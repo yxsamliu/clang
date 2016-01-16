@@ -1420,6 +1420,10 @@ llvm::GlobalVariable *MicrosoftCXXABI::getAddrOfVTable(const CXXRecordDecl *RD,
         } else {
           llvm_unreachable("unexpected linkage for vftable!");
         }
+      } else {
+        if (llvm::GlobalValue::isWeakForLinker(VFTableLinkage))
+          VTable->setComdat(
+              CGM.getModule().getOrInsertComdat(VTable->getName()));
       }
       VFTable->setLinkage(VFTableLinkage);
       CGM.setGlobalVisibility(VFTable, RD);
@@ -1875,7 +1879,9 @@ void MicrosoftCXXABI::EmitGuardedInit(CodeGenFunction &CGF, const VarDecl &D,
   if (!D.isStaticLocal()) {
     assert(GV->hasWeakLinkage() || GV->hasLinkOnceLinkage());
     // GlobalOpt is allowed to discard the initializer, so use linkonce_odr.
-    CGF.CurFn->setLinkage(llvm::GlobalValue::LinkOnceODRLinkage);
+    llvm::Function *F = CGF.CurFn;
+    F->setLinkage(llvm::GlobalValue::LinkOnceODRLinkage);
+    F->setComdat(CGM.getModule().getOrInsertComdat(F->getName()));
     CGF.EmitCXXGlobalVarDeclInit(D, GV, PerformInit);
     return;
   }
@@ -2868,6 +2874,8 @@ llvm::GlobalVariable *MSRTTIBuilder::getClassHierarchyDescriptor() {
   auto CHD = new llvm::GlobalVariable(Module, Type, /*Constant=*/true, Linkage,
                                       /*Initializer=*/nullptr,
                                       MangledName.c_str());
+  if (CHD->isWeakForLinker())
+    CHD->setComdat(CGM.getModule().getOrInsertComdat(CHD->getName()));
 
   // Initialize the base class ClassHierarchyDescriptor.
   llvm::Constant *Fields[] = {
@@ -2901,6 +2909,8 @@ MSRTTIBuilder::getBaseClassArray(SmallVectorImpl<MSRTTIClass> &Classes) {
   auto *BCA = new llvm::GlobalVariable(
       Module, ArrType,
       /*Constant=*/true, Linkage, /*Initializer=*/nullptr, MangledName.c_str());
+  if (BCA->isWeakForLinker())
+    BCA->setComdat(CGM.getModule().getOrInsertComdat(BCA->getName()));
 
   // Initialize the BaseClassArray.
   SmallVector<llvm::Constant *, 8> BaseClassArrayData;
@@ -2941,6 +2951,8 @@ MSRTTIBuilder::getBaseClassDescriptor(const MSRTTIClass &Class) {
   auto BCD = new llvm::GlobalVariable(Module, Type, /*Constant=*/true, Linkage,
                                       /*Initializer=*/nullptr,
                                       MangledName.c_str());
+  if (BCD->isWeakForLinker())
+    BCD->setComdat(CGM.getModule().getOrInsertComdat(BCD->getName()));
 
   // Initialize the BaseClassDescriptor.
   llvm::Constant *Fields[] = {
@@ -3000,6 +3012,8 @@ MSRTTIBuilder::getCompleteObjectLocator(const VPtrInfo *Info) {
   if (!ABI.isImageRelative())
     FieldsRef = FieldsRef.drop_back();
   COL->setInitializer(llvm::ConstantStruct::get(Type, FieldsRef));
+  if (COL->isWeakForLinker())
+    COL->setComdat(CGM.getModule().getOrInsertComdat(COL->getName()));
   return COL;
 }
 
@@ -3031,13 +3045,14 @@ llvm::Constant *MicrosoftCXXABI::getAddrOfRTTIDescriptor(QualType Type) {
     llvm::ConstantDataArray::getString(CGM.getLLVMContext(), TypeInfoString)};
   llvm::StructType *TypeDescriptorType =
       getTypeDescriptorType(TypeInfoString);
-  return llvm::ConstantExpr::getBitCast(
-      new llvm::GlobalVariable(
-          CGM.getModule(), TypeDescriptorType, /*Constant=*/false,
-          getLinkageForRTTI(Type),
-          llvm::ConstantStruct::get(TypeDescriptorType, Fields),
-          MangledName.c_str()),
-      CGM.Int8PtrTy);
+  auto *Var = new llvm::GlobalVariable(
+      CGM.getModule(), TypeDescriptorType, /*Constant=*/false,
+      getLinkageForRTTI(Type),
+      llvm::ConstantStruct::get(TypeDescriptorType, Fields),
+      MangledName.c_str());
+  if (Var->isWeakForLinker())
+    Var->setComdat(CGM.getModule().getOrInsertComdat(Var->getName()));
+  return llvm::ConstantExpr::getBitCast(Var, CGM.Int8PtrTy);
 }
 
 /// \brief Gets or a creates a Microsoft CompleteObjectLocator.
@@ -3051,7 +3066,8 @@ static void emitCXXConstructor(CodeGenModule &CGM,
                                const CXXConstructorDecl *ctor,
                                StructorType ctorType) {
   // There are no constructor variants, always emit the complete destructor.
-  CGM.codegenCXXStructor(ctor, StructorType::Complete);
+  llvm::Function *Fn = CGM.codegenCXXStructor(ctor, StructorType::Complete);
+  CGM.maybeSetTrivialComdat(*ctor, *Fn);
 }
 
 static void emitCXXDestructor(CodeGenModule &CGM, const CXXDestructorDecl *dtor,
@@ -3077,7 +3093,9 @@ static void emitCXXDestructor(CodeGenModule &CGM, const CXXDestructorDecl *dtor,
   if (dtorType == StructorType::Base && !CGM.TryEmitBaseDestructorAsAlias(dtor))
     return;
 
-  CGM.codegenCXXStructor(dtor, dtorType);
+  llvm::Function *Fn = CGM.codegenCXXStructor(dtor, dtorType);
+  if (Fn->isWeakForLinker())
+    Fn->setComdat(CGM.getModule().getOrInsertComdat(Fn->getName()));
 }
 
 void MicrosoftCXXABI::emitCXXStructor(const CXXMethodDecl *MD,
