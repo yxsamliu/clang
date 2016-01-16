@@ -2785,7 +2785,8 @@ Sema::FinishTemplateArgumentDeduction(FunctionTemplateDecl *FunctionTemplate,
                                       unsigned NumExplicitlySpecified,
                                       FunctionDecl *&Specialization,
                                       TemplateDeductionInfo &Info,
-        SmallVectorImpl<OriginalCallArg> const *OriginalCallArgs) {
+        SmallVectorImpl<OriginalCallArg> const *OriginalCallArgs,
+                                      bool PartialOverloading) {
   TemplateParameterList *TemplateParams
     = FunctionTemplate->getTemplateParameters();
 
@@ -2912,6 +2913,8 @@ Sema::FinishTemplateArgumentDeduction(FunctionTemplateDecl *FunctionTemplate,
                          const_cast<NamedDecl *>(TemplateParams->getParam(I)));
       Info.reset(TemplateArgumentList::CreateCopy(Context, Builder.data(),
                                                   Builder.size()));
+      if (PartialOverloading) break;
+
       return HasDefaultArg ? TDK_SubstitutionFailure : TDK_Incomplete;
     }
 
@@ -3286,26 +3289,28 @@ DeduceTemplateArgumentByListElement(Sema &S,
 Sema::TemplateDeductionResult Sema::DeduceTemplateArguments(
     FunctionTemplateDecl *FunctionTemplate,
     TemplateArgumentListInfo *ExplicitTemplateArgs, ArrayRef<Expr *> Args,
-    FunctionDecl *&Specialization, TemplateDeductionInfo &Info) {
+    FunctionDecl *&Specialization, TemplateDeductionInfo &Info,
+    bool PartialOverloading) {
   if (FunctionTemplate->isInvalidDecl())
     return TDK_Invalid;
 
   FunctionDecl *Function = FunctionTemplate->getTemplatedDecl();
+  unsigned NumParams = Function->getNumParams();
 
   // C++ [temp.deduct.call]p1:
   //   Template argument deduction is done by comparing each function template
   //   parameter type (call it P) with the type of the corresponding argument
   //   of the call (call it A) as described below.
   unsigned CheckArgs = Args.size();
-  if (Args.size() < Function->getMinRequiredArguments())
+  if (Args.size() < Function->getMinRequiredArguments() && !PartialOverloading)
     return TDK_TooFewArguments;
-  else if (Args.size() > Function->getNumParams()) {
+  else if (TooManyArguments(NumParams, Args.size(), PartialOverloading)) {
     const FunctionProtoType *Proto
       = Function->getType()->getAs<FunctionProtoType>();
     if (Proto->isTemplateVariadic())
       /* Do nothing */;
     else if (Proto->isVariadic())
-      CheckArgs = Function->getNumParams();
+      CheckArgs = NumParams;
     else
       return TDK_TooManyArguments;
   }
@@ -3332,7 +3337,7 @@ Sema::TemplateDeductionResult Sema::DeduceTemplateArguments(
     NumExplicitlySpecified = Deduced.size();
   } else {
     // Just fill in the parameter types from the function declaration.
-    for (unsigned I = 0, N = Function->getNumParams(); I != N; ++I)
+    for (unsigned I = 0; I != NumParams; ++I)
       ParamTypes.push_back(Function->getParamDecl(I)->getType());
   }
 
@@ -3340,8 +3345,8 @@ Sema::TemplateDeductionResult Sema::DeduceTemplateArguments(
   Deduced.resize(TemplateParams->size());
   unsigned ArgIdx = 0;
   SmallVector<OriginalCallArg, 4> OriginalCallArgs;
-  for (unsigned ParamIdx = 0, NumParams = ParamTypes.size();
-       ParamIdx != NumParams; ++ParamIdx) {
+  for (unsigned ParamIdx = 0, NumParamTypes = ParamTypes.size();
+       ParamIdx != NumParamTypes; ++ParamIdx) {
     QualType OrigParamType = ParamTypes[ParamIdx];
     QualType ParamType = OrigParamType;
     
@@ -3410,7 +3415,7 @@ Sema::TemplateDeductionResult Sema::DeduceTemplateArguments(
     //   the function parameter pack. For a function parameter pack that does
     //   not occur at the end of the parameter-declaration-list, the type of
     //   the parameter pack is a non-deduced context.
-    if (ParamIdx + 1 < NumParams)
+    if (ParamIdx + 1 < NumParamTypes)
       break;
 
     QualType ParamPattern = ParamExpansion->getPattern();
@@ -3480,7 +3485,8 @@ Sema::TemplateDeductionResult Sema::DeduceTemplateArguments(
 
   return FinishTemplateArgumentDeduction(FunctionTemplate, Deduced,
                                          NumExplicitlySpecified, Specialization,
-                                         Info, &OriginalCallArgs);
+                                         Info, &OriginalCallArgs,
+                                         PartialOverloading);
 }
 
 QualType Sema::adjustCCAndNoReturn(QualType ArgFunctionType,

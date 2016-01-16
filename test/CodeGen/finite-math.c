@@ -12,3 +12,4 @@ void foo(void) {
 
   // CHECK: ret
 }
+
