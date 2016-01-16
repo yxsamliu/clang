@@ -1238,7 +1238,10 @@ def warn_cxx98_compat_enum_nested_name_spec : Warning<
   InGroup<CXX98Compat>, DefaultIgnore;
 def err_nested_name_spec_is_not_class : Error<
   "%0 cannot appear before '::' because it is not a class"
-  "%select{ or namespace|, namespace, or scoped enumeration}1; did you mean ':'?">;
+  "%select{ or namespace|, namespace, or enumeration}1; did you mean ':'?">;
+def ext_nested_name_spec_is_enum : ExtWarn<
+  "use of enumeration in a nested name specifier is a C++11 extension">,
+  InGroup<CXX11>;
 
 // C++ class members
 def err_storageclass_invalid_for_member : Error<
@@ -3917,8 +3920,8 @@ def err_static_data_member_reinitialization :
 def err_redefinition : Error<"redefinition of %0">;
 def err_alias_after_tentative :
   Error<"alias definition of %0 after tentative definition">;
-def err_tentative_after_alias :
-  Error<"tentative definition of %0 after alias definition">;
+def err_alias_is_definition :
+  Error<"definition %0 cannot also be an alias">;
 def err_definition_of_implicitly_declared_member : Error<
   "definition of implicitly declared %select{default constructor|copy "
   "constructor|move constructor|copy assignment operator|move assignment "
@@ -5633,7 +5636,7 @@ def err_typecheck_deleted_function : Error<
   "invokes a deleted function">;
   
 def err_expected_class_or_namespace : Error<"%0 is not a class"
-  "%select{ or namespace|, namespace, or scoped enumeration}1">;
+  "%select{ or namespace|, namespace, or enumeration}1">;
 def err_invalid_declarator_scope : Error<"cannot define or redeclare %0 here "
   "because namespace %1 does not enclose namespace %2">;
 def err_invalid_declarator_global_scope : Error<
@@ -6384,6 +6387,9 @@ def err_base_class_has_flexible_array_member : Error<
 def err_incomplete_base_class : Error<"base class has incomplete type">;
 def err_duplicate_base_class : Error<
   "base class %0 specified more than once as a direct base class">;
+def warn_inaccessible_base_class : Warning<
+  "direct base %0 is inaccessible due to ambiguity:%1">,
+  InGroup<DiagGroup<"inaccessible-base">>;
 // FIXME: better way to display derivation?  Pass entire thing into diagclient?
 def err_ambiguous_derived_to_base_conv : Error<
   "ambiguous conversion from derived class %0 to base class %1:%2">;
@@ -7551,6 +7557,10 @@ def note_omp_nested_teams_construct_here : Note<
   "nested teams construct here">;
 def note_omp_nested_statement_here : Note<
   "%select{statement|directive}0 outside teams construct here">;
+def err_omp_single_copyprivate_with_nowait : Error<
+  "the 'copyprivate' clause must not be used with the 'nowait' clause">;
+def note_omp_nowait_clause_here : Note<
+  "'nowait' clause is here">;
 } // end of OpenMP category
 
 let CategoryName = "Related Result Type Issue" in {

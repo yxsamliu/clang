@@ -343,6 +343,8 @@ def AddressSpace : TypeAttr {
 def Alias : Attr {
   let Spellings = [GCC<"alias">];
   let Args = [StringArgument<"Aliasee">];
+  let Subjects = SubjectList<[Function, GlobalVar], ErrorDiag,
+                             "ExpectedFunctionGlobalVarMethodOrProperty">;
   let Documentation = [Undocumented];
 }
 
