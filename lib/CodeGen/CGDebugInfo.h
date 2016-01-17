@@ -452,6 +452,9 @@ private:
 };
 
 class ApplyDebugLocation {
+private:
+  void init(SourceLocation TemporaryLocation);
+
 protected:
   llvm::DebugLoc OriginalLocation;
   CodeGenFunction &CGF;
@@ -459,6 +462,7 @@ protected:
 public:
   ApplyDebugLocation(CodeGenFunction &CGF,
                      SourceLocation TemporaryLocation = SourceLocation());
+  ApplyDebugLocation(CodeGenFunction &CGF, const Expr *E);
   ApplyDebugLocation(CodeGenFunction &CGF, llvm::DebugLoc Loc);
   ~ApplyDebugLocation();
 };
