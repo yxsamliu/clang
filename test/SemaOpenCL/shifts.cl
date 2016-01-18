@@ -35,13 +35,6 @@ char2 ptest06(char2 c) {
   return c << 1;
 }
 
-void ptest07() {
-  char3 v = {1,1,1};
-  char3 w = {1,2,3};
-
-  v <<= w;
-}
-
 // ** Negative tests **
 
 char2 ntest01(char c, char2 s) {
