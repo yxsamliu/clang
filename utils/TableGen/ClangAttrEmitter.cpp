@@ -28,6 +28,7 @@
 
 using namespace llvm;
 
+namespace {
 class FlattenedSpelling {
   std::string V, N, NS;
   bool K;
@@ -53,8 +54,10 @@ public:
   const std::string &nameSpace() const { return NS; }
   bool knownToGCC() const { return K; }
 };
+} // namespace
 
-std::vector<FlattenedSpelling> GetFlattenedSpellings(const Record &Attr) {
+static std::vector<FlattenedSpelling>
+GetFlattenedSpellings(const Record &Attr) {
   std::vector<Record *> Spellings = Attr.getValueAsListOfDefs("Spellings");
   std::vector<FlattenedSpelling> Ret;
 
@@ -1162,7 +1165,7 @@ writePrettyPrintFunction(Record &R,
 
     OS <<
       "  case " << I << " : {\n"
-      "    OS << \"" + Prefix.str() + Spelling.str();
+      "    OS << \"" << Prefix << Spelling;
 
     if (Variety == "Pragma") {
       OS << " \";\n";
@@ -1190,7 +1193,7 @@ writePrettyPrintFunction(Record &R,
 
     if (!Args.empty())
       OS << ")";
-    OS << Suffix.str() + "\";\n";
+    OS << Suffix + "\";\n";
 
     OS <<
       "    break;\n"

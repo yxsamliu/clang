@@ -118,7 +118,7 @@ static AvailabilityResult DiagnoseAvailabilityOfDecl(Sema &S,
     case AR_Available:
     case AR_NotYetIntroduced:
       break;
-            
+
     case AR_Deprecated:
       if (S.getCurContextAvailability() != AR_Deprecated)
         S.EmitAvailabilityWarning(Sema::AD_Deprecation,
@@ -3453,6 +3453,9 @@ ExprResult Sema::ActOnNumericConstant(const Token &Tok, Scope *UDLScope) {
           Diag(Tok.getLocation(), diag::err_int128_unsupported);
           Width = MaxWidth;
           Ty = Context.getIntMaxType();
+        } else if (Literal.MicrosoftInteger == 8 && !Literal.isUnsigned) {
+          Width = 8;
+          Ty = Context.CharTy;
         } else {
           Width = Literal.MicrosoftInteger;
           Ty = Context.getIntTypeForBitwidth(Width,
@@ -12103,8 +12106,11 @@ void Sema::MarkFunctionReferenced(SourceLocation Loc, FunctionDecl *Func,
   } else if (CXXDestructorDecl *Destructor =
                  dyn_cast<CXXDestructorDecl>(Func)) {
     Destructor = cast<CXXDestructorDecl>(Destructor->getFirstDecl());
-    if (Destructor->isDefaulted() && !Destructor->isDeleted())
+    if (Destructor->isDefaulted() && !Destructor->isDeleted()) {
+      if (Destructor->isTrivial() && !Destructor->hasAttr<DLLExportAttr>())
+        return;
       DefineImplicitDestructor(Loc, Destructor);
+    }
     if (Destructor->isVirtual() && getLangOpts().AppleKext)
       MarkVTableUsed(Loc, Destructor->getParent());
   } else if (CXXMethodDecl *MethodDecl = dyn_cast<CXXMethodDecl>(Func)) {

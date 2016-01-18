@@ -2892,11 +2892,6 @@ ASTReader::ReadASTBlock(ModuleFile &F, unsigned ClientLoadCapabilities) {
       }
       break;
 
-    case LOCALLY_SCOPED_EXTERN_C_DECLS:
-      for (unsigned I = 0, N = Record.size(); I != N; ++I)
-        LocallyScopedExternCDecls.push_back(getGlobalDeclID(F, Record[I]));
-      break;
-
     case SELECTOR_OFFSETS: {
       F.SelectorOffsets = (const uint32_t *)Blob.data();
       F.LocalNumSelectors = Record[0];
@@ -3316,16 +3311,6 @@ ASTReader::ReadASTBlock(ModuleFile &F, unsigned ClientLoadCapabilities) {
       break;
     }
         
-    case MERGED_DECLARATIONS: {
-      for (unsigned Idx = 0; Idx < Record.size(); /* increment in loop */) {
-        GlobalDeclID CanonID = getGlobalDeclID(F, Record[Idx++]);
-        SmallVectorImpl<GlobalDeclID> &Decls = StoredMergedDecls[CanonID];
-        for (unsigned N = Record[Idx++]; N > 0; --N)
-          Decls.push_back(getGlobalDeclID(F, Record[Idx++]));
-      }
-      break;
-    }
-
     case MACRO_OFFSET: {
       if (F.LocalNumMacros != 0) {
         Error("duplicate MACRO_OFFSET record in AST file");
@@ -6251,6 +6236,10 @@ ASTReader::getGlobalDeclID(ModuleFile &F, LocalDeclID LocalID) const {
 
 bool ASTReader::isDeclIDFromModule(serialization::GlobalDeclID ID,
                                    ModuleFile &M) const {
+  // Predefined decls aren't from any module.
+  if (ID < NUM_PREDEF_DECL_IDS)
+    return false;
+
   GlobalDeclMapType::const_iterator I = GlobalDeclMap.find(ID);
   assert(I != GlobalDeclMap.end() && "Corrupted global declaration map");
   return &M == I->second;
@@ -6283,39 +6272,55 @@ SourceLocation ASTReader::getSourceLocationForDeclID(GlobalDeclID ID) {
   return ReadSourceLocation(*Rec.F, RawLocation);
 }
 
+static Decl *getPredefinedDecl(ASTContext &Context, PredefinedDeclIDs ID) {
+  switch (ID) {
+  case PREDEF_DECL_NULL_ID:
+    return nullptr;
+
+  case PREDEF_DECL_TRANSLATION_UNIT_ID:
+    return Context.getTranslationUnitDecl();
+
+  case PREDEF_DECL_OBJC_ID_ID:
+    return Context.getObjCIdDecl();
+
+  case PREDEF_DECL_OBJC_SEL_ID:
+    return Context.getObjCSelDecl();
+
+  case PREDEF_DECL_OBJC_CLASS_ID:
+    return Context.getObjCClassDecl();
+
+  case PREDEF_DECL_OBJC_PROTOCOL_ID:
+    return Context.getObjCProtocolDecl();
+
+  case PREDEF_DECL_INT_128_ID:
+    return Context.getInt128Decl();
+
+  case PREDEF_DECL_UNSIGNED_INT_128_ID:
+    return Context.getUInt128Decl();
+
+  case PREDEF_DECL_OBJC_INSTANCETYPE_ID:
+    return Context.getObjCInstanceTypeDecl();
+
+  case PREDEF_DECL_BUILTIN_VA_LIST_ID:
+    return Context.getBuiltinVaListDecl();
+
+  case PREDEF_DECL_EXTERN_C_CONTEXT_ID:
+    return Context.getExternCContextDecl();
+  }
+  llvm_unreachable("PredefinedDeclIDs unknown enum value");
+}
+
 Decl *ASTReader::GetExistingDecl(DeclID ID) {
   if (ID < NUM_PREDEF_DECL_IDS) {
-    switch ((PredefinedDeclIDs)ID) {
-    case PREDEF_DECL_NULL_ID:
-      return nullptr;
-
-    case PREDEF_DECL_TRANSLATION_UNIT_ID:
-      return Context.getTranslationUnitDecl();
-
-    case PREDEF_DECL_OBJC_ID_ID:
-      return Context.getObjCIdDecl();
-
-    case PREDEF_DECL_OBJC_SEL_ID:
-      return Context.getObjCSelDecl();
-
-    case PREDEF_DECL_OBJC_CLASS_ID:
-      return Context.getObjCClassDecl();
-
-    case PREDEF_DECL_OBJC_PROTOCOL_ID:
-      return Context.getObjCProtocolDecl();
-
-    case PREDEF_DECL_INT_128_ID:
-      return Context.getInt128Decl();
-
-    case PREDEF_DECL_UNSIGNED_INT_128_ID:
-      return Context.getUInt128Decl();
-
-    case PREDEF_DECL_OBJC_INSTANCETYPE_ID:
-      return Context.getObjCInstanceTypeDecl();
-
-    case PREDEF_DECL_BUILTIN_VA_LIST_ID:
-      return Context.getBuiltinVaListDecl();
+    Decl *D = getPredefinedDecl(Context, (PredefinedDeclIDs)ID);
+    if (D) {
+      // Track that we have merged the declaration with ID \p ID into the
+      // pre-existing predefined declaration \p D.
+      auto &Merged = MergedDecls[D->getCanonicalDecl()];
+      if (Merged.empty())
+        Merged.push_back(ID);
     }
+    return D;
   }
 
   unsigned Index = ID - NUM_PREDEF_DECL_IDS;
@@ -7343,17 +7348,6 @@ void ASTReader::ReadUnusedLocalTypedefNameCandidates(
   UnusedLocalTypedefNameCandidates.clear();
 }
 
-void 
-ASTReader::ReadLocallyScopedExternCDecls(SmallVectorImpl<NamedDecl *> &Decls) {
-  for (unsigned I = 0, N = LocallyScopedExternCDecls.size(); I != N; ++I) {
-    NamedDecl *D
-      = dyn_cast_or_null<NamedDecl>(GetDecl(LocallyScopedExternCDecls[I]));
-    if (D)
-      Decls.push_back(D);
-  }
-  LocallyScopedExternCDecls.clear();
-}
-
 void ASTReader::ReadReferencedSelectors(
        SmallVectorImpl<std::pair<Selector, SourceLocation> > &Sels) {
   if (ReferencedSelectorsData.empty())
@@ -8326,9 +8320,11 @@ void ASTReader::finishPendingActions() {
     PendingIncompleteDeclChains.clear();
 
     // Load pending declaration chains.
-    for (unsigned I = 0; I != PendingDeclChains.size(); ++I)
+    for (unsigned I = 0; I != PendingDeclChains.size(); ++I) {
       loadPendingDeclChain(PendingDeclChains[I]);
-    PendingDeclChainsKnown.clear();
+      PendingDeclChainsKnown.erase(PendingDeclChains[I]);
+    }
+    assert(PendingDeclChainsKnown.empty());
     PendingDeclChains.clear();
 
     // Make the most recent of the top-level declarations visible.
@@ -8397,10 +8393,12 @@ void ASTReader::finishPendingActions() {
         // Make sure that the TagType points at the definition.
         const_cast<TagType*>(TagT)->decl = TD;
       }
-      
+
       if (auto RD = dyn_cast<CXXRecordDecl>(D)) {
-        for (auto R : RD->redecls()) {
-          assert((R == D) == R->isThisDeclarationADefinition() &&
+        for (auto *R = getMostRecentExistingDecl(RD); R;
+             R = R->getPreviousDecl()) {
+          assert((R == D) ==
+                     cast<CXXRecordDecl>(R)->isThisDeclarationADefinition() &&
                  "declaration thinks it's the definition but it isn't");
           cast<CXXRecordDecl>(R)->DefinitionData = RD->DefinitionData;
         }
@@ -8408,34 +8406,36 @@ void ASTReader::finishPendingActions() {
 
       continue;
     }
-    
+
     if (auto ID = dyn_cast<ObjCInterfaceDecl>(D)) {
       // Make sure that the ObjCInterfaceType points at the definition.
       const_cast<ObjCInterfaceType *>(cast<ObjCInterfaceType>(ID->TypeForDecl))
         ->Decl = ID;
-      
-      for (auto R : ID->redecls())
-        R->Data = ID->Data;
-      
+
+      for (auto *R = getMostRecentExistingDecl(ID); R; R = R->getPreviousDecl())
+        cast<ObjCInterfaceDecl>(R)->Data = ID->Data;
+
       continue;
     }
-    
+
     if (auto PD = dyn_cast<ObjCProtocolDecl>(D)) {
-      for (auto R : PD->redecls())
-        R->Data = PD->Data;
-      
+      for (auto *R = getMostRecentExistingDecl(PD); R; R = R->getPreviousDecl())
+        cast<ObjCProtocolDecl>(R)->Data = PD->Data;
+
       continue;
     }
-    
+
     auto RTD = cast<RedeclarableTemplateDecl>(D)->getCanonicalDecl();
-    for (auto R : RTD->redecls())
-      R->Common = RTD->Common;
+    for (auto *R = getMostRecentExistingDecl(RTD); R; R = R->getPreviousDecl())
+      cast<RedeclarableTemplateDecl>(R)->Common = RTD->Common;
   }
   PendingDefinitions.clear();
 
   // Load the bodies of any functions or methods we've encountered. We do
   // this now (delayed) so that we can be sure that the declaration chains
   // have been fully wired up.
+  // FIXME: There seems to be no point in delaying this, it does not depend
+  // on the redecl chains having been wired up.
   for (PendingBodiesMap::iterator PB = PendingBodies.begin(),
                                PBEnd = PendingBodies.end();
        PB != PBEnd; ++PB) {
