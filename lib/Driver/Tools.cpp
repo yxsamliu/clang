@@ -34,7 +34,6 @@
 #include "llvm/Support/Compression.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Format.h"
 #include "llvm/Support/Host.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Process.h"
@@ -3977,10 +3976,9 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     llvm::sys::fs::file_status Status;
     if (llvm::sys::fs::status(A->getValue(), Status))
       D.Diag(diag::err_drv_no_such_file) << A->getValue();
-    char TimeStamp[48];
-    snprintf(TimeStamp, sizeof(TimeStamp), "-fbuild-session-timestamp=%" PRIu64,
-             (uint64_t)Status.getLastModificationTime().toEpochTime());
-    CmdArgs.push_back(Args.MakeArgString(TimeStamp));
+    CmdArgs.push_back(Args.MakeArgString(
+        "-fbuild-session-timestamp=" +
+        Twine((uint64_t)Status.getLastModificationTime().toEpochTime())));
   }
 
   if (Args.getLastArg(options::OPT_fmodules_validate_once_per_build_session)) {
@@ -4243,6 +4241,11 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   if (!Args.hasFlag(options::OPT_fassume_sane_operator_new,
                     options::OPT_fno_assume_sane_operator_new))
     CmdArgs.push_back("-fno-assume-sane-operator-new");
+  
+  // -def-sized-delete: default implementation of sized delete as a
+  // weak definition.
+  if (Args.hasArg(options::OPT_fdef_sized_delete))
+    CmdArgs.push_back("-fdef-sized-delete");
 
   // -fconstant-cfstrings is default, and may be subject to argument translation
   // on Darwin.
@@ -4887,6 +4890,19 @@ void Clang::AddClangCLArgs(const ArgList &Args, ArgStringList &CmdArgs) const {
     CmdArgs.push_back("-E");
     CmdArgs.push_back("-P");
   }
+
+  unsigned VolatileOptionID;
+  if (getToolChain().getTriple().getArch() == llvm::Triple::x86_64 ||
+      getToolChain().getTriple().getArch() == llvm::Triple::x86)
+    VolatileOptionID = options::OPT__SLASH_volatile_ms;
+  else
+    VolatileOptionID = options::OPT__SLASH_volatile_iso;
+
+  if (Arg *A = Args.getLastArg(options::OPT__SLASH_volatile_Group))
+    VolatileOptionID = A->getOption().getID();
+
+  if (VolatileOptionID == options::OPT__SLASH_volatile_ms)
+    CmdArgs.push_back("-fms-volatile");
 
   Arg *MostGeneralArg = Args.getLastArg(options::OPT__SLASH_vmg);
   Arg *BestCaseArg = Args.getLastArg(options::OPT__SLASH_vmb);
@@ -6105,6 +6121,12 @@ void darwin::Link::ConstructJob(Compilation &C, const JobAction &JA,
 
   Args.AddAllArgs(CmdArgs, options::OPT_T_Group);
   Args.AddAllArgs(CmdArgs, options::OPT_F);
+
+  // -iframework should be forwarded as -F.
+  for (auto it = Args.filtered_begin(options::OPT_iframework),
+         ie = Args.filtered_end(); it != ie; ++it)
+    CmdArgs.push_back(Args.MakeArgString(std::string("-F") +
+                                         (*it)->getValue()));
 
   const char *Exec =
     Args.MakeArgString(getToolChain().GetLinkerPath());

@@ -950,10 +950,11 @@ void ASTWriter::WriteBlockInfoBlock() {
 
   // Preprocessor Block.
   BLOCK(PREPROCESSOR_BLOCK);
+  RECORD(PP_MACRO_DIRECTIVE_HISTORY);
   RECORD(PP_MACRO_OBJECT_LIKE);
   RECORD(PP_MACRO_FUNCTION_LIKE);
   RECORD(PP_TOKEN);
-  
+
   // Decls and Types block.
   BLOCK(DECLTYPES_BLOCK);
   RECORD(TYPE_EXT_QUAL);
@@ -1071,7 +1072,8 @@ void ASTWriter::WriteBlockInfoBlock() {
 /// to an absolute path and removing nested './'s.
 ///
 /// \return \c true if the path was changed.
-bool cleanPathForOutput(FileManager &FileMgr, SmallVectorImpl<char> &Path) {
+static bool cleanPathForOutput(FileManager &FileMgr,
+                               SmallVectorImpl<char> &Path) {
   bool Changed = false;
 
   if (!llvm::sys::path::is_absolute(StringRef(Path.data(), Path.size()))) {
@@ -1223,6 +1225,7 @@ void ASTWriter::WriteControlBlock(Preprocessor &PP, ASTContext &Context,
       Record.push_back(0);
     }
 
+    Record.push_back(WritingModule->IsSystem);
     Stream.EmitRecord(MODULE_MAP_FILE, Record);
   }
 
@@ -1476,7 +1479,7 @@ void ASTWriter::WriteInputFiles(SourceManager &SourceMgr,
 
   unsigned UserFilesNum = 0;
   // Write out all of the input files.
-  std::vector<uint32_t> InputFileOffsets;
+  std::vector<uint64_t> InputFileOffsets;
   for (std::deque<InputFileEntry>::iterator
          I = SortedFiles.begin(), E = SortedFiles.end(); I != E; ++I) {
     const InputFileEntry &Entry = *I;
@@ -5234,13 +5237,10 @@ unsigned ASTWriter::getAnonymousDeclarationNumber(const NamedDecl *D) {
   // already done so.
   auto It = AnonymousDeclarationNumbers.find(D);
   if (It == AnonymousDeclarationNumbers.end()) {
-    unsigned Index = 0;
-    for (Decl *LexicalD : D->getLexicalDeclContext()->decls()) {
-      auto *ND = dyn_cast<NamedDecl>(LexicalD);
-      if (!ND || !needsAnonymousDeclarationNumber(ND))
-        continue;
-      AnonymousDeclarationNumbers[ND] = Index++;
-    }
+    auto *DC = D->getLexicalDeclContext();
+    numberAnonymousDeclsWithin(DC, [&](const NamedDecl *ND, unsigned Number) {
+      AnonymousDeclarationNumbers[ND] = Number;
+    });
 
     It = AnonymousDeclarationNumbers.find(D);
     assert(It != AnonymousDeclarationNumbers.end() &&

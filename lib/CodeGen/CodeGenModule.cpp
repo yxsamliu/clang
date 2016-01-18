@@ -1615,12 +1615,15 @@ CodeGenModule::GetOrCreateLLVMFunction(StringRef MangledName,
       // don't need it anymore).
       addDeferredDeclToEmit(F, DDI->second);
       DeferredDecls.erase(DDI);
-
+      
       // Otherwise, if this is a sized deallocation function, emit a weak
-      // definition
-      // for it at the end of the translation unit.
-    } else if (D && cast<FunctionDecl>(D)
-                        ->getCorrespondingUnsizedGlobalDeallocationFunction()) {
+      // definition for it at the end of the translation unit (if allowed),
+      // unless the sized deallocation function is aliased.
+    } else if (D &&
+               cast<FunctionDecl>(D)
+                  ->getCorrespondingUnsizedGlobalDeallocationFunction() &&
+               getLangOpts().DefaultSizedDelete &&
+               !D->hasAttr<AliasAttr>()) {
       addDeferredDeclToEmit(F, GD);
 
       // Otherwise, there are cases we have to worry about where we're

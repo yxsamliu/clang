@@ -194,10 +194,11 @@ namespace {
     const_iterator begin() const { return list.begin(); }
     const_iterator end() const { return list.end(); }
 
-    std::pair<const_iterator,const_iterator>
+    llvm::iterator_range<const_iterator>
     getNamespacesFor(DeclContext *DC) const {
-      return std::equal_range(begin(), end(), DC->getPrimaryContext(),
-                              UnqualUsingEntry::Comparator());
+      return llvm::make_range(std::equal_range(begin(), end(),
+                                               DC->getPrimaryContext(),
+                                               UnqualUsingEntry::Comparator()));
     }
   };
 }
@@ -413,6 +414,8 @@ void LookupResult::resolveKind() {
     if (!Unique.insert(D).second) {
       // If it's not unique, pull something off the back (and
       // continue at this index).
+      // FIXME: This is wrong. We need to take the more recent declaration in
+      // order to get the right type, default arguments, etc.
       Decls[I] = Decls[--N];
       continue;
     }
@@ -775,11 +778,8 @@ CppNamespaceLookup(Sema &S, LookupResult &R, ASTContext &Context,
 
   // Perform direct name lookup into the namespaces nominated by the
   // using directives whose common ancestor is this namespace.
-  UnqualUsingDirectiveSet::const_iterator UI, UEnd;
-  std::tie(UI, UEnd) = UDirs.getNamespacesFor(NS);
-
-  for (; UI != UEnd; ++UI)
-    if (LookupDirect(S, R, UI->getNominatedNamespace()))
+  for (const UnqualUsingEntry &UUE : UDirs.getNamespacesFor(NS))
+    if (LookupDirect(S, R, UUE.getNominatedNamespace()))
       Found = true;
 
   R.resolveKind();
@@ -1266,6 +1266,9 @@ static NamedDecl *findAcceptableDecl(Sema &SemaRef, NamedDecl *D) {
 
   for (auto RD : D->redecls()) {
     if (auto ND = dyn_cast<NamedDecl>(RD)) {
+      // FIXME: This is wrong in the case where the previous declaration is not
+      // visible in the same scope as D. This needs to be done much more
+      // carefully.
       if (LookupResult::isVisible(SemaRef, ND))
         return ND;
     }
@@ -3222,10 +3225,8 @@ static void LookupVisibleDecls(Scope *S, LookupResult &Result,
   if (Entity) {
     // Lookup visible declarations in any namespaces found by using
     // directives.
-    UnqualUsingDirectiveSet::const_iterator UI, UEnd;
-    std::tie(UI, UEnd) = UDirs.getNamespacesFor(Entity);
-    for (; UI != UEnd; ++UI)
-      LookupVisibleDecls(const_cast<DeclContext *>(UI->getNominatedNamespace()),
+    for (const UnqualUsingEntry &UUE : UDirs.getNamespacesFor(Entity))
+      LookupVisibleDecls(const_cast<DeclContext *>(UUE.getNominatedNamespace()),
                          Result, /*QualifiedNameLookup=*/false,
                          /*InBaseClass=*/false, Consumer, Visited);
   }
