@@ -204,9 +204,13 @@ public:
                                            raw_ostream &Out) = 0;
 
   virtual void mangleCXXCatchableType(QualType T, const CXXConstructorDecl *CD,
-                                      uint32_t Size, uint32_t NVOffset,
-                                      int32_t VBPtrOffset, uint32_t VBIndex,
-                                      raw_ostream &Out) = 0;
+                                      CXXCtorType CT, uint32_t Size,
+                                      uint32_t NVOffset, int32_t VBPtrOffset,
+                                      uint32_t VBIndex, raw_ostream &Out) = 0;
+
+  virtual void mangleCXXHandlerMapEntry(QualType T, bool IsConst,
+                                        bool IsVolatile, bool IsReference,
+                                        raw_ostream &Out) = 0;
 
   virtual void mangleCXXRTTIBaseClassDescriptor(
       const CXXRecordDecl *Derived, uint32_t NVOffset, int32_t VBPtrOffset,

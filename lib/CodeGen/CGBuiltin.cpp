@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "CodeGenFunction.h"
+#include "CGCXXABI.h"
 #include "CGObjCRuntime.h"
 #include "CodeGenModule.h"
 #include "CGOpenCLRuntime.h"
@@ -855,11 +856,6 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
       return RValue::get(Builder.CreateZExt(Result, Int64Ty, "extend.zext"));
   }
   case Builtin::BI__builtin_setjmp: {
-    if (!getTargetHooks().hasSjLjLowering(*this)) {
-      CGM.ErrorUnsupported(E, "__builtin_setjmp");
-      return RValue::get(nullptr);
-    }
-
     // Buffer is a void**.
     Value *Buf = EmitScalarExpr(E->getArg(0));
 
@@ -882,10 +878,6 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
     return RValue::get(Builder.CreateCall(F, Buf));
   }
   case Builtin::BI__builtin_longjmp: {
-    if (!getTargetHooks().hasSjLjLowering(*this)) {
-      CGM.ErrorUnsupported(E, "__builtin_longjmp");
-      return RValue::get(nullptr);
-    }
     Value *Buf = EmitScalarExpr(E->getArg(0));
     Buf = Builder.CreateBitCast(Buf, Int8PtrTy);
 
@@ -1825,6 +1817,36 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
                                            Arg1,
                                            PacketSize));
   }
+  case Builtin::BIget_pipe_num_packets:
+  case Builtin::BIget_pipe_max_packets: {
+    // Composing the builtin's name.
+    const char *NamePrefix;
+    if (BuiltinID == Builtin::BIget_pipe_num_packets)
+      NamePrefix = "_Z20get_pipe_num_packets";
+    else
+      NamePrefix = "_Z20get_pipe_max_packets";
+    SmallString<64> SS;
+    Ocl20Mangler Mangler(SS);
+    Mangler.appendPointer(1).appendPipe().appendInt();
+    llvm::StringRef ManglerRef = SS.str();
+    llvm::Twine NameTwine(NamePrefix, ManglerRef);
+    llvm::SmallString<128> Out;
+    llvm::StringRef Name = NameTwine.toStringRef(Out);
+
+    // Building the function's prototype.
+    CGOpenCLRuntime CGOcl(CGM);
+    Value *PacketSize = CGOcl.getPipeElemSize(E->getArg(0));
+    Value *Arg0 = EmitScalarExpr(E->getArg(0));
+    llvm::Type *ArgTys[] = {Arg0->getType(), Int32Ty};
+    llvm::FunctionType *FTy = llvm::FunctionType::get(Int32Ty,
+                                           llvm::ArrayRef<llvm::Type*>(ArgTys),
+                                           false);
+
+    return RValue::get(Builder.CreateCall2(CGM.CreateRuntimeFunction(FTy, Name),
+                                           Arg0,
+                                           PacketSize));
+  }
+
   case Builtin::BI__readfsdword: {
     Value *IntToPtr =
       Builder.CreateIntToPtr(EmitScalarExpr(E->getArg(0)),
@@ -1895,34 +1917,11 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
     }
   }
 
-  case Builtin::BIget_pipe_num_packets:
-  case Builtin::BIget_pipe_max_packets: {
-    // Composing the builtin's name.
-    const char *NamePrefix;
-    if (BuiltinID == Builtin::BIget_pipe_num_packets)
-      NamePrefix = "_Z20get_pipe_num_packets";
-    else
-      NamePrefix = "_Z20get_pipe_max_packets";
-    SmallString<64> SS;
-    Ocl20Mangler Mangler(SS);
-    Mangler.appendPointer(1).appendPipe().appendInt();
-    llvm::StringRef ManglerRef = SS.str();
-    llvm::Twine NameTwine(NamePrefix, ManglerRef);
-    llvm::SmallString<128> Out;
-    llvm::StringRef Name = NameTwine.toStringRef(Out);
-
-    // Building the function's prototype.
-    CGOpenCLRuntime CGOcl(CGM);
-    Value *PacketSize = CGOcl.getPipeElemSize(E->getArg(0));
-    Value *Arg0 = EmitScalarExpr(E->getArg(0));
-    llvm::Type *ArgTys[] = {Arg0->getType(), Int32Ty};
-    llvm::FunctionType *FTy = llvm::FunctionType::get(Int32Ty,
-                                           llvm::ArrayRef<llvm::Type*>(ArgTys),
-                                           false);
-
-    return RValue::get(Builder.CreateCall2(CGM.CreateRuntimeFunction(FTy, Name),
-                                           Arg0,
-                                           PacketSize));
+  case Builtin::BI__GetExceptionInfo: {
+    if (llvm::GlobalVariable *GV =
+            CGM.getCXXABI().getThrowInfo(FD->getParamDecl(0)->getType()))
+      return RValue::get(llvm::ConstantExpr::getBitCast(GV, CGM.Int8PtrTy));
+    break;
   }
   }
 

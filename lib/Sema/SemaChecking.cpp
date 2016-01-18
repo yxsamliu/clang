@@ -621,6 +621,10 @@ Sema::CheckBuiltinFunctionCall(FunctionDecl *FDecl, unsigned BuiltinID,
     if (SemaBuiltinLongjmp(TheCall))
       return ExprError();
     break;
+  case Builtin::BI__builtin_setjmp:
+    if (SemaBuiltinSetjmp(TheCall))
+      return ExprError();
+    break;
 
   case Builtin::BI__builtin_classify_type:
     if (checkArgCount(*this, TheCall, 1)) return true;
@@ -818,6 +822,20 @@ Sema::CheckBuiltinFunctionCall(FunctionDecl *FDecl, unsigned BuiltinID,
     if (SemaBuiltinCallWithStaticChain(*this, TheCall))
       return ExprError();
     break;
+
+  case Builtin::BI__GetExceptionInfo:
+    if (checkArgCount(*this, TheCall, 1))
+      return ExprError();
+
+    if (CheckCXXThrowOperand(
+            TheCall->getLocStart(),
+            Context.getExceptionObjectType(FDecl->getParamDecl(0)->getType()),
+            TheCall))
+      return ExprError();
+
+    TheCall->setType(Context.VoidPtrTy);
+    break;
+
   }
 
   // Since the target specific builtins for each arch overlap, only check those
@@ -1233,11 +1251,6 @@ bool Sema::CheckX86BuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
   switch (BuiltinID) {
   default: return false;
   case X86::BI_mm_prefetch: i = 1; l = 0; u = 3; break;
-  case X86::BI__builtin_ia32_vextractf128_pd256:
-  case X86::BI__builtin_ia32_vextractf128_ps256:
-  case X86::BI__builtin_ia32_vextractf128_si256:
-  case X86::BI__builtin_ia32_extract128i256: i = 1, l = 0, u = 1; break;
-  case X86::BI__builtin_ia32_insert128i256: i = 2, l = 0; u = 1; break;
   case X86::BI__builtin_ia32_sha1rnds4: i = 2, l = 0; u = 3; break;
   case X86::BI__builtin_ia32_vpermil2pd:
   case X86::BI__builtin_ia32_vpermil2pd256:
@@ -1714,9 +1727,10 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
   //   M is C if C is an integer, and ptrdiff_t if C is a pointer, and
   //   the int parameters are for orderings.
 
-  assert(AtomicExpr::AO__c11_atomic_init == 0 &&
-         AtomicExpr::AO__c11_atomic_fetch_xor + 1 == AtomicExpr::AO__atomic_load
-         && "need to update code for modified C11 atomics");
+  static_assert(AtomicExpr::AO__c11_atomic_init == 0 &&
+                    AtomicExpr::AO__c11_atomic_fetch_xor + 1 ==
+                        AtomicExpr::AO__atomic_load,
+                "need to update code for modified C11 atomics");
   bool IsC11 = Op >= AtomicExpr::AO__c11_atomic_init &&
                Op <= AtomicExpr::AO__c11_atomic_fetch_xor;
   bool IsN = Op == AtomicExpr::AO__atomic_load_n ||
@@ -2865,8 +2879,13 @@ bool Sema::SemaBuiltinConstantArgRange(CallExpr *TheCall, int ArgNum,
 }
 
 /// SemaBuiltinLongjmp - Handle __builtin_longjmp(void *env[5], int val).
-/// This checks that val is a constant 1.
+/// This checks that the target supports __builtin_longjmp and
+/// that val is a constant 1.
 bool Sema::SemaBuiltinLongjmp(CallExpr *TheCall) {
+  if (!Context.getTargetInfo().hasSjLjLowering())
+    return Diag(TheCall->getLocStart(), diag::err_builtin_longjmp_unsupported)
+             << SourceRange(TheCall->getLocStart(), TheCall->getLocEnd());
+
   Expr *Arg = TheCall->getArg(1);
   llvm::APSInt Result;
 
@@ -2878,6 +2897,16 @@ bool Sema::SemaBuiltinLongjmp(CallExpr *TheCall) {
     return Diag(TheCall->getLocStart(), diag::err_builtin_longjmp_invalid_val)
              << SourceRange(Arg->getLocStart(), Arg->getLocEnd());
 
+  return false;
+}
+
+
+/// SemaBuiltinSetjmp - Handle __builtin_setjmp(void *env[5]).
+/// This checks that the target supports __builtin_setjmp.
+bool Sema::SemaBuiltinSetjmp(CallExpr *TheCall) {
+  if (!Context.getTargetInfo().hasSjLjLowering())
+    return Diag(TheCall->getLocStart(), diag::err_builtin_setjmp_unsupported)
+             << SourceRange(TheCall->getLocStart(), TheCall->getLocEnd());
   return false;
 }
 
@@ -9006,7 +9035,7 @@ bool ShouldDiagnoseEmptyStmtBody(const SourceManager &SourceMgr,
 
   // Get line numbers of statement and body.
   bool StmtLineInvalid;
-  unsigned StmtLine = SourceMgr.getSpellingLineNumber(StmtLoc,
+  unsigned StmtLine = SourceMgr.getPresumedLineNumber(StmtLoc,
                                                       &StmtLineInvalid);
   if (StmtLineInvalid)
     return false;

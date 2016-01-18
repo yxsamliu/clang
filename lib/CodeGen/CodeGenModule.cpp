@@ -323,6 +323,8 @@ void CodeGenModule::checkAliases() {
 
 void CodeGenModule::clear() {
   DeferredDeclsToEmit.clear();
+  if (OpenMPRuntime)
+    OpenMPRuntime->clear();
 }
 
 void InstrProfStats::reportDiagnostics(DiagnosticsEngine &Diags,
@@ -3360,15 +3362,7 @@ void CodeGenModule::EmitTopLevelDecl(Decl *D) {
 
   case Decl::FileScopeAsm: {
     auto *AD = cast<FileScopeAsmDecl>(D);
-    StringRef AsmString = AD->getAsmString()->getString();
-
-    const std::string &S = getModule().getModuleInlineAsm();
-    if (S.empty())
-      getModule().setModuleInlineAsm(AsmString);
-    else if (S.end()[-1] == '\n')
-      getModule().setModuleInlineAsm(S + AsmString.str());
-    else
-      getModule().setModuleInlineAsm(S + '\n' + AsmString.str());
+    getModule().appendModuleInlineAsm(AD->getAsmString()->getString());
     break;
   }
 
@@ -3650,6 +3644,12 @@ llvm::Constant *CodeGenModule::EmitUuidofInitializer(StringRef Uuid) {
   };
 
   return llvm::ConstantStruct::getAnon(Fields);
+}
+
+llvm::Constant *
+CodeGenModule::getAddrOfCXXHandlerMapEntry(QualType Ty,
+                                           QualType CatchHandlerType) {
+  return getCXXABI().getAddrOfCXXHandlerMapEntry(Ty, CatchHandlerType);
 }
 
 llvm::Constant *CodeGenModule::GetAddrOfRTTIDescriptor(QualType Ty,

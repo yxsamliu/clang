@@ -3578,9 +3578,9 @@ QualType ASTContext::getPackExpansionType(QualType Pattern,
 
 /// CmpProtocolNames - Comparison predicate for sorting protocols
 /// alphabetically.
-static bool CmpProtocolNames(const ObjCProtocolDecl *LHS,
-                            const ObjCProtocolDecl *RHS) {
-  return LHS->getDeclName() < RHS->getDeclName();
+static int CmpProtocolNames(ObjCProtocolDecl *const *LHS,
+                            ObjCProtocolDecl *const *RHS) {
+  return DeclarationName::compare((*LHS)->getDeclName(), (*RHS)->getDeclName());
 }
 
 static bool areSortedAndUniqued(ObjCProtocolDecl * const *Protocols,
@@ -3591,7 +3591,7 @@ static bool areSortedAndUniqued(ObjCProtocolDecl * const *Protocols,
     return false;
   
   for (unsigned i = 1; i != NumProtocols; ++i)
-    if (!CmpProtocolNames(Protocols[i-1], Protocols[i]) ||
+    if (CmpProtocolNames(&Protocols[i - 1], &Protocols[i]) >= 0 ||
         Protocols[i]->getCanonicalDecl() != Protocols[i])
       return false;
   return true;
@@ -3602,7 +3602,7 @@ static void SortAndUniqueProtocols(ObjCProtocolDecl **Protocols,
   ObjCProtocolDecl **ProtocolsEnd = Protocols+NumProtocols;
 
   // Sort protocols, keyed by name.
-  std::sort(Protocols, Protocols+NumProtocols, CmpProtocolNames);
+  llvm::array_pod_sort(Protocols, ProtocolsEnd, CmpProtocolNames);
 
   // Canonicalize.
   for (unsigned I = 0, N = NumProtocols; I != N; ++I)
@@ -7945,6 +7945,9 @@ QualType ASTContext::GetBuiltinType(unsigned Id,
     ArgTypes.push_back(Ty);
   }
 
+  if (Id == Builtin::BI__GetExceptionInfo)
+    return QualType();
+
   assert((TypeStr[0] != '.' || TypeStr[1] == 0) &&
          "'.' should only occur at end of builtin type list!");
 
@@ -8318,6 +8321,18 @@ void ASTContext::addCopyConstructorForExceptionObject(CXXRecordDecl *RD,
   return ABI->addCopyConstructorForExceptionObject(
       cast<CXXRecordDecl>(RD->getFirstDecl()),
       cast<CXXConstructorDecl>(CD->getFirstDecl()));
+}
+
+void ASTContext::addDefaultArgExprForConstructor(const CXXConstructorDecl *CD,
+                                                 unsigned ParmIdx, Expr *DAE) {
+  ABI->addDefaultArgExprForConstructor(
+      cast<CXXConstructorDecl>(CD->getFirstDecl()), ParmIdx, DAE);
+}
+
+Expr *ASTContext::getDefaultArgExprForConstructor(const CXXConstructorDecl *CD,
+                                                  unsigned ParmIdx) {
+  return ABI->getDefaultArgExprForConstructor(
+      cast<CXXConstructorDecl>(CD->getFirstDecl()), ParmIdx);
 }
 
 void ASTContext::setParameterIndex(const ParmVarDecl *D, unsigned int index) {

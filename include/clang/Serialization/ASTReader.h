@@ -124,8 +124,8 @@ public:
   ///
   /// \returns true to indicate the target options are invalid, or false
   /// otherwise.
-  virtual bool ReadTargetOptions(const TargetOptions &TargetOpts,
-                                 bool Complain) {
+  virtual bool ReadTargetOptions(const TargetOptions &TargetOpts, bool Complain,
+                                 bool AllowCompatibleDifferences) {
     return false;
   }
 
@@ -223,8 +223,8 @@ public:
   void ReadModuleMapFile(StringRef ModuleMapPath) override;
   bool ReadLanguageOptions(const LangOptions &LangOpts, bool Complain,
                            bool AllowCompatibleDifferences) override;
-  bool ReadTargetOptions(const TargetOptions &TargetOpts,
-                         bool Complain) override;
+  bool ReadTargetOptions(const TargetOptions &TargetOpts, bool Complain,
+                         bool AllowCompatibleDifferences) override;
   bool ReadDiagnosticOptions(IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts,
                              bool Complain) override;
   bool ReadFileSystemOptions(const FileSystemOptions &FSOpts,
@@ -257,8 +257,8 @@ public:
 
   bool ReadLanguageOptions(const LangOptions &LangOpts, bool Complain,
                            bool AllowCompatibleDifferences) override;
-  bool ReadTargetOptions(const TargetOptions &TargetOpts,
-                         bool Complain) override;
+  bool ReadTargetOptions(const TargetOptions &TargetOpts, bool Complain,
+                         bool AllowCompatibleDifferences) override;
   bool ReadDiagnosticOptions(IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts,
                              bool Complain) override;
   bool ReadPreprocessorOptions(const PreprocessorOptions &PPOpts, bool Complain,
@@ -538,6 +538,14 @@ private:
   /// MacroInfo for the identifier with ID=I+1 that has already
   /// been loaded.
   std::vector<MacroInfo *> MacrosLoaded;
+
+  typedef std::pair<IdentifierInfo *, serialization::SubmoduleID>
+      LoadedMacroInfo;
+
+  /// \brief A set of #undef directives that we have loaded; used to
+  /// deduplicate the same #undef information coming from multiple module
+  /// files.
+  llvm::DenseSet<LoadedMacroInfo> LoadedUndefs;
 
   typedef ContinuousRangeMap<serialization::MacroID, ModuleFile *, 4>
     GlobalMacroMapType;
@@ -1132,7 +1140,8 @@ private:
                                    ASTReaderListener &Listener,
                                    bool AllowCompatibleDifferences);
   static bool ParseTargetOptions(const RecordData &Record, bool Complain,
-                                 ASTReaderListener &Listener);
+                                 ASTReaderListener &Listener,
+                                 bool AllowCompatibleDifferences);
   static bool ParseDiagnosticOptions(const RecordData &Record, bool Complain,
                                      ASTReaderListener &Listener);
   static bool ParseFileSystemOptions(const RecordData &Record, bool Complain,
@@ -1844,7 +1853,8 @@ public:
   serialization::IdentifierID getGlobalIdentifierID(ModuleFile &M,
                                                     unsigned LocalID);
 
-  ModuleMacroInfo *getModuleMacro(const PendingMacroInfo &PMInfo);
+  ModuleMacroInfo *getModuleMacro(IdentifierInfo *II,
+                                  const PendingMacroInfo &PMInfo);
 
   void resolvePendingMacro(IdentifierInfo *II, const PendingMacroInfo &PMInfo);
 

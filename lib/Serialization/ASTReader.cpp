@@ -89,11 +89,13 @@ ChainedASTReaderListener::ReadLanguageOptions(const LangOptions &LangOpts,
          Second->ReadLanguageOptions(LangOpts, Complain,
                                      AllowCompatibleDifferences);
 }
-bool
-ChainedASTReaderListener::ReadTargetOptions(const TargetOptions &TargetOpts,
-                                            bool Complain) {
-  return First->ReadTargetOptions(TargetOpts, Complain) ||
-         Second->ReadTargetOptions(TargetOpts, Complain);
+bool ChainedASTReaderListener::ReadTargetOptions(
+    const TargetOptions &TargetOpts, bool Complain,
+    bool AllowCompatibleDifferences) {
+  return First->ReadTargetOptions(TargetOpts, Complain,
+                                  AllowCompatibleDifferences) ||
+         Second->ReadTargetOptions(TargetOpts, Complain,
+                                   AllowCompatibleDifferences);
 }
 bool ChainedASTReaderListener::ReadDiagnosticOptions(
     IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts, bool Complain) {
@@ -232,7 +234,8 @@ static bool checkLanguageOptions(const LangOptions &LangOpts,
 /// \returns true if the target options mis-match, false otherwise.
 static bool checkTargetOptions(const TargetOptions &TargetOpts,
                                const TargetOptions &ExistingTargetOpts,
-                               DiagnosticsEngine *Diags) {
+                               DiagnosticsEngine *Diags,
+                               bool AllowCompatibleDifferences = true) {
 #define CHECK_TARGET_OPT(Field, Name)                             \
   if (TargetOpts.Field != ExistingTargetOpts.Field) {             \
     if (Diags)                                                    \
@@ -241,9 +244,16 @@ static bool checkTargetOptions(const TargetOptions &TargetOpts,
     return true;                                                  \
   }
 
+  // The triple and ABI must match exactly.
   CHECK_TARGET_OPT(Triple, "target");
-  CHECK_TARGET_OPT(CPU, "target CPU");
   CHECK_TARGET_OPT(ABI, "target ABI");
+
+  // We can tolerate different CPUs in many cases, notably when one CPU
+  // supports a strict superset of another. When allowing compatible
+  // differences skip this check.
+  if (!AllowCompatibleDifferences)
+    CHECK_TARGET_OPT(CPU, "target CPU");
+
 #undef CHECK_TARGET_OPT
 
   // Compare feature sets.
@@ -255,43 +265,31 @@ static bool checkTargetOptions(const TargetOptions &TargetOpts,
   std::sort(ExistingFeatures.begin(), ExistingFeatures.end());
   std::sort(ReadFeatures.begin(), ReadFeatures.end());
 
-  unsigned ExistingIdx = 0, ExistingN = ExistingFeatures.size();
-  unsigned ReadIdx = 0, ReadN = ReadFeatures.size();
-  while (ExistingIdx < ExistingN && ReadIdx < ReadN) {
-    if (ExistingFeatures[ExistingIdx] == ReadFeatures[ReadIdx]) {
-      ++ExistingIdx;
-      ++ReadIdx;
-      continue;
-    }
+  // We compute the set difference in both directions explicitly so that we can
+  // diagnose the differences differently.
+  SmallVector<StringRef, 4> UnmatchedExistingFeatures, UnmatchedReadFeatures;
+  std::set_difference(
+      ExistingFeatures.begin(), ExistingFeatures.end(), ReadFeatures.begin(),
+      ReadFeatures.end(), std::back_inserter(UnmatchedExistingFeatures));
+  std::set_difference(ReadFeatures.begin(), ReadFeatures.end(),
+                      ExistingFeatures.begin(), ExistingFeatures.end(),
+                      std::back_inserter(UnmatchedReadFeatures));
 
-    if (ReadFeatures[ReadIdx] < ExistingFeatures[ExistingIdx]) {
-      if (Diags)
-        Diags->Report(diag::err_pch_targetopt_feature_mismatch)
-          << false << ReadFeatures[ReadIdx];
-      return true;
-    }
+  // If we are allowing compatible differences and the read feature set is
+  // a strict subset of the existing feature set, there is nothing to diagnose.
+  if (AllowCompatibleDifferences && UnmatchedReadFeatures.empty())
+    return false;
 
-    if (Diags)
+  if (Diags) {
+    for (StringRef Feature : UnmatchedReadFeatures)
       Diags->Report(diag::err_pch_targetopt_feature_mismatch)
-        << true << ExistingFeatures[ExistingIdx];
-    return true;
+          << /* is-existing-feature */ false << Feature;
+    for (StringRef Feature : UnmatchedExistingFeatures)
+      Diags->Report(diag::err_pch_targetopt_feature_mismatch)
+          << /* is-existing-feature */ true << Feature;
   }
 
-  if (ExistingIdx < ExistingN) {
-    if (Diags)
-      Diags->Report(diag::err_pch_targetopt_feature_mismatch)
-        << true << ExistingFeatures[ExistingIdx];
-    return true;
-  }
-
-  if (ReadIdx < ReadN) {
-    if (Diags)
-      Diags->Report(diag::err_pch_targetopt_feature_mismatch)
-        << false << ReadFeatures[ReadIdx];
-    return true;
-  }
-
-  return false;
+  return !UnmatchedReadFeatures.empty() || !UnmatchedExistingFeatures.empty();
 }
 
 bool
@@ -305,10 +303,12 @@ PCHValidator::ReadLanguageOptions(const LangOptions &LangOpts,
 }
 
 bool PCHValidator::ReadTargetOptions(const TargetOptions &TargetOpts,
-                                     bool Complain) {
+                                     bool Complain,
+                                     bool AllowCompatibleDifferences) {
   const TargetOptions &ExistingTargetOpts = PP.getTargetInfo().getTargetOpts();
   return checkTargetOptions(TargetOpts, ExistingTargetOpts,
-                            Complain? &Reader.Diags : nullptr);
+                            Complain ? &Reader.Diags : nullptr,
+                            AllowCompatibleDifferences);
 }
 
 namespace {
@@ -826,7 +826,7 @@ IdentifierInfo *ASTIdentifierLookupTrait::ReadData(const internal_key_type& k,
         uint32_t LocalMacroID =
             endian::readNext<uint32_t, little, unaligned>(d);
         DataLen -= 4;
-        if (LocalMacroID == 0xdeadbeef) break;
+        if (LocalMacroID == (uint32_t)-1) break;
         LocalMacroIDs.push_back(LocalMacroID);
       }
     }
@@ -1807,7 +1807,7 @@ struct ASTReader::ModuleMacroInfo {
 };
 
 ASTReader::ModuleMacroInfo *
-ASTReader::getModuleMacro(const PendingMacroInfo &PMInfo) {
+ASTReader::getModuleMacro(IdentifierInfo *II, const PendingMacroInfo &PMInfo) {
   ModuleMacroInfo Info;
 
   uint32_t ID = PMInfo.ModuleMacroData.MacID;
@@ -1815,6 +1815,11 @@ ASTReader::getModuleMacro(const PendingMacroInfo &PMInfo) {
     // Macro undefinition.
     Info.SubModID = getGlobalSubmoduleID(*PMInfo.M, ID >> 1);
     Info.MI = nullptr;
+
+    // If we've already loaded the #undef of this macro from this module,
+    // don't do so again.
+    if (!LoadedUndefs.insert(std::make_pair(II, Info.SubModID)).second)
+      return nullptr;
   } else {
     // Macro definition.
     GlobalMacroID GMacID = getGlobalMacroID(*PMInfo.M, ID >> 1);
@@ -1848,7 +1853,7 @@ void ASTReader::resolvePendingMacro(IdentifierInfo *II,
 
   // Module Macro.
 
-  ModuleMacroInfo *MMI = getModuleMacro(PMInfo);
+  ModuleMacroInfo *MMI = getModuleMacro(II, PMInfo);
   if (!MMI)
     return;
 
@@ -1945,15 +1950,13 @@ static bool areDefinedInSystemModules(MacroInfo *PrevMI, MacroInfo *NewMI,
   Module *PrevOwner = nullptr;
   if (SubmoduleID PrevModID = PrevMI->getOwningModuleID())
     PrevOwner = Reader.getSubmodule(PrevModID);
-  SourceManager &SrcMgr = Reader.getSourceManager();
-  bool PrevInSystem
-    = PrevOwner? PrevOwner->IsSystem
-               : SrcMgr.isInSystemHeader(PrevMI->getDefinitionLoc());
-  bool NewInSystem
-    = NewOwner? NewOwner->IsSystem
-              : SrcMgr.isInSystemHeader(NewMI->getDefinitionLoc());
   if (PrevOwner && PrevOwner == NewOwner)
     return false;
+  SourceManager &SrcMgr = Reader.getSourceManager();
+  bool PrevInSystem = (PrevOwner && PrevOwner->IsSystem) ||
+                      SrcMgr.isInSystemHeader(PrevMI->getDefinitionLoc());
+  bool NewInSystem = (NewOwner && NewOwner->IsSystem) ||
+                     SrcMgr.isInSystemHeader(NewMI->getDefinitionLoc());
   return PrevInSystem && NewInSystem;
 }
 
@@ -2459,6 +2462,9 @@ ASTReader::ReadControlBlock(ModuleFile &F,
       break;
     }
 
+    case KNOWN_MODULE_FILES:
+      break;
+
     case LANGUAGE_OPTIONS: {
       bool Complain = (ClientLoadCapabilities & ARR_ConfigurationMismatch) == 0;
       // FIXME: The &F == *ModuleMgr.begin() check is wrong for modules.
@@ -2473,7 +2479,8 @@ ASTReader::ReadControlBlock(ModuleFile &F,
     case TARGET_OPTIONS: {
       bool Complain = (ClientLoadCapabilities & ARR_ConfigurationMismatch)==0;
       if (Listener && &F == *ModuleMgr.begin() &&
-          ParseTargetOptions(Record, Complain, *Listener) &&
+          ParseTargetOptions(Record, Complain, *Listener,
+                             AllowCompatibleConfigurationMismatch) &&
           !DisableValidation && !AllowConfigurationMismatch)
         return ConfigurationMismatch;
       break;
@@ -4219,9 +4226,10 @@ namespace {
       return checkLanguageOptions(ExistingLangOpts, LangOpts, nullptr,
                                   AllowCompatibleDifferences);
     }
-    bool ReadTargetOptions(const TargetOptions &TargetOpts,
-                           bool Complain) override {
-      return checkTargetOptions(ExistingTargetOpts, TargetOpts, nullptr);
+    bool ReadTargetOptions(const TargetOptions &TargetOpts, bool Complain,
+                           bool AllowCompatibleDifferences) override {
+      return checkTargetOptions(ExistingTargetOpts, TargetOpts, nullptr,
+                                AllowCompatibleDifferences);
     }
     bool ReadHeaderSearchOptions(const HeaderSearchOptions &HSOpts,
                                  StringRef SpecificModuleCachePath,
@@ -4243,6 +4251,8 @@ bool ASTReader::readASTFileControlBlock(StringRef Filename,
                                         FileManager &FileMgr,
                                         ASTReaderListener &Listener) {
   // Open the AST file.
+  // FIXME: This allows use of the VFS; we do not allow use of the
+  // VFS when actually loading a module.
   auto Buffer = FileMgr.getBufferForFile(Filename);
   if (!Buffer) {
     return true;
@@ -4333,7 +4343,8 @@ bool ASTReader::readASTFileControlBlock(StringRef Filename,
       break;
 
     case TARGET_OPTIONS:
-      if (ParseTargetOptions(Record, false, Listener))
+      if (ParseTargetOptions(Record, false, Listener,
+                             /*AllowCompatibleConfigurationMismatch*/ false))
         return true;
       break;
 
@@ -4405,6 +4416,20 @@ bool ASTReader::readASTFileControlBlock(StringRef Filename,
       while (Idx < N) {
         // Read information about the AST file.
         Idx += 5; // ImportLoc, Size, ModTime, Signature
+        std::string Filename = ReadString(Record, Idx);
+        ResolveImportedPath(Filename, ModuleDir);
+        Listener.visitImport(Filename);
+      }
+      break;
+    }
+
+    case KNOWN_MODULE_FILES: {
+      // Known-but-not-technically-used module files are treated as imports.
+      if (!NeedsImports)
+        break;
+
+      unsigned Idx = 0, N = Record.size();
+      while (Idx < N) {
         std::string Filename = ReadString(Record, Idx);
         ResolveImportedPath(Filename, ModuleDir);
         Listener.visitImport(Filename);
@@ -4725,9 +4750,9 @@ bool ASTReader::ParseLanguageOptions(const RecordData &Record,
                                       AllowCompatibleDifferences);
 }
 
-bool ASTReader::ParseTargetOptions(const RecordData &Record,
-                                   bool Complain,
-                                   ASTReaderListener &Listener) {
+bool ASTReader::ParseTargetOptions(const RecordData &Record, bool Complain,
+                                   ASTReaderListener &Listener,
+                                   bool AllowCompatibleDifferences) {
   unsigned Idx = 0;
   TargetOptions TargetOpts;
   TargetOpts.Triple = ReadString(Record, Idx);
@@ -4740,7 +4765,8 @@ bool ASTReader::ParseTargetOptions(const RecordData &Record,
     TargetOpts.Features.push_back(ReadString(Record, Idx));
   }
 
-  return Listener.ReadTargetOptions(TargetOpts, Complain);
+  return Listener.ReadTargetOptions(TargetOpts, Complain,
+                                    AllowCompatibleDifferences);
 }
 
 bool ASTReader::ParseDiagnosticOptions(const RecordData &Record, bool Complain,
@@ -6859,6 +6885,9 @@ void ASTReader::StartTranslationUnit(ASTConsumer *Consumer) {
   EagerlyDeserializedDecls.clear();
 
   PassInterestingDeclsToConsumer();
+
+  if (DeserializationListener)
+    DeserializationListener->ReaderInitialized(this);
 }
 
 void ASTReader::PrintStats() {
@@ -8321,8 +8350,8 @@ void ASTReader::finishPendingActions() {
 
     // Load pending declaration chains.
     for (unsigned I = 0; I != PendingDeclChains.size(); ++I) {
-      loadPendingDeclChain(PendingDeclChains[I]);
       PendingDeclChainsKnown.erase(PendingDeclChains[I]);
+      loadPendingDeclChain(PendingDeclChains[I]);
     }
     assert(PendingDeclChainsKnown.empty());
     PendingDeclChains.clear();

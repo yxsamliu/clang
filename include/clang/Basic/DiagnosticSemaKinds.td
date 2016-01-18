@@ -7072,6 +7072,11 @@ def note_neon_vector_initializer_non_portable_q : Note<
   "vcombine_%0%1(vcreate_%0%1(), vcreate_%0%1()) to initialize from integer "
   "constants">;
 
+def err_builtin_longjmp_unsupported : Error<
+  "__builtin_longjmp is not supported for the current target">;
+def err_builtin_setjmp_unsupported : Error<
+  "__builtin_setjmp is not supported for the current target">;
+
 def err_builtin_longjmp_invalid_val : Error<
   "argument to __builtin_longjmp must be a constant 1">;
 def err_builtin_requires_language : Error<"'%0' is only available in %1">;
@@ -7401,8 +7406,6 @@ def err_opencl_return_value_with_address_space : Error<
   "return value cannot be qualified with address space">;
 def err_opencl_constant_no_init : Error<
   "variable in constant address space must be initialized">;
-def err_atomic_assignment : Error <
- "assigning directly to an atomic object is not allowed">;
 } // end of sema category
 
 let CategoryName = "OpenMP Issue" in {
@@ -7591,8 +7594,15 @@ def err_omp_atomic_write_not_expression_statement : Error<
   "the statement for 'atomic write' must be an expression statement of form 'x = expr;',"
   " where x is a lvalue expression with scalar type">;
 def err_omp_atomic_update_not_expression_statement : Error<
-  "the statement for 'atomic%select{| update}0' must be an expression statement of form '++x;', '--x;', 'x++;', 'x--;', 'x binop= expr;', 'x = x binop expr' or 'x = expr binop x',"
+  "the statement for 'atomic update' must be an expression statement of form '++x;', '--x;', 'x++;', 'x--;', 'x binop= expr;', 'x = x binop expr' or 'x = expr binop x',"
   " where x is an l-value expression with scalar type">;
+def err_omp_atomic_not_expression_statement : Error<
+  "the statement for 'atomic' must be an expression statement of form '++x;', '--x;', 'x++;', 'x--;', 'x binop= expr;', 'x = x binop expr' or 'x = expr binop x',"
+  " where x is an l-value expression with scalar type">;
+def note_omp_atomic_update: Note<
+  "%select{expected an expression statement|expected built-in binary or unary operator|expected unary decrement/increment operation|"
+  "expected expression of scalar type|expected assignment expression|expected built-in binary operator|"
+  "expected one of '+', '*', '-', '/', '&', '^', '%|', '<<', or '>>' built-in operations|expected in right hand side of expression}0">;
 def err_omp_atomic_capture_not_expression_statement : Error<
   "the statement for 'atomic capture' must be an expression statement of form 'v = ++x;', 'v = --x;', 'v = x++;', 'v = x--;', 'v = x binop= expr;', 'v = x = x binop expr' or 'v = x = expr binop x',"
   " where x and v are both l-value expressions with scalar type">;

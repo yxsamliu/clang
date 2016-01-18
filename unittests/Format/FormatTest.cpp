@@ -2686,6 +2686,13 @@ TEST_F(FormatTest, MacroDefinitionsWithIncompleteCode) {
                "#define b }\\\n"
                "  a\n"
                "a");
+  verifyFormat("#define A     \\\n"
+               "  {           \\\n"
+               "    {\n"
+               "#define B     \\\n"
+               "  }           \\\n"
+               "  }",
+               getLLVMStyleWithColumns(15));
 
   verifyNoCrash("#if a\na(\n#else\n#endif\n{a");
   verifyNoCrash("a={0,1\n#if a\n#else\n;\n#endif\n}");
@@ -5648,6 +5655,8 @@ TEST_F(FormatTest, BreaksLongVariableDeclarations) {
                "    LoooooooooooooooooooooooooooooooooooooooongVariable;");
   verifyFormat("LoooooooooooooooooooooooooooooooooooooooongType const\n"
                "    LoooooooooooooooooooooooooooooooooooooooongVariable;");
+  verifyFormat("LoooooooooooooooooooooooooooooooooooooooongType\n"
+               "    *LoooooooooooooooooooooooooooooooooooooooongVariable;");
 
   // Different ways of ()-initializiation.
   verifyFormat("LoooooooooooooooooooooooooooooooooooooooongType\n"
@@ -5664,6 +5673,8 @@ TEST_F(FormatTest, BreaksLongDeclarations) {
   verifyFormat("typedef LongTemplateType<aaaaaaaaaaaaaaaaaaa()>\n"
                "    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;");
   verifyFormat("LoooooooooooooooooooooooooooooooooooooooongReturnType\n"
+               "LoooooooooooooooooooooooooooooooongFunctionDeclaration();");
+  verifyFormat("LoooooooooooooooooooooooooooooooooooooooongReturnType *\n"
                "LoooooooooooooooooooooooooooooooongFunctionDeclaration();");
   verifyFormat("LoooooooooooooooooooooooooooooooooooooooongReturnType\n"
                "LooooooooooooooooooooooooooooooooooongFunctionDefinition() {}");
@@ -5703,12 +5714,12 @@ TEST_F(FormatTest, BreaksLongDeclarations) {
       "                                   SourceLocation L, IdentifierIn *II,\n"
       "                                   Type *T) {}");
   verifyFormat("ReallyLongReturnType<TemplateParam1, TemplateParam2>\n"
-               "ReallyReallyLongFunctionName(\n"
+               "ReallyReaaallyLongFunctionName(\n"
                "    const std::string &SomeParameter,\n"
-               "    const SomeType<string, SomeOtherTemplateParameter> &\n"
-               "        ReallyReallyLongParameterName,\n"
-               "    const SomeType<string, SomeOtherTemplateParameter> &\n"
-               "        AnotherLongParameterName) {}");
+               "    const SomeType<string, SomeOtherTemplateParameter>\n"
+               "        &ReallyReallyLongParameterName,\n"
+               "    const SomeType<string, SomeOtherTemplateParameter>\n"
+               "        &AnotherLongParameterName) {}");
   verifyFormat("template <typename A>\n"
                "SomeLoooooooooooooooooooooongType<\n"
                "    typename some_namespace::SomeOtherType<A>::Type>\n"
@@ -5732,8 +5743,8 @@ TEST_F(FormatTest, BreaksLongDeclarations) {
                      "                   int aaaaaaaaaaaaaaaaaaaaaaa);");
 
   verifyFormat("typedef size_t (*aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)(\n"
-               "    const aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa *\n"
-               "        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa);");
+               "    const aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+               "        *aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa);");
 }
 
 TEST_F(FormatTest, FormatsArrays) {
@@ -6623,6 +6634,8 @@ TEST_F(FormatTest, FormatForObjectiveCMethodDecls) {
           "- (void)sendAction:(SEL)aSelector to:(id)anObject forAllCells:(BOOL)flag;"));
 
   // Very long objectiveC method declaration.
+  verifyFormat("- (void)aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:\n"
+               "    (SoooooooooooooooooooooomeType *)bbbbbbbbbb;");
   verifyFormat("- (NSUInteger)indexOfObject:(id)anObject\n"
                "                    inRange:(NSRange)range\n"
                "                   outRange:(NSRange)out_range\n"
