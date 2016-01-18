@@ -1243,6 +1243,15 @@ an error:
 }];
 }
 
+def MSNoVTableDocs : Documentation {
+  let Category = DocCatType;
+  let Content = [{
+This attribute can be added to a class declaration or definition to signal to
+the compiler that constructors and destructors will not reference the virtual
+function table.
+  }];
+}
+
 def OptnoneDocs : Documentation {
   let Category = DocCatFunction;
   let Content = [{

@@ -2514,8 +2514,7 @@ bool Parser::ParseUnqualifiedId(CXXScopeSpec &SS, bool EnteringContext,
 
     // If the user wrote ~T::T, correct it to T::~T.
     DeclaratorScopeObj DeclScopeObj(*this, SS);
-    if (!TemplateSpecified && //!ColonIsSacred &&
-        NextToken().is(tok::coloncolon)) {
+    if (!TemplateSpecified && NextToken().is(tok::coloncolon)) {
       // Don't let ParseOptionalCXXScopeSpecifier() "correct"
       // `int A; struct { ~A::A(); };` to `int A; struct { ~A:A(); };`,
       // it will confuse this recovery logic.
@@ -2527,6 +2526,8 @@ bool Parser::ParseUnqualifiedId(CXXScopeSpec &SS, bool EnteringContext,
       }
       if (ParseOptionalCXXScopeSpecifier(SS, ObjectType, EnteringContext))
         return true;
+      if (SS.isNotEmpty())
+        ObjectType = ParsedType();
       if (Tok.isNot(tok::identifier) || NextToken().is(tok::coloncolon) ||
           SS.isInvalid()) {
         Diag(TildeLoc, diag::err_destructor_tilde_scope);
