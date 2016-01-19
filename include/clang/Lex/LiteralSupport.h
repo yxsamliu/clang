@@ -57,14 +57,14 @@ public:
   NumericLiteralParser(StringRef TokSpelling,
                        SourceLocation TokLoc,
                        Preprocessor &PP);
-  bool hadError;
-  bool isUnsigned;
-  bool isLong;        // This is *not* set for long long.
-  bool isLongLong;
-  bool isHalf;        // 1.0h
-  bool isFloat;       // 1.0f
-  bool isImaginary;   // 1.0i
-  uint8_t MicrosoftInteger;  // Microsoft suffix extension i8, i16, i32, or i64.
+  bool hadError : 1;
+  bool isUnsigned : 1;
+  bool isLong : 1;          // This is *not* set for long long.
+  bool isLongLong : 1;
+  bool isHalf : 1;          // 1.0h
+  bool isFloat : 1;         // 1.0f
+  bool isImaginary : 1;     // 1.0i
+  uint8_t MicrosoftInteger; // Microsoft suffix extension i8, i16, i32, or i64.
 
   bool isIntegerLiteral() const {
     return !saw_period && !saw_exponent;

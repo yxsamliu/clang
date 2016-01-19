@@ -1486,6 +1486,9 @@ Parser::ParsePostfixExpressionSuffix(ExprResult LHS) {
              })) {
             (void)Actions.CorrectDelayedTyposInExpr(LHS);
             LHS = ExprError();
+          } else if (LHS.isInvalid()) {
+            for (auto &E : ArgExprs)
+              Actions.CorrectDelayedTyposInExpr(E);
           }
         }
       }

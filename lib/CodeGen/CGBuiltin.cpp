@@ -27,6 +27,7 @@
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/Intrinsics.h"
+#include <sstream>
 
 using namespace clang;
 using namespace CodeGen;
@@ -2059,6 +2060,8 @@ Value *CodeGenFunction::EmitTargetBuiltinExpr(unsigned BuiltinID,
   case llvm::Triple::r600:
   case llvm::Triple::amdgcn:
     return EmitR600BuiltinExpr(BuiltinID, E);
+  case llvm::Triple::systemz:
+    return EmitSystemZBuiltinExpr(BuiltinID, E);
   default:
     return nullptr;
   }
@@ -6565,35 +6568,6 @@ Value *CodeGenFunction::EmitPPCBuiltinExpr(unsigned BuiltinID,
     llvm::Function *F = CGM.getIntrinsic(ID);
     return Builder.CreateCall(F, Ops, "");
   }
-  // P8 Crypto builtins
-  case PPC::BI__builtin_altivec_crypto_vshasigmaw:
-  case PPC::BI__builtin_altivec_crypto_vshasigmad:
-  {
-    ConstantInt *CI1 = dyn_cast<ConstantInt>(Ops[1]);
-    ConstantInt *CI2 = dyn_cast<ConstantInt>(Ops[2]);
-    assert(CI1 && CI2);
-    if (CI1->getZExtValue() > 1) {
-      CGM.Error(E->getArg(1)->getExprLoc(),
-                "argument out of range (should be 0-1).");
-      return llvm::UndefValue::get(Ops[0]->getType());
-    }
-    if (CI2->getZExtValue() > 15) {
-      CGM.Error(E->getArg(2)->getExprLoc(),
-                "argument out of range (should be 0-15).");
-      return llvm::UndefValue::get(Ops[0]->getType());
-    }
-    switch (BuiltinID) {
-    default: llvm_unreachable("Unsupported sigma intrinsic!");
-    case PPC::BI__builtin_altivec_crypto_vshasigmaw:
-      ID = Intrinsic::ppc_altivec_crypto_vshasigmaw;
-      break;
-    case PPC::BI__builtin_altivec_crypto_vshasigmad:
-      ID = Intrinsic::ppc_altivec_crypto_vshasigmad;
-      break;
-    }
-    llvm::Function *F = CGM.getIntrinsic(ID);
-    return Builder.CreateCall(F, Ops, "");
-  }
   }
 }
 
@@ -6695,6 +6669,44 @@ Value *CodeGenFunction::EmitR600BuiltinExpr(unsigned BuiltinID,
   case R600::BI__builtin_amdgpu_classf:
     return emitFPIntBuiltin(*this, E, Intrinsic::AMDGPU_class);
    default:
+    return nullptr;
+  }
+}
+
+Value *CodeGenFunction::EmitSystemZBuiltinExpr(unsigned BuiltinID,
+                                               const CallExpr *E) {
+  switch (BuiltinID) {
+  case SystemZ::BI__builtin_tbegin: {
+    Value *TDB = EmitScalarExpr(E->getArg(0));
+    Value *Control = llvm::ConstantInt::get(Int32Ty, 0xff0c);
+    Value *F = CGM.getIntrinsic(Intrinsic::s390_tbegin);
+    return Builder.CreateCall2(F, TDB, Control);
+  }
+  case SystemZ::BI__builtin_tbegin_nofloat: {
+    Value *TDB = EmitScalarExpr(E->getArg(0));
+    Value *Control = llvm::ConstantInt::get(Int32Ty, 0xff0c);
+    Value *F = CGM.getIntrinsic(Intrinsic::s390_tbegin_nofloat);
+    return Builder.CreateCall2(F, TDB, Control);
+  }
+  case SystemZ::BI__builtin_tbeginc: {
+    Value *TDB = llvm::ConstantPointerNull::get(Int8PtrTy);
+    Value *Control = llvm::ConstantInt::get(Int32Ty, 0xff08);
+    Value *F = CGM.getIntrinsic(Intrinsic::s390_tbeginc);
+    return Builder.CreateCall2(F, TDB, Control);
+  }
+  case SystemZ::BI__builtin_tabort: {
+    Value *Data = EmitScalarExpr(E->getArg(0));
+    Value *F = CGM.getIntrinsic(Intrinsic::s390_tabort);
+    return Builder.CreateCall(F, Builder.CreateSExt(Data, Int64Ty, "tabort"));
+  }
+  case SystemZ::BI__builtin_non_tx_store: {
+    Value *Address = EmitScalarExpr(E->getArg(0));
+    Value *Data = EmitScalarExpr(E->getArg(1));
+    Value *F = CGM.getIntrinsic(Intrinsic::s390_ntstg);
+    return Builder.CreateCall2(F, Data, Address);
+  }
+
+  default:
     return nullptr;
   }
 }
