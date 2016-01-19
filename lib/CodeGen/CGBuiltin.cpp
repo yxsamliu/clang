@@ -1715,11 +1715,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
                                             llvm::ArrayRef<llvm::Type*>(ArgTys),
                                             false);
       Value *BCast = Builder.CreatePointerCast(Arg1, I8PTy);
-      return RValue::get(Builder.CreateCall3(CGM.CreateRuntimeFunction(FTy,
-                                                                       Name),
-                                             Arg0,
-                                             BCast,
-                                             PacketSize));
+      return RValue::get(Builder.CreateCall(CGM.CreateRuntimeFunction(FTy,
+        Name), {Arg0, BCast, PacketSize }));
     } else {
       assert(4 == E->getNumArgs() && "Illegal number of parameters to pipe function");
 
@@ -1744,13 +1741,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
       // we may need to cast it.
       if (Arg2->getType() != Int32Ty)
         Arg2 = Builder.CreateZExtOrTrunc(Arg2, Int32Ty);
-      return RValue::get(Builder.CreateCall5(CGM.CreateRuntimeFunction(FTy,
-                                                                      Name),
-                                             Arg0,
-                                             Arg1,
-                                             Arg2,
-                                             BCast,
-                                             PacketSize));
+      return RValue::get(Builder.CreateCall(CGM.CreateRuntimeFunction(FTy,
+        Name), { Arg0, Arg1, Arg2, BCast, PacketSize }));
     }
   }
   case Builtin::BIreserve_read_pipe:
@@ -1799,10 +1791,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
     // we may need to cast it.
     if (Arg1->getType() != Int32Ty)
       Arg1 = Builder.CreateZExtOrTrunc(Arg1, Int32Ty);
-    return RValue::get( Builder.CreateCall3(CGM.CreateRuntimeFunction(FTy, Name),
-                                           Arg0,
-                                           Arg1,
-                                           PacketSize));
+    return RValue::get( Builder.CreateCall(CGM.CreateRuntimeFunction(FTy, Name),
+      {Arg0, Arg1, PacketSize }));
   }
   case Builtin::BIcommit_read_pipe:
   case Builtin::BIcommit_write_pipe:
@@ -1846,10 +1836,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
                                         llvm::ArrayRef<llvm::Type*>(ArgTys),
                                         false);
 
-    return RValue::get(Builder.CreateCall3(CGM.CreateRuntimeFunction(FTy, Name),
-                                           Arg0,
-                                           Arg1,
-                                           PacketSize));
+    return RValue::get(Builder.CreateCall(CGM.CreateRuntimeFunction(FTy, Name),
+      { Arg0, Arg1, PacketSize }));
   }
   case Builtin::BIget_pipe_num_packets:
   case Builtin::BIget_pipe_max_packets: {
@@ -1876,9 +1864,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
                                            llvm::ArrayRef<llvm::Type*>(ArgTys),
                                            false);
 
-    return RValue::get(Builder.CreateCall2(CGM.CreateRuntimeFunction(FTy, Name),
-                                           Arg0,
-                                           PacketSize));
+    return RValue::get(Builder.CreateCall(CGM.CreateRuntimeFunction(FTy, Name),
+      { Arg0, PacketSize }));
   }
 
   case Builtin::BI__readfsdword: {
