@@ -317,6 +317,14 @@ struct ComputeRegionCounts : public ConstStmtVisitor<ComputeRegionCounts> {
     RecordNextStmtCount = true;
   }
 
+  void VisitCXXThrowExpr(const CXXThrowExpr *E) {
+    RecordStmtCount(E);
+    if (E->getSubExpr())
+      Visit(E->getSubExpr());
+    PGO.setCurrentRegionUnreachable();
+    RecordNextStmtCount = true;
+  }
+
   void VisitGotoStmt(const GotoStmt *S) {
     RecordStmtCount(S);
     PGO.setCurrentRegionUnreachable();
@@ -439,6 +447,7 @@ struct ComputeRegionCounts : public ConstStmtVisitor<ComputeRegionCounts> {
 
   void VisitCXXForRangeStmt(const CXXForRangeStmt *S) {
     RecordStmtCount(S);
+    Visit(S->getLoopVarStmt());
     Visit(S->getRangeStmt());
     Visit(S->getBeginEndStmt());
     // Counter tracks the body of the loop.
@@ -447,8 +456,7 @@ struct ComputeRegionCounts : public ConstStmtVisitor<ComputeRegionCounts> {
     // Visit the body region first. (This is basically the same as a while
     // loop; see further comments in VisitWhileStmt.)
     Cnt.beginRegion();
-    CountMap[S->getLoopVarStmt()] = PGO.getCurrentRegionCount();
-    Visit(S->getLoopVarStmt());
+    CountMap[S->getBody()] = PGO.getCurrentRegionCount();
     Visit(S->getBody());
     Cnt.adjustForControlFlow();
 
@@ -467,7 +475,6 @@ struct ComputeRegionCounts : public ConstStmtVisitor<ComputeRegionCounts> {
                               BC.ContinueCount);
     CountMap[S->getCond()] = PGO.getCurrentRegionCount();
     Visit(S->getCond());
-    Cnt.adjustForControlFlow();
     Cnt.applyAdjustmentsToRegion(BC.BreakCount + BC.ContinueCount);
     RecordNextStmtCount = true;
   }
@@ -729,7 +736,7 @@ void CodeGenPGO::emitCounterRegionMapping(const Decl *D) {
 }
 
 void
-CodeGenPGO::emitEmptyCounterMapping(const Decl *D, StringRef FuncName,
+CodeGenPGO::emitEmptyCounterMapping(const Decl *D, StringRef Name,
                                     llvm::GlobalValue::LinkageTypes Linkage) {
   if (SkipCoverageMapping)
     return;
@@ -749,7 +756,7 @@ CodeGenPGO::emitEmptyCounterMapping(const Decl *D, StringRef FuncName,
   if (CoverageMapping.empty())
     return;
 
-  setFuncName(FuncName, Linkage);
+  setFuncName(Name, Linkage);
   CGM.getCoverageMapping()->addFunctionMappingRecord(
       FuncNameVar, FuncName, FunctionHash, CoverageMapping);
 }
@@ -785,11 +792,13 @@ CodeGenPGO::applyFunctionAttributes(llvm::IndexedInstrProfReader *PGOReader,
     Fn->addFnAttr(llvm::Attribute::Cold);
 }
 
-void CodeGenPGO::emitCounterIncrement(CGBuilderTy &Builder, unsigned Counter) {
+void CodeGenPGO::emitCounterIncrement(CGBuilderTy &Builder, const Stmt *S) {
   if (!CGM.getCodeGenOpts().ProfileInstrGenerate || !RegionCounterMap)
     return;
   if (!Builder.GetInsertPoint())
     return;
+
+  unsigned Counter = (*RegionCounterMap)[S];
   auto *I8PtrTy = llvm::Type::getInt8PtrTy(CGM.getLLVMContext());
   Builder.CreateCall4(CGM.getIntrinsic(llvm::Intrinsic::instrprof_increment),
                       llvm::ConstantExpr::getBitCast(FuncNameVar, I8PtrTy),
@@ -876,10 +885,9 @@ llvm::MDNode *CodeGenPGO::createBranchWeights(ArrayRef<uint64_t> Weights) {
 }
 
 llvm::MDNode *CodeGenPGO::createLoopWeights(const Stmt *Cond,
-                                            RegionCounter &Cnt) {
+                                            uint64_t LoopCount) {
   if (!haveRegionCounts())
     return nullptr;
-  uint64_t LoopCount = Cnt.getCount();
   Optional<uint64_t> CondCount = getStmtCount(Cond);
   assert(CondCount.hasValue() && "missing expected loop condition count");
   if (*CondCount == 0)

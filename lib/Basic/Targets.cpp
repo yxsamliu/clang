@@ -3531,8 +3531,9 @@ public:
     DoubleAlign = LongLongAlign = 64;
     bool IsWinCOFF =
         getTriple().isOSWindows() && getTriple().isOSBinFormatCOFF();
-    DescriptionString = IsWinCOFF ? "e-m:x-p:32:32-i64:64-f80:32-n8:16:32-S32"
-                                  : "e-m:e-p:32:32-i64:64-f80:32-n8:16:32-S32";
+    DescriptionString = IsWinCOFF
+                            ? "e-m:x-p:32:32-i64:64-f80:32-n8:16:32-a:0:32-S32"
+                            : "e-m:e-p:32:32-i64:64-f80:32-n8:16:32-a:0:32-S32";
   }
   void getTargetDefines(const LangOptions &Opts,
                         MacroBuilder &Builder) const override {
@@ -3611,7 +3612,7 @@ public:
     TLSSupported = false;
     WCharType = UnsignedShort;
     DoubleAlign = LongLongAlign = 64;
-    DescriptionString = "e-m:x-p:32:32-i64:64-f80:32-n8:16:32-S32";
+    DescriptionString = "e-m:x-p:32:32-i64:64-f80:32-n8:16:32-a:0:32-S32";
   }
   void getTargetDefines(const LangOptions &Opts,
                         MacroBuilder &Builder) const override {
@@ -5319,9 +5320,11 @@ public:
   bool handleTargetFeatures(std::vector<std::string> &Features,
                             DiagnosticsEngine &Diags) override {
     SoftFloat = false;
-    for (unsigned i = 0, e = Features.size(); i != e; ++i)
-      if (Features[i] == "+soft-float")
-        SoftFloat = true;
+    auto Feature = std::find(Features.begin(), Features.end(), "+soft-float");
+    if (Feature != Features.end()) {
+      SoftFloat = true;
+      Features.erase(Feature);
+    }
     return true;
   }
   void getTargetDefines(const LangOptions &Opts,
@@ -5521,6 +5524,7 @@ public:
     LongDoubleWidth = 128;
     LongDoubleAlign = 64;
     LongDoubleFormat = &llvm::APFloat::IEEEquad;
+    DefaultAlignForAttributeAligned = 64;
     MinGlobalAlign = 16;
     DescriptionString = "E-m:e-i1:8:16-i8:8:16-i64:64-f128:64-a:8:16-n32:64";
     MaxAtomicPromoteWidth = MaxAtomicInlineWidth = 64;

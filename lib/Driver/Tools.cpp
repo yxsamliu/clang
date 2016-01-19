@@ -338,6 +338,7 @@ void Clang::AddPreprocessingOptions(Compilation &C,
   }
 
   Args.AddLastArg(CmdArgs, options::OPT_MP);
+  Args.AddLastArg(CmdArgs, options::OPT_MV);
 
   // Convert all -MQ <target> args to -MT <quoted target>
   for (arg_iterator it = Args.filtered_begin(options::OPT_MT,
@@ -1802,8 +1803,17 @@ getAArch64ArchFeaturesFromMarch(const Driver &D, StringRef March,
                                 const ArgList &Args,
                                 std::vector<const char *> &Features) {
   std::pair<StringRef, StringRef> Split = March.split("+");
-  if (Split.first != "armv8-a")
+
+  if (Split.first == "armv8-a" ||
+      Split.first == "armv8a") {
+    // ok, no additional features.
+  } else if (
+      Split.first == "armv8.1-a" ||
+      Split.first == "armv8.1a" ) {
+    Features.push_back("+v8.1a");
+  } else {
     return false;
+  }
 
   if (Split.second.size() && !DecodeAArch64Features(D, Split.second, Features))
     return false;
@@ -2241,6 +2251,7 @@ static void addProfileRT(const ToolChain &TC, const ArgList &Args,
                      false) ||
         Args.hasArg(options::OPT_fprofile_generate) ||
         Args.hasArg(options::OPT_fprofile_instr_generate) ||
+        Args.hasArg(options::OPT_fprofile_instr_generate_EQ) ||
         Args.hasArg(options::OPT_fcreate_profile) ||
         Args.hasArg(options::OPT_coverage)))
     return;
@@ -2316,10 +2327,16 @@ collectSanitizerRuntimes(const ToolChain &TC, const ArgList &Args,
     StaticRuntimes.push_back("dfsan");
   if (SanArgs.needsLsanRt())
     StaticRuntimes.push_back("lsan");
-  if (SanArgs.needsMsanRt())
+  if (SanArgs.needsMsanRt()) {
     StaticRuntimes.push_back("msan");
-  if (SanArgs.needsTsanRt())
+    if (SanArgs.linkCXXRuntimes())
+      StaticRuntimes.push_back("msan_cxx");
+  }
+  if (SanArgs.needsTsanRt()) {
     StaticRuntimes.push_back("tsan");
+    if (SanArgs.linkCXXRuntimes())
+      StaticRuntimes.push_back("tsan_cxx");
+  }
   if (SanArgs.needsUbsanRt()) {
     StaticRuntimes.push_back("ubsan_standalone");
     if (SanArgs.linkCXXRuntimes())
@@ -3381,13 +3398,17 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   Args.AddAllArgs(CmdArgs, options::OPT_finstrument_functions);
 
-  if (Args.hasArg(options::OPT_fprofile_instr_generate) &&
+  if ((Args.hasArg(options::OPT_fprofile_instr_generate) ||
+       Args.hasArg(options::OPT_fprofile_instr_generate_EQ)) &&
       (Args.hasArg(options::OPT_fprofile_instr_use) ||
        Args.hasArg(options::OPT_fprofile_instr_use_EQ)))
     D.Diag(diag::err_drv_argument_not_allowed_with)
       << "-fprofile-instr-generate" << "-fprofile-instr-use";
 
-  Args.AddAllArgs(CmdArgs, options::OPT_fprofile_instr_generate);
+  if (Arg *A = Args.getLastArg(options::OPT_fprofile_instr_generate_EQ))
+    A->render(Args, CmdArgs);
+  else
+    Args.AddAllArgs(CmdArgs, options::OPT_fprofile_instr_generate);
 
   if (Arg *A = Args.getLastArg(options::OPT_fprofile_instr_use_EQ))
     A->render(Args, CmdArgs);
@@ -3403,7 +3424,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back("-femit-coverage-data");
 
   if (Args.hasArg(options::OPT_fcoverage_mapping) &&
-      !Args.hasArg(options::OPT_fprofile_instr_generate))
+      !(Args.hasArg(options::OPT_fprofile_instr_generate) ||
+        Args.hasArg(options::OPT_fprofile_instr_generate_EQ)))
     D.Diag(diag::err_drv_argument_only_allowed_with)
       << "-fcoverage-mapping" << "-fprofile-instr-generate";
 

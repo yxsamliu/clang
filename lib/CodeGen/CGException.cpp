@@ -955,8 +955,7 @@ void CodeGenFunction::ExitCXXTryStmt(const CXXTryStmt &S, bool IsFnTryBlock) {
     CGM.getCXXABI().emitBeginCatch(*this, C);
 
     // Emit the PGO counter increment.
-    RegionCounter CatchCnt = getPGORegionCounter(C);
-    CatchCnt.beginRegion(Builder);
+    incrementProfileCounter(C);
 
     // Perform the body of the catch.
     EmitStmt(C->getHandlerBlock());
@@ -984,9 +983,8 @@ void CodeGenFunction::ExitCXXTryStmt(const CXXTryStmt &S, bool IsFnTryBlock) {
       Builder.CreateBr(ContBB);
   }
 
-  RegionCounter ContCnt = getPGORegionCounter(&S);
   EmitBlock(ContBB);
-  ContCnt.beginRegion(Builder);
+  incrementProfileCounter(&S);
 }
 
 namespace {
@@ -1305,7 +1303,7 @@ struct PerformSEHFinally : EHScopeStack::Cleanup {
 
   void Emit(CodeGenFunction &CGF, Flags F) override {
     ASTContext &Context = CGF.getContext();
-    QualType ArgTys[2] = {Context.BoolTy, Context.VoidPtrTy};
+    QualType ArgTys[2] = {Context.UnsignedCharTy, Context.VoidPtrTy};
     FunctionProtoType::ExtProtoInfo EPI;
     const auto *FTP = cast<FunctionType>(
         Context.getFunctionType(Context.VoidTy, ArgTys, EPI));
@@ -1502,7 +1500,8 @@ CodeGenFunction::GenerateSEHFilterFunction(CodeGenFunction &ParentCGF,
     CGM.getCXXABI().getMangleContext().mangleSEHFilterExpression(Parent, OS);
   }
 
-  startOutlinedSEHHelper(ParentCGF, Name, getContext().IntTy, Args, FilterExpr);
+  startOutlinedSEHHelper(ParentCGF, Name, getContext().LongTy, Args,
+                         FilterExpr);
 
   // Mark finally block calls as nounwind and noinline to make LLVM's job a
   // little easier.
@@ -1514,7 +1513,7 @@ CodeGenFunction::GenerateSEHFilterFunction(CodeGenFunction &ParentCGF,
 
   // Emit the original filter expression, convert to i32, and return.
   llvm::Value *R = EmitScalarExpr(FilterExpr);
-  R = Builder.CreateIntCast(R, CGM.IntTy,
+  R = Builder.CreateIntCast(R, ConvertType(getContext().LongTy),
                             FilterExpr->getType()->isSignedIntegerType());
   Builder.CreateStore(R, ReturnValue);
 
@@ -1532,7 +1531,8 @@ CodeGenFunction::GenerateSEHFinallyFunction(CodeGenFunction &ParentCGF,
   FunctionArgList Args;
   Args.push_back(ImplicitParamDecl::Create(
       getContext(), nullptr, StartLoc,
-      &getContext().Idents.get("abnormal_termination"), getContext().BoolTy));
+      &getContext().Idents.get("abnormal_termination"),
+      getContext().UnsignedCharTy));
   Args.push_back(ImplicitParamDecl::Create(
       getContext(), nullptr, StartLoc,
       &getContext().Idents.get("frame_pointer"), getContext().VoidPtrTy));

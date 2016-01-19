@@ -149,6 +149,8 @@ private:
     bool MightBeFunctionType = CurrentToken->is(tok::star);
     bool HasMultipleLines = false;
     bool HasMultipleParametersOnALine = false;
+    bool MightBeObjCForRangeLoop =
+        Left->Previous && Left->Previous->is(tok::kw_for);
     while (CurrentToken) {
       // LookForDecls is set when "if (" has been seen. Check for
       // 'identifier' '*' 'identifier' followed by not '=' -- this
@@ -210,7 +212,8 @@ private:
       }
       if (CurrentToken->isOneOf(tok::r_square, tok::r_brace))
         return false;
-      else if (CurrentToken->is(tok::l_brace))
+
+      if (CurrentToken->is(tok::l_brace))
         Left->Type = TT_Unknown; // Not TT_ObjCBlockLParen
       if (CurrentToken->is(tok::comma) && CurrentToken->Next &&
           !CurrentToken->Next->HasUnescapedNewline &&
@@ -219,6 +222,11 @@ private:
       if (CurrentToken->isOneOf(tok::kw_const, tok::kw_auto) ||
           CurrentToken->isSimpleTypeSpecifier())
         Contexts.back().IsExpression = false;
+      if (CurrentToken->isOneOf(tok::semi, tok::colon))
+        MightBeObjCForRangeLoop = false;
+      if (MightBeObjCForRangeLoop && CurrentToken->is(Keywords.kw_in))
+        CurrentToken->Type = TT_ObjCForIn;
+
       FormatToken *Tok = CurrentToken;
       if (!consumeToken())
         return false;
@@ -534,18 +542,13 @@ private:
     case tok::kw_template:
       parseTemplateDeclaration();
       break;
-    case tok::identifier:
-      if (Line.First->is(tok::kw_for) && Tok->is(Keywords.kw_in) &&
-          Tok->Previous->isNot(tok::colon))
-        Tok->Type = TT_ObjCForIn;
-      break;
     case tok::comma:
-      if (Contexts.back().FirstStartOfName && Contexts.size() == 1) {
+      if (Contexts.back().InCtorInitializer)
+        Tok->Type = TT_CtorInitializerComma;
+      else if (Contexts.back().FirstStartOfName && Contexts.size() == 1) {
         Contexts.back().FirstStartOfName->PartOfMultiVariableDeclStmt = true;
         Line.IsMultiVariableDeclStmt = true;
       }
-      if (Contexts.back().InCtorInitializer)
-        Tok->Type = TT_CtorInitializerComma;
       if (Contexts.back().IsForEachMacro)
         Contexts.back().IsExpression = true;
       break;
@@ -579,11 +582,14 @@ private:
 
   void parsePragma() {
     next(); // Consume "pragma".
-    if (CurrentToken && CurrentToken->TokenText == "mark") {
+    if (CurrentToken &&
+        CurrentToken->isOneOf(Keywords.kw_mark, Keywords.kw_option)) {
+      bool IsMark = CurrentToken->is(Keywords.kw_mark);
       next(); // Consume "mark".
       next(); // Consume first token (so we fix leading whitespace).
       while (CurrentToken) {
-        CurrentToken->Type = TT_ImplicitStringLiteral;
+        if (IsMark || CurrentToken->Previous->is(TT_BinaryOperator))
+          CurrentToken->Type = TT_ImplicitStringLiteral;
         next();
       }
     }
@@ -631,9 +637,8 @@ private:
 
 public:
   LineType parseLine() {
-    if (CurrentToken->is(tok::hash)) {
+    if (CurrentToken->is(tok::hash))
       return parsePreprocessorDirective();
-    }
 
     // Directly allow to 'import <string-literal>' to support protocol buffer
     // definitions (code.google.com/p/protobuf) or missing "#" (either way we
@@ -655,6 +660,15 @@ public:
     if (CurrentToken->is(tok::less) && Line.Last->is(tok::greater)) {
       parseIncludeDirective();
       return LT_ImportStatement;
+    }
+
+    // In .proto files, top-level options are very similar to import statements
+    // and should not be line-wrapped.
+    if (Style.Language == FormatStyle::LK_Proto && Line.Level == 0 &&
+        CurrentToken->is(Keywords.kw_option)) {
+      next();
+      if (CurrentToken && CurrentToken->is(tok::identifier))
+        return LT_ImportStatement;
     }
 
     bool KeywordVirtualFound = false;
@@ -728,27 +742,22 @@ private:
     Context(tok::TokenKind ContextKind, unsigned BindingStrength,
             bool IsExpression)
         : ContextKind(ContextKind), BindingStrength(BindingStrength),
-          LongestObjCSelectorName(0), ColonIsForRangeExpr(false),
-          ColonIsDictLiteral(false), ColonIsObjCMethodExpr(false),
-          FirstObjCSelectorName(nullptr), FirstStartOfName(nullptr),
-          IsExpression(IsExpression), CanBeExpression(true),
-          InTemplateArgument(false), InCtorInitializer(false),
-          CaretFound(false), IsForEachMacro(false) {}
+          IsExpression(IsExpression) {}
 
     tok::TokenKind ContextKind;
     unsigned BindingStrength;
-    unsigned LongestObjCSelectorName;
-    bool ColonIsForRangeExpr;
-    bool ColonIsDictLiteral;
-    bool ColonIsObjCMethodExpr;
-    FormatToken *FirstObjCSelectorName;
-    FormatToken *FirstStartOfName;
     bool IsExpression;
-    bool CanBeExpression;
-    bool InTemplateArgument;
-    bool InCtorInitializer;
-    bool CaretFound;
-    bool IsForEachMacro;
+    unsigned LongestObjCSelectorName = 0;
+    bool ColonIsForRangeExpr = false;
+    bool ColonIsDictLiteral = false;
+    bool ColonIsObjCMethodExpr = false;
+    FormatToken *FirstObjCSelectorName = nullptr;
+    FormatToken *FirstStartOfName = nullptr;
+    bool CanBeExpression = true;
+    bool InTemplateArgument = false;
+    bool InCtorInitializer = false;
+    bool CaretFound = false;
+    bool IsForEachMacro = false;
   };
 
   /// \brief Puts a new \c Context onto the stack \c Contexts for the lifetime
@@ -1391,7 +1400,8 @@ static bool isFunctionDeclarationName(const FormatToken &Current) {
     if (Tok->is(tok::kw_const) || Tok->isSimpleTypeSpecifier() ||
         Tok->isOneOf(TT_PointerOrReference, TT_StartOfName))
       return true;
-    if (Tok->isOneOf(tok::l_brace, tok::string_literal) || Tok->Tok.isLiteral())
+    if (Tok->isOneOf(tok::l_brace, tok::string_literal, TT_ObjCMethodExpr) ||
+        Tok->Tok.isLiteral())
       return false;
   }
   return false;
@@ -1666,7 +1676,7 @@ bool TokenAnnotator::spaceRequiredBetween(const AnnotatedLine &Line,
   if (Right.isOneOf(tok::semi, tok::comma))
     return false;
   if (Right.is(tok::less) &&
-      (Left.isOneOf(tok::kw_template, tok::r_paren) ||
+      (Left.is(tok::kw_template) ||
        (Line.Type == LT_ObjCDecl && Style.ObjCSpaceBeforeProtocolList)))
     return true;
   if (Left.isOneOf(tok::exclaim, tok::tilde))
@@ -1701,7 +1711,8 @@ bool TokenAnnotator::spaceRequiredBetween(const AnnotatedLine &Line,
     return true;
   if (Left.is(TT_PointerOrReference))
     return Right.Tok.isLiteral() || Right.is(TT_BlockComment) ||
-           (!Right.isOneOf(TT_PointerOrReference, tok::l_paren) &&
+           (!Right.isOneOf(TT_PointerOrReference, TT_ArraySubscriptLSquare,
+                           tok::l_paren) &&
             (Style.PointerAlignment != FormatStyle::PAS_Right &&
              !Line.IsMultiVariableDeclStmt) &&
             Left.Previous &&
@@ -2053,7 +2064,8 @@ bool TokenAnnotator::canBreakBefore(const AnnotatedLine &Line,
   if (Left.isOneOf(TT_TemplateCloser, TT_UnaryOperator) ||
       Left.is(tok::kw_operator))
     return false;
-  if (Left.is(tok::equal) && Line.Type == LT_VirtualFunctionDecl)
+  if (Left.is(tok::equal) && !Right.isOneOf(tok::kw_default, tok::kw_delete) &&
+      Line.Type == LT_VirtualFunctionDecl)
     return false;
   if (Left.is(tok::l_paren) && Left.is(TT_AttributeParen))
     return false;

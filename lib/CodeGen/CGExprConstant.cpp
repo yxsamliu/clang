@@ -1422,8 +1422,7 @@ llvm::Constant *CodeGenModule::EmitNullConstant(QualType T) {
     return ::EmitNullConstant(*this, RD, /*complete object*/ true);
   }
 
-  assert(T->isMemberPointerType() && "Should only see member pointers here!");
-  assert(!T->getAs<MemberPointerType>()->getPointeeType()->isFunctionType() &&
+  assert(T->isMemberDataPointerType() &&
          "Should only see pointers to data members here!");
 
   return getCXXABI().EmitNullMemberPointer(T->castAs<MemberPointerType>());
