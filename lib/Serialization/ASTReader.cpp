@@ -8642,10 +8642,14 @@ void ASTReader::FinishedDeserializing() {
 
   if (NumCurrentElementsDeserializing == 0) {
     // Propagate exception specification updates along redeclaration chains.
-    for (auto Update : PendingExceptionSpecUpdates) {
-      auto *FPT = Update.second->getType()->castAs<FunctionProtoType>();
-      SemaObj->UpdateExceptionSpec(Update.second,
-                                   FPT->getExtProtoInfo().ExceptionSpec);
+    while (!PendingExceptionSpecUpdates.empty()) {
+      auto Updates = std::move(PendingExceptionSpecUpdates);
+      PendingExceptionSpecUpdates.clear();
+      for (auto Update : Updates) {
+        auto *FPT = Update.second->getType()->castAs<FunctionProtoType>();
+        SemaObj->UpdateExceptionSpec(Update.second,
+                                     FPT->getExtProtoInfo().ExceptionSpec);
+      }
     }
 
     diagnoseOdrViolations();
