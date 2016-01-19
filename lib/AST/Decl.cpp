@@ -44,6 +44,12 @@ bool Decl::isOutOfLine() const {
   return !getLexicalDeclContext()->Equals(getDeclContext());
 }
 
+TranslationUnitDecl::TranslationUnitDecl(ASTContext &ctx)
+    : Decl(TranslationUnit, nullptr, SourceLocation()),
+      DeclContext(TranslationUnit), Ctx(ctx), AnonymousNamespace(nullptr) {
+  Hidden = Ctx.getLangOpts().ModulesLocalVisibility;
+}
+
 //===----------------------------------------------------------------------===//
 // NamedDecl Implementation
 //===----------------------------------------------------------------------===//
@@ -1771,6 +1777,8 @@ VarDecl::VarDecl(Kind DK, ASTContext &C, DeclContext *DC,
                 "VarDeclBitfields too large!");
   static_assert(sizeof(ParmVarDeclBitfields) <= sizeof(unsigned),
                 "ParmVarDeclBitfields too large!");
+  static_assert(sizeof(NonParmVarDeclBitfields) <= sizeof(unsigned),
+                "NonParmVarDeclBitfields too large!");
   AllBits = 0;
   VarDeclBits.SClass = SC;
   // Everything else is implicitly initialized to false.
@@ -1797,9 +1805,12 @@ void VarDecl::setStorageClass(StorageClass SC) {
 VarDecl::TLSKind VarDecl::getTLSKind() const {
   switch (VarDeclBits.TSCSpec) {
   case TSCS_unspecified:
-    if (hasAttr<ThreadAttr>())
-      return TLS_Static;
-    return TLS_None;
+    if (!hasAttr<ThreadAttr>())
+      return TLS_None;
+    return getASTContext().getLangOpts().isCompatibleWithMSVC(
+               LangOptions::MSVC2015)
+               ? TLS_Dynamic
+               : TLS_Static;
   case TSCS___thread: // Fall through.
   case TSCS__Thread_local:
       return TLS_Static;
@@ -1917,9 +1928,12 @@ VarDecl::isThisDeclarationADefinition(ASTContext &C) const {
   if (hasInit())
     return Definition;
 
-  if (hasAttr<AliasAttr>() ||
-      (hasAttr<SelectAnyAttr>() && !getAttr<SelectAnyAttr>()->isInherited()))
+  if (hasAttr<AliasAttr>())
     return Definition;
+
+  if (const auto *SAA = getAttr<SelectAnyAttr>())
+    if (!SAA->isInherited())
+      return Definition;
 
   // A variable template specialization (other than a static data member
   // template or an explicit specialization) is a declaration until we
@@ -2569,10 +2583,6 @@ FunctionDecl::setPreviousDeclaration(FunctionDecl *PrevDecl) {
   
   if (PrevDecl && PrevDecl->IsInline)
     IsInline = true;
-}
-
-const FunctionDecl *FunctionDecl::getCanonicalDecl() const {
-  return getFirstDecl();
 }
 
 FunctionDecl *FunctionDecl::getCanonicalDecl() { return getFirstDecl(); }
@@ -3944,10 +3954,17 @@ TypedefDecl *TypedefDecl::Create(ASTContext &C, DeclContext *DC,
 
 void TypedefNameDecl::anchor() { }
 
-TagDecl *TypedefNameDecl::getAnonDeclWithTypedefName() const {
-  if (auto *TT = getTypeSourceInfo()->getType()->getAs<TagType>())
-    if (TT->getDecl()->getTypedefNameForAnonDecl() == this)
+TagDecl *TypedefNameDecl::getAnonDeclWithTypedefName(bool AnyRedecl) const {
+  if (auto *TT = getTypeSourceInfo()->getType()->getAs<TagType>()) {
+    auto *OwningTypedef = TT->getDecl()->getTypedefNameForAnonDecl();
+    auto *ThisTypedef = this;
+    if (AnyRedecl && OwningTypedef) {
+      OwningTypedef = OwningTypedef->getCanonicalDecl();
+      ThisTypedef = ThisTypedef->getCanonicalDecl();
+    }
+    if (OwningTypedef == ThisTypedef)
       return TT->getDecl();
+  }
 
   return nullptr;
 }

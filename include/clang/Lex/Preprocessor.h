@@ -358,9 +358,9 @@ class Preprocessor : public RefCountedBase<Preprocessor> {
 
   struct MacroExpandsInfo {
     Token Tok;
-    MacroDirective *MD;
+    MacroDefinition MD;
     SourceRange Range;
-    MacroExpandsInfo(Token Tok, MacroDirective *MD, SourceRange Range)
+    MacroExpandsInfo(Token Tok, MacroDefinition MD, SourceRange Range)
       : Tok(Tok), MD(MD), Range(Range) { }
   };
   SmallVector<MacroExpandsInfo, 2> DelayedMacroExpandsCallbacks;
@@ -392,7 +392,7 @@ class Preprocessor : public RefCountedBase<Preprocessor> {
       // FIXME: Find a spare bit on IdentifierInfo and store a
       //        HasModuleMacros flag.
       if (!II->hasMacroDefinition() || !PP.getLangOpts().Modules ||
-          !PP.VisibleModules.getGeneration())
+          !PP.CurSubmoduleState->VisibleModules.getGeneration())
         return nullptr;
 
       auto *Info = State.dyn_cast<ModuleMacroInfo*>();
@@ -402,7 +402,7 @@ class Preprocessor : public RefCountedBase<Preprocessor> {
         State = Info;
       }
 
-      if (PP.VisibleModules.getGeneration() !=
+      if (PP.CurSubmoduleState->VisibleModules.getGeneration() !=
           Info->ActiveModuleMacrosGeneration)
         PP.updateModuleMacroInfo(II, *Info);
       return Info;
@@ -467,12 +467,15 @@ class Preprocessor : public RefCountedBase<Preprocessor> {
         return Info->OverriddenMacros;
       return None;
     }
-    void setOverriddenMacros(ArrayRef<ModuleMacro*> Overrides) {
+    void setOverriddenMacros(Preprocessor &PP,
+                             ArrayRef<ModuleMacro *> Overrides) {
       auto *Info = State.dyn_cast<ModuleMacroInfo*>();
       if (!Info) {
-        assert(Overrides.empty() &&
-               "have overrides but never had module macro");
-        return;
+        if (Overrides.empty())
+          return;
+        Info = new (PP.getPreprocessorAllocator())
+            ModuleMacroInfo(State.get<MacroDirective *>());
+        State = Info;
       }
       Info->OverriddenMacros.clear();
       Info->OverriddenMacros.insert(Info->OverriddenMacros.end(),
@@ -481,38 +484,50 @@ class Preprocessor : public RefCountedBase<Preprocessor> {
     }
   };
 
-  typedef llvm::DenseMap<const IdentifierInfo *, MacroState> MacroMap;
-
   /// For each IdentifierInfo that was associated with a macro, we
   /// keep a mapping to the history of all macro definitions and #undefs in
   /// the reverse order (the latest one is in the head of the list).
-  MacroMap Macros;
+  ///
+  /// This mapping lives within the \p CurSubmoduleState.
+  typedef llvm::DenseMap<const IdentifierInfo *, MacroState> MacroMap;
 
   friend class ASTReader;
 
+  struct SubmoduleState;
+
   /// \brief Information about a submodule that we're currently building.
   struct BuildingSubmoduleInfo {
-    BuildingSubmoduleInfo(Module *M, SourceLocation ImportLoc)
-        : M(M), ImportLoc(ImportLoc) {}
+    BuildingSubmoduleInfo(Module *M, SourceLocation ImportLoc,
+                          SubmoduleState *OuterSubmoduleState)
+        : M(M), ImportLoc(ImportLoc), OuterSubmoduleState(OuterSubmoduleState) {
+    }
 
     /// The module that we are building.
     Module *M;
     /// The location at which the module was included.
     SourceLocation ImportLoc;
+    /// The previous SubmoduleState.
+    SubmoduleState *OuterSubmoduleState;
+  };
+  SmallVector<BuildingSubmoduleInfo, 8> BuildingSubmoduleStack;
 
-    struct SavedMacroInfo {
-      SavedMacroInfo() : Latest(nullptr) {}
-      MacroDirective *Latest;
-      llvm::TinyPtrVector<ModuleMacro*> Overridden;
-    };
-    /// The macros that were visible before we entered the module.
-    llvm::DenseMap<const IdentifierInfo*, SavedMacroInfo> Macros;
-
-    // FIXME: VisibleModules?
+  /// \brief Information about a submodule's preprocessor state.
+  struct SubmoduleState {
+    /// The macros for the submodule.
+    MacroMap Macros;
+    /// The set of modules that are visible within the submodule.
+    VisibleModuleSet VisibleModules;
     // FIXME: CounterValue?
     // FIXME: PragmaPushMacroInfo?
   };
-  SmallVector<BuildingSubmoduleInfo, 8> BuildingSubmoduleStack;
+  std::map<Module*, SubmoduleState> Submodules;
+
+  /// The preprocessor state for preprocessing outside of any submodule.
+  SubmoduleState NullSubmoduleState;
+
+  /// The current submodule state. Will be \p NullSubmoduleState if we're not
+  /// in a submodule.
+  SubmoduleState *CurSubmoduleState;
 
   /// The set of known macros exported from modules.
   llvm::FoldingSet<ModuleMacro> ModuleMacros;
@@ -521,9 +536,6 @@ class Preprocessor : public RefCountedBase<Preprocessor> {
   /// any other module macro.
   llvm::DenseMap<const IdentifierInfo *, llvm::TinyPtrVector<ModuleMacro*>>
       LeafModuleMacros;
-
-  /// The current set of visible modules.
-  VisibleModuleSet VisibleModules;
 
   /// \brief Macros that we want to warn because they are not used at the end
   /// of the translation unit.
@@ -669,6 +681,7 @@ public:
   HeaderSearch &getHeaderSearchInfo() const { return HeaderInfo; }
 
   IdentifierTable &getIdentifierTable() { return Identifiers; }
+  const IdentifierTable &getIdentifierTable() const { return Identifiers; }
   SelectorTable &getSelectorTable() { return Selectors; }
   Builtin::Context &getBuiltinInfo() { return BuiltinInfo; }
   llvm::BumpPtrAllocator &getPreprocessorAllocator() { return BP; }
@@ -763,52 +776,6 @@ public:
   }
   /// \}
 
-  /// \brief A description of the current definition of a macro.
-  class MacroDefinition {
-    llvm::PointerIntPair<DefMacroDirective*, 1, bool> LatestLocalAndAmbiguous;
-    ArrayRef<ModuleMacro*> ModuleMacros;
-  public:
-    MacroDefinition() : LatestLocalAndAmbiguous(), ModuleMacros() {}
-    MacroDefinition(DefMacroDirective *MD, ArrayRef<ModuleMacro *> MMs,
-                    bool IsAmbiguous)
-        : LatestLocalAndAmbiguous(MD, IsAmbiguous), ModuleMacros(MMs) {}
-
-    /// \brief Determine whether there is a definition of this macro.
-    explicit operator bool() const {
-      return getLocalDirective() || !ModuleMacros.empty();
-    }
-
-    /// \brief Get the MacroInfo that should be used for this definition.
-    MacroInfo *getMacroInfo() const {
-      if (!ModuleMacros.empty())
-        return ModuleMacros.back()->getMacroInfo();
-      if (auto *MD = getLocalDirective())
-        return MD->getMacroInfo();
-      return nullptr;
-    }
-
-    /// \brief \c true if the definition is ambiguous, \c false otherwise.
-    bool isAmbiguous() const { return LatestLocalAndAmbiguous.getInt(); }
-
-    /// \brief Get the latest non-imported, non-\#undef'd macro definition
-    /// for this macro.
-    DefMacroDirective *getLocalDirective() const {
-      return LatestLocalAndAmbiguous.getPointer();
-    }
-
-    /// \brief Get the active module macros for this macro.
-    ArrayRef<ModuleMacro *> getModuleMacros() const {
-      return ModuleMacros;
-    }
-
-    template<typename Fn> void forAllDefinitions(Fn F) const {
-      if (auto *MD = getLocalDirective())
-        F(MD->getMacroInfo());
-      for (auto *MM : getModuleMacros())
-        F(MM->getMacroInfo());
-    }
-  };
-
   bool isMacroDefined(StringRef Id) {
     return isMacroDefined(&Identifiers.get(Id));
   }
@@ -821,7 +788,7 @@ public:
     if (!II->hasMacroDefinition())
       return MacroDefinition();
 
-    MacroState &S = Macros[II];
+    MacroState &S = CurSubmoduleState->Macros[II];
     auto *MD = S.getLatest();
     while (MD && isa<VisibilityMacroDirective>(MD))
       MD = MD->getPrevious();
@@ -835,7 +802,7 @@ public:
     if (!II->hadMacroDefinition())
       return MacroDefinition();
 
-    MacroState &S = Macros[II];
+    MacroState &S = CurSubmoduleState->Macros[II];
     MacroDirective::DefInfo DI;
     if (auto *MD = S.getLatest())
       DI = MD->findDirectiveAtLoc(Loc, getSourceManager());
@@ -1070,6 +1037,10 @@ public:
   void LexAfterModuleImport(Token &Result);
 
   void makeModuleVisible(Module *M, SourceLocation Loc);
+
+  SourceLocation getModuleImportLoc(Module *M) const {
+    return CurSubmoduleState->VisibleModules.getImportLoc(M);
+  }
 
   /// \brief Lex a string literal, which may be the concatenation of multiple
   /// string literals and may even come from macro expansion.
@@ -1653,9 +1624,9 @@ private:
 
   void PushIncludeMacroStack() {
     assert(CurLexerKind != CLK_CachingLexer && "cannot push a caching lexer");
-    IncludeMacroStack.push_back(IncludeStackInfo(
+    IncludeMacroStack.emplace_back(
         CurLexerKind, CurSubmodule, std::move(CurLexer), std::move(CurPTHLexer),
-        CurPPLexer, std::move(CurTokenLexer), CurDirLookup));
+        CurPPLexer, std::move(CurTokenLexer), CurDirLookup);
     CurPPLexer = nullptr;
   }
 
@@ -1840,6 +1811,7 @@ private:
   void HandleImportDirective(SourceLocation HashLoc, Token &Tok);
   void HandleMicrosoftImportDirective(Token &Tok);
 
+public:
   // Module inclusion testing.
   /// \brief Find the module that owns the source or header file that
   /// \p Loc points to. If the location is in a file that was included
@@ -1850,6 +1822,7 @@ private:
   /// directly or indirectly.
   Module *getModuleContainingLocation(SourceLocation Loc);
 
+private:
   // Macro handling.
   void HandleDefineDirective(Token &Tok, bool ImmediatelyAfterTopLevelIfndef);
   void HandleUndefDirective(Token &Tok);

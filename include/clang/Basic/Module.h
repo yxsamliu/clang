@@ -16,6 +16,7 @@
 #define LLVM_CLANG_BASIC_MODULE_H
 
 #include "clang/Basic/SourceLocation.h"
+#include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/PointerIntPair.h"
 #include "llvm/ADT/PointerUnion.h"
@@ -64,6 +65,9 @@ public:
 
   /// \brief The umbrella header or directory.
   llvm::PointerUnion<const DirectoryEntry *, const FileEntry *> Umbrella;
+
+  /// \brief The name of the umbrella entry, as written in the module map.
+  std::string UmbrellaAsWritten;
   
 private:
   /// \brief The submodules of this module, indexed by name.
@@ -104,6 +108,17 @@ public:
   struct Header {
     std::string NameAsWritten;
     const FileEntry *Entry;
+
+    explicit operator bool() { return Entry; }
+  };
+
+  /// \brief Information about a directory name as found in the module map
+  /// file.
+  struct DirectoryName {
+    std::string NameAsWritten;
+    const DirectoryEntry *Entry;
+
+    explicit operator bool() { return Entry; }
   };
 
   /// \brief The headers that are part of this module.
@@ -186,10 +201,7 @@ public:
   /// particular module.
   enum NameVisibilityKind {
     /// \brief All of the names in this module are hidden.
-    ///
     Hidden,
-    /// \brief Only the macro names in this module are visible.
-    MacrosVisible,
     /// \brief All of the names in this module are visible.
     AllVisible
   };
@@ -197,15 +209,12 @@ public:
   /// \brief The visibility of names within this particular module.
   NameVisibilityKind NameVisibility;
 
-  /// \brief The location at which macros within this module became visible.
-  SourceLocation MacroVisibilityLoc;
-
   /// \brief The location of the inferred submodule.
   SourceLocation InferredSubmoduleLoc;
 
   /// \brief The set of modules imported by this module, and on which this
   /// module depends.
-  SmallVector<Module *, 2> Imports;
+  llvm::SmallSetVector<Module *, 2> Imports;
   
   /// \brief Describes an exported module.
   ///
@@ -375,12 +384,14 @@ public:
 
   /// \brief Retrieve the directory for which this module serves as the
   /// umbrella.
-  const DirectoryEntry *getUmbrellaDir() const;
+  DirectoryName getUmbrellaDir() const;
 
   /// \brief Retrieve the header that serves as the umbrella header for this
   /// module.
-  const FileEntry *getUmbrellaHeader() const {
-    return Umbrella.dyn_cast<const FileEntry *>();
+  Header getUmbrellaHeader() const {
+    if (auto *E = Umbrella.dyn_cast<const FileEntry *>())
+      return Header{UmbrellaAsWritten, E};
+    return Header{};
   }
 
   /// \brief Determine whether this module has an umbrella directory that is
@@ -480,14 +491,24 @@ private:
 class VisibleModuleSet {
 public:
   VisibleModuleSet() : Generation(0) {}
+  VisibleModuleSet(VisibleModuleSet &&O)
+      : ImportLocs(std::move(O.ImportLocs)), Generation(O.Generation ? 1 : 0) {
+    O.ImportLocs.clear();
+    ++O.Generation;
+  }
 
+  /// Move from another visible modules set. Guaranteed to leave the source
+  /// empty and bump the generation on both.
   VisibleModuleSet &operator=(VisibleModuleSet &&O) {
     ImportLocs = std::move(O.ImportLocs);
+    O.ImportLocs.clear();
+    ++O.Generation;
     ++Generation;
     return *this;
   }
 
-  /// \brief Get the current visibility generation.
+  /// \brief Get the current visibility generation. Incremented each time the
+  /// set of visible modules changes in any way.
   unsigned getGeneration() const { return Generation; }
 
   /// \brief Determine whether a module is visible.
@@ -513,7 +534,9 @@ public:
       ConflictCallback;
   /// \brief Make a specific module visible.
   void setVisible(Module *M, SourceLocation Loc,
-                  VisibleCallback Vis, ConflictCallback Cb);
+                  VisibleCallback Vis = [](Module *) {},
+                  ConflictCallback Cb = [](ArrayRef<Module *>, Module *,
+                                           StringRef) {});
 
 private:
   /// Import locations for each visible module. Indexed by the module's
