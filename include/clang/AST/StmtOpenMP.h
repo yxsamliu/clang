@@ -195,7 +195,7 @@ public:
 
   child_range children() {
     if (!hasAssociatedStmt())
-      return child_range();
+      return child_range(child_iterator(), child_iterator());
     Stmt **ChildStorage = reinterpret_cast<Stmt **>(getClauses().end());
     return child_range(ChildStorage, ChildStorage + NumChildren);
   }
@@ -1798,6 +1798,64 @@ public:
   }
 };
 
+/// \brief This represents '#pragma omp target data' directive.
+///
+/// \code
+/// #pragma omp target data device(0) if(a) map(b[:])
+/// \endcode
+/// In this example directive '#pragma omp target data' has clauses 'device'
+/// with the value '0', 'if' with condition 'a' and 'map' with array
+/// section 'b[:]'.
+///
+class OMPTargetDataDirective : public OMPExecutableDirective {
+  friend class ASTStmtReader;
+  /// \brief Build directive with the given start and end location.
+  ///
+  /// \param StartLoc Starting location of the directive kind.
+  /// \param EndLoc Ending Location of the directive.
+  /// \param NumClauses The number of clauses.
+  ///
+  OMPTargetDataDirective(SourceLocation StartLoc, SourceLocation EndLoc,
+                         unsigned NumClauses)
+      : OMPExecutableDirective(this, OMPTargetDataDirectiveClass, 
+                               OMPD_target_data, StartLoc, EndLoc, NumClauses,
+                               1) {}
+
+  /// \brief Build an empty directive.
+  ///
+  /// \param NumClauses Number of clauses.
+  ///
+  explicit OMPTargetDataDirective(unsigned NumClauses)
+      : OMPExecutableDirective(this, OMPTargetDataDirectiveClass, 
+                               OMPD_target_data, SourceLocation(),
+                               SourceLocation(), NumClauses, 1) {}
+
+public:
+  /// \brief Creates directive with a list of \a Clauses.
+  ///
+  /// \param C AST context.
+  /// \param StartLoc Starting location of the directive kind.
+  /// \param EndLoc Ending Location of the directive.
+  /// \param Clauses List of clauses.
+  /// \param AssociatedStmt Statement, associated with the directive.
+  ///
+  static OMPTargetDataDirective *
+  Create(const ASTContext &C, SourceLocation StartLoc, SourceLocation EndLoc,
+         ArrayRef<OMPClause *> Clauses, Stmt *AssociatedStmt);
+
+  /// \brief Creates an empty directive with the place for \a N clauses.
+  ///
+  /// \param C AST context.
+  /// \param N The number of clauses.
+  ///
+  static OMPTargetDataDirective *CreateEmpty(const ASTContext &C, unsigned N,
+                                             EmptyShell);
+
+  static bool classof(const Stmt *T) {
+    return T->getStmtClass() == OMPTargetDataDirectiveClass;
+  }
+};
+
 /// \brief This represents '#pragma omp teams' directive.
 ///
 /// \code
@@ -1853,6 +1911,121 @@ public:
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == OMPTeamsDirectiveClass;
+  }
+};
+
+/// \brief This represents '#pragma omp cancellation point' directive.
+///
+/// \code
+/// #pragma omp cancellation point for
+/// \endcode
+///
+/// In this example a cancellation point is created for innermost 'for' region.
+class OMPCancellationPointDirective : public OMPExecutableDirective {
+  friend class ASTStmtReader;
+  OpenMPDirectiveKind CancelRegion;
+  /// \brief Build directive with the given start and end location.
+  ///
+  /// \param StartLoc Starting location of the directive kind.
+  /// \param EndLoc Ending location of the directive.
+  ///
+  OMPCancellationPointDirective(SourceLocation StartLoc, SourceLocation EndLoc)
+      : OMPExecutableDirective(this, OMPCancellationPointDirectiveClass,
+                               OMPD_cancellation_point, StartLoc, EndLoc, 0, 0),
+        CancelRegion(OMPD_unknown) {}
+
+  /// \brief Build an empty directive.
+  ///
+  explicit OMPCancellationPointDirective()
+      : OMPExecutableDirective(this, OMPCancellationPointDirectiveClass,
+                               OMPD_cancellation_point, SourceLocation(),
+                               SourceLocation(), 0, 0),
+        CancelRegion(OMPD_unknown) {}
+
+  /// \brief Set cancel region for current cancellation point.
+  /// \param CR Cancellation region.
+  void setCancelRegion(OpenMPDirectiveKind CR) { CancelRegion = CR; }
+
+public:
+  /// \brief Creates directive.
+  ///
+  /// \param C AST context.
+  /// \param StartLoc Starting location of the directive kind.
+  /// \param EndLoc Ending Location of the directive.
+  ///
+  static OMPCancellationPointDirective *
+  Create(const ASTContext &C, SourceLocation StartLoc, SourceLocation EndLoc,
+         OpenMPDirectiveKind CancelRegion);
+
+  /// \brief Creates an empty directive.
+  ///
+  /// \param C AST context.
+  ///
+  static OMPCancellationPointDirective *CreateEmpty(const ASTContext &C,
+                                                    EmptyShell);
+
+  /// \brief Get cancellation region for the current cancellation point.
+  OpenMPDirectiveKind getCancelRegion() const { return CancelRegion; }
+
+  static bool classof(const Stmt *T) {
+    return T->getStmtClass() == OMPCancellationPointDirectiveClass;
+  }
+};
+
+/// \brief This represents '#pragma omp cancel' directive.
+///
+/// \code
+/// #pragma omp cancel for
+/// \endcode
+///
+/// In this example a cancel is created for innermost 'for' region.
+class OMPCancelDirective : public OMPExecutableDirective {
+  friend class ASTStmtReader;
+  OpenMPDirectiveKind CancelRegion;
+  /// \brief Build directive with the given start and end location.
+  ///
+  /// \param StartLoc Starting location of the directive kind.
+  /// \param EndLoc Ending location of the directive.
+  ///
+  OMPCancelDirective(SourceLocation StartLoc, SourceLocation EndLoc)
+      : OMPExecutableDirective(this, OMPCancelDirectiveClass, OMPD_cancel,
+                               StartLoc, EndLoc, 0, 0),
+        CancelRegion(OMPD_unknown) {}
+
+  /// \brief Build an empty directive.
+  ///
+  explicit OMPCancelDirective()
+      : OMPExecutableDirective(this, OMPCancelDirectiveClass, OMPD_cancel,
+                               SourceLocation(), SourceLocation(), 0, 0),
+        CancelRegion(OMPD_unknown) {}
+
+  /// \brief Set cancel region for current cancellation point.
+  /// \param CR Cancellation region.
+  void setCancelRegion(OpenMPDirectiveKind CR) { CancelRegion = CR; }
+
+public:
+  /// \brief Creates directive.
+  ///
+  /// \param C AST context.
+  /// \param StartLoc Starting location of the directive kind.
+  /// \param EndLoc Ending Location of the directive.
+  ///
+  static OMPCancelDirective *Create(const ASTContext &C,
+                                    SourceLocation StartLoc,
+                                    SourceLocation EndLoc,
+                                    OpenMPDirectiveKind CancelRegion);
+
+  /// \brief Creates an empty directive.
+  ///
+  /// \param C AST context.
+  ///
+  static OMPCancelDirective *CreateEmpty(const ASTContext &C, EmptyShell);
+
+  /// \brief Get cancellation region for the current cancellation point.
+  OpenMPDirectiveKind getCancelRegion() const { return CancelRegion; }
+
+  static bool classof(const Stmt *T) {
+    return T->getStmtClass() == OMPCancelDirectiveClass;
   }
 };
 

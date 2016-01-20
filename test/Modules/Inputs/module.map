@@ -332,3 +332,18 @@ module DebugModule {
   header "DebugModule.h"
 }
 
+module ImportNameInDir {
+  header "ImportNameInDir.h"
+  export *
+}
+
+module RequiresWithMissingHeader {
+  module HeaderBefore {
+    header "RequiresWithMissingHeader-Missing1.h"
+    requires missing
+  }
+  module HeaderAfter {
+    requires missing
+    header "RequiresWithMissingHeader-Missing2.h"
+  }
+}

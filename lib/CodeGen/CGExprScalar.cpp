@@ -16,6 +16,7 @@
 #include "CGDebugInfo.h"
 #include "CGObjCRuntime.h"
 #include "CodeGenModule.h"
+#include "TargetInfo.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/DeclObjC.h"
 #include "clang/AST/RecordLayout.h"
@@ -1002,14 +1003,10 @@ Value *ScalarExprEmitter::VisitShuffleVectorExpr(ShuffleVectorExpr *E) {
     }
 
     llvm::VectorType *MTy = cast<llvm::VectorType>(Mask->getType());
-    llvm::Constant* EltMask;
-
-    EltMask = llvm::ConstantInt::get(MTy->getElementType(),
-                                     llvm::NextPowerOf2(LHSElts-1)-1);
 
     // Mask off the high bits of each shuffle index.
-    Value *MaskBits = llvm::ConstantVector::getSplat(MTy->getNumElements(),
-                                                     EltMask);
+    Value *MaskBits =
+        llvm::ConstantInt::get(MTy, llvm::NextPowerOf2(LHSElts - 1) - 1);
     Mask = Builder.CreateAnd(Mask, MaskBits, "mask");
 
     // newv = undef
@@ -2058,6 +2055,13 @@ ScalarExprEmitter::VisitUnaryExprOrTypeTraitExpr(
 
       return size;
     }
+  } else if (E->getKind() == UETT_OpenMPRequiredSimdAlign) {
+    auto Alignment =
+        CGF.getContext()
+            .toCharUnitsFromBits(CGF.getContext().getOpenMPDefaultSimdAlign(
+                E->getTypeOfArgument()->getPointeeType()))
+            .getQuantity();
+    return llvm::ConstantInt::get(CGF.SizeTy, Alignment);
   }
 
   // If this isn't sizeof(vla), the result must be constant; use the constant

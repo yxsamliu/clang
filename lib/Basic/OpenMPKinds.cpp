@@ -328,6 +328,16 @@ bool clang::isAllowedClauseForDirective(OpenMPDirectiveKind DKind,
       break;
     }
     break;
+  case OMPD_target_data:
+    switch (CKind) {
+#define OPENMP_TARGET_DATA_CLAUSE(Name)                                        \
+  case OMPC_##Name:                                                            \
+    return true;
+#include "clang/Basic/OpenMPKinds.def"
+    default:
+      break;
+    }
+    break;
   case OMPD_teams:
     switch (CKind) {
 #define OPENMP_TEAMS_CLAUSE(Name)                                              \
@@ -347,6 +357,8 @@ bool clang::isAllowedClauseForDirective(OpenMPDirectiveKind DKind,
   case OMPD_barrier:
   case OMPD_taskwait:
   case OMPD_taskgroup:
+  case OMPD_cancellation_point:
+  case OMPD_cancel:
   case OMPD_ordered:
     break;
   }

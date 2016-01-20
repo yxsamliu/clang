@@ -1297,6 +1297,7 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
   case tok::kw__Nonnull:
   case tok::kw__Nullable:
   case tok::kw__Null_unspecified:
+  case tok::kw___kindof:
     return TPResult::True;
 
     // Borland
@@ -1400,7 +1401,7 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
   case_typename:
     // In Objective-C, we might have a protocol-qualified type.
     if (getLangOpts().ObjC1 && NextToken().is(tok::less)) {
-      // Tentatively parse the 
+      // Tentatively parse the protocol qualifiers.
       TentativeParsingAction PA(*this);
       ConsumeToken(); // The type token
       

@@ -239,6 +239,8 @@ PUNCTUATOR(greatergreatergreater, ">>>")
 //   KEYOPENCL  - This is a keyword in OpenCL
 //   KEYNOOPENCL  - This is a keyword that is not supported in OpenCL
 //   KEYALTIVEC - This is a keyword in AltiVec
+//   KEYZVECTOR - This is a keyword for the System z vector extensions,
+//                which are heavily based on AltiVec
 //   KEYBORLAND - This is a keyword if Borland extensions are enabled
 //   BOOLSUPPORT - This is a keyword if 'bool' is a built-in type
 //   HALFSUPPORT - This is a keyword if 'half' is a built-in type
@@ -280,7 +282,7 @@ KEYWORD(volatile                    , KEYALL)
 KEYWORD(while                       , KEYALL)
 KEYWORD(_Alignas                    , KEYALL)
 KEYWORD(_Alignof                    , KEYALL)
-KEYWORD(_Atomic                     , KEYALL|KEYNOMS18|KEYNOOPENCL)
+KEYWORD(_Atomic                     , KEYALL|KEYNOOPENCL)
 KEYWORD(_Bool                       , KEYNOCXX)
 KEYWORD(_Complex                    , KEYALL)
 KEYWORD(_Generic                    , KEYALL)
@@ -517,7 +519,7 @@ KEYWORD(image2d_array_depth_t       , KEYOPENCL)
 
 KEYWORD(sampler_t                   , KEYOPENCL)
 KEYWORD(event_t                     , KEYOPENCL)
-KEYWORD(vec_step                    , KEYOPENCL|KEYALTIVEC)
+KEYWORD(vec_step                    , KEYOPENCL|KEYALTIVEC|KEYZVECTOR)
 
 // OpenCL 2.0
 KEYWORD(queue_t                     , KEYOPENCL)
@@ -525,13 +527,16 @@ KEYWORD(clk_event_t                 , KEYOPENCL)
 KEYWORD(reserve_id_t                , KEYOPENCL)
 KEYWORD(pipe                        , KEYOPENCL)
 
+// OpenMP Type Traits
+KEYWORD(__builtin_omp_required_simd_align, KEYALL)
+
 // Borland Extensions.
 KEYWORD(__pascal                    , KEYALL)
 
 // Altivec Extension.
-KEYWORD(__vector                    , KEYALTIVEC)
+KEYWORD(__vector                    , KEYALTIVEC|KEYZVECTOR)
 KEYWORD(__pixel                     , KEYALTIVEC)
-KEYWORD(__bool                      , KEYALTIVEC)
+KEYWORD(__bool                      , KEYALTIVEC|KEYZVECTOR)
 
 // ARM NEON extensions.
 ALIAS("__fp16", half                , KEYALL)
@@ -544,6 +549,11 @@ KEYWORD(__bridge                     , KEYARC)
 KEYWORD(__bridge_transfer            , KEYARC)
 KEYWORD(__bridge_retained            , KEYARC)
 KEYWORD(__bridge_retain              , KEYARC)
+
+// Objective-C keywords.
+KEYWORD(__covariant                  , KEYOBJC2)
+KEYWORD(__contravariant              , KEYOBJC2)
+KEYWORD(__kindof                     , KEYOBJC2)
 
 // Alternate spelling for various tokens.  There are GCC extensions in all
 // languages, but should not be disabled in strict conformance mode.
