@@ -1267,6 +1267,10 @@ BUILTIN(work_group_commit_write_pipe, "v.", "tn")
 BUILTIN(get_pipe_num_packets, "Ui.", "tn")
 BUILTIN(get_pipe_max_packets, "Ui.", "tn")
 
+// Safestack builtins
+BUILTIN(__builtin___get_unsafe_stack_start, "v*", "Fn")
+BUILTIN(__builtin___get_unsafe_stack_ptr, "v*", "Fn")
+
 #undef BUILTIN
 #undef LIBBUILTIN
 #undef LANGBUILTIN
