@@ -412,6 +412,30 @@ const internal::VariadicAllOfMatcher<CXXCtorInitializer> cxxCtorInitializer;
 ///   matches 'int' in C<int>.
 const internal::VariadicAllOfMatcher<TemplateArgument> templateArgument;
 
+/// \brief Matches non-type template parameter declarations.
+///
+/// Given
+/// \code
+///   template <typename T, int N> struct C {};
+/// \endcode
+/// nonTypeTemplateParmDecl()
+///   matches 'N', but not 'T'.
+const internal::VariadicDynCastAllOfMatcher<
+  Decl,
+  NonTypeTemplateParmDecl> nonTypeTemplateParmDecl;
+
+/// \brief Matches template type parameter declarations.
+///
+/// Given
+/// \code
+///   template <typename T, int N> struct C {};
+/// \endcode
+/// templateTypeParmDecl()
+///   matches 'T', but not 'N'.
+const internal::VariadicDynCastAllOfMatcher<
+  Decl,
+  TemplateTypeParmDecl> templateTypeParmDecl;
+
 /// \brief Matches public C++ declarations.
 ///
 /// Given
@@ -2044,8 +2068,10 @@ internal::Matcher<T> findAll(const internal::Matcher<T> &Matcher) {
 ///
 /// Usable as: Any Matcher
 const internal::ArgumentAdaptingMatcherFunc<
-    internal::HasParentMatcher, internal::TypeList<Decl, Stmt>,
-    internal::TypeList<Decl, Stmt> > LLVM_ATTRIBUTE_UNUSED hasParent = {};
+    internal::HasParentMatcher,
+    internal::TypeList<Decl, NestedNameSpecifierLoc, Stmt, TypeLoc>,
+    internal::TypeList<Decl, NestedNameSpecifierLoc, Stmt, TypeLoc>>
+    LLVM_ATTRIBUTE_UNUSED hasParent = {};
 
 /// \brief Matches AST nodes that have an ancestor that matches the provided
 /// matcher.
@@ -2059,8 +2085,10 @@ const internal::ArgumentAdaptingMatcherFunc<
 ///
 /// Usable as: Any Matcher
 const internal::ArgumentAdaptingMatcherFunc<
-    internal::HasAncestorMatcher, internal::TypeList<Decl, Stmt>,
-    internal::TypeList<Decl, Stmt> > LLVM_ATTRIBUTE_UNUSED hasAncestor = {};
+    internal::HasAncestorMatcher,
+    internal::TypeList<Decl, NestedNameSpecifierLoc, Stmt, TypeLoc>,
+    internal::TypeList<Decl, NestedNameSpecifierLoc, Stmt, TypeLoc>>
+    LLVM_ATTRIBUTE_UNUSED hasAncestor = {};
 
 /// \brief Matches if the provided matcher does not match.
 ///
@@ -3255,6 +3283,20 @@ AST_POLYMORPHIC_MATCHER(isDefinition,
   return Node.isThisDeclarationADefinition();
 }
 
+/// \brief Matches if a function declaration is variadic.
+///
+/// Example matches f, but not g or h. The function i will not match, even when
+/// compiled in C mode.
+/// \code
+///   void f(...);
+///   void g(int);
+///   template <typename... Ts> void h(Ts...);
+///   void i();
+/// \endcode
+AST_MATCHER(FunctionDecl, isVariadic) {
+  return Node.isVariadic();
+}
+
 /// \brief Matches the class declaration that the given method declaration
 /// belongs to.
 ///
@@ -3341,6 +3383,23 @@ AST_MATCHER(CXXMethodDecl, isPure) {
 /// cxxMethodDecl(isConst()) matches A::foo() but not A::bar()
 AST_MATCHER(CXXMethodDecl, isConst) {
   return Node.isConst();
+}
+
+/// \brief Matches if the given method declaration declares a copy assignment
+/// operator.
+///
+/// Given
+/// \code
+/// struct A {
+///   A &operator=(const A &);
+///   A &operator=(A &&);
+/// };
+/// \endcode
+///
+/// cxxMethodDecl(isCopyAssignmentOperator()) matches the first method but not
+/// the second one.
+AST_MATCHER(CXXMethodDecl, isCopyAssignmentOperator) {
+  return Node.isCopyAssignmentOperator();
 }
 
 /// \brief Matches if the given method declaration overrides another method.
@@ -4097,6 +4156,24 @@ AST_TYPE_MATCHER(TemplateTypeParmType, templateTypeParmType);
 /// \endcode
 AST_TYPE_MATCHER(InjectedClassNameType, injectedClassNameType);
 
+/// \brief Matches decayed type
+/// Example matches i[] in declaration of f.
+///     (matcher = valueDecl(hasType(decayedType(hasDecayedType(pointerType())))))
+/// Example matches i[1].
+///     (matcher = expr(hasType(decayedType(hasDecayedType(pointerType())))))
+/// \code
+///   void f(int i[]) {
+///     i[1] = 0;
+///   }
+/// \endcode
+AST_TYPE_MATCHER(DecayedType, decayedType);
+
+/// \brief Matches the decayed type, whos decayed type matches \c InnerMatcher
+AST_MATCHER_P(DecayedType, hasDecayedType, internal::Matcher<QualType>,
+              InnerType) {
+  return InnerType.matches(Node.getDecayedType(), Finder, Builder);
+}
+
 /// \brief Matches declarations whose declaration context, interpreted as a
 /// Decl, matches \c InnerMatcher.
 ///
@@ -4247,9 +4324,14 @@ AST_MATCHER_P_OVERLOAD(Decl, equalsNode, const Decl*, Other, 0) {
 /// \brief Matches if a node equals another node.
 ///
 /// \c Stmt has pointer identity in the AST.
-///
 AST_MATCHER_P_OVERLOAD(Stmt, equalsNode, const Stmt*, Other, 1) {
   return &Node == Other;
+}
+/// \brief Matches if a node equals another node.
+///
+/// \c Type has pointer identity in the AST.
+AST_MATCHER_P_OVERLOAD(Type, equalsNode, const Type*, Other, 2) {
+    return &Node == Other;
 }
 
 /// @}

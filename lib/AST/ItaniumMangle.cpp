@@ -1754,6 +1754,9 @@ CXXNameMangler::mangleOperatorName(OverloadedOperatorKind OO, unsigned Arity) {
   // The conditional operator can't be overloaded, but we still handle it when
   // mangling expressions.
   case OO_Conditional: Out << "qu"; break;
+  // Proposal on cxx-abi-dev, 2015-10-21.
+  //              ::= aw        # co_await
+  case OO_Coawait: Out << "aw"; break;
 
   case OO_None:
   case NUM_OVERLOADED_OPERATORS:
@@ -3518,6 +3521,18 @@ recurse:
 
   case Expr::CXXThisExprClass:
     Out << "fpT";
+    break;
+
+  case Expr::CoawaitExprClass:
+    // FIXME: Propose a non-vendor mangling.
+    Out << "v18co_await";
+    mangleExpression(cast<CoawaitExpr>(E)->getOperand());
+    break;
+
+  case Expr::CoyieldExprClass:
+    // FIXME: Propose a non-vendor mangling.
+    Out << "v18co_yield";
+    mangleExpression(cast<CoawaitExpr>(E)->getOperand());
     break;
   }
 }

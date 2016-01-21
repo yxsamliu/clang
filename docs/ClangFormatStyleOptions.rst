@@ -150,26 +150,61 @@ the configuration (without a prefix: ``Auto``).
 **AccessModifierOffset** (``int``)
   The extra indent or outdent of access modifiers, e.g. ``public:``.
 
-**AlignAfterOpenBracket** (``bool``)
+**AlignAfterOpenBracket** (``BracketAlignmentStyle``)
   If ``true``, horizontally aligns arguments after an open bracket.
 
   This applies to round brackets (parentheses), angle brackets and square
   brackets. This will result in formattings like
-  \code
-  someLongFunction(argument1,
-  argument2);
-  \endcode
+
+  Possible values:
+
+  * ``BAS_Align`` (in configuration: ``Align``)
+    Align parameters on the open bracket, e.g.:
+
+    .. code-block:: c++
+
+      someLongFunction(argument1,
+                       argument2);
+  * ``BAS_DontAlign`` (in configuration: ``DontAlign``)
+    Don't align, instead use ``ContinuationIndentWidth``, e.g.:
+
+    .. code-block:: c++
+
+      someLongFunction(argument1,
+          argument2);
+  * ``BAS_AlwaysBreak`` (in configuration: ``AlwaysBreak``)
+    Always break after an open bracket, if the parameters don't fit
+    on a single line, e.g.:
+
+    .. code-block:: c++
+
+      someLongFunction(
+          argument1, argument2);
+
 
 **AlignConsecutiveAssignments** (``bool``)
   If ``true``, aligns consecutive assignments.
 
   This will align the assignment operators of consecutive lines. This
   will result in formattings like
-  \code
-  int aaaa = 12;
-  int b    = 23;
-  int ccc  = 23;
-  \endcode
+
+  .. code-block:: c++
+
+    int aaaa = 12;
+    int b    = 23;
+    int ccc  = 23;
+
+**AlignConsecutiveDeclarations** (``bool``)
+  If ``true``, aligns consecutive declarations.
+
+  This will align the declaration names of consecutive lines. This
+  will result in formattings like
+
+  .. code-block:: c++
+
+    int         aaaa = 12;
+    float       b = 23;
+    std::string ccc = 23;
 
 **AlignEscapedNewlinesLeft** (``bool``)
   If ``true``, aligns escaped newlines as far left as possible.
@@ -272,6 +307,9 @@ the configuration (without a prefix: ``Auto``).
   * ``bool BeforeElse`` Wrap before ``else``.
   * ``bool IndentBraces`` Indent the wrapped braces themselves.
 
+
+**BreakAfterJavaFieldAnnotations** (``bool``)
+  Break after each annotation on a field in Java files.
 
 **BreakBeforeBinaryOperators** (``BinaryOperatorStyle``)
   The way to wrap binary operators.
@@ -381,14 +419,21 @@ the configuration (without a prefix: ``Auto``).
   instead of as function calls.
 
   These are expected to be macros of the form:
-  \code
-  FOREACH(<variable-declaration>, ...)
-  <loop-body>
-  \endcode
+
+  .. code-block:: c++
+
+    FOREACH(<variable-declaration>, ...)
+      <loop-body>
+
+  In the .clang-format configuration file, this can be configured like:
+
+  .. code-block:: c++
+
+    ForEachMacros: ['RANGES_FOR', 'FOREACH']
 
   For example: BOOST_FOREACH.
 
-**IncludeCategories** (``std::vector<std::pair<std::string, unsigned>>``)
+**IncludeCategories** (``std::vector<IncludeCategory>``)
   Regular expressions denoting the different #include categories used
   for ordering #includes.
 
@@ -402,6 +447,18 @@ the configuration (without a prefix: ``Auto``).
   category. The main header for a source file automatically gets category 0,
   so that it is kept at the beginning of the #includes
   (http://llvm.org/docs/CodingStandards.html#include-style).
+
+  To configure this in the .clang-format file, use:
+
+  .. code-block:: c++
+
+    IncludeCategories:
+      - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+        Priority:        2
+      - Regex:           '^(<|"(gtest|isl|json)/)'
+        Priority:        3
+      - Regex:           '.\*'
+        Priority:        1
 
 **IndentCaseLabels** (``bool``)
   Indent case labels one level from the switch statement.
@@ -602,9 +659,9 @@ used by a codebase somewhere in the wild. Of course, we do want to support all
 major projects and thus have established the following bar for adding style
 options. Each new style option must ..
 
-  * .. be used in a project of significant size (have dozens of contributors)
-  * .. have a publicly accessible style guide
-  * .. have a person willing to contribute and maintain patches
+  * be used in a project of significant size (have dozens of contributors)
+  * have a publicly accessible style guide
+  * have a person willing to contribute and maintain patches
 
 Examples
 ========

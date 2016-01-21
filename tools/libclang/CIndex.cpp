@@ -2116,6 +2116,9 @@ void OMPClauseEnqueue::VisitOMPSharedClause(const OMPSharedClause *C) {
 }
 void OMPClauseEnqueue::VisitOMPReductionClause(const OMPReductionClause *C) {
   VisitOMPClauseList(C);
+  for (auto *E : C->privates()) {
+    Visitor->AddStmt(E);
+  }
   for (auto *E : C->lhs_exprs()) {
     Visitor->AddStmt(E);
   }
@@ -3900,7 +3903,11 @@ CXString clang_Cursor_getMangling(CXCursor C) {
 
   std::string FrontendBuf;
   llvm::raw_string_ostream FrontendBufOS(FrontendBuf);
-  MC->mangleName(ND, FrontendBufOS);
+  if (MC->shouldMangleDeclName(ND)) {
+    MC->mangleName(ND, FrontendBufOS);
+  } else {
+    ND->printName(FrontendBufOS);
+  }
 
   // Now apply backend mangling.
   std::unique_ptr<llvm::DataLayout> DL(
@@ -6891,6 +6898,16 @@ CXFile clang_Module_getTopLevelHeader(CXTranslationUnit TU,
 //===----------------------------------------------------------------------===//
 
 extern "C" {
+unsigned clang_CXXField_isMutable(CXCursor C) {
+  if (!clang_isDeclaration(C.kind))
+    return 0;
+
+  if (const auto D = cxcursor::getCursorDecl(C))
+    if (const auto FD = dyn_cast_or_null<FieldDecl>(D))
+      return FD->isMutable() ? 1 : 0;
+  return 0;
+}
+
 unsigned clang_CXXMethod_isPureVirtual(CXCursor C) {
   if (!clang_isDeclaration(C.kind))
     return 0;

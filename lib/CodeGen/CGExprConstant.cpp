@@ -636,6 +636,8 @@ public:
   }
 
   llvm::Constant *VisitCastExpr(CastExpr* E) {
+    if (const auto *ECE = dyn_cast<ExplicitCastExpr>(E))
+      CGM.EmitExplicitCastExprType(ECE, CGF);
     Expr *subExpr = E->getSubExpr();
     llvm::Constant *C = CGM.EmitConstantExpr(subExpr, subExpr->getType(), CGF);
     if (!C) return nullptr;
@@ -1037,7 +1039,7 @@ public:
       unsigned Type = cast<PredefinedExpr>(E)->getIdentType();
       if (CGF) {
         LValue Res = CGF->EmitPredefinedLValue(cast<PredefinedExpr>(E));
-        return cast<ConstantAddress>(Res.getAddress());
+        return llvm::cast<ConstantAddress>(Res.getAddress());
       } else if (Type == PredefinedExpr::PrettyFunction) {
         return CGM.GetAddrOfConstantCString("top level", ".tmp");
       }

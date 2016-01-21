@@ -348,6 +348,10 @@ macro(set_clang_windows_version_resource_properties name)
   endif()
 endmacro()
 
+macro(add_clang_subdirectory name)
+  add_llvm_subdirectory(CLANG TOOL ${name})
+endmacro()
+
 macro(add_clang_library name)
   cmake_parse_arguments(ARG
     ""
@@ -550,7 +554,8 @@ endif()
 set(CLANG_ORDER_FILE "" CACHE FILEPATH
   "Order file to use when compiling clang in order to improve startup time.")
 
-if (CLANG_BUILT_STANDALONE)
+if (CLANG_BUILT_STANDALONE OR CMAKE_VERSION VERSION_EQUAL 3 OR
+    CMAKE_VERSION VERSION_GREATER 3)
   # Generate a list of CMake library targets so that other CMake projects can
   # link against them. LLVM calls its version of this file LLVMExports.cmake, but
   # the usual CMake convention seems to be ${Project}Targets.cmake.
@@ -598,7 +603,7 @@ if (CLANG_ENABLE_BOOTSTRAP)
   # DARWIN_LTO_LIBRARY so that -flto will work using the just-built compiler
   if(APPLE)
     set(LTO_DEP LTO llvm-ar llvm-ranlib)
-    set(LTO_LIBRARY -DDARWIN_LTO_LIBRARY=${LLVM_RUNTIME_OUTPUT_INTDIR}/libLTO.dylib)
+    set(LTO_LIBRARY -DDARWIN_LTO_LIBRARY=${LLVM_SHLIB_OUTPUT_INTDIR}/libLTO.dylib)
     set(LTO_AR -DCMAKE_AR=${LLVM_RUNTIME_OUTPUT_INTDIR}/llvm-ar)
     set(LTO_RANLIB -DCMAKE_RANLIB=${LLVM_RUNTIME_OUTPUT_INTDIR}/llvm-ranlib)
   endif()

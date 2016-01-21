@@ -2192,6 +2192,13 @@ TEST_F(FormatTest, FormatsNamespaces) {
                    "}    // my_namespace\n"
                    "#endif    // HEADER_GUARD"));
 
+  EXPECT_EQ("namespace A::B {\n"
+            "class C {};\n"
+            "}",
+            format("namespace A::B {\n"
+                   "class C {};\n"
+                   "}"));
+
   FormatStyle Style = getLLVMStyle();
   Style.NamespaceIndentation = FormatStyle::NI_All;
   EXPECT_EQ("namespace out {\n"
@@ -2332,8 +2339,8 @@ TEST_F(FormatTest, IncompleteTryCatchBlocks) {
 
 TEST_F(FormatTest, FormatTryCatchBraceStyles) {
   FormatStyle Style = getLLVMStyle();
-  for (auto BraceStyle :
-       {FormatStyle::BS_Attach, FormatStyle::BS_Mozilla, FormatStyle::BS_WebKit}) {
+  for (auto BraceStyle : {FormatStyle::BS_Attach, FormatStyle::BS_Mozilla,
+                          FormatStyle::BS_WebKit}) {
     Style.BreakBeforeBraces = BraceStyle;
     verifyFormat("try {\n"
                  "  // something\n"
@@ -2383,6 +2390,15 @@ TEST_F(FormatTest, FormatTryCatchBraceStyles) {
                "  {\n"
                "    // something\n"
                "  }",
+               Style);
+  Style.BreakBeforeBraces = FormatStyle::BS_Custom;
+  Style.BraceWrapping.BeforeCatch = true;
+  verifyFormat("try {\n"
+               "  // something\n"
+               "}\n"
+               "catch (...) {\n"
+               "  // something\n"
+               "}",
                Style);
 }
 
@@ -3494,7 +3510,7 @@ TEST_F(FormatTest, NoOperandAlignment) {
                "        * cccccccccccccccccccccccccccccccccccc;",
                Style);
 
-  Style.AlignAfterOpenBracket = false;
+  Style.AlignAfterOpenBracket = FormatStyle::BAS_DontAlign;
   verifyFormat("return (a > b\n"
                "    // comment1\n"
                "    // comment2\n"
@@ -3597,6 +3613,11 @@ TEST_F(FormatTest, ConstructorInitializers) {
   verifyFormat("Constructor()\n"
                "    : aaaaa(aaaaaaaaaaaaaaaaaaaaaa, aaaaaaaaaaaaaaaaaaaaaa,\n"
                "            aaaaaaaaaaaaaaaaaaaaaa) {}",
+               OnePerLine);
+  OnePerLine.ColumnLimit = 60;
+  verifyFormat("Constructor()\n"
+               "    : aaaaaaaaaaaaaaaaaaaa(a),\n"
+               "      bbbbbbbbbbbbbbbbbbbbbbbb(b) {}",
                OnePerLine);
 
   EXPECT_EQ("Constructor()\n"
@@ -4298,7 +4319,7 @@ TEST_F(FormatTest, AlignsAfterOpenBracket) {
       "SomeLongVariableName->someFunction(foooooooo(aaaaaaaaaaaaaaa,\n"
       "                                             aaaaaaaaaaaaaaaaaaaaa));");
   FormatStyle Style = getLLVMStyle();
-  Style.AlignAfterOpenBracket = false;
+  Style.AlignAfterOpenBracket = FormatStyle::BAS_DontAlign;
   verifyFormat("void aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa(\n"
                "    aaaaaaaaaaa aaaaaaaa, aaaaaaaaa aaaaaaa) {}",
                Style);
@@ -4327,17 +4348,17 @@ TEST_F(FormatTest, ParenthesesAndOperandAlignment) {
   verifyFormat("int a = f(aaaaaaaaaaaaaaaaaaaaaa &&\n"
                "          bbbbbbbbbbbbbbbbbbbbbb);",
                Style);
-  Style.AlignAfterOpenBracket = true;
+  Style.AlignAfterOpenBracket = FormatStyle::BAS_Align;
   Style.AlignOperands = false;
   verifyFormat("int a = f(aaaaaaaaaaaaaaaaaaaaaa &&\n"
                "          bbbbbbbbbbbbbbbbbbbbbb);",
                Style);
-  Style.AlignAfterOpenBracket = false;
+  Style.AlignAfterOpenBracket = FormatStyle::BAS_DontAlign;
   Style.AlignOperands = true;
   verifyFormat("int a = f(aaaaaaaaaaaaaaaaaaaaaa &&\n"
                "          bbbbbbbbbbbbbbbbbbbbbb);",
                Style);
-  Style.AlignAfterOpenBracket = false;
+  Style.AlignAfterOpenBracket = FormatStyle::BAS_DontAlign;
   Style.AlignOperands = false;
   verifyFormat("int a = f(aaaaaaaaaaaaaaaaaaaaaa &&\n"
                "    bbbbbbbbbbbbbbbbbbbbbb);",
@@ -5327,6 +5348,8 @@ TEST_F(FormatTest, UnderstandsOverloadedOperators) {
   verifyGoogleFormat("operator ::A();");
 
   verifyFormat("using A::operator+;");
+  verifyFormat("inline A operator^(const A &lhs, const A &rhs) {}\n"
+               "int i;");
 }
 
 TEST_F(FormatTest, UnderstandsFunctionRefQualification) {
@@ -5423,6 +5446,7 @@ TEST_F(FormatTest, UnderstandsUsesOfStarAndAmp) {
   verifyIndependentOfContext("return (int **&)a;");
   verifyIndependentOfContext("f((*PointerToArray)[10]);");
   verifyFormat("void f(Type (*parameter)[10]) {}");
+  verifyFormat("void f(Type (&parameter)[10]) {}");
   verifyGoogleFormat("return sizeof(int**);");
   verifyIndependentOfContext("Type **A = static_cast<Type **>(P);");
   verifyGoogleFormat("Type** A = static_cast<Type**>(P);");
@@ -5568,6 +5592,7 @@ TEST_F(FormatTest, UnderstandsUsesOfStarAndAmp) {
   // verifyIndependentOfContext("MACRO(A *a);");
 
   verifyFormat("DatumHandle const *operator->() const { return input_; }");
+  verifyFormat("return options != nullptr && operator==(*options);");
 
   EXPECT_EQ("#define OP(x)                                    \\\n"
             "  ostream &operator<<(ostream &s, const A &a) {  \\\n"
@@ -7433,6 +7458,19 @@ TEST_F(FormatTest, ObjCSnippets) {
                "@import baz;");
 }
 
+TEST_F(FormatTest, ObjCForIn) {
+  verifyFormat("- (void)test {\n"
+               "  for (NSString *n in arrayOfStrings) {\n"
+               "    foo(n);\n"
+               "  }\n"
+               "}");
+  verifyFormat("- (void)test {\n"
+               "  for (NSString *n in (__bridge NSArray *)arrayOfStrings) {\n"
+               "    foo(n);\n"
+               "  }\n"
+               "}");
+}
+
 TEST_F(FormatTest, ObjCLiterals) {
   verifyFormat("@\"String\"");
   verifyFormat("@1");
@@ -7505,6 +7543,13 @@ TEST_F(FormatTest, ObjCDictLiterals) {
                "      bbbbbbbbbbbbbbbbbb : bbbbb,\n"
                "      cccccccccccccccc : ccccccccccccccc\n"
                "    }];");
+
+  // Ensure that casts before the key are kept on the same line as the key.
+  verifyFormat(
+      "NSDictionary *d = @{\n"
+      "  (aaaaaaaa id)aaaaaaaaa : (aaaaaaaa id)aaaaaaaaaaaaaaaaaaaaaaaa,\n"
+      "  (aaaaaaaa id)aaaaaaaaaaaaaa : (aaaaaaaa id)aaaaaaaaaaaaaa,\n"
+      "};");
 }
 
 TEST_F(FormatTest, ObjCArrayLiterals) {
@@ -8365,6 +8410,8 @@ TEST_F(FormatTest, ConfigurableSpacesInParentheses) {
   verifyFormat("call( x, y, z );", Spaces);
   verifyFormat("call();", Spaces);
   verifyFormat("std::function<void( int, int )> callback;", Spaces);
+  verifyFormat("void inFunction() { std::function<void( int, int )> fct; }",
+               Spaces);
   verifyFormat("while ( (bool)1 )\n"
                "  continue;",
                Spaces);
@@ -8636,6 +8683,19 @@ TEST_F(FormatTest, AlignConsecutiveAssignments) {
                "    someLooooooooooooooooongFunction();\n"
                "int j = 2;",
                Alignment);
+
+  verifyFormat("auto lambda = []() {\n"
+               "  auto i = 0;\n"
+               "  return 0;\n"
+               "};\n"
+               "int i  = 0;\n"
+               "auto v = type{\n"
+               "    i = 1,   //\n"
+               "    (i = 2), //\n"
+               "    i = 3    //\n"
+               "};",
+               Alignment);
+
   // FIXME: Should align all three assignments
   verifyFormat(
       "int i      = 1;\n"
@@ -8804,6 +8864,23 @@ TEST_F(FormatTest, AlignConsecutiveDeclarations) {
                "    someLooooooooooooooooongFunction();\n"
                "int j = 2;",
                Alignment);
+
+  Alignment.AlignConsecutiveAssignments = true;
+  verifyFormat("auto lambda = []() {\n"
+               "  auto  ii = 0;\n"
+               "  float j  = 0;\n"
+               "  return 0;\n"
+               "};\n"
+               "int   i  = 0;\n"
+               "float i2 = 0;\n"
+               "auto  v  = type{\n"
+               "    i = 1,   //\n"
+               "    (i = 2), //\n"
+               "    i = 3    //\n"
+               "};",
+               Alignment);
+  Alignment.AlignConsecutiveAssignments = false;
+
   // FIXME: Should align all three declarations
   verifyFormat(
       "int      i = 1;\n"
@@ -9468,7 +9545,6 @@ TEST_F(FormatTest, GetsCorrectBasedOnStyle) {
 TEST_F(FormatTest, ParsesConfigurationBools) {
   FormatStyle Style = {};
   Style.Language = FormatStyle::LK_Cpp;
-  CHECK_PARSE_BOOL(AlignAfterOpenBracket);
   CHECK_PARSE_BOOL(AlignEscapedNewlinesLeft);
   CHECK_PARSE_BOOL(AlignOperands);
   CHECK_PARSE_BOOL(AlignTrailingComments);
@@ -9480,8 +9556,8 @@ TEST_F(FormatTest, ParsesConfigurationBools) {
   CHECK_PARSE_BOOL(AllowShortIfStatementsOnASingleLine);
   CHECK_PARSE_BOOL(AllowShortLoopsOnASingleLine);
   CHECK_PARSE_BOOL(AlwaysBreakTemplateDeclarations);
-  CHECK_PARSE_BOOL(BinPackParameters);
   CHECK_PARSE_BOOL(BinPackArguments);
+  CHECK_PARSE_BOOL(BinPackParameters);
   CHECK_PARSE_BOOL(BreakBeforeTernaryOperators);
   CHECK_PARSE_BOOL(BreakConstructorInitializersBeforeComma);
   CHECK_PARSE_BOOL(ConstructorInitializerAllOnOneLineOrOnePerLine);
@@ -9571,6 +9647,19 @@ TEST_F(FormatTest, ParsesConfiguration) {
   CHECK_PARSE("BreakBeforeBinaryOperators: true", BreakBeforeBinaryOperators,
               FormatStyle::BOS_All);
 
+  Style.AlignAfterOpenBracket = FormatStyle::BAS_AlwaysBreak;
+  CHECK_PARSE("AlignAfterOpenBracket: Align", AlignAfterOpenBracket,
+              FormatStyle::BAS_Align);
+  CHECK_PARSE("AlignAfterOpenBracket: DontAlign", AlignAfterOpenBracket,
+              FormatStyle::BAS_DontAlign);
+  CHECK_PARSE("AlignAfterOpenBracket: AlwaysBreak", AlignAfterOpenBracket,
+              FormatStyle::BAS_AlwaysBreak);
+  // For backward compatibility:
+  CHECK_PARSE("AlignAfterOpenBracket: false", AlignAfterOpenBracket,
+              FormatStyle::BAS_DontAlign);
+  CHECK_PARSE("AlignAfterOpenBracket: true", AlignAfterOpenBracket,
+              FormatStyle::BAS_Align);
+
   Style.UseTab = FormatStyle::UT_ForIndentation;
   CHECK_PARSE("UseTab: Never", UseTab, FormatStyle::UT_Never);
   CHECK_PARSE("UseTab: ForIndentation", UseTab, FormatStyle::UT_ForIndentation);
@@ -9646,6 +9735,8 @@ TEST_F(FormatTest, ParsesConfiguration) {
   CHECK_PARSE("NamespaceIndentation: All", NamespaceIndentation,
               FormatStyle::NI_All);
 
+  // FIXME: This is required because parsing a configuration simply overwrites
+  // the first N elements of the list instead of resetting it.
   Style.ForEachMacros.clear();
   std::vector<std::string> BoostForeach;
   BoostForeach.push_back("BOOST_FOREACH");
@@ -9655,6 +9746,16 @@ TEST_F(FormatTest, ParsesConfiguration) {
   BoostAndQForeach.push_back("Q_FOREACH");
   CHECK_PARSE("ForEachMacros: [BOOST_FOREACH, Q_FOREACH]", ForEachMacros,
               BoostAndQForeach);
+
+  Style.IncludeCategories.clear();
+  std::vector<FormatStyle::IncludeCategory> ExpectedCategories = {{"abc/.*", 2},
+                                                                  {".*", 1}};
+  CHECK_PARSE("IncludeCategories:\n"
+              "  - Regex: abc/.*\n"
+              "    Priority: 2\n"
+              "  - Regex: .*\n"
+              "    Priority: 1",
+              IncludeCategories, ExpectedCategories);
 }
 
 TEST_F(FormatTest, ParsesConfigurationWithLanguages) {
@@ -10558,6 +10659,9 @@ TEST_F(FormatTest, SpacesInAngles) {
   verifyFormat("f< int, float >();", Spaces);
   verifyFormat("template <> g() {}", Spaces);
   verifyFormat("template < std::vector< int > > f() {}", Spaces);
+  verifyFormat("std::function< void(int, int) > fct;", Spaces);
+  verifyFormat("void inFunction() { std::function< void(int, int) > fct; }",
+               Spaces);
 
   Spaces.Standard = FormatStyle::LS_Cpp03;
   Spaces.SpacesInAngles = true;

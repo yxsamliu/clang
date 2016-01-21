@@ -11,6 +11,7 @@
 //  Objective-C++.
 //
 //===----------------------------------------------------------------------===//
+
 #include "clang/Sema/Lookup.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/ASTMutationListener.h"
@@ -153,7 +154,7 @@ namespace {
     // by its using directives, transitively) as if they appeared in
     // the given effective context.
     void addUsingDirectives(DeclContext *DC, DeclContext *EffectiveDC) {
-      SmallVector<DeclContext*,4> queue;
+      SmallVector<DeclContext*, 4> queue;
       while (true) {
         for (auto UD : DC->using_directives()) {
           DeclContext *NS = UD->getNominatedNamespace();
@@ -204,7 +205,7 @@ namespace {
                                                UnqualUsingEntry::Comparator()));
     }
   };
-}
+} // end anonymous namespace
 
 // Retrieve the set of identifier namespaces that correspond to a
 // specific kind of name lookup.
@@ -977,7 +978,7 @@ struct FindLocalExternScope {
   LookupResult &R;
   bool OldFindLocalExtern;
 };
-}
+} // end anonymous namespace
 
 bool Sema::CppLookupName(LookupResult &R, Scope *S) {
   assert(getLangOpts().CPlusPlus && "Can perform only C++ lookup");
@@ -2198,7 +2199,7 @@ void Sema::DiagnoseAmbiguousLookup(LookupResult &Result) {
   case LookupResult::AmbiguousTagHiding: {
     Diag(NameLoc, diag::err_ambiguous_tag_hiding) << Name << LookupRange;
 
-    llvm::SmallPtrSet<NamedDecl*,8> TagDecls;
+    llvm::SmallPtrSet<NamedDecl*, 8> TagDecls;
 
     for (auto *D : Result)
       if (TagDecl *TD = dyn_cast<TagDecl>(D)) {
@@ -2244,7 +2245,7 @@ namespace {
     Sema::AssociatedClassSet &Classes;
     SourceLocation InstantiationLoc;
   };
-}
+} // end anonymous namespace
 
 static void
 addAssociatedClassesAndNamespaces(AssociatedLookup &Result, QualType T);
@@ -3933,7 +3934,8 @@ void TypoCorrectionConsumer::performQualifiedLookups() {
       // current correction candidate is the name of that class, then skip
       // it as it is unlikely a qualified version of the class' constructor
       // is an appropriate correction.
-      if (CXXRecordDecl *NSDecl = NSType ? NSType->getAsCXXRecordDecl() : 0) {
+      if (CXXRecordDecl *NSDecl = NSType ? NSType->getAsCXXRecordDecl() :
+                                           nullptr) {
         if (NSDecl->getIdentifier() == QR.getCorrectionAsIdentifierInfo())
           continue;
       }

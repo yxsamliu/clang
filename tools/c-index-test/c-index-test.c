@@ -767,6 +767,8 @@ static void PrintCursor(CXCursor Cursor, const char *CommentSchemaFile) {
     clang_disposeString(DeprecatedMessage);
     clang_disposeString(UnavailableMessage);
     
+    if (clang_CXXField_isMutable(Cursor))
+      printf(" (mutable)");
     if (clang_CXXMethod_isStatic(Cursor))
       printf(" (static)");
     if (clang_CXXMethod_isVirtual(Cursor))
@@ -1430,6 +1432,8 @@ static enum CXChildVisitResult PrintTypeSize(CXCursor cursor, CXCursor p,
 static enum CXChildVisitResult PrintMangledName(CXCursor cursor, CXCursor p,
                                                 CXClientData d) {
   CXString MangledName;
+  if (clang_isUnexposed(clang_getCursorKind(cursor)))
+    return CXChildVisit_Recurse;
   PrintCursor(cursor, NULL);
   MangledName = clang_Cursor_getMangling(cursor);
   printf(" [mangled=%s]\n", clang_getCString(MangledName));

@@ -163,6 +163,7 @@ class Parser : public CodeCompletionHandler {
   std::unique_ptr<PragmaHandler> MSConstSeg;
   std::unique_ptr<PragmaHandler> MSCodeSeg;
   std::unique_ptr<PragmaHandler> MSSection;
+  std::unique_ptr<PragmaHandler> MSRuntimeChecks;
   std::unique_ptr<PragmaHandler> OptimizeHandler;
   std::unique_ptr<PragmaHandler> LoopHintHandler;
   std::unique_ptr<PragmaHandler> UnrollHintHandler;
@@ -1581,7 +1582,9 @@ private:
                          SourceLocation Loc, bool ConvertToBoolean);
 
   //===--------------------------------------------------------------------===//
-  // C++ types
+  // C++ Coroutines
+
+  ExprResult ParseCoyieldExpression();
 
   //===--------------------------------------------------------------------===//
   // C99 6.7.8: Initialization.

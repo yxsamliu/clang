@@ -780,7 +780,8 @@ IdentifierInfo *ASTIdentifierLookupTrait::ReadData(const internal_key_type& k,
   }
   if (!II->isFromAST()) {
     II->setIsFromAST();
-    if (isInterestingIdentifier(Reader, *II, F.isModule()))
+    bool IsModule = Reader.PP.getCurrentModule() != nullptr;
+    if (isInterestingIdentifier(Reader, *II, IsModule))
       II->setChangedSinceDeserialization();
   }
   Reader.markIdentifierUpToDate(II);
@@ -1450,8 +1451,7 @@ MacroInfo *ASTReader::ReadMacroRecord(ModuleFile &F, uint64_t Offset) {
         if (isC99VarArgs) MI->setIsC99Varargs();
         if (isGNUVarArgs) MI->setIsGNUVarargs();
         if (hasCommaPasting) MI->setHasCommaPasting();
-        MI->setArgumentList(MacroArgs.data(), MacroArgs.size(),
-                            PP.getPreprocessorAllocator());
+        MI->setArgumentList(MacroArgs, PP.getPreprocessorAllocator());
       }
 
       // Remember that we saw this macro last so that we add the tokens that
@@ -1948,7 +1948,9 @@ InputFile ASTReader::getInputFile(ModuleFile &F, unsigned ID, bool Complain) {
     if (Complain) {
       std::string ErrorStr = "could not find file '";
       ErrorStr += Filename;
-      ErrorStr += "' referenced by AST file";
+      ErrorStr += "' referenced by AST file '";
+      ErrorStr += F.FileName;
+      ErrorStr += "'";
       Error(ErrorStr.c_str());
     }
     // Record that we didn't find the file.
@@ -3510,7 +3512,8 @@ ASTReader::ASTReadResult ASTReader::ReadAST(const std::string &FileName,
       // whether we need to serialize it.
       if (!II.isFromAST()) {
         II.setIsFromAST();
-        if (isInterestingIdentifier(*this, II, F.isModule()))
+        bool IsModule = PP.getCurrentModule() != nullptr;
+        if (isInterestingIdentifier(*this, II, IsModule))
           II.setChangedSinceDeserialization();
       }
 

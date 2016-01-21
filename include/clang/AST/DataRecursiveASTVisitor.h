@@ -43,7 +43,7 @@
   OPERATOR(PostInc) OPERATOR(PostDec) OPERATOR(PreInc) OPERATOR(PreDec)        \
       OPERATOR(AddrOf) OPERATOR(Deref) OPERATOR(Plus) OPERATOR(Minus)          \
       OPERATOR(Not) OPERATOR(LNot) OPERATOR(Real) OPERATOR(Imag)               \
-      OPERATOR(Extension)
+      OPERATOR(Extension) OPERATOR(Coawait)
 
 // All binary operators (excluding compound assign operators).
 #define BINOP_LIST()                                                           \
@@ -2310,6 +2310,12 @@ DEF_TRAVERSE_STMT(MaterializeTemporaryExpr, {})
 DEF_TRAVERSE_STMT(CXXFoldExpr, {})
 DEF_TRAVERSE_STMT(AtomicExpr, {})
 
+// Coroutine support.
+DEF_TRAVERSE_STMT(CoroutineBodyStmt, {})
+DEF_TRAVERSE_STMT(CoreturnStmt, {})
+DEF_TRAVERSE_STMT(CoawaitExpr, {})
+DEF_TRAVERSE_STMT(CoyieldExpr, {})
+
 // These literals (all of them) do not need any action.
 DEF_TRAVERSE_STMT(IntegerLiteral, {})
 DEF_TRAVERSE_STMT(CharacterLiteral, {})
@@ -2668,6 +2674,9 @@ RecursiveASTVisitor<Derived>::VisitOMPReductionClause(OMPReductionClause *C) {
   TRY_TO(TraverseNestedNameSpecifierLoc(C->getQualifierLoc()));
   TRY_TO(TraverseDeclarationNameInfo(C->getNameInfo()));
   TRY_TO(VisitOMPClauseList(C));
+  for (auto *E : C->privates()) {
+    TRY_TO(TraverseStmt(E));
+  }
   for (auto *E : C->lhs_exprs()) {
     TRY_TO(TraverseStmt(E));
   }

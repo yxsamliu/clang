@@ -2500,8 +2500,10 @@ bool MismatchingNewDeleteDetector::hasMatchingNewInCtor(
 MismatchingNewDeleteDetector::MismatchResult
 MismatchingNewDeleteDetector::analyzeInClassInitializer() {
   assert(Field != nullptr && "This should be called only for members");
-  if (const CXXNewExpr *NE =
-          getNewExprFromInitListOrExpr(Field->getInClassInitializer())) {
+  const Expr *InitExpr = Field->getInClassInitializer();
+  if (!InitExpr)
+    return EndOfTU ? NoMismatch : AnalyzeLater;
+  if (const CXXNewExpr *NE = getNewExprFromInitListOrExpr(InitExpr)) {
     if (NE->isArray() != IsArrayForm) {
       NewExprs.push_back(NE);
       return MemberInitMismatches;
@@ -3457,6 +3459,7 @@ Sema::PerformImplicitConversion(Expr *From, QualType ToType,
   case ICK_Function_To_Pointer:
   case ICK_Qualification:
   case ICK_Num_Conversion_Kinds:
+  case ICK_C_Only_Conversion:
     llvm_unreachable("Improper second standard conversion");
   }
 
@@ -6553,6 +6556,8 @@ public:
   }
 
   ExprResult TransformLambdaExpr(LambdaExpr *E) { return Owned(E); }
+
+  ExprResult TransformBlockExpr(BlockExpr *E) { return Owned(E); }
 
   ExprResult Transform(Expr *E) {
     ExprResult Res;

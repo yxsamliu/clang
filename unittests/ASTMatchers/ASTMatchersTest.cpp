@@ -1172,6 +1172,20 @@ TEST(Matcher, SubstNonTypeTemplateParm) {
                       substNonTypeTemplateParmExpr()));
 }
 
+TEST(Matcher, NonTypeTemplateParmDecl) {
+  EXPECT_TRUE(matches("template <int N> void f();",
+                      nonTypeTemplateParmDecl(hasName("N"))));
+  EXPECT_TRUE(
+      notMatches("template <typename T> void f();", nonTypeTemplateParmDecl()));
+}
+
+TEST(Matcher, templateTypeParmDecl) {
+  EXPECT_TRUE(matches("template <typename T> void f();",
+                      templateTypeParmDecl(hasName("T"))));
+  EXPECT_TRUE(
+      notMatches("template <int N> void f();", templateTypeParmDecl()));
+}
+
 TEST(Matcher, UserDefinedLiteral) {
   EXPECT_TRUE(matches("constexpr char operator \"\" _inc (const char i) {"
                       "  return i + 1;"
@@ -1511,6 +1525,13 @@ TEST(Function, MatchesFunctionDeclarations) {
       notMatches("void f(int);"
                  "template <typename T> struct S { void g(T t) { f(t); } };",
                  CallFunctionF));
+
+  EXPECT_TRUE(matches("void f(...);", functionDecl(isVariadic())));
+  EXPECT_TRUE(notMatches("void f(int);", functionDecl(isVariadic())));
+  EXPECT_TRUE(notMatches("template <typename... Ts> void f(Ts...);",
+                         functionDecl(isVariadic())));
+  EXPECT_TRUE(notMatches("void f();", functionDecl(isVariadic())));
+  EXPECT_TRUE(notMatchesC("void f();", functionDecl(isVariadic())));
 }
 
 TEST(FunctionTemplate, MatchesFunctionTemplateDeclarations) {
@@ -1867,6 +1888,21 @@ TEST(Matcher, MatchesPureMethod) {
   EXPECT_TRUE(matches("class X { virtual int f() = 0; };",
                       cxxMethodDecl(isPure(), hasName("::X::f"))));
   EXPECT_TRUE(notMatches("class X { int f(); };", cxxMethodDecl(isPure())));
+}
+
+TEST(Matcher, MatchesCopyAssignmentOperator) {
+  EXPECT_TRUE(matches("class X { X &operator=(X); };",
+                      cxxMethodDecl(isCopyAssignmentOperator())));
+  EXPECT_TRUE(matches("class X { X &operator=(X &); };",
+                      cxxMethodDecl(isCopyAssignmentOperator())));
+  EXPECT_TRUE(matches("class X { X &operator=(const X &); };",
+                      cxxMethodDecl(isCopyAssignmentOperator())));
+  EXPECT_TRUE(matches("class X { X &operator=(volatile X &); };",
+                      cxxMethodDecl(isCopyAssignmentOperator())));
+  EXPECT_TRUE(matches("class X { X &operator=(const volatile X &); };",
+                      cxxMethodDecl(isCopyAssignmentOperator())));
+  EXPECT_TRUE(notMatches("class X { X &operator=(X &&); };",
+                      cxxMethodDecl(isCopyAssignmentOperator())));
 }
 
 TEST(Matcher, MatchesConstMethod) {
@@ -4095,6 +4131,11 @@ TEST(TypeMatching, MatchesArrayTypes) {
   EXPECT_TRUE(matches("const int a = 0;", qualType(isInteger())));
 }
 
+TEST(TypeMatching, DecayedType) {
+  EXPECT_TRUE(matches("void f(int i[]);", valueDecl(hasType(decayedType(hasDecayedType(pointerType()))))));
+  EXPECT_TRUE(notMatches("int i[7];", decayedType()));
+}
+
 TEST(TypeMatching, MatchesComplexTypes) {
   EXPECT_TRUE(matches("_Complex float f;", complexType()));
   EXPECT_TRUE(matches(
@@ -4645,6 +4686,16 @@ public:
                              decl(has(decl(equalsNode(TypedNode)))).bind(""))),
                          *Node, Context)) != nullptr;
   }
+  bool verify(const BoundNodes &Nodes, ASTContext &Context, const Type *Node) {
+    // Use the original typed pointer to verify we can pass pointers to subtypes
+    // to equalsNode.
+    const T *TypedNode = cast<T>(Node);
+    const auto *Dec = Nodes.getNodeAs<FieldDecl>("decl");
+    return selectFirst<T>(
+               "", match(fieldDecl(hasParent(decl(has(fieldDecl(
+                             hasType(type(equalsNode(TypedNode)).bind(""))))))),
+                         *Dec, Context)) != nullptr;
+  }
 };
 
 TEST(IsEqualTo, MatchesNodesByIdentity) {
@@ -4654,6 +4705,10 @@ TEST(IsEqualTo, MatchesNodesByIdentity) {
   EXPECT_TRUE(matchAndVerifyResultTrue(
       "void f() { if (true) if(true) {} }", ifStmt().bind(""),
       new VerifyAncestorHasChildIsEqual<IfStmt>()));
+  EXPECT_TRUE(matchAndVerifyResultTrue(
+      "class X { class Y {} y; };",
+      fieldDecl(hasName("y"), hasType(type().bind(""))).bind("decl"),
+      new VerifyAncestorHasChildIsEqual<Type>()));
 }
 
 TEST(MatchFinder, CheckProfiling) {

@@ -489,9 +489,9 @@ CastsAwayConstness(Sema &Self, QualType SrcType, QualType DestType,
                    QualType *TheOffendingDestType = nullptr,
                    Qualifiers *CastAwayQualifiers = nullptr) {
   // If the only checking we care about is for Objective-C lifetime qualifiers,
-  // and we're not in ARC mode, there's nothing to check.
+  // and we're not in ObjC mode, there's nothing to check.
   if (!CheckCVR && CheckObjCLifetime && 
-      !Self.Context.getLangOpts().ObjCAutoRefCount)
+      !Self.Context.getLangOpts().ObjC1)
     return false;
     
   // Casting away constness is defined in C++ 5.2.11p8 with reference to
@@ -2236,6 +2236,16 @@ void CastOperation::CheckCStyleCast() {
     return;
   }
 
+  // Overloads are allowed with C extensions, so we need to support them.
+  if (SrcExpr.get()->getType() == Self.Context.OverloadTy) {
+    DeclAccessPair DAP;
+    if (FunctionDecl *FD = Self.ResolveAddressOfOverloadedFunction(
+            SrcExpr.get(), DestType, /*Complain=*/true, DAP))
+      SrcExpr = Self.FixOverloadedFunctionReference(SrcExpr.get(), DAP, FD);
+    else
+      return;
+    assert(SrcExpr.isUsable());
+  }
   SrcExpr = Self.DefaultFunctionArrayLvalueConversion(SrcExpr.get());
   if (SrcExpr.isInvalid())
     return;

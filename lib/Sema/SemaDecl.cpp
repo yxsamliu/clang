@@ -9901,9 +9901,9 @@ Sema::ActOnCXXForRangeIdentifier(Scope *S, SourceLocation IdentLoc,
 void Sema::CheckCompleteVariableDeclaration(VarDecl *var) {
   if (var->isInvalidDecl()) return;
 
-  // In ARC, don't allow jumps past the implicit initialization of a
+  // In Objective-C, don't allow jumps past the implicit initialization of a
   // local retaining variable.
-  if (getLangOpts().ObjCAutoRefCount &&
+  if (getLangOpts().ObjC1 &&
       var->hasLocalStorage()) {
     switch (var->getType().getObjCLifetime()) {
     case Qualifiers::OCL_None:
@@ -10999,6 +10999,9 @@ Decl *Sema::ActOnFinishFunctionBody(Decl *dcl, Stmt *Body,
   sema::AnalysisBasedWarnings::Policy WP = AnalysisWarnings.getDefaultPolicy();
   sema::AnalysisBasedWarnings::Policy *ActivePolicy = nullptr;
 
+  if (getLangOpts().Coroutines && !getCurFunction()->CoroutineStmts.empty())
+    CheckCompletedCoroutineBody(FD, Body);
+
   if (FD) {
     FD->setBody(Body);
 
@@ -11549,9 +11552,9 @@ bool Sema::CheckEnumUnderlyingType(TypeSourceInfo *TI) {
 
 /// Check whether this is a valid redeclaration of a previous enumeration.
 /// \return true if the redeclaration was invalid.
-bool Sema::CheckEnumRedeclaration(SourceLocation EnumLoc, bool IsScoped,
-                                  QualType EnumUnderlyingTy,
-                                  const EnumDecl *Prev) {
+bool Sema::CheckEnumRedeclaration(
+    SourceLocation EnumLoc, bool IsScoped, QualType EnumUnderlyingTy,
+    bool EnumUnderlyingIsImplicit, const EnumDecl *Prev) {
   bool IsFixed = !EnumUnderlyingTy.isNull();
 
   if (IsScoped != Prev->isScoped()) {
@@ -11573,6 +11576,10 @@ bool Sema::CheckEnumRedeclaration(SourceLocation EnumLoc, bool IsScoped,
           << Prev->getIntegerTypeRange();
       return true;
     }
+  } else if (IsFixed && !Prev->isFixed() && EnumUnderlyingIsImplicit) {
+    ;
+  } else if (!IsFixed && Prev->isFixed() && !Prev->getIntegerTypeSourceInfo()) {
+    ;
   } else if (IsFixed != Prev->isFixed()) {
     Diag(EnumLoc, diag::err_enum_redeclare_fixed_mismatch)
       << Prev->isFixed();
@@ -11842,6 +11849,7 @@ Decl *Sema::ActOnTag(Scope *S, unsigned TagSpec, TagUseKind TUK,
   // this early, because it's needed to detect if this is an incompatible
   // redeclaration.
   llvm::PointerUnion<const Type*, TypeSourceInfo*> EnumUnderlying;
+  bool EnumUnderlyingIsImplicit = false;
 
   if (Kind == TTK_Enum) {
     if (UnderlyingType.isInvalid() || (!UnderlyingType.get() && ScopedEnum))
@@ -11863,9 +11871,13 @@ Decl *Sema::ActOnTag(Scope *S, unsigned TagSpec, TagUseKind TUK,
                                           UPPC_FixedUnderlyingType))
         EnumUnderlying = Context.IntTy.getTypePtr();
 
-    } else if (getLangOpts().MSVCCompat)
-      // Microsoft enums are always of int type.
-      EnumUnderlying = Context.IntTy.getTypePtr();
+    } else if (Context.getTargetInfo().getCXXABI().isMicrosoft()) {
+      if (getLangOpts().MSVCCompat || TUK == TUK_Definition) {
+        // Microsoft enums are always of int type.
+        EnumUnderlying = Context.IntTy.getTypePtr();
+        EnumUnderlyingIsImplicit = true;
+      }
+    }
   }
 
   DeclContext *SearchDC = CurContext;
@@ -12211,7 +12223,8 @@ Decl *Sema::ActOnTag(Scope *S, unsigned TagSpec, TagUseKind TUK,
           // returning the previous declaration, unless this is a definition,
           // in which case we want the caller to bail out.
           if (CheckEnumRedeclaration(NameLoc.isValid() ? NameLoc : KWLoc,
-                                     ScopedEnum, EnumUnderlyingTy, PrevEnum))
+                                     ScopedEnum, EnumUnderlyingTy,
+                                     EnumUnderlyingIsImplicit, PrevEnum))
             return TUK == TUK_Declaration ? PrevTagDecl : nullptr;
         }
 
@@ -13158,9 +13171,8 @@ bool Sema::CheckNontrivialField(FieldDecl *FD) {
           SourceLocation Loc = FD->getLocation();
           if (getSourceManager().isInSystemHeader(Loc)) {
             if (!FD->hasAttr<UnavailableAttr>())
-              FD->addAttr(UnavailableAttr::CreateImplicit(Context,
-                                  "this system field has retaining ownership",
-                                  Loc));
+              FD->addAttr(UnavailableAttr::CreateImplicit(Context, "",
+                            UnavailableAttr::IR_ARCFieldWithOwnership, Loc));
             return false;
           }
         }
@@ -13529,9 +13541,8 @@ void Sema::ActOnFields(Scope *S, SourceLocation RecLoc, Decl *EnclosingDecl,
         SourceLocation loc = FD->getLocation();
         if (getSourceManager().isInSystemHeader(loc)) {
           if (!FD->hasAttr<UnavailableAttr>()) {
-            FD->addAttr(UnavailableAttr::CreateImplicit(Context,
-                              "this system field has retaining ownership",
-                              loc));
+            FD->addAttr(UnavailableAttr::CreateImplicit(Context, "",
+                          UnavailableAttr::IR_ARCFieldWithOwnership, loc));
           }
         } else {
           Diag(FD->getLocation(), diag::err_arc_objc_object_in_tag) 
@@ -14095,6 +14106,7 @@ static bool ValidDuplicateEnum(EnumConstantDecl *ECD, EnumDecl *Enum) {
   return false;
 }
 
+namespace {
 struct DupKey {
   int64_t val;
   bool isTombstoneOrEmptyKey;
@@ -14118,6 +14130,7 @@ struct DenseMapInfoDupKey {
            LHS.val == RHS.val;
   }
 };
+} // end anonymous namespace
 
 // Emits a warning when an element is implicitly set a value that
 // a previous element has already been set to.
@@ -14511,15 +14524,13 @@ Decl *Sema::ActOnFileScopeAsmDecl(Expr *expr,
 static void checkModuleImportContext(Sema &S, Module *M,
                                      SourceLocation ImportLoc,
                                      DeclContext *DC) {
+  SourceLocation ExternCLoc;
+
   if (auto *LSD = dyn_cast<LinkageSpecDecl>(DC)) {
     switch (LSD->getLanguage()) {
     case LinkageSpecDecl::lang_c:
-      if (!M->IsExternC) {
-        S.Diag(ImportLoc, diag::err_module_import_in_extern_c)
-          << M->getFullModuleName();
-        S.Diag(LSD->getLocStart(), diag::note_module_import_in_extern_c);
-        return;
-      }
+      if (ExternCLoc.isInvalid())
+        ExternCLoc = LSD->getLocStart();
       break;
     case LinkageSpecDecl::lang_cxx:
       break;
@@ -14529,11 +14540,16 @@ static void checkModuleImportContext(Sema &S, Module *M,
 
   while (isa<LinkageSpecDecl>(DC))
     DC = DC->getParent();
+
   if (!isa<TranslationUnitDecl>(DC)) {
     S.Diag(ImportLoc, diag::err_module_import_not_at_top_level_fatal)
       << M->getFullModuleName() << DC;
     S.Diag(cast<Decl>(DC)->getLocStart(),
            diag::note_module_import_not_at_top_level) << DC;
+  } else if (!M->IsExternC && ExternCLoc.isValid()) {
+    S.Diag(ImportLoc, diag::ext_module_import_in_extern_c)
+      << M->getFullModuleName();
+    S.Diag(ExternCLoc, diag::note_module_import_in_extern_c);
   }
 }
 

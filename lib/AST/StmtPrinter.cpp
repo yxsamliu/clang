@@ -1727,7 +1727,7 @@ void StmtPrinter::VisitUserDefinedLiteral(UserDefinedLiteral *Node) {
     assert(Args);
 
     if (Args->size() != 1) {
-      OS << "operator \"\" " << Node->getUDSuffix()->getName();
+      OS << "operator\"\"" << Node->getUDSuffix()->getName();
       TemplateSpecializationType::PrintTemplateArgumentList(
           OS, Args->data(), Args->size(), Policy);
       OS << "()";
@@ -2161,6 +2161,31 @@ void StmtPrinter::VisitCXXFoldExpr(CXXFoldExpr *E) {
     PrintExpr(E->getRHS());
   }
   OS << ")";
+}
+
+// C++ Coroutines TS
+
+void StmtPrinter::VisitCoroutineBodyStmt(CoroutineBodyStmt *S) {
+  Visit(S->getBody());
+}
+
+void StmtPrinter::VisitCoreturnStmt(CoreturnStmt *S) {
+  OS << "co_return";
+  if (S->getOperand()) {
+    OS << " ";
+    Visit(S->getOperand());
+  }
+  OS << ";";
+}
+
+void StmtPrinter::VisitCoawaitExpr(CoawaitExpr *S) {
+  OS << "co_await ";
+  PrintExpr(S->getOperand());
+}
+
+void StmtPrinter::VisitCoyieldExpr(CoyieldExpr *S) {
+  OS << "co_yield ";
+  PrintExpr(S->getOperand());
 }
 
 // Obj-C

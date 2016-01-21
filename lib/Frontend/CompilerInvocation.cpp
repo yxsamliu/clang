@@ -25,6 +25,7 @@
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/ADT/Triple.h"
+#include "llvm/Linker/Linker.h"
 #include "llvm/Option/Arg.h"
 #include "llvm/Option/ArgList.h"
 #include "llvm/Option/OptTable.h"
@@ -393,38 +394,21 @@ static bool ParseCodeGenArgs(CodeGenOptions &Opts, ArgList &Args, InputKind IK,
       Diags.Report(diag::err_drv_invalid_value) << A->getAsString(Args) << Name;
   }
 
-  if (Args.hasArg(OPT_gline_tables_only)) {
-    Opts.setDebugInfo(CodeGenOptions::DebugLineTablesOnly);
-  } else if (Args.hasArg(OPT_g_Flag) || Args.hasArg(OPT_gdwarf_2) ||
-             Args.hasArg(OPT_gdwarf_3) || Args.hasArg(OPT_gdwarf_4)) {
-    bool Default = false;
-    // Until dtrace (via CTF) and LLDB can deal with distributed debug info,
-    // Darwin and FreeBSD default to standalone/full debug info.
-    if (llvm::Triple(TargetOpts.Triple).isOSDarwin() ||
-        llvm::Triple(TargetOpts.Triple).isOSFreeBSD())
-      Default = true;
-
-    if (Args.hasFlag(OPT_fstandalone_debug, OPT_fno_standalone_debug, Default))
-      Opts.setDebugInfo(CodeGenOptions::FullDebugInfo);
-    else
-      Opts.setDebugInfo(CodeGenOptions::LimitedDebugInfo);
+  if (Arg *A = Args.getLastArg(OPT_debug_info_kind_EQ)) {
+    Opts.setDebugInfo(
+        llvm::StringSwitch<CodeGenOptions::DebugInfoKind>(A->getValue())
+            .Case("line-tables-only", CodeGenOptions::DebugLineTablesOnly)
+            .Case("limited", CodeGenOptions::LimitedDebugInfo)
+            .Case("standalone", CodeGenOptions::FullDebugInfo));
   }
+  Opts.DwarfVersion = getLastArgIntValue(Args, OPT_dwarf_version_EQ, 0, Diags);
   Opts.DebugColumnInfo = Args.hasArg(OPT_dwarf_column_info);
-  if (Args.hasArg(OPT_gcodeview)) {
-    Opts.EmitCodeView = true;
-    Opts.DwarfVersion = 0;
-  } else if (Opts.getDebugInfo() != CodeGenOptions::NoDebugInfo) {
-    // Default Dwarf version is 4 if we are generating debug information.
-    Opts.DwarfVersion = 4;
-  }
+  Opts.EmitCodeView = Args.hasArg(OPT_gcodeview);
   Opts.SplitDwarfFile = Args.getLastArgValue(OPT_split_dwarf_file);
-  if (Args.hasArg(OPT_gdwarf_2))
-    Opts.DwarfVersion = 2;
-  else if (Args.hasArg(OPT_gdwarf_3))
-    Opts.DwarfVersion = 3;
-  else if (Args.hasArg(OPT_gdwarf_4))
-    Opts.DwarfVersion = 4;
   Opts.DebugTypeExtRefs = Args.hasArg(OPT_dwarf_ext_refs);
+
+  for (const auto &Arg : Args.getAllArgValues(OPT_fdebug_prefix_map_EQ))
+    Opts.DebugPrefixMap.insert(StringRef(Arg).split('='));
 
   if (const Arg *A =
           Args.getLastArg(OPT_emit_llvm_uselists, OPT_no_emit_llvm_uselists))
@@ -462,7 +446,6 @@ static bool ParseCodeGenArgs(CodeGenOptions &Opts, ArgList &Args, InputKind IK,
   Opts.DumpCoverageMapping = Args.hasArg(OPT_dump_coverage_mapping);
   Opts.AsmVerbose = Args.hasArg(OPT_masm_verbose);
   Opts.ObjCAutoRefCountExceptions = Args.hasArg(OPT_fobjc_arc_exceptions);
-  Opts.NewMSEH = Args.hasArg(OPT_fnew_ms_eh);
   Opts.CXAAtExit = !Args.hasArg(OPT_fno_use_cxa_atexit);
   Opts.CXXCtorDtorAliases = Args.hasArg(OPT_mconstructor_aliases);
   Opts.CodeModel = getCodeModel(Args, Diags);
@@ -519,7 +502,9 @@ static bool ParseCodeGenArgs(CodeGenOptions &Opts, ArgList &Args, InputKind IK,
 
   Opts.MergeFunctions = Args.hasArg(OPT_fmerge_functions);
 
-  Opts.PrepareForLTO = Args.hasArg(OPT_flto);
+  Opts.PrepareForLTO = Args.hasArg(OPT_flto, OPT_flto_EQ);
+  const Arg *A = Args.getLastArg(OPT_flto, OPT_flto_EQ);
+  Opts.EmitFunctionSummary = A && A->containsValue("thin");
 
   Opts.MSVolatile = Args.hasArg(OPT_fms_volatile);
 
@@ -564,7 +549,13 @@ static bool ParseCodeGenArgs(CodeGenOptions &Opts, ArgList &Args, InputKind IK,
   Opts.EmitOpenCLArgMetadata = Args.hasArg(OPT_cl_kernel_arg_info);
   Opts.CompressDebugSections = Args.hasArg(OPT_compress_debug_sections);
   Opts.DebugCompilationDir = Args.getLastArgValue(OPT_fdebug_compilation_dir);
-  Opts.LinkBitcodeFile = Args.getLastArgValue(OPT_mlink_bitcode_file);
+  for (auto A : Args.filtered(OPT_mlink_bitcode_file, OPT_mlink_cuda_bitcode)) {
+    unsigned LinkFlags = llvm::Linker::Flags::None;
+    if (A->getOption().matches(OPT_mlink_cuda_bitcode))
+      LinkFlags = llvm::Linker::Flags::LinkOnlyNeeded |
+                  llvm::Linker::Flags::InternalizeLinkedSymbols;
+    Opts.LinkBitcodeFiles.push_back(std::make_pair(LinkFlags, A->getValue()));
+  }
   Opts.SanitizeCoverageType =
       getLastArgIntValue(Args, OPT_fsanitize_coverage_type, 0, Diags);
   Opts.SanitizeCoverageIndirectCalls =
@@ -1322,7 +1313,7 @@ static Visibility parseVisibility(Arg *arg, ArgList &args,
   StringRef value = arg->getValue();
   if (value == "default") {
     return DefaultVisibility;
-  } else if (value == "hidden") {
+  } else if (value == "hidden" || value == "internal") {
     return HiddenVisibility;
   } else if (value == "protected") {
     // FIXME: diagnose if target does not support protected visibility
@@ -1420,9 +1411,6 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
   if (Args.hasArg(OPT_fcuda_is_device))
     Opts.CUDAIsDevice = 1;
 
-  if (Args.hasArg(OPT_fcuda_uses_libdevice))
-    Opts.CUDAUsesLibDevice = 1;
-
   if (Args.hasArg(OPT_fcuda_allow_host_calls_from_host_device))
     Opts.CUDAAllowHostCallsFromHostDevice = 1;
 
@@ -1447,12 +1435,28 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
       Opts.ObjCAutoRefCount = 1;
       if (!Opts.ObjCRuntime.allowsARC())
         Diags.Report(diag::err_arc_unsupported_on_runtime);
+    }
 
-      // Only set ObjCARCWeak if ARC is enabled.
-      if (Args.hasArg(OPT_fobjc_runtime_has_weak))
-        Opts.ObjCARCWeak = 1;
-      else
-        Opts.ObjCARCWeak = Opts.ObjCRuntime.allowsWeak();
+    // ObjCWeakRuntime tracks whether the runtime supports __weak, not
+    // whether the feature is actually enabled.  This is predominantly
+    // determined by -fobjc-runtime, but we allow it to be overridden
+    // from the command line for testing purposes.
+    if (Args.hasArg(OPT_fobjc_runtime_has_weak))
+      Opts.ObjCWeakRuntime = 1;
+    else
+      Opts.ObjCWeakRuntime = Opts.ObjCRuntime.allowsWeak();
+
+    // ObjCWeak determines whether __weak is actually enabled.
+    if (Opts.ObjCAutoRefCount) {
+      Opts.ObjCWeak = Opts.ObjCWeakRuntime;
+    } else if (Args.hasArg(OPT_fobjc_weak)) {
+      if (Opts.getGC() != LangOptions::NonGC) {
+        Diags.Report(diag::err_objc_weak_with_gc);
+      } else if (Opts.ObjCWeakRuntime) {
+        Opts.ObjCWeak = true;
+      } else {
+        Diags.Report(diag::err_objc_weak_unsupported);
+      }
     }
 
     if (Args.hasArg(OPT_fno_objc_infer_related_result_type))
@@ -1567,6 +1571,7 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
     Opts.Blocks = Args.hasArg(OPT_fblocks);
   }
   Opts.BlocksRuntimeOptional = Args.hasArg(OPT_fblocks_runtime_optional);
+  Opts.Coroutines = Args.hasArg(OPT_fcoroutines);
   Opts.Modules = Args.hasArg(OPT_fmodules);
   Opts.ModulesStrictDeclUse = Args.hasArg(OPT_fmodules_strict_decluse);
   Opts.ModulesDeclUse =
@@ -2019,8 +2024,8 @@ void ModuleSignature::flush() {
 }
 
 void ModuleSignature::add(StringRef Value) {
-  for (StringRef::iterator I = Value.begin(), IEnd = Value.end(); I != IEnd;++I)
-    add(*I, 8);
+  for (auto &c : Value)
+    add(c, 8);
 }
 
 llvm::APInt ModuleSignature::getAsInteger() const {

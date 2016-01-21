@@ -314,12 +314,7 @@ public:
     return EmitNullValue(E->getType());
   }
   Value *VisitExplicitCastExpr(ExplicitCastExpr *E) {
-    if (E->getType()->isVariablyModifiedType())
-      CGF.EmitVariablyModifiedType(E->getType());
-
-    if (CGDebugInfo *DI = CGF.getDebugInfo())
-      DI->EmitExplicitCastType(E->getType());
-
+    CGF.CGM.EmitExplicitCastExprType(E, &CGF);
     return VisitCastExpr(E);
   }
   Value *VisitCastExpr(CastExpr *E);
@@ -1383,7 +1378,7 @@ Value *ScalarExprEmitter::VisitCastExpr(CastExpr *CE) {
   case CK_LValueBitCast:
   case CK_ObjCObjectLValueCast: {
     Address Addr = EmitLValue(E).getAddress();
-    Addr = Builder.CreateElementBitCast(Addr, ConvertType(DestTy));
+    Addr = Builder.CreateElementBitCast(Addr, CGF.ConvertTypeForMem(DestTy));
     LValue LV = CGF.MakeAddrLValue(Addr, DestTy);
     return EmitLoadOfLValue(LV, CE->getExprLoc());
   }

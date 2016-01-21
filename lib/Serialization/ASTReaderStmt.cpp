@@ -381,6 +381,26 @@ void ASTStmtReader::VisitMSAsmStmt(MSAsmStmt *S) {
                 Constraints, Exprs, Clobbers);
 }
 
+void ASTStmtReader::VisitCoroutineBodyStmt(CoroutineBodyStmt *S) {
+  // FIXME: Implement coroutine serialization.
+  llvm_unreachable("unimplemented");
+}
+
+void ASTStmtReader::VisitCoreturnStmt(CoreturnStmt *S) {
+  // FIXME: Implement coroutine serialization.
+  llvm_unreachable("unimplemented");
+}
+
+void ASTStmtReader::VisitCoawaitExpr(CoawaitExpr *S) {
+  // FIXME: Implement coroutine serialization.
+  llvm_unreachable("unimplemented");
+}
+
+void ASTStmtReader::VisitCoyieldExpr(CoyieldExpr *S) {
+  // FIXME: Implement coroutine serialization.
+  llvm_unreachable("unimplemented");
+}
+
 void ASTStmtReader::VisitCapturedStmt(CapturedStmt *S) {
   VisitStmt(S);
   ++Idx;
@@ -1178,9 +1198,10 @@ void ASTStmtReader::VisitCXXTryStmt(CXXTryStmt *S) {
 
 void ASTStmtReader::VisitCXXForRangeStmt(CXXForRangeStmt *S) {
   VisitStmt(S);
-  S->setForLoc(ReadSourceLocation(Record, Idx));
-  S->setColonLoc(ReadSourceLocation(Record, Idx));
-  S->setRParenLoc(ReadSourceLocation(Record, Idx));
+  S->ForLoc = ReadSourceLocation(Record, Idx);
+  S->CoawaitLoc = ReadSourceLocation(Record, Idx);
+  S->ColonLoc = ReadSourceLocation(Record, Idx);
+  S->RParenLoc = ReadSourceLocation(Record, Idx);
   S->setRangeStmt(Reader.ReadSubStmt());
   S->setBeginEndStmt(Reader.ReadSubStmt());
   S->setCond(Reader.ReadSubExpr());
@@ -1993,6 +2014,10 @@ void OMPClauseReader::VisitOMPReductionClause(OMPReductionClause *C) {
   for (unsigned i = 0; i != NumVars; ++i)
     Vars.push_back(Reader->Reader.ReadSubExpr());
   C->setVarRefs(Vars);
+  Vars.clear();
+  for (unsigned i = 0; i != NumVars; ++i)
+    Vars.push_back(Reader->Reader.ReadSubExpr());
+  C->setPrivates(Vars);
   Vars.clear();
   for (unsigned i = 0; i != NumVars; ++i)
     Vars.push_back(Reader->Reader.ReadSubExpr());
