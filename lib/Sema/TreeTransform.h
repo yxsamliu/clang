@@ -1358,12 +1358,15 @@ public:
   ///
   /// By default, performs semantic analysis to build the new OpenMP clause.
   /// Subclasses may override this routine to provide different behavior.
-  OMPClause *RebuildOMPIfClause(Expr *Condition,
-                                SourceLocation StartLoc,
+  OMPClause *RebuildOMPIfClause(OpenMPDirectiveKind NameModifier,
+                                Expr *Condition, SourceLocation StartLoc,
                                 SourceLocation LParenLoc,
+                                SourceLocation NameModifierLoc,
+                                SourceLocation ColonLoc,
                                 SourceLocation EndLoc) {
-    return getSema().ActOnOpenMPIfClause(Condition, StartLoc,
-                                         LParenLoc, EndLoc);
+    return getSema().ActOnOpenMPIfClause(NameModifier, Condition, StartLoc,
+                                         LParenLoc, NameModifierLoc, ColonLoc,
+                                         EndLoc);
   }
 
   /// \brief Build a new OpenMP 'final' clause.
@@ -1971,7 +1974,8 @@ public:
     return getSema().BuildMemberReferenceExpr(Base, BaseType, OpLoc, isArrow,
                                               SS, TemplateKWLoc,
                                               FirstQualifierInScope,
-                                              R, ExplicitTemplateArgs);
+                                              R, ExplicitTemplateArgs,
+                                              /*S*/nullptr);
   }
 
   /// \brief Build a new binary operator expression.
@@ -2037,7 +2041,8 @@ public:
                                               SS, SourceLocation(),
                                               /*FirstQualifierInScope*/ nullptr,
                                               NameInfo,
-                                              /* TemplateArgs */ nullptr);
+                                              /* TemplateArgs */ nullptr,
+                                              /*S*/ nullptr);
   }
 
   /// \brief Build a new initializer list expression.
@@ -2485,7 +2490,7 @@ public:
                                                     TemplateArgs);
 
     return getSema().BuildQualifiedDeclarationNameExpr(
-        SS, NameInfo, IsAddressOfOperand, RecoveryTSI);
+        SS, NameInfo, IsAddressOfOperand, /*S*/nullptr, RecoveryTSI);
   }
 
   /// \brief Build a new template-id expression.
@@ -2579,7 +2584,7 @@ public:
                                             SS, TemplateKWLoc,
                                             FirstQualifierInScope,
                                             MemberNameInfo,
-                                            TemplateArgs);
+                                            TemplateArgs, /*S*/nullptr);
   }
 
   /// \brief Build a new member reference expression.
@@ -2601,7 +2606,7 @@ public:
                                             OperatorLoc, IsArrow,
                                             SS, TemplateKWLoc,
                                             FirstQualifierInScope,
-                                            R, TemplateArgs);
+                                            R, TemplateArgs, /*S*/nullptr);
   }
 
   /// \brief Build a new noexcept expression.
@@ -2741,7 +2746,8 @@ public:
                                               SS, SourceLocation(),
                                               /*FirstQualifierInScope=*/nullptr,
                                               NameInfo,
-                                              /*TemplateArgs=*/nullptr);
+                                              /*TemplateArgs=*/nullptr,
+                                              /*S=*/nullptr);
   }
 
   /// \brief Build a new Objective-C property reference expression.
@@ -2759,7 +2765,8 @@ public:
                                               SS, SourceLocation(),
                                               /*FirstQualifierInScope=*/nullptr,
                                               NameInfo,
-                                              /*TemplateArgs=*/nullptr);
+                                              /*TemplateArgs=*/nullptr,
+                                              /*S=*/nullptr);
   }
 
   /// \brief Build a new Objective-C property reference expression.
@@ -2791,7 +2798,8 @@ public:
                                               SS, SourceLocation(),
                                               /*FirstQualifierInScope=*/nullptr,
                                               NameInfo,
-                                              /*TemplateArgs=*/nullptr);
+                                              /*TemplateArgs=*/nullptr,
+                                              /*S=*/nullptr);
   }
 
   /// \brief Build a new shuffle vector expression.
@@ -7235,8 +7243,9 @@ OMPClause *TreeTransform<Derived>::TransformOMPIfClause(OMPIfClause *C) {
   ExprResult Cond = getDerived().TransformExpr(C->getCondition());
   if (Cond.isInvalid())
     return nullptr;
-  return getDerived().RebuildOMPIfClause(Cond.get(), C->getLocStart(),
-                                         C->getLParenLoc(), C->getLocEnd());
+  return getDerived().RebuildOMPIfClause(
+      C->getNameModifier(), Cond.get(), C->getLocStart(), C->getLParenLoc(),
+      C->getNameModifierLoc(), C->getColonLoc(), C->getLocEnd());
 }
 
 template <typename Derived>
@@ -7827,7 +7836,7 @@ TreeTransform<Derived>::TransformOffsetOfExpr(OffsetOfExpr *E) {
 template<typename Derived>
 ExprResult
 TreeTransform<Derived>::TransformOpaqueValueExpr(OpaqueValueExpr *E) {
-  assert(getDerived().AlreadyTransformed(E->getType()) &&
+  assert((!E->getSourceExpr() || getDerived().AlreadyTransformed(E->getType())) &&
          "opaque value expression requires transformation");
   return E;
 }
@@ -11218,7 +11227,8 @@ TreeTransform<Derived>::RebuildCXXPseudoDestructorExpr(Expr *Base,
                                             SS, TemplateKWLoc,
                                             /*FIXME: FirstQualifier*/ nullptr,
                                             NameInfo,
-                                            /*TemplateArgs*/ nullptr);
+                                            /*TemplateArgs*/ nullptr,
+                                            /*S*/nullptr);
 }
 
 template<typename Derived>

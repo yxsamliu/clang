@@ -4806,7 +4806,7 @@ static bool TryOCLZeroQueueInitialization(Sema &S,
                                           QualType DestType,
                                           Expr *Initializer) {
   if (!S.getLangOpts().OpenCL || S.getLangOpts().OpenCLVersion < 200 ||
-      !DestType->isQueueType() ||
+      !DestType->isQueueT() ||
       !Initializer->isIntegerConstantExpr(S.getASTContext()) ||
       (Initializer->EvaluateKnownConstInt(S.getASTContext()) != 0))
     return false;
@@ -6791,7 +6791,7 @@ InitializationSequence::Perform(Sema &S,
       break;
     }
     case SK_OCLZeroQueue: {
-      assert(Step->Type->isQueueType() &&
+      assert(Step->Type->isQueueT() &&
              "Event initialization on non queue type.");
 
       CurInit = S.ImpCastExprToType(CurInit.get(), Step->Type,

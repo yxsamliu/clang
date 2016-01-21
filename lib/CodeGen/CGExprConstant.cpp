@@ -978,23 +978,26 @@ public:
   }
 
 public:
-  llvm::Constant *EmitLValue(APValue::LValueBase LVBase) {
+  ConstantAddress EmitLValue(APValue::LValueBase LVBase) {
     if (const ValueDecl *Decl = LVBase.dyn_cast<const ValueDecl*>()) {
       if (Decl->hasAttr<WeakRefAttr>())
         return CGM.GetWeakRefReference(Decl);
       if (const FunctionDecl *FD = dyn_cast<FunctionDecl>(Decl))
-        return CGM.GetAddrOfFunction(FD);
+        return ConstantAddress(CGM.GetAddrOfFunction(FD), CharUnits::One());
       if (const VarDecl* VD = dyn_cast<VarDecl>(Decl)) {
         // We can never refer to a variable with local storage.
         if (!VD->hasLocalStorage()) {
+          CharUnits Align = CGM.getContext().getDeclAlign(VD);
           if (VD->isFileVarDecl() || VD->hasExternalStorage())
-            return CGM.GetAddrOfGlobalVar(VD);
-          else if (VD->isLocalVarDecl())
-            return CGM.getOrCreateStaticVarDecl(
+            return ConstantAddress(CGM.GetAddrOfGlobalVar(VD), Align);
+          else if (VD->isLocalVarDecl()) {
+            auto Ptr = CGM.getOrCreateStaticVarDecl(
                 *VD, CGM.getLLVMLinkageVarDefinition(VD, /*isConstant=*/false));
+            return ConstantAddress(Ptr, Align);
+          }
         }
       }
-      return nullptr;
+      return ConstantAddress::invalid();
     }
 
     Expr *E = const_cast<Expr*>(LVBase.get<const Expr*>());
@@ -1007,14 +1010,18 @@ public:
       llvm::Constant* C = CGM.EmitConstantExpr(CLE->getInitializer(),
                                                CLE->getType(), CGF);
       // FIXME: "Leaked" on failure.
-      if (C)
-        C = new llvm::GlobalVariable(CGM.getModule(), C->getType(),
+      if (!C) return ConstantAddress::invalid();
+
+      CharUnits Align = CGM.getContext().getTypeAlignInChars(E->getType());
+
+      auto GV = new llvm::GlobalVariable(CGM.getModule(), C->getType(),
                                      E->getType().isConstant(CGM.getContext()),
                                      llvm::GlobalValue::InternalLinkage,
                                      C, ".compoundliteral", nullptr,
                                      llvm::GlobalVariable::NotThreadLocal,
                           CGM.getContext().getTargetAddressSpace(E->getType()));
-      return C;
+      GV->setAlignment(Align.getQuantity());
+      return ConstantAddress(GV, Align);
     }
     case Expr::StringLiteralClass:
       return CGM.GetAddrOfConstantStringFromLiteral(cast<StringLiteral>(E));
@@ -1022,15 +1029,15 @@ public:
       return CGM.GetAddrOfConstantStringFromObjCEncode(cast<ObjCEncodeExpr>(E));
     case Expr::ObjCStringLiteralClass: {
       ObjCStringLiteral* SL = cast<ObjCStringLiteral>(E);
-      llvm::Constant *C =
+      ConstantAddress C =
           CGM.getObjCRuntime().GenerateConstantString(SL->getString());
-      return llvm::ConstantExpr::getBitCast(C, ConvertType(E->getType()));
+      return C.getElementBitCast(ConvertType(E->getType()));
     }
     case Expr::PredefinedExprClass: {
       unsigned Type = cast<PredefinedExpr>(E)->getIdentType();
       if (CGF) {
         LValue Res = CGF->EmitPredefinedLValue(cast<PredefinedExpr>(E));
-        return cast<llvm::Constant>(Res.getAddress());
+        return cast<ConstantAddress>(Res.getAddress());
       } else if (Type == PredefinedExpr::PrettyFunction) {
         return CGM.GetAddrOfConstantCString("top level", ".tmp");
       }
@@ -1041,7 +1048,8 @@ public:
       assert(CGF && "Invalid address of label expression outside function.");
       llvm::Constant *Ptr =
         CGF->GetAddrOfLabel(cast<AddrLabelExpr>(E)->getLabel());
-      return llvm::ConstantExpr::getBitCast(Ptr, ConvertType(E->getType()));
+      Ptr = llvm::ConstantExpr::getBitCast(Ptr, ConvertType(E->getType()));
+      return ConstantAddress(Ptr, CharUnits::One());
     }
     case Expr::CallExprClass: {
       CallExpr* CE = cast<CallExpr>(E);
@@ -1067,7 +1075,10 @@ public:
       else
         FunctionName = "global";
 
-      return CGM.GetAddrOfGlobalBlock(cast<BlockExpr>(E), FunctionName.c_str());
+      // This is not really an l-value.
+      llvm::Constant *Ptr =
+        CGM.GetAddrOfGlobalBlock(cast<BlockExpr>(E), FunctionName.c_str());
+      return ConstantAddress(Ptr, CGM.getPointerAlign());
     }
     case Expr::CXXTypeidExprClass: {
       CXXTypeidExpr *Typeid = cast<CXXTypeidExpr>(E);
@@ -1076,7 +1087,8 @@ public:
         T = Typeid->getTypeOperand(CGM.getContext());
       else
         T = Typeid->getExprOperand()->getType();
-      return CGM.GetAddrOfRTTIDescriptor(T);
+      return ConstantAddress(CGM.GetAddrOfRTTIDescriptor(T),
+                             CGM.getPointerAlign());
     }
     case Expr::CXXUuidofExprClass: {
       return CGM.GetAddrOfUuidDescriptor(cast<CXXUuidofExpr>(E));
@@ -1092,7 +1104,7 @@ public:
     }
     }
 
-    return nullptr;
+    return ConstantAddress::invalid();
   }
 };
 
@@ -1256,7 +1268,7 @@ llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
     llvm::Constant *Offset =
       llvm::ConstantInt::get(Int64Ty, Value.getLValueOffset().getQuantity());
 
-    llvm::Constant *C;
+    llvm::Constant *C = nullptr;
     if (APValue::LValueBase LVBase = Value.getLValueBase()) {
       // An array can be represented as an lvalue referring to the base.
       if (isa<llvm::ArrayType>(DestTy)) {
@@ -1265,7 +1277,7 @@ llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
           const_cast<Expr*>(LVBase.get<const Expr*>()));
       }
 
-      C = ConstExprEmitter(*this, CGF).EmitLValue(LVBase);
+      C = ConstExprEmitter(*this, CGF).EmitLValue(LVBase).getPointer();
 
       // Apply offset if necessary.
       if (!Offset->isNullValue()) {
@@ -1439,7 +1451,7 @@ CodeGenModule::EmitConstantValueForMemory(const APValue &Value,
   return C;
 }
 
-llvm::Constant *
+ConstantAddress
 CodeGenModule::GetAddrOfConstantCompoundLiteral(const CompoundLiteralExpr *E) {
   assert(E->isFileScope() && "not a file-scope compound literal expr");
   return ConstExprEmitter(*this, nullptr).EmitLValue(E);

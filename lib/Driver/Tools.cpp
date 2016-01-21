@@ -484,6 +484,8 @@ static bool isNoCommonDefault(const llvm::Triple &Triple) {
     return false;
 
   case llvm::Triple::xcore:
+  case llvm::Triple::wasm32:
+  case llvm::Triple::wasm64:
     return true;
   }
 }
@@ -1553,6 +1555,25 @@ static const char *getX86TargetCPU(const ArgList &Args,
   }
 }
 
+/// Get the (LLVM) name of the WebAssembly cpu we are targeting.
+static StringRef getWebAssemblyTargetCPU(const ArgList &Args) {
+  // If we have -mcpu=, use that.
+  if (Arg *A = Args.getLastArg(options::OPT_mcpu_EQ)) {
+    StringRef CPU = A->getValue();
+
+#ifdef __wasm__
+    // Handle "native" by examining the host. "native" isn't meaningful when
+    // cross compiling, so only support this when the host is also WebAssembly.
+    if (CPU == "native")
+      return llvm::sys::getHostCPUName();
+#endif
+
+    return CPU;
+  }
+
+  return "generic";
+}
+
 static std::string getCPUName(const ArgList &Args, const llvm::Triple &T,
                               bool FromAs = false) {
   switch (T.getArch()) {
@@ -1625,6 +1646,10 @@ static std::string getCPUName(const ArgList &Args, const llvm::Triple &T,
   case llvm::Triple::r600:
   case llvm::Triple::amdgcn:
     return getR600TargetGPU(Args);
+
+  case llvm::Triple::wasm32:
+  case llvm::Triple::wasm64:
+    return getWebAssemblyTargetCPU(Args);
   }
 }
 
@@ -2074,6 +2099,24 @@ static void getAArch64TargetFeatures(const Driver &D,
     Features.push_back("+reserve-x18");
 }
 
+static void getWebAssemblyTargetFeatures(const ArgList &Args,
+                                         std::vector<const char *> &Features) {
+  for (const Arg *A : Args.filtered(options::OPT_m_wasm_Features_Group)) {
+    StringRef Name = A->getOption().getName();
+    A->claim();
+
+    // Skip over "-m".
+    assert(Name.startswith("m") && "Invalid feature name.");
+    Name = Name.substr(1);
+
+    bool IsNegative = Name.startswith("no-");
+    if (IsNegative)
+      Name = Name.substr(3);
+
+    Features.push_back(Args.MakeArgString((IsNegative ? "-" : "+") + Name));
+  }
+}
+
 static void getTargetFeatures(const Driver &D, const llvm::Triple &Triple,
                               const ArgList &Args, ArgStringList &CmdArgs,
                               bool ForAS) {
@@ -2110,6 +2153,10 @@ static void getTargetFeatures(const Driver &D, const llvm::Triple &Triple,
   case llvm::Triple::x86:
   case llvm::Triple::x86_64:
     getX86TargetFeatures(D, Triple, Args, Features);
+    break;
+  case llvm::Triple::wasm32:
+  case llvm::Triple::wasm64:
+    getWebAssemblyTargetFeatures(Args, Features);
     break;
   }
 
@@ -2335,6 +2382,12 @@ static void CollectArgsForIntegratedAssembler(Compilation &C,
       } else if (Value.startswith("-mcpu") || Value.startswith("-mfpu") ||
                  Value.startswith("-mhwdiv") || Value.startswith("-march")) {
         // Do nothing, we'll validate it later.
+      } else if (Value == "--trap") {
+        CmdArgs.push_back("-target-feature");
+        CmdArgs.push_back("+use-tcc-in-div");
+      } else if (Value == "--break") {
+        CmdArgs.push_back("-target-feature");
+        CmdArgs.push_back("-use-tcc-in-div");
       } else {
         D.Diag(diag::err_drv_unsupported_option_argument)
             << A->getOption().getName() << Value;
@@ -2584,9 +2637,15 @@ static bool areOptimizationsEnabled(const ArgList &Args) {
 
 static bool shouldUseFramePointerForTarget(const ArgList &Args,
                                            const llvm::Triple &Triple) {
-  // XCore never wants frame pointers, regardless of OS.
-  if (Triple.getArch() == llvm::Triple::xcore) {
+  switch (Triple.getArch()) {
+  case llvm::Triple::xcore:
+  case llvm::Triple::wasm32:
+  case llvm::Triple::wasm64:
+    // XCore never wants frame pointers, regardless of OS.
+    // WebAssembly never wants frame pointers.
     return false;
+  default:
+    break;
   }
 
   if (Triple.isOSLinux()) {
@@ -3263,6 +3322,11 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
       CmdArgs.push_back("-analyzer-checker=security.insecureAPI.mktemp");
       CmdArgs.push_back("-analyzer-checker=security.insecureAPI.mkstemp");
       CmdArgs.push_back("-analyzer-checker=security.insecureAPI.vfork");
+
+      // Default nullability checks.
+      CmdArgs.push_back("-analyzer-checker=nullability.NullPassedToNonnull");
+      CmdArgs.push_back(
+          "-analyzer-checker=nullability.NullReturnedFromNonnull");
     }
 
     // Set the output format. The default is plist, for (lame) historical
@@ -3379,6 +3443,10 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   if (Args.hasFlag(options::OPT_fstrict_enums, options::OPT_fno_strict_enums,
                    false))
     CmdArgs.push_back("-fstrict-enums");
+  if (Args.hasFlag(options::OPT_fstrict_vtable_pointers,
+                   options::OPT_fno_strict_vtable_pointers,
+                   false))
+    CmdArgs.push_back("-fstrict-vtable-pointers");
   if (!Args.hasFlag(options::OPT_foptimize_sibling_calls,
                     options::OPT_fno_optimize_sibling_calls))
     CmdArgs.push_back("-mdisable-tail-calls");
@@ -3710,14 +3778,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
           Triple.getOS() == llvm::Triple::Solaris)
         CmdArgs.push_back("-gdwarf-2");
       SplitDwarfArg = nullptr;
-    } else if (A->getOption().matches(options::OPT_gdwarf_2))
-      CmdArgs.push_back("-gdwarf-2");
-    else if (A->getOption().matches(options::OPT_gdwarf_3))
-      CmdArgs.push_back("-gdwarf-3");
-    else if (A->getOption().matches(options::OPT_gdwarf_4))
-      CmdArgs.push_back("-gdwarf-4");
-    else if (!A->getOption().matches(options::OPT_g0) &&
-             !A->getOption().matches(options::OPT_ggdb0)) {
+    } else if (A->getOption().matches(options::OPT_gdwarf_2) ||
+               A->getOption().matches(options::OPT_gdwarf_3) ||
+               A->getOption().matches(options::OPT_gdwarf_4)) {
+      A->render(Args, CmdArgs);
+    } else if (!A->getOption().matches(options::OPT_g0) &&
+               !A->getOption().matches(options::OPT_ggdb0)) {
       // Default is dwarf-2 for Darwin, OpenBSD, FreeBSD and Solaris.
       const llvm::Triple &Triple = getToolChain().getTriple();
       if (Triple.isOSDarwin() || Triple.getOS() == llvm::Triple::OpenBSD ||
@@ -4146,10 +4212,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
       // given, decide a default based on the target. Otherwise rely on the
       // options and pass the right information to the frontend.
       if (!Args.hasFlag(options::OPT_fopenmp_use_tls,
-                        options::OPT_fnoopenmp_use_tls,
-                        getToolChain().getArch() == llvm::Triple::ppc ||
-                            getToolChain().getArch() == llvm::Triple::ppc64 ||
-                            getToolChain().getArch() == llvm::Triple::ppc64le))
+                        options::OPT_fnoopenmp_use_tls, /*Default=*/true))
         CmdArgs.push_back("-fnoopenmp-use-tls");
       break;
     default:
@@ -4270,14 +4333,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   // Translate -mstackrealign
   if (Args.hasFlag(options::OPT_mstackrealign, options::OPT_mno_stackrealign,
-                   false)) {
-    CmdArgs.push_back("-backend-option");
-    CmdArgs.push_back("-force-align-stack");
-  }
-  if (!Args.hasFlag(options::OPT_mno_stackrealign, options::OPT_mstackrealign,
-                    false)) {
+                   false))
     CmdArgs.push_back(Args.MakeArgString("-mstackrealign"));
-  }
 
   if (Args.hasArg(options::OPT_mstack_alignment)) {
     StringRef alignment = Args.getLastArgValue(options::OPT_mstack_alignment);
@@ -4293,9 +4350,19 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
       CmdArgs.push_back("-mstack-probe-size=0");
   }
 
-  if (getToolChain().getArch() == llvm::Triple::aarch64 ||
-      getToolChain().getArch() == llvm::Triple::aarch64_be)
+  switch (getToolChain().getArch()) {
+  case llvm::Triple::aarch64:
+  case llvm::Triple::aarch64_be:
+  case llvm::Triple::arm:
+  case llvm::Triple::armeb:
+  case llvm::Triple::thumb:
+  case llvm::Triple::thumbeb:
     CmdArgs.push_back("-fallow-half-arguments-and-returns");
+    break;
+
+  default:
+    break;
+  }
 
   if (Arg *A = Args.getLastArg(options::OPT_mrestrict_it,
                                options::OPT_mno_restrict_it)) {
@@ -4395,7 +4462,10 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   Args.AddAllArgs(CmdArgs, options::OPT_fmodule_map_file);
 
   // -fmodule-file can be used to specify files containing precompiled modules.
-  Args.AddAllArgs(CmdArgs, options::OPT_fmodule_file);
+  if (HaveModules)
+    Args.AddAllArgs(CmdArgs, options::OPT_fmodule_file);
+  else
+    Args.ClaimAllArgs(options::OPT_fmodule_file);
 
   // -fmodule-cache-path specifies where our implicitly-built module files
   // should be written.
@@ -4506,8 +4576,9 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   if (!Args.hasFlag(options::OPT_fuse_cxa_atexit,
                     options::OPT_fno_use_cxa_atexit,
                     !IsWindowsCygnus && !IsWindowsGNU &&
-                        getToolChain().getArch() != llvm::Triple::hexagon &&
-                        getToolChain().getArch() != llvm::Triple::xcore) ||
+                    getToolChain().getTriple().getOS() != llvm::Triple::Solaris &&
+                    getToolChain().getArch() != llvm::Triple::hexagon &&
+                    getToolChain().getArch() != llvm::Triple::xcore) ||
       KernelOrKext)
     CmdArgs.push_back("-fno-use-cxa-atexit");
 
@@ -5487,12 +5558,9 @@ void ClangAs::ConstructJob(Compilation &C, const JobAction &JA,
       if (!A->getOption().matches(options::OPT_g0))
         CmdArgs.push_back("-g");
 
-    if (Args.hasArg(options::OPT_gdwarf_2))
-      CmdArgs.push_back("-gdwarf-2");
-    if (Args.hasArg(options::OPT_gdwarf_3))
-      CmdArgs.push_back("-gdwarf-3");
-    if (Args.hasArg(options::OPT_gdwarf_4))
-      CmdArgs.push_back("-gdwarf-4");
+    if (Arg *A = Args.getLastArg(options::OPT_gdwarf_2, options::OPT_gdwarf_3,
+                                 options::OPT_gdwarf_4))
+      A->render(Args, CmdArgs);
 
     // Add the -fdebug-compilation-dir flag if needed.
     addDebugCompDirArg(Args, CmdArgs);
@@ -6879,10 +6947,6 @@ void solaris::Linker::ConstructJob(Compilation &C, const JobAction &JA,
         Args.MakeArgString(getToolChain().GetFilePath("values-Xa.o")));
     CmdArgs.push_back(
         Args.MakeArgString(getToolChain().GetFilePath("crtbegin.o")));
-
-    if (getToolChain().getDriver().CCCIsCXX())
-      CmdArgs.push_back(
-          Args.MakeArgString(getToolChain().GetFilePath("cxa_finalize.o")));
   }
 
   const ToolChain::path_list &Paths = getToolChain().getFilePaths();
@@ -6899,9 +6963,9 @@ void solaris::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     if (getToolChain().getDriver().CCCIsCXX())
       getToolChain().AddCXXStdlibLibArgs(Args, CmdArgs);
     CmdArgs.push_back("-lgcc_s");
+    CmdArgs.push_back("-lc");
     if (!Args.hasArg(options::OPT_shared)) {
       CmdArgs.push_back("-lgcc");
-      CmdArgs.push_back("-lc");
       CmdArgs.push_back("-lm");
     }
   }
@@ -8882,6 +8946,13 @@ void visualstudio::Linker::ConstructJob(Compilation &C, const JobAction &JA,
       }
       CmdArgs.push_back(
           Args.MakeArgString(std::string("-libpath:") + LibDir.c_str()));
+
+      if (MSVC.useUniversalCRT(VisualStudioDir)) {
+        std::string UniversalCRTLibPath;
+        if (MSVC.getUniversalCRTLibraryPath(UniversalCRTLibPath))
+          CmdArgs.push_back(Args.MakeArgString(std::string("-libpath:") +
+                                               UniversalCRTLibPath.c_str()));
+      }
     }
 
     std::string WindowsSdkLibPath;
@@ -9600,14 +9671,27 @@ void tools::SHAVE::Compiler::ConstructJob(Compilation &C, const JobAction &JA,
   // Append all -I, -iquote, -isystem paths, defines/undefines,
   // 'f' flags, optimize flags, and warning options.
   // These are spelled the same way in clang and moviCompile.
-  Args.AddAllArgs(CmdArgs,
-                  {options::OPT_I_Group, options::OPT_clang_i_Group,
-                   options::OPT_D, options::OPT_U,
-                   options::OPT_f_Group,
-                   options::OPT_f_clang_Group,
-                   options::OPT_g_Group,
-                   options::OPT_O_Group,
-                   options::OPT_W_Group});
+  Args.AddAllArgs(CmdArgs, {options::OPT_I_Group, options::OPT_clang_i_Group,
+                            options::OPT_D, options::OPT_U,
+                            options::OPT_f_Group, options::OPT_f_clang_Group,
+                            options::OPT_g_Group, options::OPT_M_Group,
+                            options::OPT_O_Group, options::OPT_W_Group});
+
+  // If we're producing a dependency file, and assembly is the final action,
+  // then the name of the target in the dependency file should be the '.o'
+  // file, not the '.s' file produced by this step. For example, instead of
+  //  /tmp/mumble.s: mumble.c .../someheader.h
+  // the filename on the lefthand side should be "mumble.o"
+  if (Args.getLastArg(options::OPT_MF) && !Args.getLastArg(options::OPT_MT) &&
+      C.getActions().size() == 1 &&
+      C.getActions()[0]->getKind() == Action::AssembleJobClass) {
+    Arg *A = Args.getLastArg(options::OPT_o);
+    if (A) {
+      CmdArgs.push_back("-MT");
+      CmdArgs.push_back(Args.MakeArgString(A->getValue()));
+    }
+  }
+
   CmdArgs.push_back("-fno-exceptions"); // Always do this even if unspecified.
 
   CmdArgs.push_back(II.getFilename());
@@ -9633,13 +9717,14 @@ void tools::SHAVE::Assembler::ConstructJob(Compilation &C, const JobAction &JA,
   assert(Output.getType() == types::TY_Object);
 
   CmdArgs.push_back("-no6thSlotCompression");
-  CmdArgs.push_back("-cv:myriad2"); // Chip Version ?
+  CmdArgs.push_back("-cv:myriad2"); // Chip Version
   CmdArgs.push_back("-noSPrefixing");
   CmdArgs.push_back("-a"); // Mystery option.
-  for (auto Arg : Args.filtered(options::OPT_I)) {
-    Arg->claim();
+  Args.AddAllArgValues(CmdArgs, options::OPT_Wa_COMMA, options::OPT_Xassembler);
+  for (const Arg *A : Args.filtered(options::OPT_I, options::OPT_isystem)) {
+    A->claim();
     CmdArgs.push_back(
-        Args.MakeArgString(std::string("-i:") + Arg->getValue(0)));
+        Args.MakeArgString(std::string("-i:") + A->getValue(0)));
   }
   CmdArgs.push_back("-elf"); // Output format.
   CmdArgs.push_back(II.getFilename());

@@ -901,6 +901,11 @@ Sema::CheckOverload(Scope *S, FunctionDecl *New, const LookupResult &Old,
       OldD = cast<UsingShadowDecl>(OldD)->getTargetDecl();
     }
 
+    // A using-declaration does not conflict with another declaration
+    // if one of them is hidden.
+    if ((OldIsUsingDecl || NewIsUsingDecl) && !isVisible(*I))
+      continue;
+
     // If either declaration was introduced by a using declaration,
     // we'll need to use slightly different rules for matching.
     // Essentially, these rules are the normal rules, except that
@@ -1635,7 +1640,7 @@ static bool IsStandardConversion(Sema &S, Expr* From, QualType ToType,
              (From->EvaluateKnownConstInt(S.getASTContext()) == 0)) {
     SCS.Second = ICK_Zero_Event_Conversion;
     FromType = ToType;
-  } else if (ToType->isQueueType() &&
+  } else if (ToType->isQueueT() &&
              From->isIntegerConstantExpr(S.getASTContext()) &&
              (From->EvaluateKnownConstInt(S.getASTContext()) == 0)) {
     SCS.Second = ICK_Zero_Queue_Conversion;
@@ -10752,8 +10757,8 @@ BuildRecoveryCallExpr(Sema &SemaRef, Scope *S, Expr *Fn,
   // casts and such from the call, we don't really care.
   ExprResult NewFn = ExprError();
   if ((*R.begin())->isCXXClassMember())
-    NewFn = SemaRef.BuildPossibleImplicitMemberExpr(SS, TemplateKWLoc,
-                                                    R, ExplicitTemplateArgs);
+    NewFn = SemaRef.BuildPossibleImplicitMemberExpr(SS, TemplateKWLoc, R,
+                                                    ExplicitTemplateArgs, S);
   else if (ExplicitTemplateArgs || TemplateKWLoc.isValid())
     NewFn = SemaRef.BuildTemplateIdExpr(SS, TemplateKWLoc, R, false,
                                         ExplicitTemplateArgs);
@@ -11639,10 +11644,6 @@ Sema::BuildCallToMemberFunction(Scope *S, Expr *MemExprE,
         << (qualsString.find(' ') == std::string::npos ? 1 : 2);
     }
 
-    if (resultType->isMemberPointerType())
-      if (Context.getTargetInfo().getCXXABI().isMicrosoft())
-        RequireCompleteType(LParenLoc, resultType, 0);
-
     CXXMemberCallExpr *call
       = new (Context) CXXMemberCallExpr(Context, MemExprE, Args,
                                         resultType, valueKind, RParenLoc);
@@ -12372,7 +12373,7 @@ Sema::BuildForRangeBeginEndCall(Scope *S, SourceLocation Loc,
                                  /*TemplateKWLoc=*/SourceLocation(),
                                  /*FirstQualifierInScope=*/nullptr,
                                  MemberLookup,
-                                 /*TemplateArgs=*/nullptr);
+                                 /*TemplateArgs=*/nullptr, S);
     if (MemberRef.isInvalid()) {
       *CallExpr = ExprError();
       Diag(Range->getLocStart(), diag::note_in_for_range)

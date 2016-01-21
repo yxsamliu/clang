@@ -347,9 +347,10 @@ TypeSpecifierType BuiltinTypeLoc::getWrittenTypeSpec() const {
   case BuiltinType::OCLImage3d:
   case BuiltinType::OCLSampler:
   case BuiltinType::OCLEvent:
+  case BuiltinType::OCLClkEvent:
   case BuiltinType::OCLQueue:
-  case BuiltinType::OCLCLKEvent:
-  case BuiltinType::OCLReserveId:
+  case BuiltinType::OCLNDRange:
+  case BuiltinType::OCLReserveID:
   case BuiltinType::BuiltinFn:
   case BuiltinType::OMPArraySection:
     return TST_unspecified;

@@ -255,10 +255,11 @@ public:
   unsigned getTypeWidth(IntType T) const;
 
   /// \brief Return integer type with specified width.
-  IntType getIntTypeByWidth(unsigned BitWidth, bool IsSigned) const;
+  virtual IntType getIntTypeByWidth(unsigned BitWidth, bool IsSigned) const;
 
   /// \brief Return the smallest integer type with at least the specified width.
-  IntType getLeastIntTypeByWidth(unsigned BitWidth, bool IsSigned) const;
+  virtual IntType getLeastIntTypeByWidth(unsigned BitWidth,
+                                         bool IsSigned) const;
 
   /// \brief Return floating point type with specified width.
   RealType getRealTypeByWidth(unsigned BitWidth) const;
@@ -746,15 +747,7 @@ public:
   /// \return False on error (invalid features).
   virtual bool initFeatureMap(llvm::StringMap<bool> &Features,
                               DiagnosticsEngine &Diags, StringRef CPU,
-                              std::vector<std::string> &FeatureVec) const {
-    for (const auto &F : FeatureVec) {
-      const char *Name = F.c_str();
-      // Apply the feature via the target.
-      bool Enabled = Name[0] == '+';
-      setFeatureEnabled(Features, Name + 1, Enabled);
-    }
-    return true;
-  }
+                              std::vector<std::string> &FeatureVec) const;
 
   /// \brief Get the ABI currently in use.
   virtual StringRef getABI() const { return StringRef(); }

@@ -1022,7 +1022,7 @@ Corrected:
   
   if (FirstDecl->isCXXClassMember())
     return BuildPossibleImplicitMemberExpr(SS, SourceLocation(), Result,
-                                           nullptr);
+                                           nullptr, S);
 
   bool ADL = UseArgumentDependentLookup(SS, Result, NextToken.is(tok::l_paren));
   return BuildDeclarationNameExpr(SS, Result, ADL);
@@ -3560,6 +3560,9 @@ void Sema::handleTagNumbering(const TagDecl *Tag, Scope *TagScope) {
 
 void Sema::setTagNameForLinkagePurposes(TagDecl *TagFromDeclSpec,
                                         TypedefNameDecl *NewTD) {
+  if (TagFromDeclSpec->isInvalidDecl())
+    return;
+
   // Do nothing if the tag already has a name for linkage purposes.
   if (TagFromDeclSpec->hasNameForLinkage())
     return;
@@ -5356,9 +5359,11 @@ static void checkAttributesAfterMerging(Sema &S, NamedDecl &ND) {
     }
   }
 
-  // dll attributes require external linkage.
   if (const InheritableAttr *Attr = getDLLAttr(&ND)) {
-    if (!ND.isExternallyVisible()) {
+    // dll attributes require external linkage. Static locals may have external
+    // linkage but still cannot be explicitly imported or exported.
+    auto *VD = dyn_cast<VarDecl>(&ND);
+    if (!ND.isExternallyVisible() || (VD && VD->isStaticLocal())) {
       S.Diag(ND.getLocation(), diag::err_attribute_dll_not_extern)
         << &ND << Attr;
       ND.setInvalidDecl();
@@ -5914,8 +5919,26 @@ Sema::ActOnVariableDeclarator(Scope *S, Declarator &D, DeclContext *DC,
     if (D.getDeclSpec().isConstexprSpecified())
       NewVD->setConstexpr(true);
 
-    if (D.getDeclSpec().isConceptSpecified())
+    if (D.getDeclSpec().isConceptSpecified()) {
       NewVD->setConcept(true);
+
+      // C++ Concepts TS [dcl.spec.concept]p2: A concept definition shall not
+      // be declared with the thread_local, inline, friend, or constexpr
+      // specifiers, [...]
+      if (D.getDeclSpec().getThreadStorageClassSpec() == TSCS_thread_local) {
+        Diag(D.getDeclSpec().getThreadStorageClassSpecLoc(),
+             diag::err_concept_decl_invalid_specifiers)
+            << 0 << 0;
+        NewVD->setInvalidDecl(true);
+  }
+
+      if (D.getDeclSpec().isConstexprSpecified()) {
+        Diag(D.getDeclSpec().getConstexprSpecLoc(),
+             diag::err_concept_decl_invalid_specifiers)
+            << 0 << 3;
+        NewVD->setInvalidDecl(true);
+      }
+    }
   }
 
   // Set the lexical context. If the declarator has a C++ scope specifier, the
@@ -7128,7 +7151,7 @@ static OpenCLParamType getOpenCLKernelParameterType(QualType PT) {
   if (PT->isImageType())
     return PtrKernelParam;
 
-  if (PT->isBooleanType() || PT->isEventT() || PT->isReserveIdT() ||
+  if (PT->isBooleanType() || PT->isEventT() || PT->isReserveIDT() ||
       PT->isHalfType())
     return InvalidKernelParam;
 
@@ -7299,7 +7322,8 @@ Sema::ActOnFunctionDeclarator(Scope *S, Declarator &D, DeclContext *DC,
       << DeclSpec::getSpecifierName(TSCS);
 
   if (D.isFirstDeclarationOfMember())
-    adjustMemberFunctionCC(R, D.isStaticMember());
+    adjustMemberFunctionCC(R, D.isStaticMember(), D.isCtorOrDtor(),
+                           D.getIdentifierLoc());
 
   bool isFriend = false;
   FunctionTemplateDecl *FunctionTemplate = nullptr;
@@ -7575,6 +7599,30 @@ Sema::ActOnFunctionDeclarator(Scope *S, Declarator &D, DeclContext *DC,
       // C++ Concepts TS [dcl.spec.concept]p2: Every concept definition is
       // implicity defined to be a constexpr declaration (implicitly inline)
       NewFD->setImplicitlyInline();
+
+      // C++ Concepts TS [dcl.spec.concept]p2: A concept definition shall not
+      // be declared with the thread_local, inline, friend, or constexpr
+      // specifiers, [...]
+      if (isInline) {
+        Diag(D.getDeclSpec().getInlineSpecLoc(),
+             diag::err_concept_decl_invalid_specifiers)
+            << 1 << 1;
+        NewFD->setInvalidDecl(true);
+    }
+
+      if (isFriend) {
+        Diag(D.getDeclSpec().getFriendSpecLoc(),
+             diag::err_concept_decl_invalid_specifiers)
+            << 1 << 2;
+        NewFD->setInvalidDecl(true);
+      }
+
+      if (isConstexpr) {
+        Diag(D.getDeclSpec().getConstexprSpecLoc(),
+             diag::err_concept_decl_invalid_specifiers)
+            << 1 << 3;
+        NewFD->setInvalidDecl(true);
+      }
     }
 
     // If __module_private__ was specified, mark the function accordingly.
@@ -12687,26 +12735,36 @@ ExprResult Sema::VerifyBitField(SourceLocation FieldLoc,
   }
 
   if (!FieldTy->isDependentType()) {
-    uint64_t TypeSize = Context.getTypeSize(FieldTy);
-    if (Value.getZExtValue() > TypeSize) {
-      if (!getLangOpts().CPlusPlus || IsMsStruct ||
-          Context.getTargetInfo().getCXXABI().isMicrosoft()) {
-        if (FieldName) 
-          return Diag(FieldLoc, diag::err_bitfield_width_exceeds_type_size)
-            << FieldName << (unsigned)Value.getZExtValue() 
-            << (unsigned)TypeSize;
-        
-        return Diag(FieldLoc, diag::err_anon_bitfield_width_exceeds_type_size)
-          << (unsigned)Value.getZExtValue() << (unsigned)TypeSize;
-      }
-      
+    uint64_t TypeStorageSize = Context.getTypeSize(FieldTy);
+    uint64_t TypeWidth = Context.getIntWidth(FieldTy);
+    bool BitfieldIsOverwide = Value.ugt(TypeWidth);
+
+    // Over-wide bitfields are an error in C or when using the MSVC bitfield
+    // ABI.
+    bool CStdConstraintViolation =
+        BitfieldIsOverwide && !getLangOpts().CPlusPlus;
+    bool MSBitfieldViolation =
+        Value.ugt(TypeStorageSize) &&
+        (IsMsStruct || Context.getTargetInfo().getCXXABI().isMicrosoft());
+    if (CStdConstraintViolation || MSBitfieldViolation) {
+      unsigned DiagWidth =
+          CStdConstraintViolation ? TypeWidth : TypeStorageSize;
       if (FieldName)
-        Diag(FieldLoc, diag::warn_bitfield_width_exceeds_type_size)
-          << FieldName << (unsigned)Value.getZExtValue() 
-          << (unsigned)TypeSize;
+        return Diag(FieldLoc, diag::err_bitfield_width_exceeds_type_width)
+               << FieldName << (unsigned)Value.getZExtValue() << DiagWidth;
+
+      return Diag(FieldLoc, diag::err_anon_bitfield_width_exceeds_type_width)
+             << (unsigned)Value.getZExtValue() << DiagWidth;
+      }
+
+    if (BitfieldIsOverwide) {
+      if (FieldName)
+        Diag(FieldLoc, diag::warn_bitfield_width_exceeds_type_width)
+            << FieldName << (unsigned)Value.getZExtValue()
+            << (unsigned)TypeWidth;
       else
-        Diag(FieldLoc, diag::warn_anon_bitfield_width_exceeds_type_size)
-          << (unsigned)Value.getZExtValue() << (unsigned)TypeSize;        
+        Diag(FieldLoc, diag::warn_anon_bitfield_width_exceeds_type_width)
+            << (unsigned)Value.getZExtValue() << (unsigned)TypeWidth;
     }
   }
 
@@ -14120,6 +14178,35 @@ static void CheckForDuplicateEnumValues(Sema &S, ArrayRef<Decl *> Elements,
   }
 }
 
+bool Sema::IsValueInFlagEnum(const EnumDecl *ED, const llvm::APInt &Val,
+                             bool AllowMask) const {
+  assert(ED->hasAttr<FlagEnumAttr>() && "looking for value in non-flag enum");
+  assert(ED->isCompleteDefinition() && "expected enum definition");
+
+  auto R = FlagBitsCache.insert(std::make_pair(ED, llvm::APInt()));
+  llvm::APInt &FlagBits = R.first->second;
+
+  if (R.second) {
+    for (auto *E : ED->enumerators()) {
+      const auto &EVal = E->getInitVal();
+      // Only single-bit enumerators introduce new flag values.
+      if (EVal.isPowerOf2())
+        FlagBits = FlagBits.zextOrSelf(EVal.getBitWidth()) | EVal;
+    }
+  }
+
+  // A value is in a flag enum if either its bits are a subset of the enum's
+  // flag bits (the first condition) or we are allowing masks and the same is
+  // true of its complement (the second condition). When masks are allowed, we
+  // allow the common idiom of ~(enum1 | enum2) to be a valid enum value.
+  //
+  // While it's true that any value could be used as a mask, the assumption is
+  // that a mask will have all of the insignificant bits set. Anything else is
+  // likely a logic error.
+  llvm::APInt FlagMask = ~FlagBits.zextOrTrunc(Val.getBitWidth());
+  return !(FlagMask & Val) || (AllowMask && !(FlagMask & ~Val));
+}
+
 void Sema::ActOnEnumBody(SourceLocation EnumLoc, SourceLocation LBraceLoc,
                          SourceLocation RBraceLoc, Decl *EnumDeclX,
                          ArrayRef<Decl *> Elements,
@@ -14275,8 +14362,8 @@ void Sema::ActOnEnumBody(SourceLocation EnumLoc, SourceLocation LBraceLoc,
 
   // Loop over all of the enumerator constants, changing their types to match
   // the type of the enum if needed.
-  for (unsigned i = 0, e = Elements.size(); i != e; ++i) {
-    EnumConstantDecl *ECD = cast_or_null<EnumConstantDecl>(Elements[i]);
+  for (auto *D : Elements) {
+    auto *ECD = cast_or_null<EnumConstantDecl>(D);
     if (!ECD) continue;  // Already issued a diagnostic.
 
     // Standard C says the enumerators have int type, but we allow, as an
@@ -14339,6 +14426,19 @@ void Sema::ActOnEnumBody(SourceLocation EnumLoc, SourceLocation LBraceLoc,
                            NumPositiveBits, NumNegativeBits);
 
   CheckForDuplicateEnumValues(*this, Elements, Enum, EnumType);
+
+  if (Enum->hasAttr<FlagEnumAttr>()) {
+    for (Decl *D : Elements) {
+      EnumConstantDecl *ECD = cast_or_null<EnumConstantDecl>(D);
+      if (!ECD) continue;  // Already issued a diagnostic.
+
+      llvm::APSInt InitVal = ECD->getInitVal();
+      if (InitVal != 0 && !InitVal.isPowerOf2() &&
+          !IsValueInFlagEnum(Enum, InitVal, true))
+        Diag(ECD->getLocation(), diag::warn_flag_enum_constant_out_of_range)
+          << ECD << Enum;
+    }
+  }
 
   // Now that the enum type is defined, ensure it's not been underaligned.
   if (Enum->hasAttrs())
