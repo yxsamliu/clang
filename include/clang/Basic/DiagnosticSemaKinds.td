@@ -7557,8 +7557,6 @@ def err_image_type_can_be_used_only_as_parameter : Error <
 // Atomics.
 def err_atomic_init_addressspace : Error<
   "initialization of atomic variables is restricted to variables in global address space">;
-def err_atomic_init_constant : Error <
- "atomic variables can only be assigned to compile time constants, in their definition statement">;
 // Blocks.
 def err_invalid_block_as_parameter : Error<
   "block parameter given must take pointers to local memory as parameters (prototype is %0)">;
