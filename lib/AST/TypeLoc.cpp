@@ -351,6 +351,7 @@ TypeSpecifierType BuiltinTypeLoc::getWrittenTypeSpec() const {
   case BuiltinType::OCLCLKEvent:
   case BuiltinType::OCLReserveId:
   case BuiltinType::BuiltinFn:
+  case BuiltinType::OMPArraySection:
     return TST_unspecified;
   }
 

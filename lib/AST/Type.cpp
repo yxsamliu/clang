@@ -836,11 +836,8 @@ public:
       }
 
       if (exceptionChanged) {
-        unsigned size = sizeof(QualType) * exceptionTypes.size();
-        void *mem = Ctx.Allocate(size, llvm::alignOf<QualType>());
-        memcpy(mem, exceptionTypes.data(), size);
-        info.ExceptionSpec.Exceptions
-          = llvm::makeArrayRef((QualType *)mem, exceptionTypes.size());
+        info.ExceptionSpec.Exceptions =
+            llvm::makeArrayRef(exceptionTypes).copy(Ctx);
       }
     }
 
@@ -1158,11 +1155,8 @@ QualType QualType::substObjCTypeArgs(
         }
 
         if (exceptionChanged) {
-          unsigned size = sizeof(QualType) * exceptionTypes.size();
-          void *mem = ctx.Allocate(size, llvm::alignOf<QualType>());
-          memcpy(mem, exceptionTypes.data(), size);
-          info.ExceptionSpec.Exceptions
-            = llvm::makeArrayRef((QualType *)mem, exceptionTypes.size());
+          info.ExceptionSpec.Exceptions =
+              llvm::makeArrayRef(exceptionTypes).copy(ctx);
         }
       }
 
@@ -1275,7 +1269,7 @@ Optional<ArrayRef<QualType>> Type::getObjCSubstitutions(
     if (!dcTypeParams)
       return None;
   } else {
-    // If we are in neither a class mor a category, there's no
+    // If we are in neither a class nor a category, there's no
     // substitution to perform.
     dcCategoryDecl = dyn_cast<ObjCCategoryDecl>(dc);
     if (!dcCategoryDecl)
@@ -2291,7 +2285,7 @@ bool QualType::isCXX11PODType(ASTContext &Context) const {
       //   a standard-layout class, and has no non-static data members of type
       //   non-POD struct, non-POD union (or array of such types). [...]
       //
-      // We don't directly query the recursive aspect as the requiremets for
+      // We don't directly query the recursive aspect as the requirements for
       // both standard-layout classes and trivial classes apply recursively
       // already.
     }
@@ -2553,6 +2547,7 @@ StringRef BuiltinType::getName(const PrintingPolicy &Policy) const {
   case OCLImage2dArrayDepth: return "image2d_array_depth_t";
   case OCLSampler:        return "sampler_t";
   case OCLEvent:          return "event_t";
+  case OMPArraySection:   return "<OpenMP array section type>";
   case OCLQueue:          return "queue_t";
   case OCLCLKEvent:       return "clk_event_t";
   case OCLReserveId:      return "reserve_id_t";
@@ -2970,7 +2965,7 @@ SubstTemplateTypeParmPackType(const TemplateTypeParmType *Param,
 }
 
 TemplateArgument SubstTemplateTypeParmPackType::getArgumentPack() const {
-  return TemplateArgument(Arguments, NumArguments);
+  return TemplateArgument(llvm::makeArrayRef(Arguments, NumArguments));
 }
 
 void SubstTemplateTypeParmPackType::Profile(llvm::FoldingSetNodeID &ID) {
@@ -3463,6 +3458,7 @@ bool Type::canHaveNullability() const {
     case BuiltinType::OCLEvent:
     case BuiltinType::BuiltinFn:
     case BuiltinType::NullPtr:
+    case BuiltinType::OMPArraySection:
       return false;
     }
 
@@ -3563,7 +3559,7 @@ bool Type::isObjCARCImplicitlyUnretainedType() const {
 
   if (const ObjCObjectPointerType *opt
         = dyn_cast<ObjCObjectPointerType>(canon)) {
-    // Class and Class<Protocol> don't require retension.
+    // Class and Class<Protocol> don't require retention.
     if (opt->getObjectType()->isObjCClass())
       return true;
   }

@@ -45,6 +45,7 @@ using namespace clang::CodeGen;
 
 CGDebugInfo::CGDebugInfo(CodeGenModule &CGM)
     : CGM(CGM), DebugKind(CGM.getCodeGenOpts().getDebugInfo()),
+      DebugTypeExtRefs(CGM.getCodeGenOpts().DebugTypeExtRefs),
       DBuilder(CGM.getModule()) {
   CreateCompileUnit();
 }
@@ -56,54 +57,63 @@ CGDebugInfo::~CGDebugInfo() {
 
 ApplyDebugLocation::ApplyDebugLocation(CodeGenFunction &CGF,
                                        SourceLocation TemporaryLocation)
-    : CGF(CGF) {
+    : CGF(&CGF) {
   init(TemporaryLocation);
 }
 
 ApplyDebugLocation::ApplyDebugLocation(CodeGenFunction &CGF,
                                        bool DefaultToEmpty,
                                        SourceLocation TemporaryLocation)
-    : CGF(CGF) {
+    : CGF(&CGF) {
   init(TemporaryLocation, DefaultToEmpty);
 }
 
 void ApplyDebugLocation::init(SourceLocation TemporaryLocation,
                               bool DefaultToEmpty) {
-  if (auto *DI = CGF.getDebugInfo()) {
-    OriginalLocation = CGF.Builder.getCurrentDebugLocation();
-    if (TemporaryLocation.isInvalid()) {
-      if (DefaultToEmpty)
-        CGF.Builder.SetCurrentDebugLocation(llvm::DebugLoc());
-      else {
-        // Construct a location that has a valid scope, but no line info.
-        assert(!DI->LexicalBlockStack.empty());
-        CGF.Builder.SetCurrentDebugLocation(
-            llvm::DebugLoc::get(0, 0, DI->LexicalBlockStack.back()));
-      }
-    } else
-      DI->EmitLocation(CGF.Builder, TemporaryLocation);
+  auto *DI = CGF->getDebugInfo();
+  if (!DI) {
+    CGF = nullptr;
+    return;
   }
+
+  OriginalLocation = CGF->Builder.getCurrentDebugLocation();
+  if (TemporaryLocation.isValid()) {
+    DI->EmitLocation(CGF->Builder, TemporaryLocation);
+    return;
+  }
+
+  if (DefaultToEmpty) {
+    CGF->Builder.SetCurrentDebugLocation(llvm::DebugLoc());
+    return;
+  }
+
+  // Construct a location that has a valid scope, but no line info.
+  assert(!DI->LexicalBlockStack.empty());
+  CGF->Builder.SetCurrentDebugLocation(
+      llvm::DebugLoc::get(0, 0, DI->LexicalBlockStack.back()));
 }
 
 ApplyDebugLocation::ApplyDebugLocation(CodeGenFunction &CGF, const Expr *E)
-    : CGF(CGF) {
+    : CGF(&CGF) {
   init(E->getExprLoc());
 }
 
 ApplyDebugLocation::ApplyDebugLocation(CodeGenFunction &CGF, llvm::DebugLoc Loc)
-    : CGF(CGF) {
-  if (CGF.getDebugInfo()) {
-    OriginalLocation = CGF.Builder.getCurrentDebugLocation();
-    if (Loc)
-      CGF.Builder.SetCurrentDebugLocation(std::move(Loc));
+    : CGF(&CGF) {
+  if (!CGF.getDebugInfo()) {
+    this->CGF = nullptr;
+    return;
   }
+  OriginalLocation = CGF.Builder.getCurrentDebugLocation();
+  if (Loc)
+    CGF.Builder.SetCurrentDebugLocation(std::move(Loc));
 }
 
 ApplyDebugLocation::~ApplyDebugLocation() {
   // Query CGF so the location isn't overwritten when location updates are
   // temporarily disabled (for C++ default function arguments)
-  if (CGF.getDebugInfo())
-    CGF.Builder.SetCurrentDebugLocation(std::move(OriginalLocation));
+  if (CGF)
+    CGF->Builder.SetCurrentDebugLocation(std::move(OriginalLocation));
 }
 
 void CGDebugInfo::setLocation(SourceLocation Loc) {
@@ -643,7 +653,6 @@ static SmallString<256> getUniqueTagTypeName(const TagType *Ty,
   // a unique string for a type?
   llvm::raw_svector_ostream Out(FullName);
   CGM.getCXXABI().getMangleContext().mangleCXXRTTIName(QualType(Ty, 0), Out);
-  Out.flush();
   return FullName;
 }
 
@@ -1428,8 +1437,21 @@ llvm::DIType *CGDebugInfo::getOrCreateRecordType(QualType RTy,
 
 llvm::DIType *CGDebugInfo::getOrCreateInterfaceType(QualType D,
                                                     SourceLocation Loc) {
+  return getOrCreateStandaloneType(D, Loc);
+}
+
+llvm::DIType *CGDebugInfo::getOrCreateStandaloneType(QualType D,
+                                                     SourceLocation Loc) {
   assert(DebugKind >= CodeGenOptions::LimitedDebugInfo);
+  assert(!D.isNull() && "null type");
   llvm::DIType *T = getOrCreateType(D, getOrCreateFile(Loc));
+  assert(T && "could not create debug info for type");
+
+  // Composite types with UIDs were already retained by DIBuilder
+  // because they are only referenced by name in the IR.
+  if (auto *CTy = dyn_cast<llvm::DICompositeType>(T))
+    if (!CTy->getIdentifier().empty())
+      return T;
   RetainedTypes.push_back(D.getAsOpaquePtr());
   return T;
 }
@@ -2428,7 +2450,7 @@ CGDebugInfo::getFunctionForwardDeclaration(const FunctionDecl *FD) {
   llvm::DISubprogram *SP = DBuilder.createTempFunctionFwdDecl(
       DContext, Name, LinkageName, Unit, Line,
       getOrCreateFunctionType(FD, FnType, Unit), !FD->isExternallyVisible(),
-      false /*declaration*/, 0, Flags, CGM.getLangOpts().Optimize, nullptr,
+      /* isDefinition = */ false, 0, Flags, CGM.getLangOpts().Optimize, nullptr,
       TParamsArray.get(), getFunctionDeclaration(FD));
   const FunctionDecl *CanonDecl = cast<FunctionDecl>(FD->getCanonicalDecl());
   FwdDeclReplaceMap.emplace_back(std::piecewise_construct,
@@ -3401,9 +3423,9 @@ void CGDebugInfo::finalize() {
 
   // We keep our own list of retained types, because we need to look
   // up the final type in the type cache.
-  for (std::vector<void *>::const_iterator RI = RetainedTypes.begin(),
-         RE = RetainedTypes.end(); RI != RE; ++RI)
-    DBuilder.retainType(cast<llvm::DIType>(TypeCache[*RI]));
+  for (auto &RT : RetainedTypes)
+    if (auto MD = TypeCache[RT])
+      DBuilder.retainType(cast<llvm::DIType>(MD));
 
   DBuilder.finalize();
 }

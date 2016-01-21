@@ -1246,7 +1246,7 @@ llvm::Value *CGOpenMPRuntime::getCriticalRegionLock(StringRef CriticalName) {
 }
 
 namespace {
-template <size_t N> class CallEndCleanup : public EHScopeStack::Cleanup {
+template <size_t N> class CallEndCleanup final : public EHScopeStack::Cleanup {
   llvm::Value *Callee;
   llvm::Value *Args[N];
 
@@ -1284,12 +1284,12 @@ void CGOpenMPRuntime::emitCriticalRegion(CodeGenFunction &CGF,
 }
 
 static void emitIfStmt(CodeGenFunction &CGF, llvm::Value *IfCond,
-                       OpenMPDirectiveKind Kind,
+                       OpenMPDirectiveKind Kind, SourceLocation Loc,
                        const RegionCodeGenTy &BodyOpGen) {
   llvm::Value *CallBool = CGF.EmitScalarConversion(
       IfCond,
       CGF.getContext().getIntTypeForBitwidth(/*DestWidth=*/32, /*Signed=*/true),
-      CGF.getContext().BoolTy);
+      CGF.getContext().BoolTy, Loc);
 
   auto *ThenBlock = CGF.createBasicBlock("omp_if.then");
   auto *ContBlock = CGF.createBasicBlock("omp_if.end");
@@ -1315,13 +1315,14 @@ void CGOpenMPRuntime::emitMasterRegion(CodeGenFunction &CGF,
       CGF.EmitRuntimeCall(createRuntimeFunction(OMPRTL__kmpc_master), Args);
   typedef CallEndCleanup<std::extent<decltype(Args)>::value>
       MasterCallEndCleanup;
-  emitIfStmt(CGF, IsMaster, OMPD_master, [&](CodeGenFunction &CGF) -> void {
-    CodeGenFunction::RunCleanupsScope Scope(CGF);
-    CGF.EHStack.pushCleanup<MasterCallEndCleanup>(
-        NormalAndEHCleanup, createRuntimeFunction(OMPRTL__kmpc_end_master),
-        llvm::makeArrayRef(Args));
-    MasterOpGen(CGF);
-  });
+  emitIfStmt(
+      CGF, IsMaster, OMPD_master, Loc, [&](CodeGenFunction &CGF) -> void {
+        CodeGenFunction::RunCleanupsScope Scope(CGF);
+        CGF.EHStack.pushCleanup<MasterCallEndCleanup>(
+            NormalAndEHCleanup, createRuntimeFunction(OMPRTL__kmpc_end_master),
+            llvm::makeArrayRef(Args));
+        MasterOpGen(CGF);
+      });
 }
 
 void CGOpenMPRuntime::emitTaskyieldCall(CodeGenFunction &CGF,
@@ -1444,18 +1445,19 @@ void CGOpenMPRuntime::emitSingleRegion(CodeGenFunction &CGF,
       CGF.EmitRuntimeCall(createRuntimeFunction(OMPRTL__kmpc_single), Args);
   typedef CallEndCleanup<std::extent<decltype(Args)>::value>
       SingleCallEndCleanup;
-  emitIfStmt(CGF, IsSingle, OMPD_single, [&](CodeGenFunction &CGF) -> void {
-    CodeGenFunction::RunCleanupsScope Scope(CGF);
-    CGF.EHStack.pushCleanup<SingleCallEndCleanup>(
-        NormalAndEHCleanup, createRuntimeFunction(OMPRTL__kmpc_end_single),
-        llvm::makeArrayRef(Args));
-    SingleOpGen(CGF);
-    if (DidIt) {
-      // did_it = 1;
-      CGF.Builder.CreateAlignedStore(CGF.Builder.getInt32(1), DidIt,
-                                     DidIt->getAlignment());
-    }
-  });
+  emitIfStmt(
+      CGF, IsSingle, OMPD_single, Loc, [&](CodeGenFunction &CGF) -> void {
+        CodeGenFunction::RunCleanupsScope Scope(CGF);
+        CGF.EHStack.pushCleanup<SingleCallEndCleanup>(
+            NormalAndEHCleanup, createRuntimeFunction(OMPRTL__kmpc_end_single),
+            llvm::makeArrayRef(Args));
+        SingleOpGen(CGF);
+        if (DidIt) {
+          // did_it = 1;
+          CGF.Builder.CreateAlignedStore(CGF.Builder.getInt32(1), DidIt,
+                                         DidIt->getAlignment());
+        }
+      });
   // call __kmpc_copyprivate(ident_t *, gtid, <buf_size>, <copyprivate list>,
   // <copy_func>, did_it);
   if (DidIt) {
@@ -1719,7 +1721,7 @@ llvm::Value *CGOpenMPRuntime::emitForNext(CodeGenFunction &CGF,
       CGF.EmitRuntimeCall(createDispatchNextFunction(IVSize, IVSigned), Args);
   return CGF.EmitScalarConversion(
       Call, CGF.getContext().getIntTypeForBitwidth(32, /* Signed */ true),
-      CGF.getContext().BoolTy);
+      CGF.getContext().BoolTy, Loc);
 }
 
 void CGOpenMPRuntime::emitNumThreadsClause(CodeGenFunction &CGF,
@@ -2089,6 +2091,27 @@ emitTaskPrivateMappingFunction(CodeGenModule &CGM, SourceLocation Loc,
   return TaskPrivatesMap;
 }
 
+llvm::Value *getTypeSize(CodeGenFunction &CGF, QualType Ty) {
+  auto &C = CGF.getContext();
+  llvm::Value *Size;
+  auto SizeInChars = C.getTypeSizeInChars(Ty);
+  if (SizeInChars.isZero()) {
+    // getTypeSizeInChars() returns 0 for a VLA.
+    Size = nullptr;
+    while (auto *VAT = C.getAsVariableArrayType(Ty)) {
+      llvm::Value *ArraySize;
+      std::tie(ArraySize, Ty) = CGF.getVLASize(VAT);
+      Size = Size ? CGF.Builder.CreateNUWMul(Size, ArraySize) : ArraySize;
+    }
+    SizeInChars = C.getTypeSizeInChars(Ty);
+    assert(!SizeInChars.isZero());
+    Size = CGF.Builder.CreateNUWMul(
+        Size, llvm::ConstantInt::get(CGF.SizeTy, SizeInChars.getQuantity()));
+  } else
+    Size = llvm::ConstantInt::get(CGF.SizeTy, SizeInChars.getQuantity());
+  return Size;
+}
+
 static int array_pod_sort_comparator(const PrivateDataTy *P1,
                                      const PrivateDataTy *P2) {
   return P1->first < P2->first ? 1 : (P2->first < P1->first ? -1 : 0);
@@ -2326,19 +2349,30 @@ void CGOpenMPRuntime::emitTaskCall(
     // kmp_depend_info[<Dependences.size()>] deps;
     DependInfo = CGF.CreateMemTemp(KmpDependInfoArrayTy);
     for (unsigned i = 0; i < DependencesNumber; ++i) {
-      auto Addr = CGF.EmitLValue(Dependences[i].second);
-      auto *Size = llvm::ConstantInt::get(
-          CGF.SizeTy,
-          C.getTypeSizeInChars(Dependences[i].second->getType()).getQuantity());
+      auto *E = Dependences[i].second;
+      LValue Addr = CGF.EmitLValue(E);
+      llvm::Value *Size;
+      QualType Ty = E->getType();
+      auto *DestAddr = Addr.getAddress();
+      if (auto *ASE = dyn_cast<OMPArraySectionExpr>(E->IgnoreParenImpCasts())) {
+        LValue UpAddrLVal =
+            CGF.EmitOMPArraySectionExpr(ASE, /*LowerBound=*/false);
+        llvm::Value *UpAddr =
+            CGF.Builder.CreateConstGEP1_32(UpAddrLVal.getAddress(), /*Idx0=*/1);
+        llvm::Value *LowIntPtr =
+            CGF.Builder.CreatePtrToInt(DestAddr, CGM.SizeTy);
+        llvm::Value *UpIntPtr = CGF.Builder.CreatePtrToInt(UpAddr, CGM.SizeTy);
+        Size = CGF.Builder.CreateNUWSub(UpIntPtr, LowIntPtr);
+      } else
+        Size = getTypeSize(CGF, Ty);
       auto Base = CGF.MakeNaturalAlignAddrLValue(
           CGF.Builder.CreateStructGEP(/*Ty=*/nullptr, DependInfo, i),
           KmpDependInfoTy);
       // deps[i].base_addr = &<Dependences[i].second>;
       auto BaseAddrLVal = CGF.EmitLValueForField(
           Base, *std::next(KmpDependInfoRD->field_begin(), BaseAddr));
-      CGF.EmitStoreOfScalar(
-          CGF.Builder.CreatePtrToInt(Addr.getAddress(), CGF.IntPtrTy),
-          BaseAddrLVal);
+      CGF.EmitStoreOfScalar(CGF.Builder.CreatePtrToInt(DestAddr, CGF.IntPtrTy),
+                            BaseAddrLVal);
       // deps[i].len = sizeof(<Dependences[i].second>);
       auto LenLVal = CGF.EmitLValueForField(
           Base, *std::next(KmpDependInfoRD->field_begin(), Len));

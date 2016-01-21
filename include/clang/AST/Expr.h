@@ -459,6 +459,10 @@ public:
   /// \brief Returns whether this expression refers to a vector element.
   bool refersToVectorElement() const;
 
+  /// \brief Returns whether this expression refers to a global register
+  /// variable.
+  bool refersToGlobalRegisterVar() const;
+
   /// \brief Returns whether this expression has a placeholder type.
   bool hasPlaceholderType() const {
     return getType()->isPlaceholderType();
@@ -4976,6 +4980,11 @@ public:
   }
   SourceLocation getLocStart() const LLVM_READONLY { return SourceLocation(); }
   SourceLocation getLocEnd() const LLVM_READONLY { return SourceLocation(); }
+  
+  static bool classof(const Stmt *T) {
+    return T->getStmtClass() == TypoExprClass;
+  }
+
 };
 }  // end namespace clang
 

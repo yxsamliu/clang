@@ -166,14 +166,6 @@ static void addObjCARCOptPass(const PassManagerBuilder &Builder, PassManagerBase
     PM.add(createObjCARCOptPass());
 }
 
-static void addSampleProfileLoaderPass(const PassManagerBuilder &Builder,
-                                       legacy::PassManagerBase &PM) {
-  const PassManagerBuilderWrapper &BuilderWrapper =
-      static_cast<const PassManagerBuilderWrapper &>(Builder);
-  const CodeGenOptions &CGOpts = BuilderWrapper.getCGOpts();
-  PM.add(createSampleProfileLoaderPass(CGOpts.SampleProfileFile));
-}
-
 static void addAddDiscriminatorsPass(const PassManagerBuilder &Builder,
                                      legacy::PassManagerBase &PM) {
   PM.add(createAddDiscriminatorsPass());
@@ -301,10 +293,6 @@ void EmitAssemblyHelper::CreatePasses() {
   PMBuilder.addExtension(PassManagerBuilder::EP_EarlyAsPossible,
                          addAddDiscriminatorsPass);
 
-  if (!CodeGenOpts.SampleProfileFile.empty())
-    PMBuilder.addExtension(PassManagerBuilder::EP_EarlyAsPossible,
-                           addSampleProfileLoaderPass);
-
   // In ObjC ARC mode, add the main ARC optimization passes.
   if (LangOpts.ObjCAutoRefCount) {
     PMBuilder.addExtension(PassManagerBuilder::EP_EarlyAsPossible,
@@ -423,6 +411,9 @@ void EmitAssemblyHelper::CreatePasses() {
     MPM->add(createInstrProfilingPass(Options));
   }
 
+  if (!CodeGenOpts.SampleProfileFile.empty())
+    MPM->add(createSampleProfileLoaderPass(CodeGenOpts.SampleProfileFile));
+
   PMBuilder.populateModulePassManager(*MPM);
 }
 
@@ -458,8 +449,8 @@ TargetMachine *EmitAssemblyHelper::CreateTargetMachine(bool MustCreateTM) {
     BackendArgs.push_back("-limit-float-precision");
     BackendArgs.push_back(CodeGenOpts.LimitFloatPrecision.c_str());
   }
-  for (unsigned i = 0, e = CodeGenOpts.BackendOptions.size(); i != e; ++i)
-    BackendArgs.push_back(CodeGenOpts.BackendOptions[i].c_str());
+  for (const std::string &BackendOption : CodeGenOpts.BackendOptions)
+    BackendArgs.push_back(BackendOption.c_str());
   BackendArgs.push_back(nullptr);
   llvm::cl::ParseCommandLineOptions(BackendArgs.size() - 1,
                                     BackendArgs.data());

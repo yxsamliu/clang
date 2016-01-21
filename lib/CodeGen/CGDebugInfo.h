@@ -52,6 +52,7 @@ class CGDebugInfo {
   friend class SaveAndRestoreLocation;
   CodeGenModule &CGM;
   const CodeGenOptions::DebugInfoKind DebugKind;
+  bool DebugTypeExtRefs;
   llvm::DIBuilder DBuilder;
   llvm::DICompileUnit *TheCU = nullptr;
   SourceLocation CurLoc;
@@ -354,6 +355,9 @@ public:
   /// Emit an Objective-C interface type standalone debug info.
   llvm::DIType *getOrCreateInterfaceType(QualType Ty, SourceLocation Loc);
 
+  /// Emit standalone debug info for a type.
+  llvm::DIType *getOrCreateStandaloneType(QualType Ty, SourceLocation Loc);
+
   void completeType(const EnumDecl *ED);
   void completeType(const RecordDecl *RD);
   void completeRequiredType(const RecordDecl *RD);
@@ -496,8 +500,10 @@ private:
   /// are concatenated.
   StringRef internString(StringRef A, StringRef B = StringRef()) {
     char *Data = DebugInfoNames.Allocate<char>(A.size() + B.size());
-    std::memcpy(Data, A.data(), A.size());
-    std::memcpy(Data + A.size(), B.data(), B.size());
+    if (!A.empty())
+      std::memcpy(Data, A.data(), A.size());
+    if (!B.empty())
+      std::memcpy(Data + A.size(), B.data(), B.size());
     return StringRef(Data, A.size() + B.size());
   }
 };
@@ -511,13 +517,16 @@ private:
                      SourceLocation TemporaryLocation);
 
   llvm::DebugLoc OriginalLocation;
-  CodeGenFunction &CGF;
+  CodeGenFunction *CGF;
 
 public:
   /// Set the location to the (valid) TemporaryLocation.
   ApplyDebugLocation(CodeGenFunction &CGF, SourceLocation TemporaryLocation);
   ApplyDebugLocation(CodeGenFunction &CGF, const Expr *E);
   ApplyDebugLocation(CodeGenFunction &CGF, llvm::DebugLoc Loc);
+  ApplyDebugLocation(ApplyDebugLocation &&Other) : CGF(Other.CGF) {
+    Other.CGF = nullptr;
+  }
 
   ~ApplyDebugLocation();
 

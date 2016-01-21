@@ -29,7 +29,6 @@
 #include "clang/Basic/DiagnosticIDs.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/Version.h"
-#include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/Frontend/ASTUnit.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendDiagnostic.h"
@@ -2033,6 +2032,10 @@ void OMPClauseEnqueue::VisitOMPSafelenClause(const OMPSafelenClause *C) {
   Visitor->AddStmt(C->getSafelen());
 }
 
+void OMPClauseEnqueue::VisitOMPSimdlenClause(const OMPSimdlenClause *C) {
+  Visitor->AddStmt(C->getSimdlen());
+}
+
 void OMPClauseEnqueue::VisitOMPCollapseClause(const OMPCollapseClause *C) {
   Visitor->AddStmt(C->getNumForLoops());
 }
@@ -2065,6 +2068,10 @@ void OMPClauseEnqueue::VisitOMPUpdateClause(const OMPUpdateClause *) {}
 void OMPClauseEnqueue::VisitOMPCaptureClause(const OMPCaptureClause *) {}
 
 void OMPClauseEnqueue::VisitOMPSeqCstClause(const OMPSeqCstClause *) {}
+
+void OMPClauseEnqueue::VisitOMPDeviceClause(const OMPDeviceClause *C) {
+  Visitor->AddStmt(C->getDevice());
+}
 
 template<typename T>
 void OMPClauseEnqueue::VisitOMPClauseList(T *Node) {
@@ -2116,6 +2123,9 @@ void OMPClauseEnqueue::VisitOMPReductionClause(const OMPReductionClause *C) {
 }
 void OMPClauseEnqueue::VisitOMPLinearClause(const OMPLinearClause *C) {
   VisitOMPClauseList(C);
+  for (const auto *E : C->privates()) {
+    Visitor->AddStmt(E);
+  }
   for (const auto *E : C->inits()) {
     Visitor->AddStmt(E);
   }
@@ -2974,7 +2984,8 @@ enum CXErrorCode clang_createTranslationUnit2(CXIndex CIdx,
       CompilerInstance::createDiagnostics(new DiagnosticOptions());
   std::unique_ptr<ASTUnit> AU = ASTUnit::LoadFromASTFile(
       ast_filename, CXXIdx->getPCHContainerOperations()->getRawReader(), Diags,
-      FileSystemOpts, CXXIdx->getOnlyLocalDecls(), None,
+      FileSystemOpts, /*UseDebugInfo=*/false,
+      CXXIdx->getOnlyLocalDecls(), None,
       /*CaptureDiagnostics=*/true,
       /*AllowPCHWithCompilerErrors=*/true,
       /*UserFilesAreVolatile=*/true);
@@ -3875,7 +3886,7 @@ CXString clang_Cursor_getMangling(CXCursor C) {
 
   // Now apply backend mangling.
   std::unique_ptr<llvm::DataLayout> DL(
-      new llvm::DataLayout(Ctx.getTargetInfo().getTargetDescription()));
+      new llvm::DataLayout(Ctx.getTargetInfo().getDataLayoutString()));
 
   std::string FinalBuf;
   llvm::raw_string_ostream FinalBufOS(FinalBuf);
@@ -4049,6 +4060,8 @@ CXString clang_getCursorKindSpelling(enum CXCursorKind Kind) {
       return cxstring::createRef("UnaryOperator");
   case CXCursor_ArraySubscriptExpr:
       return cxstring::createRef("ArraySubscriptExpr");
+  case CXCursor_OMPArraySectionExpr:
+      return cxstring::createRef("OMPArraySectionExpr");
   case CXCursor_BinaryOperator:
       return cxstring::createRef("BinaryOperator");
   case CXCursor_CompoundAssignOperator:
@@ -7374,8 +7387,6 @@ Logger &cxindex::Logger::operator<<(const llvm::format_object_base &Fmt) {
 static llvm::ManagedStatic<llvm::sys::Mutex> LoggingMutex;
 
 cxindex::Logger::~Logger() {
-  LogOS.flush();
-
   llvm::sys::ScopedLock L(*LoggingMutex);
 
   static llvm::TimeRecord sBeginTR = llvm::TimeRecord::getCurrentTime();

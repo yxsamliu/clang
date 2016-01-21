@@ -15,6 +15,7 @@
 #include "clang/AST/ASTDiagnostic.h"
 #include "clang/AST/ExprCXX.h"
 #include "clang/AST/ExprObjC.h"
+#include "clang/AST/ExprOpenMP.h"
 #include "clang/AST/Stmt.h"
 #include "clang/AST/StmtCXX.h"
 #include "clang/AST/StmtObjC.h"
@@ -724,10 +725,7 @@ MSAsmStmt::MSAsmStmt(const ASTContext &C, SourceLocation asmloc,
 }
 
 static StringRef copyIntoContext(const ASTContext &C, StringRef str) {
-  size_t size = str.size();
-  char *buffer = new (C) char[size];
-  memcpy(buffer, str.data(), size);
-  return StringRef(buffer, size);
+  return str.copy(C);
 }
 
 void MSAsmStmt::initialize(const ASTContext &C, StringRef asmstr,
@@ -1320,10 +1318,16 @@ OMPSharedClause *OMPSharedClause::CreateEmpty(const ASTContext &C,
   return new (Mem) OMPSharedClause(N);
 }
 
+void OMPLinearClause::setPrivates(ArrayRef<Expr *> PL) {
+  assert(PL.size() == varlist_size() &&
+         "Number of privates is not the same as the preallocated buffer");
+  std::copy(PL.begin(), PL.end(), varlist_end());
+}
+
 void OMPLinearClause::setInits(ArrayRef<Expr *> IL) {
   assert(IL.size() == varlist_size() &&
          "Number of inits is not the same as the preallocated buffer");
-  std::copy(IL.begin(), IL.end(), varlist_end());
+  std::copy(IL.begin(), IL.end(), getPrivates().end());
 }
 
 void OMPLinearClause::setUpdates(ArrayRef<Expr *> UL) {
@@ -1338,19 +1342,20 @@ void OMPLinearClause::setFinals(ArrayRef<Expr *> FL) {
   std::copy(FL.begin(), FL.end(), getUpdates().end());
 }
 
-OMPLinearClause *
-OMPLinearClause::Create(const ASTContext &C, SourceLocation StartLoc,
-                        SourceLocation LParenLoc, SourceLocation ColonLoc,
-                        SourceLocation EndLoc, ArrayRef<Expr *> VL,
-                        ArrayRef<Expr *> IL, Expr *Step, Expr *CalcStep) {
+OMPLinearClause *OMPLinearClause::Create(
+    const ASTContext &C, SourceLocation StartLoc, SourceLocation LParenLoc,
+    OpenMPLinearClauseKind Modifier, SourceLocation ModifierLoc,
+    SourceLocation ColonLoc, SourceLocation EndLoc, ArrayRef<Expr *> VL,
+    ArrayRef<Expr *> PL, ArrayRef<Expr *> IL, Expr *Step, Expr *CalcStep) {
   // Allocate space for 4 lists (Vars, Inits, Updates, Finals) and 2 expressions
   // (Step and CalcStep).
   void *Mem = C.Allocate(llvm::RoundUpToAlignment(sizeof(OMPLinearClause),
                                                   llvm::alignOf<Expr *>()) +
-                         (4 * VL.size() + 2) * sizeof(Expr *));
-  OMPLinearClause *Clause = new (Mem)
-      OMPLinearClause(StartLoc, LParenLoc, ColonLoc, EndLoc, VL.size());
+                         (5 * VL.size() + 2) * sizeof(Expr *));
+  OMPLinearClause *Clause = new (Mem) OMPLinearClause(
+      StartLoc, LParenLoc, Modifier, ModifierLoc, ColonLoc, EndLoc, VL.size());
   Clause->setVarRefs(VL);
+  Clause->setPrivates(PL);
   Clause->setInits(IL);
   // Fill update and final expressions with zeroes, they are provided later,
   // after the directive construction.
@@ -1369,7 +1374,7 @@ OMPLinearClause *OMPLinearClause::CreateEmpty(const ASTContext &C,
   // (Step and CalcStep).
   void *Mem = C.Allocate(llvm::RoundUpToAlignment(sizeof(OMPLinearClause),
                                                   llvm::alignOf<Expr *>()) +
-                         (4 * NumVars + 2) * sizeof(Expr *));
+                         (5 * NumVars + 2) * sizeof(Expr *));
   return new (Mem) OMPLinearClause(NumVars);
 }
 
@@ -1499,6 +1504,19 @@ void OMPLoopDirective::setCounters(ArrayRef<Expr *> A) {
   std::copy(A.begin(), A.end(), getCounters().begin());
 }
 
+void OMPLoopDirective::setPrivateCounters(ArrayRef<Expr *> A) {
+  assert(A.size() == getCollapsedNumber() && "Number of loop private counters "
+                                             "is not the same as the collapsed "
+                                             "number");
+  std::copy(A.begin(), A.end(), getPrivateCounters().begin());
+}
+
+void OMPLoopDirective::setInits(ArrayRef<Expr *> A) {
+  assert(A.size() == getCollapsedNumber() &&
+         "Number of counter inits is not the same as the collapsed number");
+  std::copy(A.begin(), A.end(), getInits().begin());
+}
+
 void OMPLoopDirective::setUpdates(ArrayRef<Expr *> A) {
   assert(A.size() == getCollapsedNumber() &&
          "Number of counter updates is not the same as the collapsed number");
@@ -1603,18 +1621,6 @@ OMPDependClause *OMPDependClause::CreateEmpty(const ASTContext &C, unsigned N) {
   return new (Mem) OMPDependClause(N);
 }
 
-const OMPClause *
-OMPExecutableDirective::getSingleClause(OpenMPClauseKind K) const {
-  auto &&I = getClausesOfKind(K);
-
-  if (I) {
-    auto *Clause = *I;
-    assert(!++I && "There are at least 2 clauses of the specified kind");
-    return Clause;
-  }
-  return nullptr;
-}
-
 OMPParallelDirective *OMPParallelDirective::Create(
                                               const ASTContext &C,
                                               SourceLocation StartLoc,
@@ -1664,6 +1670,8 @@ OMPSimdDirective::Create(const ASTContext &C, SourceLocation StartLoc,
   Dir->setInit(Exprs.Init);
   Dir->setInc(Exprs.Inc);
   Dir->setCounters(Exprs.Counters);
+  Dir->setPrivateCounters(Exprs.PrivateCounters);
+  Dir->setInits(Exprs.Inits);
   Dir->setUpdates(Exprs.Updates);
   Dir->setFinals(Exprs.Finals);
   return Dir;
@@ -1710,6 +1718,8 @@ OMPForDirective::Create(const ASTContext &C, SourceLocation StartLoc,
   Dir->setNextLowerBound(Exprs.NLB);
   Dir->setNextUpperBound(Exprs.NUB);
   Dir->setCounters(Exprs.Counters);
+  Dir->setPrivateCounters(Exprs.PrivateCounters);
+  Dir->setInits(Exprs.Inits);
   Dir->setUpdates(Exprs.Updates);
   Dir->setFinals(Exprs.Finals);
   return Dir;
@@ -1756,6 +1766,8 @@ OMPForSimdDirective::Create(const ASTContext &C, SourceLocation StartLoc,
   Dir->setNextLowerBound(Exprs.NLB);
   Dir->setNextUpperBound(Exprs.NUB);
   Dir->setCounters(Exprs.Counters);
+  Dir->setPrivateCounters(Exprs.PrivateCounters);
+  Dir->setInits(Exprs.Inits);
   Dir->setUpdates(Exprs.Updates);
   Dir->setFinals(Exprs.Finals);
   return Dir;
@@ -1911,6 +1923,8 @@ OMPParallelForDirective *OMPParallelForDirective::Create(
   Dir->setNextLowerBound(Exprs.NLB);
   Dir->setNextUpperBound(Exprs.NUB);
   Dir->setCounters(Exprs.Counters);
+  Dir->setPrivateCounters(Exprs.PrivateCounters);
+  Dir->setInits(Exprs.Inits);
   Dir->setUpdates(Exprs.Updates);
   Dir->setFinals(Exprs.Finals);
   return Dir;
@@ -1955,6 +1969,8 @@ OMPParallelForSimdDirective *OMPParallelForSimdDirective::Create(
   Dir->setNextLowerBound(Exprs.NLB);
   Dir->setNextUpperBound(Exprs.NUB);
   Dir->setCounters(Exprs.Counters);
+  Dir->setPrivateCounters(Exprs.PrivateCounters);
+  Dir->setInits(Exprs.Inits);
   Dir->setUpdates(Exprs.Updates);
   Dir->setFinals(Exprs.Finals);
   return Dir;

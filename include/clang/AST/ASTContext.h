@@ -177,8 +177,9 @@ class ASTContext : public RefCountedBase<ASTContext> {
     ClassScopeSpecializationPattern;
 
   /// \brief Mapping from materialized temporaries with static storage duration
-  /// that appear in constant initializers to their evaluated values.
-  llvm::DenseMap<const MaterializeTemporaryExpr*, APValue>
+  /// that appear in constant initializers to their evaluated values.  These are
+  /// allocated in a std::map because their address must be stable.
+  llvm::DenseMap<const MaterializeTemporaryExpr *, APValue *>
     MaterializedTemporaryValues;
 
   /// \brief Representation of a "canonical" template template parameter that
@@ -503,6 +504,9 @@ public:
 
   void *Allocate(size_t Size, unsigned Align = 8) const {
     return BumpAlloc.Allocate(Size, Align);
+  }
+  template <typename T> T *Allocate(size_t Num = 1) const {
+    return static_cast<T *>(Allocate(Num * sizeof(T), llvm::alignOf<T>()));
   }
   void Deallocate(void *Ptr) const { }
   
@@ -847,6 +851,7 @@ public:
   CanQualType OCLImage2dArrayMSAADepthTy, OCLImage2dArrayMSAATy, OCLImage2dArrayDepthTy;
   CanQualType OCLImage3dTy;
   CanQualType OCLSamplerTy, OCLEventTy;
+  CanQualType OMPArraySectionTy;
   CanQualType OCLQueueTy, OCLCLKEventTy, OCLReserveIdTy;
 
   // Types for deductions in C++0x [stmt.ranged]'s desugaring. Built on demand.
@@ -2318,6 +2323,14 @@ public:
 
   Expr *getDefaultArgExprForConstructor(const CXXConstructorDecl *CD,
                                         unsigned ParmIdx);
+
+  void addTypedefNameForUnnamedTagDecl(TagDecl *TD, TypedefNameDecl *TND);
+
+  TypedefNameDecl *getTypedefNameForUnnamedTagDecl(const TagDecl *TD);
+
+  void addDeclaratorForUnnamedTagDecl(TagDecl *TD, DeclaratorDecl *DD);
+
+  DeclaratorDecl *getDeclaratorForUnnamedTagDecl(const TagDecl *TD);
 
   void setManglingNumber(const NamedDecl *ND, unsigned Number);
   unsigned getManglingNumber(const NamedDecl *ND) const;

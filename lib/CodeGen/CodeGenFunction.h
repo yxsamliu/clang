@@ -24,6 +24,7 @@
 #include "clang/AST/CharUnits.h"
 #include "clang/AST/ExprCXX.h"
 #include "clang/AST/ExprObjC.h"
+#include "clang/AST/ExprOpenMP.h"
 #include "clang/AST/Type.h"
 #include "clang/Basic/ABI.h"
 #include "clang/Basic/CapturedStmt.h"
@@ -2412,6 +2413,8 @@ public:
   LValue EmitUnaryOpLValue(const UnaryOperator *E);
   LValue EmitArraySubscriptExpr(const ArraySubscriptExpr *E,
                                 bool Accessed = false);
+  LValue EmitOMPArraySectionExpr(const OMPArraySectionExpr *E,
+                                 bool IsLowerBound = true);
   LValue EmitExtVectorElementExpr(const ExtVectorElementExpr *E);
   LValue EmitMemberExpr(const MemberExpr *E);
   LValue EmitObjCIsaExpr(const ObjCIsaExpr *E);
@@ -2707,17 +2710,16 @@ public:
   /// scalar type, returning the result.
   llvm::Value *EmitScalarExpr(const Expr *E , bool IgnoreResultAssign = false);
 
-  /// EmitScalarConversion - Emit a conversion from the specified type to the
-  /// specified destination type, both of which are LLVM scalar types.
+  /// Emit a conversion from the specified type to the specified destination
+  /// type, both of which are LLVM scalar types.
   llvm::Value *EmitScalarConversion(llvm::Value *Src, QualType SrcTy,
-                                    QualType DstTy);
+                                    QualType DstTy, SourceLocation Loc);
 
-  /// EmitComplexToScalarConversion - Emit a conversion from the specified
-  /// complex type to the specified destination type, where the destination type
-  /// is an LLVM scalar type.
+  /// Emit a conversion from the specified complex type to the specified
+  /// destination type, where the destination type is an LLVM scalar type.
   llvm::Value *EmitComplexToScalarConversion(ComplexPairTy Src, QualType SrcTy,
-                                             QualType DstTy);
-
+                                             QualType DstTy,
+                                             SourceLocation Loc);
 
   /// EmitAggExpr - Emit the computation of the specified expression
   /// of aggregate type.  The result is computed into the given slot,

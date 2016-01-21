@@ -1573,7 +1573,7 @@ enum CXCursorKind {
   CXCursor_ObjCImplementationDecl        = 18,
   /** \brief An Objective-C \@implementation for a category. */
   CXCursor_ObjCCategoryImplDecl          = 19,
-  /** \brief A typedef */
+  /** \brief A typedef. */
   CXCursor_TypedefDecl                   = 20,
   /** \brief A C++ class method. */
   CXCursor_CXXMethod                     = 21,
@@ -1982,7 +1982,11 @@ enum CXCursorKind {
    */
   CXCursor_ObjCSelfExpr                  = 146,
 
-  CXCursor_LastExpr                      = CXCursor_ObjCSelfExpr,
+  /** \brief OpenMP 4.0 [2.4, Array Section].
+   */
+  CXCursor_OMPArraySectionExpr           = 147,
+
+  CXCursor_LastExpr                      = CXCursor_OMPArraySectionExpr,
 
   /* Statements */
   CXCursor_FirstStmt                     = 200,
