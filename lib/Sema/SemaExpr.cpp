@@ -3981,7 +3981,7 @@ Sema::CreateUnaryExprOrTypeTraitExpr(Expr *E, SourceLocation OpLoc,
 ExprResult
 Sema::ActOnUnaryExprOrTypeTraitExpr(SourceLocation OpLoc,
                                     UnaryExprOrTypeTrait ExprKind, bool IsType,
-                                    void *TyOrEx, const SourceRange &ArgRange) {
+                                    void *TyOrEx, SourceRange ArgRange) {
   // If error parsing type, ignore.
   if (!TyOrEx) return ExprError();
 
@@ -13434,10 +13434,18 @@ bool Sema::tryCaptureVariable(
     if (getLangOpts().OpenMP) {
       if (auto *RSI = dyn_cast<CapturedRegionScopeInfo>(CSI)) {
         // OpenMP private variables should not be captured in outer scope, so
-        // just break here.
+        // just break here. Similarly, global variables that are captured in a
+        // target region should not be captured outside the scope of the region.
         if (RSI->CapRegionKind == CR_OpenMP) {
-          if (isOpenMPPrivateVar(Var, OpenMPLevel)) {
-            Nested = true;
+          auto isTargetCap = isOpenMPTargetCapturedVar(Var, OpenMPLevel);
+          // When we detect target captures we are looking from inside the
+          // target region, therefore we need to propagate the capture from the
+          // enclosing region. Therefore, the capture is not initially nested.
+          if (isTargetCap)
+            FunctionScopesIndex--;
+
+          if (isTargetCap || isOpenMPPrivateVar(Var, OpenMPLevel)) {
+            Nested = !isTargetCap;
             DeclRefType = DeclRefType.getUnqualifiedType();
             CaptureType = Context.getLValueReferenceType(DeclRefType);
             break;

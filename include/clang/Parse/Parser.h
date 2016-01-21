@@ -2167,8 +2167,7 @@ private:
   void MaybeParseMicrosoftDeclSpecs(ParsedAttributes &Attrs,
                                     SourceLocation *End = nullptr) {
     const auto &LO = getLangOpts();
-    if ((LO.MicrosoftExt || LO.Borland || LO.CUDA) &&
-        Tok.is(tok::kw___declspec))
+    if (LO.DeclSpecKeyword && Tok.is(tok::kw___declspec))
       ParseMicrosoftDeclSpecs(Attrs, End);
   }
   void ParseMicrosoftDeclSpecs(ParsedAttributes &Attrs,
