@@ -449,7 +449,7 @@ public:
   /// ordered region.
   virtual void emitOrderedRegion(CodeGenFunction &CGF,
                                  const RegionCodeGenTy &OrderedOpGen,
-                                 SourceLocation Loc);
+                                 SourceLocation Loc, bool IsThreads);
 
   /// \brief Emit an implicit/explicit barrier for OpenMP threads.
   /// \param Kind Directive for which this implicit barrier call must be
@@ -718,9 +718,12 @@ public:
                                          OpenMPDirectiveKind CancelRegion);
 
   /// \brief Emit code for 'cancel' construct.
+  /// \param IfCond Condition in the associated 'if' clause, if it was
+  /// specified, nullptr otherwise.
   /// \param CancelRegion Region kind for which the cancel must be emitted.
   ///
   virtual void emitCancelCall(CodeGenFunction &CGF, SourceLocation Loc,
+                              const Expr *IfCond,
                               OpenMPDirectiveKind CancelRegion);
 };
 

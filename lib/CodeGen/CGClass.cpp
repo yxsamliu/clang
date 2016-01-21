@@ -1789,6 +1789,7 @@ namespace {
     // Generate function call for handling vtable pointer poisoning.
     void Emit(CodeGenFunction &CGF, Flags flags) override {
       assert(Dtor->getParent()->isDynamicClass());
+      (void)Dtor;
       ASTContext &Context = CGF.getContext();
       // Poison vtable and vtable ptr if they exist for this class.
       llvm::Value *VTablePtr = CGF.LoadCXXThis();
@@ -2106,9 +2107,12 @@ void CodeGenFunction::EmitCXXConstructorCall(const CXXConstructorDecl *D,
   // FIXME: If vtable is used by ctor/dtor, or if vtable is external and we are
   // sure that definition of vtable is not hidden,
   // then we are always safe to refer to it.
+  // FIXME: It looks like InstCombine is very inefficient on dealing with
+  // assumes. Make assumption loads require -fstrict-vtable-pointers temporarily.
   if (CGM.getCodeGenOpts().OptimizationLevel > 0 &&
       ClassDecl->isDynamicClass() && Type != Ctor_Base &&
-      CGM.getCXXABI().canSpeculativelyEmitVTable(ClassDecl))
+      CGM.getCXXABI().canSpeculativelyEmitVTable(ClassDecl) &&
+      CGM.getCodeGenOpts().StrictVTablePointers)
     EmitVTableAssumptionLoads(ClassDecl, This);
 }
 

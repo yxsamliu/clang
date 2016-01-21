@@ -83,8 +83,28 @@ public:
   }
 
 };
-} // end anonymous namespace
 
+// CloudABI Target
+template <typename Target>
+class CloudABITargetInfo : public OSTargetInfo<Target> {
+protected:
+  void getOSDefines(const LangOptions &Opts, const llvm::Triple &Triple,
+                    MacroBuilder &Builder) const override {
+    Builder.defineMacro("__CloudABI__");
+    Builder.defineMacro("__ELF__");
+
+    // CloudABI uses ISO/IEC 10646:2012 for wchar_t, char16_t and char32_t.
+    Builder.defineMacro("__STDC_ISO_10646__", "201206L");
+    Builder.defineMacro("__STDC_UTF_16__");
+    Builder.defineMacro("__STDC_UTF_32__");
+  }
+
+public:
+  CloudABITargetInfo(const llvm::Triple &Triple)
+      : OSTargetInfo<Target>(Triple) {
+    this->UserLabelPrefix = "";
+  }
+};
 
 static void getDarwinDefines(MacroBuilder &Builder, const LangOptions &Opts,
                              const llvm::Triple &Triple,
@@ -150,8 +170,7 @@ static void getDarwinDefines(MacroBuilder &Builder, const LangOptions &Opts,
     Str[3] = '0' + (Rev / 10);
     Str[4] = '0' + (Rev % 10);
     Str[5] = '\0';
-    Builder.defineMacro("__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__",
-                        Str);
+    Builder.defineMacro("__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__", Str);
   } else if (Triple.isMacOSX()) {
     // Note that the Driver allows versions which aren't representable in the
     // define (because we only get a single digit for the minor and micro
@@ -184,29 +203,6 @@ static void getDarwinDefines(MacroBuilder &Builder, const LangOptions &Opts,
 
   PlatformMinVersion = VersionTuple(Maj, Min, Rev);
 }
-
-namespace {
-// CloudABI Target
-template <typename Target>
-class CloudABITargetInfo : public OSTargetInfo<Target> {
-protected:
-  void getOSDefines(const LangOptions &Opts, const llvm::Triple &Triple,
-                    MacroBuilder &Builder) const override {
-    Builder.defineMacro("__CloudABI__");
-    Builder.defineMacro("__ELF__");
-
-    // CloudABI uses ISO/IEC 10646:2012 for wchar_t, char16_t and char32_t.
-    Builder.defineMacro("__STDC_ISO_10646__", "201206L");
-    Builder.defineMacro("__STDC_UTF_16__");
-    Builder.defineMacro("__STDC_UTF_32__");
-  }
-
-public:
-  CloudABITargetInfo(const llvm::Triple &Triple)
-      : OSTargetInfo<Target>(Triple) {
-    this->UserLabelPrefix = "";
-  }
-};
 
 template<typename Target>
 class DarwinTargetInfo : public OSTargetInfo<Target> {
@@ -735,7 +731,6 @@ public:
   }
 };
 
-namespace {
 // WebAssembly target
 template <typename Target>
 class WebAssemblyOSTargetInfo : public OSTargetInfo<Target> {
@@ -762,7 +757,6 @@ public:
     this->TheCXXABI.set(TargetCXXABI::WebAssembly);
   }
 };
-} // end anonymous namespace
 
 //===----------------------------------------------------------------------===//
 // Specific target implementations.
@@ -1583,7 +1577,7 @@ public:
   }
 };
 
-  static const unsigned NVPTXAddrSpaceMap[] = {
+static const unsigned NVPTXAddrSpaceMap[] = {
     1,    // opencl_global
     3,    // opencl_local
     4,    // opencl_constant
@@ -1592,9 +1586,10 @@ public:
     1,    // cuda_device
     4,    // cuda_constant
     3,    // cuda_shared
-  };
-  class NVPTXTargetInfo : public TargetInfo {
-    static const char * const GCCRegNames[];
+};
+
+class NVPTXTargetInfo : public TargetInfo {
+  static const char *const GCCRegNames[];
     static const Builtin::Info BuiltinInfo[];
 
   // The GPU profiles supported by the NVPTX backend
@@ -1607,7 +1602,7 @@ public:
     GK_SM37,
   } GPU;
 
-  public:
+public:
     NVPTXTargetInfo(const llvm::Triple &Triple) : TargetInfo(Triple) {
       BigEndian = false;
       TLSSupported = false;
@@ -1652,13 +1647,13 @@ public:
     void getTargetBuiltins(const Builtin::Info *&Records,
                            unsigned &NumRecords) const override {
       Records = BuiltinInfo;
-      NumRecords = clang::NVPTX::LastTSBuiltin-Builtin::FirstTSBuiltin;
+    NumRecords = clang::NVPTX::LastTSBuiltin - Builtin::FirstTSBuiltin;
     }
     bool hasFeature(StringRef Feature) const override {
       return Feature == "ptx" || Feature == "nvptx";
     }
 
-    void getGCCRegNames(const char * const *&Names,
+  void getGCCRegNames(const char *const *&Names,
                         unsigned &NumNames) const override;
     void getGCCRegAliases(const GCCRegAlias *&Aliases,
                                   unsigned &NumAliases) const override {
@@ -1666,11 +1661,11 @@ public:
       Aliases = nullptr;
       NumAliases = 0;
     }
-    bool
-    validateAsmConstraint(const char *&Name,
+  bool validateAsmConstraint(const char *&Name,
                           TargetInfo::ConstraintInfo &Info) const override {
       switch (*Name) {
-      default: return false;
+    default:
+      return false;
       case 'c':
       case 'h':
       case 'r':
@@ -1700,39 +1695,38 @@ public:
 
       return GPU != GK_NONE;
     }
-  };
+};
 
-  const Builtin::Info NVPTXTargetInfo::BuiltinInfo[] = {
+const Builtin::Info NVPTXTargetInfo::BuiltinInfo[] = {
 #define BUILTIN(ID, TYPE, ATTRS) \
     { #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr },
 #define LIBBUILTIN(ID, TYPE, ATTRS, HEADER) \
     { #ID, TYPE, ATTRS, HEADER, ALL_LANGUAGES, nullptr },
 #include "clang/Basic/BuiltinsNVPTX.def"
-  };
+};
 
-  const char * const NVPTXTargetInfo::GCCRegNames[] = {
-    "r0"
-  };
+const char *const NVPTXTargetInfo::GCCRegNames[] = {"r0"};
 
-  void NVPTXTargetInfo::getGCCRegNames(const char * const *&Names,
+void NVPTXTargetInfo::getGCCRegNames(const char *const *&Names,
                                      unsigned &NumNames) const {
     Names = GCCRegNames;
     NumNames = llvm::array_lengthof(GCCRegNames);
-  }
+}
 
-  class NVPTX32TargetInfo : public NVPTXTargetInfo {
-  public:
+class NVPTX32TargetInfo : public NVPTXTargetInfo {
+public:
     NVPTX32TargetInfo(const llvm::Triple &Triple) : NVPTXTargetInfo(Triple) {
+    LongWidth = LongAlign = 32;
       PointerWidth = PointerAlign = 32;
       SizeType = TargetInfo::UnsignedInt;
       PtrDiffType = TargetInfo::SignedInt;
       IntPtrType = TargetInfo::SignedInt;
       DataLayoutString = "e-p:32:32-i64:64-v16:16-v32:32-n16:32:64";
     }
-  };
+};
 
-  class NVPTX64TargetInfo : public NVPTXTargetInfo {
-  public:
+class NVPTX64TargetInfo : public NVPTXTargetInfo {
+public:
     NVPTX64TargetInfo(const llvm::Triple &Triple) : NVPTXTargetInfo(Triple) {
       PointerWidth = PointerAlign = 64;
       SizeType = TargetInfo::UnsignedLong;
@@ -1740,7 +1734,7 @@ public:
       IntPtrType = TargetInfo::SignedLong;
       DataLayoutString = "e-i64:64-v16:16-v32:32-n16:32:64";
     }
-  };
+};
 
 static const unsigned AMDGPUAddrSpaceMap[] = {
   1,    // opencl_global
@@ -3720,7 +3714,6 @@ public:
     Builder.defineMacro("_M_IX86", "600");
   }
 };
-} // end anonymous namespace
 
 static void addCygMingDefines(const LangOptions &Opts, MacroBuilder &Builder) {
   // Mingw and cygwin define __declspec(a) to __attribute__((a)).  Clang supports
@@ -3752,7 +3745,6 @@ static void addMinGWDefines(const LangOptions &Opts, MacroBuilder &Builder) {
   addCygMingDefines(Opts, Builder);
 }
 
-namespace {
 // x86-32 MinGW target
 class MinGWX86_32TargetInfo : public WindowsX86_32TargetInfo {
 public:
@@ -3893,6 +3885,9 @@ public:
 
     // Use fp2ret for _Complex long double.
     ComplexLongDoubleUsesFP2Ret = true;
+
+    // Make __builtin_ms_va_list available.
+    HasBuiltinMSVaList = true;
 
     // x86-64 has atomics up to 16 bytes.
     MaxAtomicPromoteWidth = 128;
@@ -4119,6 +4114,7 @@ class ARMTargetInfo : public TargetInfo {
 
   unsigned CRC : 1;
   unsigned Crypto : 1;
+  unsigned DSP : 1;
   unsigned Unaligned : 1;
 
   enum {
@@ -4470,6 +4466,7 @@ public:
     FPU = 0;
     CRC = 0;
     Crypto = 0;
+    DSP = 0;
     Unaligned = 1;
     SoftFloat = SoftFloatABI = false;
     HWDiv = 0;
@@ -4505,6 +4502,8 @@ public:
         CRC = 1;
       } else if (Feature == "+crypto") {
         Crypto = 1;
+      } else if (Feature == "+t2dsp") {
+        DSP = 1;
       } else if (Feature == "+fp-only-sp") {
         HW_FP_remove |= HW_FP_DP | HW_FP_HP;
       } else if (Feature == "+strict-align") {
@@ -4740,25 +4739,19 @@ public:
     }
 
     // ACLE 6.4.7 DSP instructions
-    bool hasDSP = false;
-    bool is5EOrAbove = (ArchVersion >= 6 ||
-                       (ArchVersion == 5 && CPUAttr.count('E')));
-    // FIXME: We are not getting all 32-bit ARM architectures
-    bool is32Bit = (!isThumb() || supportsThumb2());
-    if (is5EOrAbove && is32Bit && (CPUProfile != "M" || CPUAttr  == "7EM")) {
+    if (DSP) {
       Builder.defineMacro("__ARM_FEATURE_DSP", "1");
-      hasDSP = true;
     }
 
     // ACLE 6.4.8 Saturation instructions
-    bool hasSAT = false;
+    bool SAT = false;
     if ((ArchVersion == 6 && CPUProfile != "M") || ArchVersion > 6 ) {
       Builder.defineMacro("__ARM_FEATURE_SAT", "1");
-      hasSAT = true;
+      SAT = true;
     }
 
     // ACLE 6.4.6 Q (saturation) flag
-    if (hasDSP || hasSAT)
+    if (DSP || SAT)
       Builder.defineMacro("__ARM_FEATURE_QBIT", "1");
   }
 
@@ -4944,15 +4937,15 @@ void ARMTargetInfo::getGCCRegAliases(const GCCRegAlias *&Aliases,
 
 const Builtin::Info ARMTargetInfo::BuiltinInfo[] = {
 #define BUILTIN(ID, TYPE, ATTRS) \
-  { #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr},
+  { #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr },
 #define LIBBUILTIN(ID, TYPE, ATTRS, HEADER) \
   { #ID, TYPE, ATTRS, HEADER, ALL_LANGUAGES, nullptr },
 #include "clang/Basic/BuiltinsNEON.def"
 
 #define BUILTIN(ID, TYPE, ATTRS) \
-  { #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr},
+  { #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr },
 #define LANGBUILTIN(ID, TYPE, ATTRS, LANG) \
-  { #ID, TYPE, ATTRS, nullptr, LANG, nullptr},
+  { #ID, TYPE, ATTRS, nullptr, LANG, nullptr },
 #define LIBBUILTIN(ID, TYPE, ATTRS, HEADER) \
   { #ID, TYPE, ATTRS, HEADER, ALL_LANGUAGES, nullptr },
 #include "clang/Basic/BuiltinsARM.def"
@@ -6053,16 +6046,20 @@ validateAsmConstraint(const char *&Name,
   }
 }
 
-  class MSP430TargetInfo : public TargetInfo {
-    static const char * const GCCRegNames[];
-  public:
+class MSP430TargetInfo : public TargetInfo {
+  static const char *const GCCRegNames[];
+
+public:
     MSP430TargetInfo(const llvm::Triple &Triple) : TargetInfo(Triple) {
       BigEndian = false;
       TLSSupported = false;
-      IntWidth = 16; IntAlign = 16;
-      LongWidth = 32; LongLongWidth = 64;
+    IntWidth = 16;
+    IntAlign = 16;
+    LongWidth = 32;
+    LongLongWidth = 64;
       LongAlign = LongLongAlign = 16;
-      PointerWidth = 16; PointerAlign = 16;
+    PointerWidth = 16;
+    PointerAlign = 16;
       SuitableAlign = 16;
       SizeType = UnsignedInt;
       IntMaxType = SignedLongLong;
@@ -6086,7 +6083,7 @@ validateAsmConstraint(const char *&Name,
     bool hasFeature(StringRef Feature) const override {
       return Feature == "msp430";
     }
-    void getGCCRegNames(const char * const *&Names,
+  void getGCCRegNames(const char *const *&Names,
                         unsigned &NumNames) const override;
     void getGCCRegAliases(const GCCRegAlias *&Aliases,
                           unsigned &NumAliases) const override {
@@ -6094,8 +6091,7 @@ validateAsmConstraint(const char *&Name,
       Aliases = nullptr;
       NumAliases = 0;
     }
-    bool
-    validateAsmConstraint(const char *&Name,
+  bool validateAsmConstraint(const char *&Name,
                           TargetInfo::ConstraintInfo &info) const override {
       // FIXME: implement
       switch (*Name) {
@@ -6115,28 +6111,27 @@ validateAsmConstraint(const char *&Name,
       // FIXME: implement
       return TargetInfo::CharPtrBuiltinVaList;
    }
-  };
+};
 
-  const char * const MSP430TargetInfo::GCCRegNames[] = {
+const char *const MSP430TargetInfo::GCCRegNames[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
-  };
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
 
-  void MSP430TargetInfo::getGCCRegNames(const char * const *&Names,
+void MSP430TargetInfo::getGCCRegNames(const char *const *&Names,
                                         unsigned &NumNames) const {
     Names = GCCRegNames;
     NumNames = llvm::array_lengthof(GCCRegNames);
-  }
+}
 
-  // LLVM and Clang cannot be used directly to output native binaries for
-  // target, but is used to compile C code to llvm bitcode with correct
-  // type and alignment information.
-  //
-  // TCE uses the llvm bitcode as input and uses it for generating customized
-  // target processor and program binary. TCE co-design environment is
-  // publicly available in http://tce.cs.tut.fi
+// LLVM and Clang cannot be used directly to output native binaries for
+// target, but is used to compile C code to llvm bitcode with correct
+// type and alignment information.
+//
+// TCE uses the llvm bitcode as input and uses it for generating customized
+// target processor and program binary. TCE co-design environment is
+// publicly available in http://tce.cs.tut.fi
 
-  static const unsigned TCEOpenCLAddrSpaceMap[] = {
+static const unsigned TCEOpenCLAddrSpaceMap[] = {
       3, // opencl_global
       4, // opencl_local
       5, // opencl_constant
@@ -6145,10 +6140,10 @@ validateAsmConstraint(const char *&Name,
       0, // cuda_device
       0, // cuda_constant
       0  // cuda_shared
-  };
+};
 
-  class TCETargetInfo : public TargetInfo{
-  public:
+class TCETargetInfo : public TargetInfo {
+public:
     TCETargetInfo(const llvm::Triple &Triple) : TargetInfo(Triple) {
       TLSSupported = false;
       IntWidth = 32;
@@ -6183,27 +6178,23 @@ validateAsmConstraint(const char *&Name,
       Builder.defineMacro("__TCE__");
       Builder.defineMacro("__TCE_V1__");
     }
-    bool hasFeature(StringRef Feature) const override {
-      return Feature == "tce";
-    }
+  bool hasFeature(StringRef Feature) const override { return Feature == "tce"; }
 
     void getTargetBuiltins(const Builtin::Info *&Records,
                            unsigned &NumRecords) const override {}
-    const char *getClobbers() const override {
-      return "";
-    }
+  const char *getClobbers() const override { return ""; }
     BuiltinVaListKind getBuiltinVaListKind() const override {
       return TargetInfo::VoidPtrBuiltinVaList;
     }
-    void getGCCRegNames(const char * const *&Names,
+  void getGCCRegNames(const char *const *&Names,
                         unsigned &NumNames) const override {}
     bool validateAsmConstraint(const char *&Name,
-                               TargetInfo::ConstraintInfo &info) const override{
+                             TargetInfo::ConstraintInfo &info) const override {
       return true;
     }
     void getGCCRegAliases(const GCCRegAlias *&Aliases,
                           unsigned &NumAliases) const override {}
-  };
+};
 
 class BPFTargetInfo : public TargetInfo {
 public:
@@ -7127,16 +7118,13 @@ protected:
   }
 };
 
-} // end anonymous namespace.
-
 const Builtin::Info Le64TargetInfo::BuiltinInfo[] = {
 #define BUILTIN(ID, TYPE, ATTRS)                                               \
   { #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr },
 #include "clang/Basic/BuiltinsLe64.def"
 };
 
-namespace {
-  static const unsigned SPIRAddrSpaceMap[] = {
+static const unsigned SPIRAddrSpaceMap[] = {
     1,    // opencl_global
     3,    // opencl_local
     2,    // opencl_constant
@@ -7144,9 +7132,9 @@ namespace {
     0,    // cuda_device
     0,    // cuda_constant
     0     // cuda_shared
-  };
-  class SPIRTargetInfo : public TargetInfo {
-  public:
+};
+class SPIRTargetInfo : public TargetInfo {
+public:
     SPIRTargetInfo(const llvm::Triple &Triple) : TargetInfo(Triple) {
       assert(getTriple().getOS() == llvm::Triple::UnknownOS &&
         "SPIR target must use unknown OS");
@@ -7173,13 +7161,10 @@ namespace {
 
     void getTargetBuiltins(const Builtin::Info *&Records,
                            unsigned &NumRecords) const override {}
-    const char *getClobbers() const override {
-      return "";
-    }
-    void getGCCRegNames(const char * const *&Names,
+  const char *getClobbers() const override { return ""; }
+  void getGCCRegNames(const char *const *&Names,
                         unsigned &NumNames) const override {}
-    bool
-    validateAsmConstraint(const char *&Name,
+  bool validateAsmConstraint(const char *&Name,
                           TargetInfo::ConstraintInfo &info) const override {
       return true;
     }
@@ -7190,18 +7175,17 @@ namespace {
     }
 
     CallingConvCheckResult checkCallingConvention(CallingConv CC) const override {
-      return (CC == CC_SpirFunction ||
-              CC == CC_SpirKernel) ? CCCR_OK : CCCR_Warning;
+    return (CC == CC_SpirFunction || CC == CC_SpirKernel) ? CCCR_OK
+                                                          : CCCR_Warning;
     }
 
     CallingConv getDefaultCallingConv(CallingConvMethodType MT) const override {
       return CC_SpirFunction;
     }
-  };
+};
 
-
-  class SPIR32TargetInfo : public SPIRTargetInfo {
-  public:
+class SPIR32TargetInfo : public SPIRTargetInfo {
+public:
     SPIR32TargetInfo(const llvm::Triple &Triple) : SPIRTargetInfo(Triple) {
       PointerWidth = PointerAlign = 32;
       SizeType     = TargetInfo::UnsignedInt;
@@ -7213,10 +7197,10 @@ namespace {
                           MacroBuilder &Builder) const override {
       DefineStd(Builder, "SPIR32", Opts);
     }
-  };
+};
 
-  class SPIR64TargetInfo : public SPIRTargetInfo {
-  public:
+class SPIR64TargetInfo : public SPIRTargetInfo {
+public:
     SPIR64TargetInfo(const llvm::Triple &Triple) : SPIRTargetInfo(Triple) {
       PointerWidth = PointerAlign = 64;
       SizeType     = TargetInfo::UnsignedLong;
@@ -7228,7 +7212,7 @@ namespace {
                           MacroBuilder &Builder) const override {
       DefineStd(Builder, "SPIR64", Opts);
     }
-  };
+};
 
 class XCoreTargetInfo : public TargetInfo {
   static const Builtin::Info BuiltinInfo[];
@@ -7294,9 +7278,7 @@ const Builtin::Info XCoreTargetInfo::BuiltinInfo[] = {
   { #ID, TYPE, ATTRS, HEADER, ALL_LANGUAGES, nullptr },
 #include "clang/Basic/BuiltinsXCore.def"
 };
-} // end anonymous namespace.
 
-namespace {
 // x86_32 Android target
 class AndroidX86_32TargetInfo : public LinuxTargetInfo<X86_32TargetInfo> {
 public:
@@ -7307,9 +7289,7 @@ public:
     LongDoubleFormat = &llvm::APFloat::IEEEdouble;
   }
 };
-} // end anonymous namespace
 
-namespace {
 // x86_64 Android target
 class AndroidX86_64TargetInfo : public LinuxTargetInfo<X86_64TargetInfo> {
 public:
@@ -7323,7 +7303,6 @@ public:
   }
 };
 } // end anonymous namespace
-
 
 //===----------------------------------------------------------------------===//
 // Driver code
