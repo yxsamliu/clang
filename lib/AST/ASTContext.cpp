@@ -327,7 +327,7 @@ const Decl *adjustDeclToTemplate(const Decl *D) {
   // FIXME: Adjust alias templates?
   return D;
 }
-} // unnamed namespace
+} // anonymous namespace
 
 const RawComment *ASTContext::getRawCommentForAnyRedecl(
                                                 const Decl *D,
@@ -430,7 +430,6 @@ comments::FullComment *ASTContext::cloneFullComment(comments::FullComment *FC,
     new (*this) comments::FullComment(FC->getBlocks(),
                                       ThisDeclInfo);
   return CFC;
-  
 }
 
 comments::FullComment *ASTContext::getLocalCommentForDeclUncached(const Decl *D) const {
@@ -744,7 +743,7 @@ ASTContext::ASTContext(LangOptions &LOpts, SourceManager &SM,
       ucontext_tDecl(nullptr), BlockDescriptorType(nullptr),
       BlockDescriptorExtendedType(nullptr), cudaConfigureCallDecl(nullptr),
       FirstLocalImport(), LastLocalImport(), ExternCContext(nullptr),
-      SourceMgr(SM), LangOpts(LOpts),
+      MakeIntegerSeqDecl(nullptr), SourceMgr(SM), LangOpts(LOpts),
       SanitizerBL(new SanitizerBlacklist(LangOpts.SanitizerBlacklistFiles, SM)),
       AddrSpaceMap(nullptr), Target(nullptr), AuxTarget(nullptr),
       PrintingPolicy(LOpts), Idents(idents), Selectors(sels),
@@ -912,6 +911,24 @@ ExternCContextDecl *ASTContext::getExternCContextDecl() const {
     ExternCContext = ExternCContextDecl::Create(*this, getTranslationUnitDecl());
 
   return ExternCContext;
+}
+
+BuiltinTemplateDecl *
+ASTContext::buildBuiltinTemplateDecl(BuiltinTemplateKind BTK,
+                                     const IdentifierInfo *II) const {
+  auto *BuiltinTemplate = BuiltinTemplateDecl::Create(*this, TUDecl, II, BTK);
+  BuiltinTemplate->setImplicit();
+  TUDecl->addDecl(BuiltinTemplate);
+
+  return BuiltinTemplate;
+}
+
+BuiltinTemplateDecl *
+ASTContext::getMakeIntegerSeqDecl() const {
+  if (!MakeIntegerSeqDecl)
+    MakeIntegerSeqDecl = buildBuiltinTemplateDecl(BTK__make_integer_seq,
+                                                  getMakeIntegerSeqName());
+  return MakeIntegerSeqDecl;
 }
 
 RecordDecl *ASTContext::buildImplicitRecord(StringRef Name,
@@ -1912,7 +1929,7 @@ unsigned ASTContext::getPreferredTypeAlign(const Type *T) const {
 /// getTargetDefaultAlignForAttributeAligned - Return the default alignment
 /// for __attribute__((aligned)) on this target, to be used if no alignment
 /// value is specified.
-unsigned ASTContext::getTargetDefaultAlignForAttributeAligned(void) const {
+unsigned ASTContext::getTargetDefaultAlignForAttributeAligned() const {
   return getTargetInfo().getDefaultAlignForAttributeAligned();
 }
 
@@ -3253,7 +3270,6 @@ QualType ASTContext::getAttributedType(AttributedType::Kind attrKind,
   return QualType(type, 0);
 }
 
-
 /// \brief Retrieve a substitution-result type.
 QualType
 ASTContext::getSubstTemplateTypeParmType(const TemplateTypeParmType *Parm,
@@ -3953,7 +3969,6 @@ QualType ASTContext::getTypeOfType(QualType tofType) const {
   return QualType(tot, 0);
 }
 
-
 /// \brief Unlike many "get<Type>" functions, we don't unique DecltypeType
 /// nodes. This would never be helpful, since each such type has its own
 /// expression, and would not give a significant memory saving, since there
@@ -4005,20 +4020,20 @@ QualType ASTContext::getUnaryTransformType(QualType BaseType,
 /// getAutoType - Return the uniqued reference to the 'auto' type which has been
 /// deduced to the given type, or to the canonical undeduced 'auto' type, or the
 /// canonical deduced-but-dependent 'auto' type.
-QualType ASTContext::getAutoType(QualType DeducedType, bool IsDecltypeAuto,
+QualType ASTContext::getAutoType(QualType DeducedType, AutoTypeKeyword Keyword,
                                  bool IsDependent) const {
-  if (DeducedType.isNull() && !IsDecltypeAuto && !IsDependent)
+  if (DeducedType.isNull() && Keyword == AutoTypeKeyword::Auto && !IsDependent)
     return getAutoDeductType();
 
   // Look in the folding set for an existing type.
   void *InsertPos = nullptr;
   llvm::FoldingSetNodeID ID;
-  AutoType::Profile(ID, DeducedType, IsDecltypeAuto, IsDependent);
+  AutoType::Profile(ID, DeducedType, Keyword, IsDependent);
   if (AutoType *AT = AutoTypes.FindNodeOrInsertPos(ID, InsertPos))
     return QualType(AT, 0);
 
   AutoType *AT = new (*this, TypeAlignment) AutoType(DeducedType,
-                                                     IsDecltypeAuto,
+                                                     Keyword,
                                                      IsDependent);
   Types.push_back(AT);
   if (InsertPos)
@@ -4058,7 +4073,7 @@ QualType ASTContext::getAtomicType(QualType T) const {
 QualType ASTContext::getAutoDeductType() const {
   if (AutoDeductTy.isNull())
     AutoDeductTy = QualType(
-      new (*this, TypeAlignment) AutoType(QualType(), /*decltype(auto)*/false,
+      new (*this, TypeAlignment) AutoType(QualType(), AutoTypeKeyword::Auto,
                                           /*dependent*/false),
       0);
   return AutoDeductTy;
@@ -4457,7 +4472,6 @@ ASTContext::getCanonicalNestedNameSpecifier(NestedNameSpecifier *NNS) const {
 
   llvm_unreachable("Invalid NestedNameSpecifier::Kind!");
 }
-
 
 const ArrayType *ASTContext::getAsArrayType(QualType T) const {
   // Handle the non-qualified case efficiently.
@@ -5872,7 +5886,6 @@ void ASTContext::getObjCEncodingForTypeImpl(QualType T, std::string& S,
   // Just ignore it.
   case Type::Auto:
     return;
-  
 
 #define ABSTRACT_TYPE(KIND, BASE)
 #define TYPE(KIND, BASE)
@@ -8913,7 +8926,7 @@ createDynTypedNode(const NestedNameSpecifierLoc &Node) {
     friend class RecursiveASTVisitor<ParentMapASTVisitor>;
   };
 
-} // end namespace
+} // anonymous namespace
 
 template <typename NodeTy, typename MapTy>
 static ASTContext::DynTypedNodeList getDynNodeFromMap(const NodeTy &Node,

@@ -70,6 +70,7 @@ namespace clang {
   class VTableContextBase;
 
   namespace Builtin { class Context; }
+  enum BuiltinTemplateKind : int;
 
   namespace comments {
     class FullComment;
@@ -247,6 +248,9 @@ class ASTContext : public RefCountedBase<ASTContext> {
   /// The identifier 'NSCopying'.
   IdentifierInfo *NSCopyingName = nullptr;
 
+  /// The identifier '__make_integer_seq'.
+  mutable IdentifierInfo *MakeIntegerSeqName = nullptr;
+
   QualType ObjCConstantStringType;
   mutable RecordDecl *CFConstantStringTypeDecl;
   
@@ -400,6 +404,7 @@ private:
   
   TranslationUnitDecl *TUDecl;
   mutable ExternCContextDecl *ExternCContext;
+  mutable BuiltinTemplateDecl *MakeIntegerSeqDecl;
 
   /// \brief The associated SourceManager object.a
   SourceManager &SourceMgr;
@@ -875,6 +880,7 @@ public:
   TranslationUnitDecl *getTranslationUnitDecl() const { return TUDecl; }
 
   ExternCContextDecl *getExternCContextDecl() const;
+  BuiltinTemplateDecl *getMakeIntegerSeqDecl() const;
 
   // Builtin Types.
   CanQualType VoidTy;
@@ -947,6 +953,9 @@ public:
 
   void PrintStats() const;
   const SmallVectorImpl<Type *>& getTypes() const { return Types; }
+
+  BuiltinTemplateDecl *buildBuiltinTemplateDecl(BuiltinTemplateKind BTK,
+                                                const IdentifierInfo *II) const;
 
   /// \brief Create a new implicit TU-level CXXRecordDecl or RecordDecl
   /// declaration.
@@ -1300,7 +1309,7 @@ public:
                                  UnaryTransformType::UTTKind UKind) const;
 
   /// \brief C++11 deduced auto type.
-  QualType getAutoType(QualType DeducedType, bool IsDecltypeAuto,
+  QualType getAutoType(QualType DeducedType, AutoTypeKeyword Keyword,
                        bool IsDependent) const;
 
   /// \brief C++11 deduction pattern for 'auto' type.
@@ -1452,6 +1461,12 @@ public:
     }
 
     return NSCopyingName;
+  }
+
+  IdentifierInfo *getMakeIntegerSeqName() const {
+    if (!MakeIntegerSeqName)
+      MakeIntegerSeqName = &Idents.get("__make_integer_seq");
+    return MakeIntegerSeqName;
   }
 
   /// \brief Retrieve the Objective-C "instancetype" type, if already known;
@@ -2267,16 +2282,6 @@ public:
   // unsigned integer type.  This method takes a signed type, and returns the
   // corresponding unsigned integer type.
   QualType getCorrespondingUnsignedType(QualType T) const;
-
-  //===--------------------------------------------------------------------===//
-  //                    Type Iterators.
-  //===--------------------------------------------------------------------===//
-  typedef llvm::iterator_range<SmallVectorImpl<Type *>::const_iterator>
-    type_const_range;
-
-  type_const_range types() const {
-    return type_const_range(Types.begin(), Types.end());
-  }
 
   //===--------------------------------------------------------------------===//
   //                    Integer Values

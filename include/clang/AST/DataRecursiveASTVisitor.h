@@ -1555,6 +1555,10 @@ DEF_TRAVERSE_DECL(FunctionTemplateDecl, {
     TRY_TO(TraverseFunctionInstantiations(D));
 })
 
+DEF_TRAVERSE_DECL(BuiltinTemplateDecl, {
+  TRY_TO(TraverseTemplateParameterListHelper(D->getTemplateParameters()));
+})
+
 DEF_TRAVERSE_DECL(TemplateTemplateParmDecl, {
   // D is the "T" in something like
   //   template <template <typename> class T> class container { };
@@ -2704,6 +2708,12 @@ bool RecursiveASTVisitor<Derived>::VisitOMPDependClause(OMPDependClause *C) {
 template <typename Derived>
 bool RecursiveASTVisitor<Derived>::VisitOMPDeviceClause(OMPDeviceClause *C) {
   TRY_TO(TraverseStmt(C->getDevice()));
+  return true;
+}
+
+template <typename Derived>
+bool RecursiveASTVisitor<Derived>::VisitOMPMapClause(OMPMapClause *C) {
+  TRY_TO(VisitOMPClauseList(C));
   return true;
 }
 

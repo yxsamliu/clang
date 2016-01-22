@@ -779,7 +779,7 @@ def Format : InheritableAttr {
   let Args = [IdentifierArgument<"Type">, IntArgument<"FormatIdx">,
               IntArgument<"FirstArg">];
   let Subjects = SubjectList<[ObjCMethod, Block, HasFunctionProto], WarnDiag,
-                             "ExpectedFunction">;
+                             "ExpectedFunctionWithProtoType">;
   let Documentation = [FormatDocs];
 }
 
@@ -787,7 +787,7 @@ def FormatArg : InheritableAttr {
   let Spellings = [GCC<"format_arg">];
   let Args = [IntArgument<"FormatIdx">];
   let Subjects = SubjectList<[ObjCMethod, HasFunctionProto], WarnDiag,
-                             "ExpectedFunction">;
+                             "ExpectedFunctionWithProtoType">;
   let Documentation = [Undocumented];
 }
 
@@ -898,6 +898,13 @@ def ReturnsTwice : InheritableAttr {
   let Spellings = [GCC<"returns_twice">];
   let Subjects = SubjectList<[Function]>;
   let Documentation = [Undocumented];
+}
+
+def DisableTailCalls : InheritableAttr {
+  let Spellings = [GNU<"disable_tail_calls">,
+                   CXX11<"clang", "disable_tail_calls">];
+  let Subjects = SubjectList<[Function, ObjCMethod]>;
+  let Documentation = [DisableTailCallsDocs];
 }
 
 def NoAlias : InheritableAttr {
@@ -1037,6 +1044,12 @@ def NoInstrumentFunction : InheritableAttr {
   let Spellings = [GCC<"no_instrument_function">];
   let Subjects = SubjectList<[Function]>;
   let Documentation = [Undocumented];
+}
+
+def NotTailCalled : InheritableAttr {
+  let Spellings = [GNU<"not_tail_called">, CXX11<"clang", "not_tail_called">];
+  let Subjects = SubjectList<[Function]>;
+  let Documentation = [NotTailCalledDocs];
 }
 
 def NoThrow : InheritableAttr {
@@ -1213,7 +1226,8 @@ def Ownership : InheritableAttr {
     }
   }];
   let Args = [IdentifierArgument<"Module">, VariadicUnsignedArgument<"Args">];
-  let Subjects = SubjectList<[HasFunctionProto], WarnDiag, "ExpectedFunction">;
+  let Subjects = SubjectList<[HasFunctionProto], WarnDiag,
+                             "ExpectedFunctionWithProtoType">;
   let Documentation = [Undocumented];
 }
 
@@ -2134,4 +2148,10 @@ def OMPThreadPrivateDecl : InheritableAttr {
   let Spellings = [];
   let SemaHandler = 0;
   let Documentation = [Undocumented];
+}
+
+def InternalLinkage : InheritableAttr {
+  let Spellings = [GNU<"internal_linkage">, CXX11<"clang", "internal_linkage">];
+  let Subjects = SubjectList<[Var, Function, CXXRecord]>;
+  let Documentation = [InternalLinkageDocs];
 }
