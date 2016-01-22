@@ -32,10 +32,10 @@ class CodeGenModule;
 class CGOpenCLRuntime {
 protected:
   CodeGenModule &CGM;
-
   llvm::Type *PipeTy;
+
 public:
-  CGOpenCLRuntime(CodeGenModule &CGM) : CGM(CGM), PipeTy(0) {}
+  CGOpenCLRuntime(CodeGenModule &CGM) : CGM(CGM), PipeTy(nullptr) {}
   virtual ~CGOpenCLRuntime();
 
   /// Emit the IR required for a work-group-local variable declaration, and add
@@ -46,7 +46,7 @@ public:
 
   virtual llvm::Type *convertOpenCLSpecificType(const Type *T);
 
-  llvm::Type *getPipeType();
+  virtual llvm::Type *getPipeType();
 
   // \brief Returnes a value which indicates the size in bytes of the pipe
   // element.

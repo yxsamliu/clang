@@ -885,7 +885,7 @@ void CodeGenFunction::StartFunction(GlobalDecl GD,
   if (CGDebugInfo *DI = getDebugInfo()) {
     SmallVector<QualType, 16> ArgTypes;
     for (FunctionArgList::const_iterator i = Args.begin(), e = Args.end();
-	 i != e; ++i) {
+     i != e; ++i) {
       ArgTypes.push_back((*i)->getType());
     }
 

@@ -3127,10 +3127,8 @@ ASTContext::getFunctionType(QualType ResultTy, ArrayRef<QualType> ArgArray,
   return QualType(FTP, 0);
 }
 
-/// getPipeType - Return pipe type for the specified type.
+/// Return pipe type for the specified type.
 QualType ASTContext::getPipeType(QualType T) const {
-  // Unique pointers, to guarantee there is only one pointer of a particular
-  // structure.
   llvm::FoldingSetNodeID ID;
   PipeType::Profile(ID, T);
 
@@ -3138,7 +3136,7 @@ QualType ASTContext::getPipeType(QualType T) const {
   if (PipeType *PT = PipeTypes.FindNodeOrInsertPos(ID, InsertPos))
     return QualType(PT, 0);
 
-  // If the atomic value type isn't canonical, this won't be a canonical type
+  // If the pipe element type isn't canonical, this won't be a canonical type
   // either, so fill in the canonical type field.
   QualType Canonical;
   if (!T.isCanonical()) {
@@ -3146,7 +3144,8 @@ QualType ASTContext::getPipeType(QualType T) const {
 
     // Get the new insert position for the node we care about.
     PipeType *NewIP = PipeTypes.FindNodeOrInsertPos(ID, InsertPos);
-    assert(!NewIP && "Shouldn't be in the map!"); (void)NewIP;
+    assert(!NewIP && "Shouldn't be in the map!");
+    (void)NewIP;
   }
   PipeType *New = new (*this, TypeAlignment) PipeType(T, Canonical);
   Types.push_back(New);
@@ -5894,6 +5893,7 @@ void ASTContext::getObjCEncodingForTypeImpl(QualType T, std::string& S,
   case Type::Auto:
     return;
 
+  case Type::Pipe:
 #define ABSTRACT_TYPE(KIND, BASE)
 #define TYPE(KIND, BASE)
 #define DEPENDENT_TYPE(KIND, BASE) \

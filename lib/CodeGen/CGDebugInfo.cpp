@@ -2031,14 +2031,11 @@ llvm::DIType *CGDebugInfo::CreateType(const AtomicType *Ty, llvm::DIFile *U) {
   return getOrCreateType(Ty->getValueType(), U);
 }
 
-llvm::DIType *CGDebugInfo::CreateType(const PipeType *Ty,
+llvm::DIType* CGDebugInfo::CreateType(const PipeType *Ty,
                                      llvm::DIFile *U) {
-  // Ignore the atomic wrapping
-  // FIXME: What is the correct representation?
   return getOrCreateType(Ty->getElementType(), U);
 }
 
-/// CreateEnumType - get enumeration type.
 llvm::DIType *CGDebugInfo::CreateEnumType(const EnumType *Ty) {
   const EnumDecl *ED = Ty->getDecl();
 

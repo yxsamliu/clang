@@ -7713,6 +7713,10 @@ def err_wrong_sampler_addressspace: Error<
   "sampler type cannot be used with the __local and __global address space qualifiers">;
 def err_opencl_global_invalid_addr_space : Error<
   "program scope variable must reside in %0 address space">;
+def err_missing_actual_pipe_type : Error<
+  "missing actual type specifier for pipe">;
+def err_reference_pipe_type : Error <
+  "pipes packet types cannot be of reference type">;
 def err_read_write_with_samplers : Error <
   "reading from an image declared with 'read_write' qualifier using a sampler is prohibited">;
 def err_image_type_can_be_used_only_as_parameter : Error <
@@ -7736,12 +7740,8 @@ def err_read_write_not_allowed_for_pipes : Error<
   "read_write access qualifier can't be specified for pipes">;
 def err_mismatch_access_qualifiers : Error<
   "passing '%0' to '%1' mismatch access qualifiers">;
-def err_missing_actual_pipe_type : Error<
-  "missing actual type specifier for pipe">;
 def err_multiple_access_qualifiers : Error<
   "multiple access qualifiers">;
-def err_reference_pipe_type : Error <
-  "pipes packet types cannot be of reference type">;
 def err_nosvm_attr_not_pointer : Error<
   "nosvm attribute should be used with pointer variables only">;
 def err_nosvm_opencl_version : Error<

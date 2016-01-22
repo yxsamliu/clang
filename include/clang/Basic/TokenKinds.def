@@ -536,10 +536,11 @@ KEYWORD(vec_step                    , KEYOPENCL|KEYALTIVEC|KEYZVECTOR)
 KEYWORD(queue_t                     , KEYOPENCL)
 KEYWORD(clk_event_t                 , KEYOPENCL)
 KEYWORD(reserve_id_t                , KEYOPENCL)
-KEYWORD(pipe                        , KEYOPENCL)
 
 // OpenMP Type Traits
 KEYWORD(__builtin_omp_required_simd_align, KEYALL)
+
+KEYWORD(pipe                        , KEYOPENCL)
 
 // Borland Extensions.
 KEYWORD(__pascal                    , KEYALL)

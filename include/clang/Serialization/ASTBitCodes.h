@@ -908,7 +908,7 @@ namespace clang {
       TYPE_DECAYED               = 41,
       /// \brief An AdjustedType record.
       TYPE_ADJUSTED              = 42,
-      /// \brief An PipeType record.
+      /// \brief A PipeType record.
       TYPE_PIPE                  = 43
     };
 

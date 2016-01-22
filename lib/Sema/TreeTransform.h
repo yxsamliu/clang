@@ -5327,16 +5327,15 @@ QualType TreeTransform<Derived>::TransformAtomicType(TypeLocBuilder &TLB,
   return Result;
 }
 
-template<typename Derived>
+template <typename Derived>
 QualType TreeTransform<Derived>::TransformPipeType(TypeLocBuilder &TLB,
-                                                     PipeTypeLoc TL) {
+                                                   PipeTypeLoc TL) {
   QualType ValueType = getDerived().TransformType(TLB, TL.getValueLoc());
   if (ValueType.isNull())
     return QualType();
 
   QualType Result = TL.getType();
-  if (getDerived().AlwaysRebuild() ||
-      ValueType != TL.getValueLoc().getType()) {
+  if (getDerived().AlwaysRebuild() || ValueType != TL.getValueLoc().getType()) {
     Result = getDerived().RebuildPipeType(ValueType, TL.getKWLoc());
     if (Result.isNull())
       return QualType();
@@ -5348,7 +5347,6 @@ QualType TreeTransform<Derived>::TransformPipeType(TypeLocBuilder &TLB,
   return Result;
 }
 
-namespace {
   /// \brief Simple iterator that traverses the template arguments in a
   /// container that provides a \c getArgLoc() member function.
   ///
@@ -5412,7 +5410,7 @@ namespace {
       return !(X == Y);
     }
   };
-}
+
 
 
 template <typename Derived>

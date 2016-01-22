@@ -2685,8 +2685,9 @@ void CXXNameMangler::mangleType(const AtomicType *T) {
 }
 
 void CXXNameMangler::mangleType(const PipeType *T) {
-  // <type> ::= U <source-name> <type>	# vendor extended type qualifier
-  // (Until there's a standardized mangling...)
+  // Pipe type mangling rules are described in SPIR 2.0 specification
+  // A.1 Data types and A.3 Summary of changes
+  // <type> ::= 8ocl_pipe
   Out << "8ocl_pipe";
 }
 

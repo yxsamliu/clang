@@ -1208,9 +1208,7 @@ DEF_TRAVERSE_TYPELOC(ObjCObjectPointerType,
 
 DEF_TRAVERSE_TYPELOC(AtomicType, { TRY_TO(TraverseTypeLoc(TL.getValueLoc())); })
 
-DEF_TRAVERSE_TYPELOC(PipeType, {
-    TRY_TO(TraverseTypeLoc(TL.getValueLoc()));
-  })
+DEF_TRAVERSE_TYPELOC(PipeType, { TRY_TO(TraverseTypeLoc(TL.getValueLoc())); })
 
 #undef DEF_TRAVERSE_TYPELOC
 

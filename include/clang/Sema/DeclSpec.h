@@ -492,8 +492,8 @@ public:
   bool isTypeAltiVecPixel() const { return TypeAltiVecPixel; }
   bool isTypeAltiVecBool() const { return TypeAltiVecBool; }
   bool isTypeSpecOwned() const { return TypeSpecOwned; }
-  bool isTypeSpecPipe() const { return TypeSpecPipe; }
   bool isTypeRep() const { return isTypeRep((TST) TypeSpecType); }
+  bool isTypeSpecPipe() const { return TypeSpecPipe; }
 
   ParsedType getRepAsType() const {
     assert(isTypeRep((TST) TypeSpecType) && "DeclSpec does not store a type");
@@ -1435,11 +1435,11 @@ struct DeclaratorChunk {
     }
   };
 
-    struct PipeTypeInfo : TypeInfoCommon {
-    /// The access writes.
-    unsigned AccessWrites : 3;
+  struct PipeTypeInfo : TypeInfoCommon {
+  /// The access writes.
+  unsigned AccessWrites : 3;
 
-    void destroy() {}
+  void destroy() {}
   };
 
   union {
@@ -1451,7 +1451,6 @@ struct DeclaratorChunk {
     BlockPointerTypeInfo  Cls;
     MemberPointerTypeInfo Mem;
     PipeTypeInfo          PipeInfo;
-
   };
 
   void destroy() {
@@ -1564,7 +1563,7 @@ struct DeclaratorChunk {
 
   /// \brief Return a DeclaratorChunk for a block.
   static DeclaratorChunk getPipe(unsigned TypeQuals,
-                                          SourceLocation Loc) {
+                                 SourceLocation Loc) {
     DeclaratorChunk I;
     I.Kind          = Pipe;
     I.Loc           = Loc;

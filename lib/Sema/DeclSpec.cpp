@@ -749,16 +749,16 @@ bool DeclSpec::SetTypeAltiVecVector(bool isAltiVecVector, SourceLocation Loc,
 }
 
 bool DeclSpec::SetTypePipe(bool isPipe, SourceLocation Loc,
-                          const char *&PrevSpec, unsigned &DiagID,
-                          const PrintingPolicy &Policy) {
+                           const char *&PrevSpec, unsigned &DiagID,
+                           const PrintingPolicy &Policy) {
 
-  if ( TypeSpecType != TST_unspecified ) {
-    PrevSpec = DeclSpec::getSpecifierName((TST) TypeSpecType, Policy);
-    DiagID = diag::err_missing_actual_pipe_type;
+  if (TypeSpecType != TST_unspecified) {
+    PrevSpec = DeclSpec::getSpecifierName((TST)TypeSpecType, Policy);
+    DiagID = diag::err_invalid_decl_spec_combination;
     return true;
   }
 
-  if ( isPipe ) {
+  if (isPipe) {
     TypeSpecPipe = TSP_pipe;
   }
   return false;

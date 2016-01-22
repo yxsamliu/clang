@@ -1733,8 +1733,8 @@ public:
   bool isNDRangeT() const;                      // OpenCL ndrange_t
   bool isReserveIDT() const;                    // OpenCL reserve_id_t
 
-  bool isExecType() const;                      // OpenCL 2.0 execution model types
-  bool isPipeType() const;                      // OpenCL 2.0 pipe type
+  bool isPipeType() const;                      // OpenCL pipe type
+  bool isExecType() const;                      // OpenCL execution model types
   bool isOpenCLSpecificType() const;            // Any OpenCL specific type
 
   /// Determines if this type, which must satisfy
@@ -5030,7 +5030,6 @@ class AtomicType : public Type, public llvm::FoldingSetNode {
 };
 
 /// PipeType - OpenCL20.
-///
 class PipeType : public Type, public llvm::FoldingSetNode {
   QualType ElementType;
 
@@ -5039,8 +5038,7 @@ class PipeType : public Type, public llvm::FoldingSetNode {
          elemType->isInstantiationDependentType(),
          elemType->isVariablyModifiedType(),
          elemType->containsUnexpandedParameterPack()),
-    ElementType(elemType) {
-  }
+    ElementType(elemType) {}
   friend class ASTContext;  // ASTContext creates these.
 
 public:
@@ -5058,6 +5056,7 @@ public:
   static void Profile(llvm::FoldingSetNodeID &ID, QualType T) {
     ID.AddPointer(T.getAsOpaquePtr());
   }
+
 
   static bool classof(const Type *T) {
     return T->getTypeClass() == Pipe;
@@ -5516,6 +5515,10 @@ inline bool Type::isImageType() const {
          isImage1dBufferT();
 }
 
+inline bool Type::isPipeType() const {
+  return isa<PipeType>(CanonicalType);
+}
+
 inline bool Type::isImageDepthType() const {
   return isImage2dDepthT() || isImage2dArrayDepthT();
 }
@@ -5530,13 +5533,11 @@ inline bool Type::isExecType() const {
          isSpecificBuiltinType(BuiltinType::OCLClkEvent);
 }
 
-inline bool Type::isPipeType() const {
-  return isa<PipeType>(CanonicalType);
-}
 
 inline bool Type::isOpenCLSpecificType() const {
   return isSamplerT() || isEventT() || isImageType() || isClkEventT() ||
-         isQueueT() || isNDRangeT() || isReserveIDT() || isExecType();
+         isQueueT() || isNDRangeT() || isReserveIDT() || isPipeType() ||
+         isExecType();
 }
 
 inline bool Type::isTemplateTypeParmType() const {

@@ -337,6 +337,7 @@ static DeclaratorChunk *maybeMovePastReturnType(Declarator &declarator,
     case DeclaratorChunk::Array:
     case DeclaratorChunk::Reference:
     case DeclaratorChunk::MemberPointer:
+    case DeclaratorChunk::Pipe:
       return result;
 
     // If we do find a function declarator, scan inwards from that,
@@ -349,6 +350,7 @@ static DeclaratorChunk *maybeMovePastReturnType(Declarator &declarator,
         case DeclaratorChunk::Array:
         case DeclaratorChunk::Function:
         case DeclaratorChunk::Reference:
+        case DeclaratorChunk::Pipe:
           continue;
 
         case DeclaratorChunk::MemberPointer:
@@ -1277,9 +1279,10 @@ static QualType ConvertDeclSpecToType(TypeProcessingState &state) {
         // value being declared, poison it as invalid so we don't get chains of
         // errors.
         declarator.setInvalidType(true);
-      } else if (S.getLangOpts().OpenCL) {
-        S.Diag(DeclLoc, diag::err_opencl_missing_type_specifier)
+      } else if (S.getLangOpts().OpenCLVersion >= 200 && DS.isTypeSpecPipe()){
+        S.Diag(DeclLoc, diag::err_missing_actual_pipe_type)
           << DS.getSourceRange();
+        declarator.setInvalidType(true);
       } else {
         S.Diag(DeclLoc, diag::ext_missing_type_specifier)
           << DS.getSourceRange();
@@ -1646,9 +1649,10 @@ static QualType ConvertDeclSpecToType(TypeProcessingState &state) {
   // Apply any type attributes from the decl spec.  This may cause the
   // list of type attributes to be temporarily saved while the type
   // attributes are pushed around.
-  if (!DS.isTypeSpecPipe())         // pipe attributes will be handled later ( at GetFullTypeForDeclarator )
-    processTypeAttrs(state, Result, TAL_DeclSpec, DS.getAttributes().getList(),
-                     declarator, S.getLangOpts().OpenCLVersion);
+  // pipe attributes will be handled later ( at GetFullTypeForDeclarator )
+  if (!DS.isTypeSpecPipe())
+      processTypeAttrs(state, Result, TAL_DeclSpec, DS.getAttributes().getList(),
+                       declarator, S.getLangOpts().OpenCLVersion);
 
   // Apply const/volatile/restrict qualifiers to T.
   if (unsigned TypeQuals = DS.getTypeQualifiers()) {
@@ -2012,17 +2016,14 @@ QualType Sema::BuildReferenceType(QualType T, bool SpelledAsLValue,
 ///
 /// \param T The type to which we'll be building a Pipe.
 ///
-/// \param Loc The location of the entity whose type involves this
-/// pointer type or, if there is no such entity, the location of the
-/// type that will have pointer type.
+/// \param Loc We do not use it for now.
 ///
-/// \returns A suitable pipe type, if there are no
-/// errors. Otherwise, returns a NULL type.
-QualType Sema::BuildPipeType(QualType T,
-                                SourceLocation Loc) {
+/// \returns A suitable pipe type, if there are no errors. Otherwise, returns a
+/// NULL type.
+QualType Sema::BuildPipeType(QualType T, SourceLocation Loc) {
   assert(!T->isObjCObjectType() && "Should build ObjCObjectPointerType");
 
-  // Build the pointer type.
+  // Build the pipe type.
   return Context.getPipeType(T);
 }
 
@@ -2643,6 +2644,7 @@ static void diagnoseRedundantReturnTypeQualifiers(Sema &S, QualType RetTy,
     case DeclaratorChunk::Reference:
     case DeclaratorChunk::Array:
     case DeclaratorChunk::MemberPointer:
+    case DeclaratorChunk::Pipe:
       // FIXME: We can't currently provide an accurate source location and a
       // fix-it hint for these.
       unsigned AtomicQual = RetTy->isAtomicType() ? DeclSpec::TQ_atomic : 0;
@@ -3168,6 +3170,7 @@ static PointerDeclaratorKind classifyPointerDeclarator(Sema &S,
     switch (chunk.Kind) {
     case DeclaratorChunk::Array:
     case DeclaratorChunk::Function:
+    case DeclaratorChunk::Pipe:
       break;
 
     case DeclaratorChunk::BlockPointer:
@@ -3416,6 +3419,8 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
         case DeclaratorChunk::Array:
           DiagKind = 2;
           break;
+        case DeclaratorChunk::Pipe:
+          break;
         }
 
         S.Diag(DeclChunk.Loc, DiagId) << DiagKind;
@@ -3481,6 +3486,7 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
       switch (chunk.Kind) {
       case DeclaratorChunk::Array:
       case DeclaratorChunk::Function:
+      case DeclaratorChunk::Pipe:
         break;
 
       case DeclaratorChunk::BlockPointer:
@@ -4210,9 +4216,10 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
       break;
     }
 
-    case DeclaratorChunk::Pipe:
+    case DeclaratorChunk::Pipe: {
       T = S.BuildPipeType(T, DeclType.Loc );
       break;
+    }
     }
 
     if (T.isNull()) {
@@ -4946,6 +4953,7 @@ static void fillAtomicQualLoc(AtomicTypeLoc ATL, const DeclaratorChunk &Chunk) {
   case DeclaratorChunk::Function:
   case DeclaratorChunk::Array:
   case DeclaratorChunk::Paren:
+  case DeclaratorChunk::Pipe:
     llvm_unreachable("cannot be _Atomic qualified");
 
   case DeclaratorChunk::Pointer:
@@ -5869,6 +5877,7 @@ static bool distributeNullabilityTypeAttr(TypeProcessingState &state,
       
     // Don't walk through these.
     case DeclaratorChunk::Reference:
+    case DeclaratorChunk::Pipe:
       return false;
     }
   }

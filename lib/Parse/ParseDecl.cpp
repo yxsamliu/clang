@@ -5099,15 +5099,12 @@ void Parser::ParseDeclaratorInternal(Declarator &D,
 
   tok::TokenKind Kind = Tok.getKind();
 
-  // Add pipe type info, only if it is not already there. (It may already been
-  // added by the recursive call).
   if (D.getDeclSpec().isTypeSpecPipe() && !isPipeDeclerator(D)) {
     DeclSpec &DS = D.getMutableDeclSpec();
 
-      D.AddTypeInfo(DeclaratorChunk::getPipe(DS.getTypeQualifiers(),
-                                           DS.getPipeLoc()),
-                  DS.getAttributes(),
-                  SourceLocation());
+    D.AddTypeInfo(
+        DeclaratorChunk::getPipe(DS.getTypeQualifiers(), DS.getPipeLoc()),
+        DS.getAttributes(), SourceLocation());
   }
 
   // Not a pointer, C++ reference, or block.
