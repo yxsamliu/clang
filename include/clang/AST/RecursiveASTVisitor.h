@@ -2445,6 +2445,9 @@ DEF_TRAVERSE_STMT(OMPTaskLoopDirective,
 DEF_TRAVERSE_STMT(OMPTaskLoopSimdDirective,
                   { TRY_TO(TraverseOMPExecutableDirective(S)); })
 
+DEF_TRAVERSE_STMT(OMPDistributeDirective,
+                  { TRY_TO(TraverseOMPExecutableDirective(S)); })
+
 // OpenMP clauses.
 template <typename Derived>
 bool RecursiveASTVisitor<Derived>::TraverseOMPClause(OMPClause *C) {
@@ -2772,6 +2775,12 @@ template <typename Derived>
 bool RecursiveASTVisitor<Derived>::VisitOMPNumTasksClause(
     OMPNumTasksClause *C) {
   TRY_TO(TraverseStmt(C->getNumTasks()));
+  return true;
+}
+
+template <typename Derived>
+bool RecursiveASTVisitor<Derived>::VisitOMPHintClause(OMPHintClause *C) {
+  TRY_TO(TraverseStmt(C->getHint()));
   return true;
 }
 

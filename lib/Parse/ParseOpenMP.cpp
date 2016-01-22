@@ -140,6 +140,7 @@ Parser::DeclGroupPtrTy Parser::ParseOpenMPDeclarativeDirective() {
   case OMPD_target_data:
   case OMPD_taskloop:
   case OMPD_taskloop_simd:
+  case OMPD_distribute:
     Diag(Tok, diag::err_omp_unexpected_directive)
         << getOpenMPDirectiveName(DKind);
     break;
@@ -160,7 +161,8 @@ Parser::DeclGroupPtrTy Parser::ParseOpenMPDeclarativeDirective() {
 ///         'parallel for' | 'parallel sections' | 'task' | 'taskyield' |
 ///         'barrier' | 'taskwait' | 'flush' | 'ordered' | 'atomic' |
 ///         'for simd' | 'parallel for simd' | 'target' | 'target data' |
-///         'taskgroup' | 'teams' | 'taskloop' | 'taskloop simd' {clause}
+///         'taskgroup' | 'teams' | 'taskloop' | 'taskloop simd' {clause} |
+///         'distribute'
 ///         annot_pragma_openmp_end
 ///
 StmtResult
@@ -213,7 +215,7 @@ Parser::ParseOpenMPDeclarativeOrExecutableDirective(bool StandAloneAllowed) {
   case OMPD_cancel:
     if (!StandAloneAllowed) {
       Diag(Tok, diag::err_omp_immediate_directive)
-          << getOpenMPDirectiveName(DKind);
+          << getOpenMPDirectiveName(DKind) << 0;
     }
     HasAssociatedStatement = false;
     // Fall through for further analysis.
@@ -237,7 +239,8 @@ Parser::ParseOpenMPDeclarativeOrExecutableDirective(bool StandAloneAllowed) {
   case OMPD_taskgroup:
   case OMPD_target_data:
   case OMPD_taskloop:
-  case OMPD_taskloop_simd: {
+  case OMPD_taskloop_simd:
+  case OMPD_distribute: {
     ConsumeToken();
     // Parse directive name of the 'critical' directive if any.
     if (DKind == OMPD_critical) {
@@ -291,6 +294,18 @@ Parser::ParseOpenMPDeclarativeOrExecutableDirective(bool StandAloneAllowed) {
     EndLoc = Tok.getLocation();
     // Consume final annot_pragma_openmp_end.
     ConsumeToken();
+
+    // OpenMP [2.13.8, ordered Construct, Syntax]
+    // If the depend clause is specified, the ordered construct is a stand-alone
+    // directive.
+    if (DKind == OMPD_ordered && FirstClauses[OMPC_depend].getInt()) {
+      if (!StandAloneAllowed) {
+        Diag(Loc, diag::err_omp_immediate_directive)
+            << getOpenMPDirectiveName(DKind) << 1
+            << getOpenMPClauseName(OMPC_depend);
+      }
+      HasAssociatedStatement = false;
+    }
 
     StmtResult AssociatedStmt;
     if (HasAssociatedStatement) {
@@ -401,7 +416,7 @@ bool Parser::ParseOpenMPSimpleVarList(OpenMPDirectiveKind Kind,
 ///       update-clause | capture-clause | seq_cst-clause | device-clause |
 ///       simdlen-clause | threads-clause | simd-clause | num_teams-clause |
 ///       thread_limit-clause | priority-clause | grainsize-clause |
-///       nogroup-clause | num_tasks-clause
+///       nogroup-clause | num_tasks-clause | hint-clause
 ///
 OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
                                      OpenMPClauseKind CKind, bool FirstClause) {
@@ -427,6 +442,7 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
   case OMPC_priority:
   case OMPC_grainsize:
   case OMPC_num_tasks:
+  case OMPC_hint:
     // OpenMP [2.5, Restrictions]
     //  At most one num_threads clause can appear on the directive.
     // OpenMP [2.8.1, simd construct, Restrictions]
@@ -520,7 +536,7 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
   case OMPC_flush:
   case OMPC_depend:
   case OMPC_map:
-    Clause = ParseOpenMPVarListClause(CKind);
+    Clause = ParseOpenMPVarListClause(DKind, CKind);
     break;
   case OMPC_unknown:
     Diag(Tok, diag::warn_omp_extra_tokens_at_eol)
@@ -538,7 +554,7 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
 
 /// \brief Parsing of OpenMP clauses with single expressions like 'final',
 /// 'collapse', 'safelen', 'num_threads', 'simdlen', 'num_teams',
-/// 'thread_limit', 'simdlen', 'priority', 'grainsize' or 'num_tasks'.
+/// 'thread_limit', 'simdlen', 'priority', 'grainsize', 'num_tasks' or 'hint'.
 ///
 ///    final-clause:
 ///      'final' '(' expression ')'
@@ -563,6 +579,9 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
 ///
 ///    num_tasks-clause:
 ///      'num_tasks' '(' expression ')'
+///
+///    hint-clause:
+///      'hint' '(' expression ')'
 ///
 OMPClause *Parser::ParseOpenMPSingleExprClause(OpenMPClauseKind Kind) {
   SourceLocation Loc = ConsumeToken();
@@ -786,7 +805,7 @@ static bool ParseReductionId(Parser &P, CXXScopeSpec &ReductionIdScopeSpec,
 ///    flush-clause:
 ///       'flush' '(' list ')'
 ///    depend-clause:
-///       'depend' '(' in | out | inout : list ')'
+///       'depend' '(' in | out | inout : list | source ')'
 ///    map-clause:
 ///       'map' '(' [ [ always , ]
 ///          to | from | tofrom | alloc | release | delete ':' ] list ')';
@@ -795,7 +814,8 @@ static bool ParseReductionId(Parser &P, CXXScopeSpec &ReductionIdScopeSpec,
 ///  list
 ///  modifier(list)
 /// where modifier is 'val' (C) or 'ref', 'val' or 'uval'(C++).
-OMPClause *Parser::ParseOpenMPVarListClause(OpenMPClauseKind Kind) {
+OMPClause *Parser::ParseOpenMPVarListClause(OpenMPDirectiveKind DKind,
+                                            OpenMPClauseKind Kind) {
   SourceLocation Loc = Tok.getLocation();
   SourceLocation LOpen = ConsumeToken();
   SourceLocation ColonLoc = SourceLocation();
@@ -851,11 +871,23 @@ OMPClause *Parser::ParseOpenMPVarListClause(OpenMPClauseKind Kind) {
                 StopBeforeMatch);
     } else {
       ConsumeToken();
+      // Special processing for depend(source) clause.
+      if (DKind == OMPD_ordered && DepKind == OMPC_DEPEND_source) {
+        // Parse ')'.
+        T.consumeClose();
+        return Actions.ActOnOpenMPVarListClause(
+            Kind, llvm::None, /*TailExpr=*/nullptr, Loc, LOpen,
+            /*ColonLoc=*/SourceLocation(), Tok.getLocation(),
+            ReductionIdScopeSpec, DeclarationNameInfo(), DepKind,
+            LinearModifier, MapTypeModifier, MapType, DepLinMapLoc);
+      }
     }
     if (Tok.is(tok::colon)) {
       ColonLoc = ConsumeToken();
     } else {
-      Diag(Tok, diag::warn_pragma_expected_colon) << "dependency type";
+      Diag(Tok, DKind == OMPD_ordered ? diag::warn_pragma_expected_colon_r_paren
+                                      : diag::warn_pragma_expected_colon)
+          << "dependency type";
     }
   } else if (Kind == OMPC_linear) {
     // Try to parse modifier if any.
