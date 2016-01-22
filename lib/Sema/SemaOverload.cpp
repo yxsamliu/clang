@@ -135,7 +135,7 @@ ImplicitConversionRank clang::GetConversionRank(ImplicitConversionKind Kind) {
     ICR_Exact_Match, // NOTE(gbiv): This may not be completely right --
                      // it was omitted by the patch that added
                      // ICK_Zero_Event_Conversion
-    ICR_C_Conversion
+    ICR_C_Conversion,
     ICR_Writeback_Conversion,
     ICR_Conversion,
   };
