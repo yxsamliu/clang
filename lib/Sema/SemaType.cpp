@@ -6306,12 +6306,11 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
   // type, but others can be present in the type specifiers even though they
   // apply to the decl.  Here we apply type attributes and ignore the rest.
 
-  AttributeList *next;
   bool hasOpenCLAddressSpace = false;
-  if (attrs)
-    do {
+  while (attrs) {
       AttributeList &attr = *attrs;
-      next = attr.getNext();
+    attrs = attr.getNext(); // reset to the next here due to early loop continue
+                            // stmts
 
       // Skip attributes that were marked to be invalid.
       if (attr.isInvalid())
@@ -6465,7 +6464,39 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
           distributeFunctionTypeAttr(state, attr, type);
         break;
       }
-    } while ((attrs = next));
+  }
+
+  // If address space is not set, OpenCL 2.0 defines non private default
+  // address spaces for some cases:
+  // OpenCL 2.0, section 6.5:
+  // The address space for a variable at program scope or a static variable
+  // inside a function can either be __global or __constant, but defaults to
+  // __global if not specified.
+  // (...)
+  // Pointers that are declared without pointing to a named address space point
+  // to the generic address space.
+  if (state.getSema().getLangOpts().OpenCLVersion >= 200 &&
+      !hasOpenCLAddressSpace && type.getAddressSpace() == 0 &&
+      (TAL == TAL_DeclSpec || TAL == TAL_DeclChunk)) {
+    Declarator &D = state.getDeclarator();
+    if (state.getCurrentChunkIndex() > 0 &&
+        D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
+            DeclaratorChunk::Pointer) {
+      type = state.getSema().Context.getAddrSpaceQualType(
+          type, LangAS::opencl_generic);
+    } else if (state.getCurrentChunkIndex() == 0 &&
+               D.getContext() == Declarator::FileContext &&
+               !D.isFunctionDeclarator() && !D.isFunctionDefinition() &&
+               D.getDeclSpec().getStorageClassSpec() != DeclSpec::SCS_typedef &&
+               !type->isSamplerT())
+      type = state.getSema().Context.getAddrSpaceQualType(
+          type, LangAS::opencl_global);
+    else if (state.getCurrentChunkIndex() == 0 &&
+             D.getContext() == Declarator::BlockContext &&
+             D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static)
+      type = state.getSema().Context.getAddrSpaceQualType(
+          type, LangAS::opencl_global);
+  }
 
   // If address space is not set, OpenCL 2.0 defines non private default
   // address spaces for some cases:
