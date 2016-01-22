@@ -5311,7 +5311,7 @@ public:
   bool setCPU(const std::string &Name) override {
     bool CPUKnown = llvm::StringSwitch<bool>(Name)
                         .Case("generic", true)
-                        .Cases("cortex-a53", "cortex-a57", "cortex-a72", true)
+                        .Cases("cortex-a53", "cortex-a57", "cortex-a72", "cortex-a35", true)
                         .Case("cyclone", true)
                         .Default(false);
     return CPUKnown;
@@ -7192,7 +7192,6 @@ private:
                    clang::WebAssembly::LastTSBuiltin - Builtin::FirstTSBuiltin);
   }
   BuiltinVaListKind getBuiltinVaListKind() const final {
-    // TODO: Implement va_list properly.
     return VoidPtrBuiltinVaList;
   }
   ArrayRef<const char *> getGCCRegNames() const final {

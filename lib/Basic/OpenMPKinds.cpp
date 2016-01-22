@@ -137,6 +137,10 @@ unsigned clang::getOpenMPSimpleClauseType(OpenMPClauseKind Kind,
   case OMPC_simd:
   case OMPC_num_teams:
   case OMPC_thread_limit:
+  case OMPC_priority:
+  case OMPC_grainsize:
+  case OMPC_nogroup:
+  case OMPC_num_tasks:
     break;
   }
   llvm_unreachable("Invalid OpenMP simple clause kind");
@@ -237,6 +241,10 @@ const char *clang::getOpenMPSimpleClauseTypeName(OpenMPClauseKind Kind,
   case OMPC_simd:
   case OMPC_num_teams:
   case OMPC_thread_limit:
+  case OMPC_priority:
+  case OMPC_grainsize:
+  case OMPC_nogroup:
+  case OMPC_num_tasks:
     break;
   }
   llvm_unreachable("Invalid OpenMP simple clause kind");
@@ -402,7 +410,7 @@ bool clang::isAllowedClauseForDirective(OpenMPDirectiveKind DKind,
     break;
   case OMPD_ordered:
     switch (CKind) {
-#define OPENMP_ORDERED_CLAUSE(Name)                                             \
+#define OPENMP_ORDERED_CLAUSE(Name)                                            \
   case OMPC_##Name:                                                            \
     return true;
 #include "clang/Basic/OpenMPKinds.def"
@@ -413,6 +421,16 @@ bool clang::isAllowedClauseForDirective(OpenMPDirectiveKind DKind,
   case OMPD_taskloop:
     switch (CKind) {
 #define OPENMP_TASKLOOP_CLAUSE(Name)                                           \
+  case OMPC_##Name:                                                            \
+    return true;
+#include "clang/Basic/OpenMPKinds.def"
+    default:
+      break;
+    }
+    break;
+  case OMPD_taskloop_simd:
+    switch (CKind) {
+#define OPENMP_TASKLOOP_SIMD_CLAUSE(Name)                                      \
   case OMPC_##Name:                                                            \
     return true;
 #include "clang/Basic/OpenMPKinds.def"
@@ -438,7 +456,8 @@ bool clang::isAllowedClauseForDirective(OpenMPDirectiveKind DKind,
 bool clang::isOpenMPLoopDirective(OpenMPDirectiveKind DKind) {
   return DKind == OMPD_simd || DKind == OMPD_for || DKind == OMPD_for_simd ||
          DKind == OMPD_parallel_for || DKind == OMPD_parallel_for_simd ||
-         DKind == OMPD_taskloop; // TODO add next directives.
+         DKind == OMPD_taskloop ||
+         DKind == OMPD_taskloop_simd; // TODO add next directives.
 }
 
 bool clang::isOpenMPWorksharingDirective(OpenMPDirectiveKind DKind) {
@@ -447,6 +466,10 @@ bool clang::isOpenMPWorksharingDirective(OpenMPDirectiveKind DKind) {
          DKind == OMPD_single || DKind == OMPD_parallel_for ||
          DKind == OMPD_parallel_for_simd ||
          DKind == OMPD_parallel_sections; // TODO add next directives.
+}
+
+bool clang::isOpenMPTaskLoopDirective(OpenMPDirectiveKind DKind) {
+  return DKind == OMPD_taskloop || DKind == OMPD_taskloop_simd;
 }
 
 bool clang::isOpenMPParallelDirective(OpenMPDirectiveKind DKind) {
@@ -465,7 +488,8 @@ bool clang::isOpenMPTeamsDirective(OpenMPDirectiveKind DKind) {
 
 bool clang::isOpenMPSimdDirective(OpenMPDirectiveKind DKind) {
   return DKind == OMPD_simd || DKind == OMPD_for_simd ||
-         DKind == OMPD_parallel_for_simd; // TODO add next directives.
+         DKind == OMPD_parallel_for_simd ||
+         DKind == OMPD_taskloop_simd; // TODO add next directives.
 }
 
 bool clang::isOpenMPPrivate(OpenMPClauseKind Kind) {

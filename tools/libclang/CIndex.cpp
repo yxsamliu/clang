@@ -1953,6 +1953,7 @@ public:
   void VisitOMPTargetDataDirective(const OMPTargetDataDirective *D);
   void VisitOMPTeamsDirective(const OMPTeamsDirective *D);
   void VisitOMPTaskLoopDirective(const OMPTaskLoopDirective *D);
+  void VisitOMPTaskLoopSimdDirective(const OMPTaskLoopSimdDirective *D);
 
 private:
   void AddDeclarationNameInfo(const Stmt *S);
@@ -2082,6 +2083,8 @@ void OMPClauseEnqueue::VisitOMPThreadsClause(const OMPThreadsClause *) {}
 
 void OMPClauseEnqueue::VisitOMPSIMDClause(const OMPSIMDClause *) {}
 
+void OMPClauseEnqueue::VisitOMPNogroupClause(const OMPNogroupClause *) {}
+
 void OMPClauseEnqueue::VisitOMPDeviceClause(const OMPDeviceClause *C) {
   Visitor->AddStmt(C->getDevice());
 }
@@ -2092,6 +2095,18 @@ void OMPClauseEnqueue::VisitOMPNumTeamsClause(const OMPNumTeamsClause *C) {
 
 void OMPClauseEnqueue::VisitOMPThreadLimitClause(const OMPThreadLimitClause *C) {
   Visitor->AddStmt(C->getThreadLimit());
+}
+
+void OMPClauseEnqueue::VisitOMPPriorityClause(const OMPPriorityClause *C) {
+  Visitor->AddStmt(C->getPriority());
+}
+
+void OMPClauseEnqueue::VisitOMPGrainsizeClause(const OMPGrainsizeClause *C) {
+  Visitor->AddStmt(C->getGrainsize());
+}
+
+void OMPClauseEnqueue::VisitOMPNumTasksClause(const OMPNumTasksClause *C) {
+  Visitor->AddStmt(C->getNumTasks());
 }
 
 template<typename T>
@@ -2619,6 +2634,11 @@ void EnqueueVisitor::VisitOMPCancelDirective(const OMPCancelDirective *D) {
 }
 
 void EnqueueVisitor::VisitOMPTaskLoopDirective(const OMPTaskLoopDirective *D) {
+  VisitOMPLoopDirective(D);
+}
+
+void EnqueueVisitor::VisitOMPTaskLoopSimdDirective(
+    const OMPTaskLoopSimdDirective *D) {
   VisitOMPLoopDirective(D);
 }
 
@@ -4015,8 +4035,7 @@ CXStringSet *clang_Cursor_getCXXManglings(CXCursor C) {
     Manglings.emplace_back(getMangledStructor(M, DL, DD, Dtor_Base));
     if (Ctx.getTargetInfo().getCXXABI().isItaniumFamily()) {
       Manglings.emplace_back(getMangledStructor(M, DL, DD, Dtor_Complete));
-
-      if (!DD->isVirtual())
+      if (DD->isVirtual())
         Manglings.emplace_back(getMangledStructor(M, DL, DD, Dtor_Deleting));
     }
   }
@@ -4380,6 +4399,10 @@ CXString clang_getCursorKindSpelling(enum CXCursorKind Kind) {
     return cxstring::createRef("attribute(shared)");
   case CXCursor_VisibilityAttr:
     return cxstring::createRef("attribute(visibility)");
+  case CXCursor_DLLExport:
+    return cxstring::createRef("attribute(dllexport)");
+  case CXCursor_DLLImport:
+    return cxstring::createRef("attribute(dllimport)");
   case CXCursor_PreprocessingDirective:
     return cxstring::createRef("preprocessing directive");
   case CXCursor_MacroDefinition:
@@ -4480,6 +4503,8 @@ CXString clang_getCursorKindSpelling(enum CXCursorKind Kind) {
     return cxstring::createRef("OMPCancelDirective");
   case CXCursor_OMPTaskLoopDirective:
     return cxstring::createRef("OMPTaskLoopDirective");
+  case CXCursor_OMPTaskLoopSimdDirective:
+    return cxstring::createRef("OMPTaskLoopSimdDirective");
   case CXCursor_OverloadCandidate:
       return cxstring::createRef("OverloadCandidate");
   case CXCursor_TypeAliasTemplateDecl:

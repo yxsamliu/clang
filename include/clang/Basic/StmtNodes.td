@@ -220,4 +220,4 @@ def OMPTeamsDirective : DStmt<OMPExecutableDirective>;
 def OMPCancellationPointDirective : DStmt<OMPExecutableDirective>;
 def OMPCancelDirective : DStmt<OMPExecutableDirective>;
 def OMPTaskLoopDirective : DStmt<OMPLoopDirective>;
-
+def OMPTaskLoopSimdDirective : DStmt<OMPLoopDirective>;

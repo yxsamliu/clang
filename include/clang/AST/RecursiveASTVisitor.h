@@ -1330,6 +1330,8 @@ DEF_TRAVERSE_DECL(
 DEF_TRAVERSE_DECL(ExternCContextDecl, {})
 
 DEF_TRAVERSE_DECL(NamespaceAliasDecl, {
+  TRY_TO(TraverseNestedNameSpecifierLoc(D->getQualifierLoc()));
+
   // We shouldn't traverse an aliased namespace, since it will be
   // defined (and, therefore, traversed) somewhere else.
   //
@@ -2440,6 +2442,9 @@ DEF_TRAVERSE_STMT(OMPTeamsDirective,
 DEF_TRAVERSE_STMT(OMPTaskLoopDirective,
                   { TRY_TO(TraverseOMPExecutableDirective(S)); })
 
+DEF_TRAVERSE_STMT(OMPTaskLoopSimdDirective,
+                  { TRY_TO(TraverseOMPExecutableDirective(S)); })
+
 // OpenMP clauses.
 template <typename Derived>
 bool RecursiveASTVisitor<Derived>::TraverseOMPClause(OMPClause *C) {
@@ -2568,6 +2573,11 @@ bool RecursiveASTVisitor<Derived>::VisitOMPThreadsClause(OMPThreadsClause *) {
 
 template <typename Derived>
 bool RecursiveASTVisitor<Derived>::VisitOMPSIMDClause(OMPSIMDClause *) {
+  return true;
+}
+
+template <typename Derived>
+bool RecursiveASTVisitor<Derived>::VisitOMPNogroupClause(OMPNogroupClause *) {
   return true;
 }
 
@@ -2741,6 +2751,27 @@ template <typename Derived>
 bool RecursiveASTVisitor<Derived>::VisitOMPThreadLimitClause(
     OMPThreadLimitClause *C) {
   TRY_TO(TraverseStmt(C->getThreadLimit()));
+  return true;
+}
+
+template <typename Derived>
+bool RecursiveASTVisitor<Derived>::VisitOMPPriorityClause(
+    OMPPriorityClause *C) {
+  TRY_TO(TraverseStmt(C->getPriority()));
+  return true;
+}
+
+template <typename Derived>
+bool RecursiveASTVisitor<Derived>::VisitOMPGrainsizeClause(
+    OMPGrainsizeClause *C) {
+  TRY_TO(TraverseStmt(C->getGrainsize()));
+  return true;
+}
+
+template <typename Derived>
+bool RecursiveASTVisitor<Derived>::VisitOMPNumTasksClause(
+    OMPNumTasksClause *C) {
+  TRY_TO(TraverseStmt(C->getNumTasks()));
   return true;
 }
 

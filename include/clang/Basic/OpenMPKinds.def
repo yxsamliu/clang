@@ -72,6 +72,9 @@
 #ifndef OPENMP_TASKLOOP_CLAUSE
 #  define OPENMP_TASKLOOP_CLAUSE(Name)
 #endif
+#ifndef OPENMP_TASKLOOP_SIMD_CLAUSE
+#  define OPENMP_TASKLOOP_SIMD_CLAUSE(Name)
+#endif
 #ifndef OPENMP_DEFAULT_KIND
 #  define OPENMP_DEFAULT_KIND(Name)
 #endif
@@ -119,6 +122,7 @@ OPENMP_DIRECTIVE_EXT(parallel_sections, "parallel sections")
 OPENMP_DIRECTIVE_EXT(for_simd, "for simd")
 OPENMP_DIRECTIVE_EXT(cancellation_point, "cancellation point")
 OPENMP_DIRECTIVE(taskloop)
+OPENMP_DIRECTIVE_EXT(taskloop_simd, "taskloop simd")
 
 // OpenMP clauses.
 OPENMP_CLAUSE(if, OMPIfClause)
@@ -156,6 +160,10 @@ OPENMP_CLAUSE(simd, OMPSIMDClause)
 OPENMP_CLAUSE(map, OMPMapClause)
 OPENMP_CLAUSE(num_teams, OMPNumTeamsClause)
 OPENMP_CLAUSE(thread_limit, OMPThreadLimitClause)
+OPENMP_CLAUSE(priority, OMPPriorityClause)
+OPENMP_CLAUSE(grainsize, OMPGrainsizeClause)
+OPENMP_CLAUSE(nogroup, OMPNogroupClause)
+OPENMP_CLAUSE(num_tasks, OMPNumTasksClause)
 
 // Clauses allowed for OpenMP directive 'parallel'.
 OPENMP_PARALLEL_CLAUSE(if)
@@ -300,6 +308,7 @@ OPENMP_TASK_CLAUSE(shared)
 OPENMP_TASK_CLAUSE(untied)
 OPENMP_TASK_CLAUSE(mergeable)
 OPENMP_TASK_CLAUSE(depend)
+OPENMP_TASK_CLAUSE(priority)
 
 // Clauses allowed for OpenMP directive 'atomic'.
 OPENMP_ATOMIC_CLAUSE(read)
@@ -345,7 +354,6 @@ OPENMP_MAP_KIND(release)
 OPENMP_MAP_KIND(always)
 
 // Clauses allowed for OpenMP directive 'taskloop'.
-// TODO: add next clauses
 OPENMP_TASKLOOP_CLAUSE(if)
 OPENMP_TASKLOOP_CLAUSE(shared)
 OPENMP_TASKLOOP_CLAUSE(private)
@@ -356,7 +364,32 @@ OPENMP_TASKLOOP_CLAUSE(collapse)
 OPENMP_TASKLOOP_CLAUSE(final)
 OPENMP_TASKLOOP_CLAUSE(untied)
 OPENMP_TASKLOOP_CLAUSE(mergeable)
+OPENMP_TASKLOOP_CLAUSE(priority)
+OPENMP_TASKLOOP_CLAUSE(grainsize)
+OPENMP_TASKLOOP_CLAUSE(nogroup)
+OPENMP_TASKLOOP_CLAUSE(num_tasks)
 
+// Clauses allowed for OpenMP directive 'taskloop simd'.
+OPENMP_TASKLOOP_SIMD_CLAUSE(if)
+OPENMP_TASKLOOP_SIMD_CLAUSE(shared)
+OPENMP_TASKLOOP_SIMD_CLAUSE(private)
+OPENMP_TASKLOOP_SIMD_CLAUSE(firstprivate)
+OPENMP_TASKLOOP_SIMD_CLAUSE(lastprivate)
+OPENMP_TASKLOOP_SIMD_CLAUSE(default)
+OPENMP_TASKLOOP_SIMD_CLAUSE(collapse)
+OPENMP_TASKLOOP_SIMD_CLAUSE(final)
+OPENMP_TASKLOOP_SIMD_CLAUSE(untied)
+OPENMP_TASKLOOP_SIMD_CLAUSE(mergeable)
+OPENMP_TASKLOOP_SIMD_CLAUSE(priority)
+OPENMP_TASKLOOP_SIMD_CLAUSE(linear)
+OPENMP_TASKLOOP_SIMD_CLAUSE(aligned)
+OPENMP_TASKLOOP_SIMD_CLAUSE(safelen)
+OPENMP_TASKLOOP_SIMD_CLAUSE(simdlen)
+OPENMP_TASKLOOP_SIMD_CLAUSE(grainsize)
+OPENMP_TASKLOOP_SIMD_CLAUSE(nogroup)
+OPENMP_TASKLOOP_SIMD_CLAUSE(num_tasks)
+
+#undef OPENMP_TASKLOOP_SIMD_CLAUSE
 #undef OPENMP_TASKLOOP_CLAUSE
 #undef OPENMP_LINEAR_KIND
 #undef OPENMP_DEPEND_KIND
