@@ -5089,8 +5089,7 @@ public:
 
   // ParseObjCStringLiteral - Parse Objective-C string literals.
   ExprResult ParseObjCStringLiteral(SourceLocation *AtLocs,
-                                    Expr **Strings,
-                                    unsigned NumStrings);
+                                    ArrayRef<Expr *> Strings);
 
   ExprResult BuildObjCStringLiteral(SourceLocation AtLoc, StringLiteral *S);
 
@@ -5115,8 +5114,7 @@ public:
                                           ObjCMethodDecl *setterMethod);
 
   ExprResult BuildObjCDictionaryLiteral(SourceRange SR,
-                                        ObjCDictionaryElement *Elements,
-                                        unsigned NumElements);
+                               MutableArrayRef<ObjCDictionaryElement> Elements);
 
   ExprResult BuildObjCEncodeExpression(SourceLocation AtLoc,
                                   TypeSourceInfo *EncodedTypeInfo,
@@ -5369,10 +5367,10 @@ public:
                                 SourceLocation BaseLoc,
                                 SourceLocation EllipsisLoc);
 
-  bool AttachBaseSpecifiers(CXXRecordDecl *Class, CXXBaseSpecifier **Bases,
-                            unsigned NumBases);
-  void ActOnBaseSpecifiers(Decl *ClassDecl, CXXBaseSpecifier **Bases,
-                           unsigned NumBases);
+  bool AttachBaseSpecifiers(CXXRecordDecl *Class,
+                            MutableArrayRef<CXXBaseSpecifier *> Bases);
+  void ActOnBaseSpecifiers(Decl *ClassDecl,
+                           MutableArrayRef<CXXBaseSpecifier *> Bases);
 
   bool IsDerivedFrom(SourceLocation Loc, QualType Derived, QualType Base);
   bool IsDerivedFrom(SourceLocation Loc, QualType Derived, QualType Base,
@@ -5587,7 +5585,7 @@ public:
                              SourceLocation ExportLoc,
                              SourceLocation TemplateLoc,
                              SourceLocation LAngleLoc,
-                             Decl **Params, unsigned NumParams,
+                             ArrayRef<Decl *> Params,
                              SourceLocation RAngleLoc);
 
   /// \brief The context in which we are checking a template parameter list.
@@ -6306,6 +6304,9 @@ public:
     /// \brief Substitution of the deduced template argument values
     /// resulted in an error.
     TDK_SubstitutionFailure,
+    /// \brief After substituting deduced template arguments, a dependent
+    /// parameter type did not match the corresponding argument.
+    TDK_DeducedMismatch,
     /// \brief A non-depnedent component of the parameter did not match the
     /// corresponding component of the argument.
     TDK_NonDeducedMismatch,
@@ -7002,8 +7003,6 @@ public:
   ///
   /// \param Exprs The list of expressions to substitute into.
   ///
-  /// \param NumExprs The number of expressions in \p Exprs.
-  ///
   /// \param IsCall Whether this is some form of call, in which case
   /// default arguments will be dropped.
   ///
@@ -7012,7 +7011,7 @@ public:
   /// \param Outputs Will receive all of the substituted arguments.
   ///
   /// \returns true if an error occurred, false otherwise.
-  bool SubstExprs(Expr **Exprs, unsigned NumExprs, bool IsCall,
+  bool SubstExprs(ArrayRef<Expr *> Exprs, bool IsCall,
                   const MultiLevelTemplateArgumentList &TemplateArgs,
                   SmallVectorImpl<Expr *> &Outputs);
 
@@ -7762,8 +7761,10 @@ private:
   /// \brief Initialization of data-sharing attributes stack.
   void InitDataSharingAttributesStack();
   void DestroyDataSharingAttributesStack();
-  ExprResult VerifyPositiveIntegerConstantInClause(Expr *Op,
-                                                   OpenMPClauseKind CKind);
+  ExprResult
+  VerifyPositiveIntegerConstantInClause(Expr *Op, OpenMPClauseKind CKind,
+                                        bool StrictlyPositive = true);
+
 public:
   /// \brief Return true if the provided declaration \a VD should be captured by
   /// reference in the provided scope \a RSI. This will take into account the
@@ -8046,20 +8047,17 @@ public:
                                        SourceLocation LParenLoc,
                                        SourceLocation EndLoc);
 
-  OMPClause *ActOnOpenMPSingleExprWithArgClause(OpenMPClauseKind Kind,
-                                                unsigned Argument, Expr *Expr,
-                                                SourceLocation StartLoc,
-                                                SourceLocation LParenLoc,
-                                                SourceLocation ArgumentLoc,
-                                                SourceLocation DelimLoc,
-                                                SourceLocation EndLoc);
+  OMPClause *ActOnOpenMPSingleExprWithArgClause(
+      OpenMPClauseKind Kind, ArrayRef<unsigned> Arguments, Expr *Expr,
+      SourceLocation StartLoc, SourceLocation LParenLoc,
+      ArrayRef<SourceLocation> ArgumentsLoc, SourceLocation DelimLoc,
+      SourceLocation EndLoc);
   /// \brief Called on well-formed 'schedule' clause.
-  OMPClause *ActOnOpenMPScheduleClause(OpenMPScheduleClauseKind Kind,
-                                       Expr *ChunkSize, SourceLocation StartLoc,
-                                       SourceLocation LParenLoc,
-                                       SourceLocation KindLoc,
-                                       SourceLocation CommaLoc,
-                                       SourceLocation EndLoc);
+  OMPClause *ActOnOpenMPScheduleClause(
+      OpenMPScheduleClauseModifier M1, OpenMPScheduleClauseModifier M2,
+      OpenMPScheduleClauseKind Kind, Expr *ChunkSize, SourceLocation StartLoc,
+      SourceLocation LParenLoc, SourceLocation M1Loc, SourceLocation M2Loc,
+      SourceLocation KindLoc, SourceLocation CommaLoc, SourceLocation EndLoc);
 
   OMPClause *ActOnOpenMPClause(OpenMPClauseKind Kind, SourceLocation StartLoc,
                                SourceLocation EndLoc);
@@ -8900,8 +8898,8 @@ public:
                                      DeclGroupPtrTy IterationVar);
   void CodeCompleteObjCSelector(Scope *S,
                                 ArrayRef<IdentifierInfo *> SelIdents);
-  void CodeCompleteObjCProtocolReferences(IdentifierLocPair *Protocols,
-                                          unsigned NumProtocols);
+  void CodeCompleteObjCProtocolReferences(
+                                         ArrayRef<IdentifierLocPair> Protocols);
   void CodeCompleteObjCProtocolDecl(Scope *S);
   void CodeCompleteObjCInterfaceDecl(Scope *S);
   void CodeCompleteObjCSuperclass(Scope *S,

@@ -47,6 +47,7 @@ template <> struct ScalarEnumerationTraits<FormatStyle::LanguageKind> {
     IO.enumCase(Value, "Java", FormatStyle::LK_Java);
     IO.enumCase(Value, "JavaScript", FormatStyle::LK_JavaScript);
     IO.enumCase(Value, "Proto", FormatStyle::LK_Proto);
+    IO.enumCase(Value, "TableGen", FormatStyle::LK_TableGen);
   }
 };
 
@@ -607,6 +608,7 @@ FormatStyle getChromiumStyle(FormatStyle::LanguageKind Language) {
     ChromiumStyle.BinPackParameters = false;
     ChromiumStyle.DerivePointerAlignment = false;
   }
+  ChromiumStyle.SortIncludes = false;
   return ChromiumStyle;
 }
 
@@ -1274,11 +1276,13 @@ private:
       FormatTok->Tok.setIdentifierInfo(&Info);
       FormatTok->Tok.setKind(Info.getTokenID());
       if (Style.Language == FormatStyle::LK_Java &&
-          FormatTok->isOneOf(tok::kw_struct, tok::kw_union, tok::kw_delete)) {
+          FormatTok->isOneOf(tok::kw_struct, tok::kw_union, tok::kw_delete,
+                             tok::kw_operator)) {
         FormatTok->Tok.setKind(tok::identifier);
         FormatTok->Tok.setIdentifierInfo(nullptr);
       } else if (Style.Language == FormatStyle::LK_JavaScript &&
-                 FormatTok->isOneOf(tok::kw_struct, tok::kw_union)) {
+                 FormatTok->isOneOf(tok::kw_struct, tok::kw_union,
+                                    tok::kw_operator)) {
         FormatTok->Tok.setKind(tok::identifier);
         FormatTok->Tok.setIdentifierInfo(nullptr);
       }
@@ -1939,15 +1943,15 @@ const char *StyleOptionHelpDescription =
     "  -style=\"{BasedOnStyle: llvm, IndentWidth: 8}\"";
 
 static FormatStyle::LanguageKind getLanguageByFileName(StringRef FileName) {
-  if (FileName.endswith(".java")) {
+  if (FileName.endswith(".java"))
     return FormatStyle::LK_Java;
-  } else if (FileName.endswith_lower(".js") || FileName.endswith_lower(".ts")) {
-    // JavaScript or TypeScript.
-    return FormatStyle::LK_JavaScript;
-  } else if (FileName.endswith_lower(".proto") ||
-             FileName.endswith_lower(".protodevel")) {
+  if (FileName.endswith_lower(".js") || FileName.endswith_lower(".ts"))
+    return FormatStyle::LK_JavaScript; // JavaScript or TypeScript.
+  if (FileName.endswith_lower(".proto") ||
+      FileName.endswith_lower(".protodevel"))
     return FormatStyle::LK_Proto;
-  }
+  if (FileName.endswith_lower(".td"))
+    return FormatStyle::LK_TableGen;
   return FormatStyle::LK_Cpp;
 }
 

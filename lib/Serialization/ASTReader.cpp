@@ -7852,7 +7852,7 @@ ASTReader::ReadTemplateParameterList(ModuleFile &F,
 
   TemplateParameterList* TemplateParams =
     TemplateParameterList::Create(Context, TemplateLoc, LAngleLoc,
-                                  Params.data(), Params.size(), RAngleLoc);
+                                  Params, RAngleLoc);
   return TemplateParams;
 }
 

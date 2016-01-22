@@ -3318,9 +3318,6 @@ public:
 } // end anonymous namespace
 
 NamedDecl *VisibleDeclsRecord::checkHidden(NamedDecl *ND) {
-  // Look through using declarations.
-  ND = ND->getUnderlyingDecl();
-
   unsigned IDNS = ND->getIdentifierNamespace();
   std::list<ShadowMap>::reverse_iterator SM = ShadowMaps.rbegin();
   for (std::list<ShadowMap>::reverse_iterator SMEnd = ShadowMaps.rend();
@@ -4735,7 +4732,7 @@ void TypoCorrection::addCorrectionDecl(NamedDecl *CDecl) {
   if (isKeyword())
     CorrectionDecls.clear();
 
-  CorrectionDecls.push_back(CDecl->getUnderlyingDecl());
+  CorrectionDecls.push_back(CDecl);
 
   if (!CorrectionName)
     CorrectionName = CDecl->getDeclName();
@@ -4964,7 +4961,7 @@ void Sema::diagnoseTypo(const TypoCorrection &Correction,
 
   // Maybe we're just missing a module import.
   if (Correction.requiresImport()) {
-    NamedDecl *Decl = Correction.getCorrectionDecl();
+    NamedDecl *Decl = Correction.getFoundDecl();
     assert(Decl && "import required but no declaration to import");
 
     diagnoseMissingImport(Correction.getCorrectionRange().getBegin(), Decl,
@@ -4976,7 +4973,7 @@ void Sema::diagnoseTypo(const TypoCorrection &Correction,
     << CorrectedQuotedStr << (ErrorRecovery ? FixTypo : FixItHint());
 
   NamedDecl *ChosenDecl =
-      Correction.isKeyword() ? nullptr : Correction.getCorrectionDecl();
+      Correction.isKeyword() ? nullptr : Correction.getFoundDecl();
   if (PrevNote.getDiagID() && ChosenDecl)
     Diag(ChosenDecl->getLocation(), PrevNote)
       << CorrectedQuotedStr << (ErrorRecovery ? FixItHint() : FixTypo);

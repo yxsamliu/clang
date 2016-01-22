@@ -548,6 +548,12 @@ namespace {
   struct DFIParamWithArguments : DFIArguments {
     TemplateParameter Param;
   };
+  // Structure used by DeductionFailureInfo to store template argument
+  // information and the index of the problematic call argument.
+  struct DFIDeducedMismatchArgs : DFIArguments {
+    TemplateArgumentList *TemplateArgs;
+    unsigned CallArgIndex;
+  };
 }
 
 /// \brief Convert from Sema's representation of template deduction information
@@ -559,19 +565,31 @@ clang::MakeDeductionFailureInfo(ASTContext &Context,
   DeductionFailureInfo Result;
   Result.Result = static_cast<unsigned>(TDK);
   Result.HasDiagnostic = false;
-  Result.Data = nullptr;
   switch (TDK) {
   case Sema::TDK_Success:
   case Sema::TDK_Invalid:
   case Sema::TDK_InstantiationDepth:
   case Sema::TDK_TooManyArguments:
   case Sema::TDK_TooFewArguments:
+  case Sema::TDK_MiscellaneousDeductionFailure:
+    Result.Data = nullptr;
     break;
 
   case Sema::TDK_Incomplete:
   case Sema::TDK_InvalidExplicitArguments:
     Result.Data = Info.Param.getOpaqueValue();
     break;
+
+  case Sema::TDK_DeducedMismatch: {
+    // FIXME: Should allocate from normal heap so that we can free this later.
+    auto *Saved = new (Context) DFIDeducedMismatchArgs;
+    Saved->FirstArg = Info.FirstArg;
+    Saved->SecondArg = Info.SecondArg;
+    Saved->TemplateArgs = Info.take();
+    Saved->CallArgIndex = Info.CallArgIndex;
+    Result.Data = Saved;
+    break;
+  }
 
   case Sema::TDK_NonDeducedMismatch: {
     // FIXME: Should allocate from normal heap so that we can free this later.
@@ -606,9 +624,6 @@ clang::MakeDeductionFailureInfo(ASTContext &Context,
   case Sema::TDK_FailedOverloadResolution:
     Result.Data = Info.Expression;
     break;
-
-  case Sema::TDK_MiscellaneousDeductionFailure:
-    break;
   }
 
   return Result;
@@ -628,6 +643,7 @@ void DeductionFailureInfo::Destroy() {
 
   case Sema::TDK_Inconsistent:
   case Sema::TDK_Underqualified:
+  case Sema::TDK_DeducedMismatch:
   case Sema::TDK_NonDeducedMismatch:
     // FIXME: Destroy the data?
     Data = nullptr;
@@ -662,6 +678,7 @@ TemplateParameter DeductionFailureInfo::getTemplateParameter() {
   case Sema::TDK_TooManyArguments:
   case Sema::TDK_TooFewArguments:
   case Sema::TDK_SubstitutionFailure:
+  case Sema::TDK_DeducedMismatch:
   case Sema::TDK_NonDeducedMismatch:
   case Sema::TDK_FailedOverloadResolution:
     return TemplateParameter();
@@ -697,6 +714,9 @@ TemplateArgumentList *DeductionFailureInfo::getTemplateArgumentList() {
   case Sema::TDK_FailedOverloadResolution:
     return nullptr;
 
+  case Sema::TDK_DeducedMismatch:
+    return static_cast<DFIDeducedMismatchArgs*>(Data)->TemplateArgs;
+
   case Sema::TDK_SubstitutionFailure:
     return static_cast<TemplateArgumentList*>(Data);
 
@@ -723,6 +743,7 @@ const TemplateArgument *DeductionFailureInfo::getFirstArg() {
 
   case Sema::TDK_Inconsistent:
   case Sema::TDK_Underqualified:
+  case Sema::TDK_DeducedMismatch:
   case Sema::TDK_NonDeducedMismatch:
     return &static_cast<DFIArguments*>(Data)->FirstArg;
 
@@ -749,6 +770,7 @@ const TemplateArgument *DeductionFailureInfo::getSecondArg() {
 
   case Sema::TDK_Inconsistent:
   case Sema::TDK_Underqualified:
+  case Sema::TDK_DeducedMismatch:
   case Sema::TDK_NonDeducedMismatch:
     return &static_cast<DFIArguments*>(Data)->SecondArg;
 
@@ -766,6 +788,14 @@ Expr *DeductionFailureInfo::getExpr() {
     return static_cast<Expr*>(Data);
 
   return nullptr;
+}
+
+llvm::Optional<unsigned> DeductionFailureInfo::getCallArgIndex() {
+  if (static_cast<Sema::TemplateDeductionResult>(Result) ==
+        Sema::TDK_DeducedMismatch)
+    return static_cast<DFIDeducedMismatchArgs*>(Data)->CallArgIndex;
+
+  return llvm::None;
 }
 
 void OverloadCandidateSet::destroyCandidates() {
@@ -9448,6 +9478,23 @@ static void DiagnoseBadDeduction(Sema &S, Decl *Templated,
     return;
   }
 
+  case Sema::TDK_DeducedMismatch: {
+    // Format the template argument list into the argument string.
+    SmallString<128> TemplateArgString;
+    if (TemplateArgumentList *Args =
+            DeductionFailure.getTemplateArgumentList()) {
+      TemplateArgString = " ";
+      TemplateArgString += S.getTemplateArgumentBindingsText(
+          getDescribedTemplate(Templated)->getTemplateParameters(), *Args);
+    }
+
+    S.Diag(Templated->getLocation(), diag::note_ovl_candidate_deduced_mismatch)
+        << (*DeductionFailure.getCallArgIndex() + 1)
+        << *DeductionFailure.getFirstArg() << *DeductionFailure.getSecondArg()
+        << TemplateArgString;
+    break;
+  }
+
   case Sema::TDK_NonDeducedMismatch: {
     // FIXME: Provide a source location to indicate what we couldn't match.
     TemplateArgument FirstTA = *DeductionFailure.getFirstArg();
@@ -9737,6 +9784,7 @@ static unsigned RankDeductionFailure(const DeductionFailureInfo &DFI) {
     return 2;
 
   case Sema::TDK_SubstitutionFailure:
+  case Sema::TDK_DeducedMismatch:
   case Sema::TDK_NonDeducedMismatch:
   case Sema::TDK_MiscellaneousDeductionFailure:
     return 3;
@@ -10227,7 +10275,7 @@ public:
     }
     
     if (OvlExpr->hasExplicitTemplateArgs())
-      OvlExpr->getExplicitTemplateArgs().copyInto(OvlExplicitTemplateArgs);
+      OvlExpr->copyTemplateArgumentsInto(OvlExplicitTemplateArgs);
 
     if (FindAllFunctionsThatMatchTargetTypeExactly()) {
       // C++ [over.over]p4:
@@ -10627,7 +10675,7 @@ Sema::ResolveSingleFunctionTemplateSpecialization(OverloadExpr *ovl,
     return nullptr;
 
   TemplateArgumentListInfo ExplicitTemplateArgs;
-  ovl->getExplicitTemplateArgs().copyInto(ExplicitTemplateArgs);
+  ovl->copyTemplateArgumentsInto(ExplicitTemplateArgs);
   TemplateSpecCandidateSet FailedCandidates(ovl->getNameLoc());
 
   // Look through all of the overloaded functions, searching for one
