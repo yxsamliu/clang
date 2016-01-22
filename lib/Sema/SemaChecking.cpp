@@ -7471,6 +7471,10 @@ static void DiagnoseNullConversion(Sema &S, Expr *E, QualType T,
                         E->getExprLoc()))
     return;
 
+  // Don't warn on functions which have return type nullptr_t.
+  if (isa<CallExpr>(E))
+    return;
+
   // Check for NULL (GNUNull) or nullptr (CXX11_nullptr).
   const Expr::NullPointerConstantKind NullKind =
       E->isNullPointerConstant(S.Context, Expr::NPC_ValueDependentIsNotNull);
@@ -7486,8 +7490,12 @@ static void DiagnoseNullConversion(Sema &S, Expr *E, QualType T,
 
   // __null is usually wrapped in a macro.  Go up a macro if that is the case.
   if (NullKind == Expr::NPCK_GNUNull) {
-    if (Loc.isMacroID())
-      Loc = S.SourceMgr.getImmediateExpansionRange(Loc).first;
+    if (Loc.isMacroID()) {
+      StringRef MacroName =
+          Lexer::getImmediateMacroName(Loc, S.SourceMgr, S.getLangOpts());
+      if (MacroName == "NULL")
+        Loc = S.SourceMgr.getImmediateExpansionRange(Loc).first;
+    }
   }
 
   // Only warn if the null and context location are in the same macro expansion.

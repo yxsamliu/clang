@@ -919,6 +919,10 @@ def err_opencl_address_of_label : Error<
   "OpenCL does not support address of label ('&&') GNU extension">;
 
 
+// OpenCL error
+def err_opencl_taking_function_address_parser : Error<
+  "taking address of function is not allowed">;
+
 // OpenMP support.
 def warn_pragma_omp_ignored : Warning<
   "unexpected '#pragma omp ...' in program">, InGroup<SourceUsesOpenMP>, DefaultIgnore;

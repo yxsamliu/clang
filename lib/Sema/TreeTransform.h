@@ -6154,7 +6154,7 @@ TreeTransform<Derived>::TransformIfStmt(IfStmt *S) {
     }
   }
 
-  Sema::FullExprArg FullCond(getSema().MakeFullExpr(Cond.get()));
+  Sema::FullExprArg FullCond(getSema().MakeFullExpr(Cond.get(), S->getIfLoc()));
   if (!S->getConditionVariable() && S->getCond() && !FullCond.get())
     return StmtError();
 
@@ -6249,7 +6249,8 @@ TreeTransform<Derived>::TransformWhileStmt(WhileStmt *S) {
     }
   }
 
-  Sema::FullExprArg FullCond(getSema().MakeFullExpr(Cond.get()));
+  Sema::FullExprArg FullCond(
+      getSema().MakeFullExpr(Cond.get(), S->getWhileLoc()));
   if (!S->getConditionVariable() && S->getCond() && !FullCond.get())
     return StmtError();
 
@@ -6333,7 +6334,8 @@ TreeTransform<Derived>::TransformForStmt(ForStmt *S) {
     }
   }
 
-  Sema::FullExprArg FullCond(getSema().MakeFullExpr(Cond.get()));
+  Sema::FullExprArg FullCond(
+      getSema().MakeFullExpr(Cond.get(), S->getForLoc()));
   if (!S->getConditionVariable() && S->getCond() && !FullCond.get())
     return StmtError();
 
