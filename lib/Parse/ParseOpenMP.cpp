@@ -137,6 +137,7 @@ Parser::DeclGroupPtrTy Parser::ParseOpenMPDeclarativeDirective() {
   case OMPD_cancellation_point:
   case OMPD_cancel:
   case OMPD_target_data:
+  case OMPD_taskloop:
     Diag(Tok, diag::err_omp_unexpected_directive)
         << getOpenMPDirectiveName(DKind);
     break;
@@ -232,7 +233,8 @@ Parser::ParseOpenMPDeclarativeOrExecutableDirective(bool StandAloneAllowed) {
   case OMPD_target:
   case OMPD_teams:
   case OMPD_taskgroup:
-  case OMPD_target_data: {
+  case OMPD_target_data:
+  case OMPD_taskloop: {
     ConsumeToken();
     // Parse directive name of the 'critical' directive if any.
     if (DKind == OMPD_critical) {
@@ -394,7 +396,8 @@ bool Parser::ParseOpenMPSimpleVarList(OpenMPDirectiveKind Kind,
 ///       schedule-clause | copyin-clause | copyprivate-clause | untied-clause |
 ///       mergeable-clause | flush-clause | read-clause | write-clause |
 ///       update-clause | capture-clause | seq_cst-clause | device-clause |
-///       simdlen-clause | threads-clause | simd-clause
+///       simdlen-clause | threads-clause | simd-clause | num_teams-clause |
+///       thread_limit-clause
 ///
 OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
                                      OpenMPClauseKind CKind, bool FirstClause) {
@@ -415,6 +418,8 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
   case OMPC_collapse:
   case OMPC_ordered:
   case OMPC_device:
+  case OMPC_num_teams:
+  case OMPC_thread_limit:
     // OpenMP [2.5, Restrictions]
     //  At most one num_threads clause can appear on the directive.
     // OpenMP [2.8.1, simd construct, Restrictions]
@@ -426,6 +431,9 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
     // OpenMP [2.11.1, task Construct, Restrictions]
     //  At most one if clause can appear on the directive.
     //  At most one final clause can appear on the directive.
+    // OpenMP [teams Construct, Restrictions]
+    //  At most one num_teams clause can appear on the directive.
+    //  At most one thread_limit clause can appear on the directive.
     if (!FirstClause) {
       Diag(Tok, diag::err_omp_more_one_clause)
           << getOpenMPDirectiveName(DKind) << getOpenMPClauseName(CKind) << 0;

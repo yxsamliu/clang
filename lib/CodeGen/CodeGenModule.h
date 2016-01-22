@@ -378,13 +378,12 @@ private:
   StaticExternCMap StaticExternCValues;
 
   /// \brief thread_local variables defined or used in this TU.
-  std::vector<std::pair<const VarDecl *, llvm::GlobalVariable *> >
-    CXXThreadLocals;
+  std::vector<const VarDecl *> CXXThreadLocals;
 
   /// \brief thread_local variables with initializers that need to run
   /// before any thread_local variable in this TU is odr-used.
   std::vector<llvm::Function *> CXXThreadLocalInits;
-  std::vector<llvm::GlobalVariable *> CXXThreadLocalInitVars;
+  std::vector<const VarDecl *> CXXThreadLocalInitVars;
 
   /// Global variables with initializers that need to run before main.
   std::vector<llvm::Function *> CXXGlobalInits;
@@ -701,7 +700,8 @@ public:
   /// with the specified type instead of whatever the normal requested type
   /// would be.
   llvm::Constant *GetAddrOfGlobalVar(const VarDecl *D,
-                                     llvm::Type *Ty = nullptr);
+                                     llvm::Type *Ty = nullptr,
+                                     bool IsForDefinition = false);
 
   /// Return the address of the given function. If Ty is non-null, then this
   /// function will use the specified type if it has to create it.
@@ -968,16 +968,14 @@ public:
   /// function type.
   ///
   /// \param Info - The function type information.
-  /// \param TargetDecl - The decl these attributes are being constructed
-  /// for. If supplied the attributes applied to this decl may contribute to the
-  /// function attributes and calling convention.
+  /// \param CalleeInfo - The callee information these attributes are being
+  /// constructed for. If valid, the attributes applied to this decl may
+  /// contribute to the function attributes and calling convention.
   /// \param PAL [out] - On return, the attribute list to use.
   /// \param CallingConv [out] - On return, the LLVM calling convention to use.
   void ConstructAttributeList(const CGFunctionInfo &Info,
-                              const Decl *TargetDecl,
-                              AttributeListType &PAL,
-                              unsigned &CallingConv,
-                              bool AttrOnCallSite);
+                              CGCalleeInfo CalleeInfo, AttributeListType &PAL,
+                              unsigned &CallingConv, bool AttrOnCallSite);
 
   // Fills in the supplied string map with the set of target features for the
   // passed in function.
@@ -1138,7 +1136,8 @@ private:
 
   llvm::Constant *GetOrCreateLLVMGlobal(StringRef MangledName,
                                         llvm::PointerType *PTy,
-                                        const VarDecl *D);
+                                        const VarDecl *D,
+                                        bool IsForDefinition = false);
 
   void setNonAliasAttributes(const Decl *D, llvm::GlobalObject *GO);
 
@@ -1149,7 +1148,7 @@ private:
   void EmitGlobalDefinition(GlobalDecl D, llvm::GlobalValue *GV = nullptr);
 
   void EmitGlobalFunctionDefinition(GlobalDecl GD, llvm::GlobalValue *GV);
-  void EmitGlobalVarDefinition(const VarDecl *D);
+  void EmitGlobalVarDefinition(const VarDecl *D, bool IsTentative = false);
   void EmitAliasDefinition(GlobalDecl GD);
   void EmitObjCPropertyImplementations(const ObjCImplementationDecl *D);
   void EmitObjCIvarInitializations(ObjCImplementationDecl *D);

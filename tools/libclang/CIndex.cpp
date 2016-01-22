@@ -1952,6 +1952,7 @@ public:
   void VisitOMPTargetDirective(const OMPTargetDirective *D);
   void VisitOMPTargetDataDirective(const OMPTargetDataDirective *D);
   void VisitOMPTeamsDirective(const OMPTeamsDirective *D);
+  void VisitOMPTaskLoopDirective(const OMPTaskLoopDirective *D);
 
 private:
   void AddDeclarationNameInfo(const Stmt *S);
@@ -2083,6 +2084,14 @@ void OMPClauseEnqueue::VisitOMPSIMDClause(const OMPSIMDClause *) {}
 
 void OMPClauseEnqueue::VisitOMPDeviceClause(const OMPDeviceClause *C) {
   Visitor->AddStmt(C->getDevice());
+}
+
+void OMPClauseEnqueue::VisitOMPNumTeamsClause(const OMPNumTeamsClause *C) {
+  Visitor->AddStmt(C->getNumTeams());
+}
+
+void OMPClauseEnqueue::VisitOMPThreadLimitClause(const OMPThreadLimitClause *C) {
+  Visitor->AddStmt(C->getThreadLimit());
 }
 
 template<typename T>
@@ -2607,6 +2616,10 @@ void EnqueueVisitor::VisitOMPCancellationPointDirective(
 
 void EnqueueVisitor::VisitOMPCancelDirective(const OMPCancelDirective *D) {
   VisitOMPExecutableDirective(D);
+}
+
+void EnqueueVisitor::VisitOMPTaskLoopDirective(const OMPTaskLoopDirective *D) {
+  VisitOMPLoopDirective(D);
 }
 
 void CursorVisitor::EnqueueWorkList(VisitorWorkList &WL, const Stmt *S) {
@@ -4465,6 +4478,8 @@ CXString clang_getCursorKindSpelling(enum CXCursorKind Kind) {
     return cxstring::createRef("OMPCancellationPointDirective");
   case CXCursor_OMPCancelDirective:
     return cxstring::createRef("OMPCancelDirective");
+  case CXCursor_OMPTaskLoopDirective:
+    return cxstring::createRef("OMPTaskLoopDirective");
   case CXCursor_OverloadCandidate:
       return cxstring::createRef("OverloadCandidate");
   case CXCursor_TypeAliasTemplateDecl:
@@ -6457,6 +6472,27 @@ CXLinkageKind clang_getCursorLinkage(CXCursor cursor) {
     };
 
   return CXLinkage_Invalid;
+}
+} // end: extern "C"
+
+//===----------------------------------------------------------------------===//
+// Operations for querying visibility of a cursor.
+//===----------------------------------------------------------------------===//
+
+extern "C" {
+CXVisibilityKind clang_getCursorVisibility(CXCursor cursor) {
+  if (!clang_isDeclaration(cursor.kind))
+    return CXVisibility_Invalid;
+
+  const Decl *D = cxcursor::getCursorDecl(cursor);
+  if (const NamedDecl *ND = dyn_cast_or_null<NamedDecl>(D))
+    switch (ND->getVisibility()) {
+      case HiddenVisibility: return CXVisibility_Hidden;
+      case ProtectedVisibility: return CXVisibility_Protected;
+      case DefaultVisibility: return CXVisibility_Default;
+    };
+
+  return CXVisibility_Invalid;
 }
 } // end: extern "C"
 

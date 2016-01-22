@@ -1651,7 +1651,7 @@ public:
   OMPClause *RebuildOMPDeviceClause(Expr *Device, SourceLocation StartLoc,
                                     SourceLocation LParenLoc,
                                     SourceLocation EndLoc) {
-    return getSema().ActOnOpenMPDeviceClause(Device, StartLoc, LParenLoc, 
+    return getSema().ActOnOpenMPDeviceClause(Device, StartLoc, LParenLoc,
                                              EndLoc);
   }
 
@@ -1667,6 +1667,29 @@ public:
     return getSema().ActOnOpenMPMapClause(MapTypeModifier, MapType, MapLoc,
                                           ColonLoc, VarList,StartLoc,
                                           LParenLoc, EndLoc);
+  }
+
+  /// \brief Build a new OpenMP 'num_teams' clause.
+  ///
+  /// By default, performs semantic analysis to build the new statement.
+  /// Subclasses may override this routine to provide different behavior.
+  OMPClause *RebuildOMPNumTeamsClause(Expr *NumTeams, SourceLocation StartLoc,
+                                      SourceLocation LParenLoc,
+                                      SourceLocation EndLoc) {
+    return getSema().ActOnOpenMPNumTeamsClause(NumTeams, StartLoc, LParenLoc, 
+                                               EndLoc);
+  }
+
+  /// \brief Build a new OpenMP 'thread_limit' clause.
+  ///
+  /// By default, performs semantic analysis to build the new statement.
+  /// Subclasses may override this routine to provide different behavior.
+  OMPClause *RebuildOMPThreadLimitClause(Expr *ThreadLimit,
+                                         SourceLocation StartLoc,
+                                         SourceLocation LParenLoc,
+                                         SourceLocation EndLoc) {
+    return getSema().ActOnOpenMPThreadLimitClause(ThreadLimit, StartLoc,
+                                                  LParenLoc, EndLoc);
   }
 
   /// \brief Rebuild the operand to an Objective-C \@synchronized statement.
@@ -6934,6 +6957,25 @@ TreeTransform<Derived>::TransformMSPropertyRefExpr(MSPropertyRefExpr *E) {
 }
 
 template <typename Derived>
+ExprResult TreeTransform<Derived>::TransformMSPropertySubscriptExpr(
+    MSPropertySubscriptExpr *E) {
+  auto BaseRes = getDerived().TransformExpr(E->getBase());
+  if (BaseRes.isInvalid())
+    return ExprError();
+  auto IdxRes = getDerived().TransformExpr(E->getIdx());
+  if (IdxRes.isInvalid())
+    return ExprError();
+
+  if (!getDerived().AlwaysRebuild() &&
+      BaseRes.get() == E->getBase() &&
+      IdxRes.get() == E->getIdx())
+    return E;
+
+  return getDerived().RebuildArraySubscriptExpr(
+      BaseRes.get(), SourceLocation(), IdxRes.get(), E->getRBracketLoc());
+}
+
+template <typename Derived>
 StmtResult TreeTransform<Derived>::TransformSEHTryStmt(SEHTryStmt *S) {
   StmtResult TryBlock = getDerived().TransformCompoundStmt(S->getTryBlock());
   if (TryBlock.isInvalid())
@@ -7326,6 +7368,17 @@ TreeTransform<Derived>::TransformOMPCancelDirective(OMPCancelDirective *D) {
   return Res;
 }
 
+template <typename Derived>
+StmtResult
+TreeTransform<Derived>::TransformOMPTaskLoopDirective(OMPTaskLoopDirective *D) {
+  DeclarationNameInfo DirName;
+  getDerived().getSema().StartOpenMPDSABlock(OMPD_taskloop, DirName, nullptr,
+                                             D->getLocStart());
+  StmtResult Res = getDerived().TransformOMPExecutableDirective(D);
+  getDerived().getSema().EndOpenMPDSABlock(Res.get());
+  return Res;
+}
+
 //===----------------------------------------------------------------------===//
 // OpenMP clause transformation
 //===----------------------------------------------------------------------===//
@@ -7702,6 +7755,26 @@ OMPClause *TreeTransform<Derived>::TransformOMPMapClause(OMPMapClause *C) {
       C->getMapTypeModifier(), C->getMapType(), C->getMapLoc(),
       C->getColonLoc(), Vars, C->getLocStart(), C->getLParenLoc(),
       C->getLocEnd());
+}
+
+template <typename Derived>
+OMPClause *
+TreeTransform<Derived>::TransformOMPNumTeamsClause(OMPNumTeamsClause *C) {
+  ExprResult E = getDerived().TransformExpr(C->getNumTeams());
+  if (E.isInvalid())
+    return nullptr;
+  return getDerived().RebuildOMPNumTeamsClause(
+      E.get(), C->getLocStart(), C->getLParenLoc(), C->getLocEnd());
+}
+
+template <typename Derived>
+OMPClause *
+TreeTransform<Derived>::TransformOMPThreadLimitClause(OMPThreadLimitClause *C) {
+  ExprResult E = getDerived().TransformExpr(C->getThreadLimit());
+  if (E.isInvalid())
+    return nullptr;
+  return getDerived().RebuildOMPThreadLimitClause(
+      E.get(), C->getLocStart(), C->getLParenLoc(), C->getLocEnd());
 }
 
 //===----------------------------------------------------------------------===//

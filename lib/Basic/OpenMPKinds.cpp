@@ -135,6 +135,8 @@ unsigned clang::getOpenMPSimpleClauseType(OpenMPClauseKind Kind,
   case OMPC_device:
   case OMPC_threads:
   case OMPC_simd:
+  case OMPC_num_teams:
+  case OMPC_thread_limit:
     break;
   }
   llvm_unreachable("Invalid OpenMP simple clause kind");
@@ -233,6 +235,8 @@ const char *clang::getOpenMPSimpleClauseTypeName(OpenMPClauseKind Kind,
   case OMPC_device:
   case OMPC_threads:
   case OMPC_simd:
+  case OMPC_num_teams:
+  case OMPC_thread_limit:
     break;
   }
   llvm_unreachable("Invalid OpenMP simple clause kind");
@@ -406,6 +410,16 @@ bool clang::isAllowedClauseForDirective(OpenMPDirectiveKind DKind,
       break;
     }
     break;
+  case OMPD_taskloop:
+    switch (CKind) {
+#define OPENMP_TASKLOOP_CLAUSE(Name)                                           \
+  case OMPC_##Name:                                                            \
+    return true;
+#include "clang/Basic/OpenMPKinds.def"
+    default:
+      break;
+    }
+    break;
   case OMPD_unknown:
   case OMPD_threadprivate:
   case OMPD_section:
@@ -423,8 +437,8 @@ bool clang::isAllowedClauseForDirective(OpenMPDirectiveKind DKind,
 
 bool clang::isOpenMPLoopDirective(OpenMPDirectiveKind DKind) {
   return DKind == OMPD_simd || DKind == OMPD_for || DKind == OMPD_for_simd ||
-         DKind == OMPD_parallel_for ||
-         DKind == OMPD_parallel_for_simd; // TODO add next directives.
+         DKind == OMPD_parallel_for || DKind == OMPD_parallel_for_simd ||
+         DKind == OMPD_taskloop; // TODO add next directives.
 }
 
 bool clang::isOpenMPWorksharingDirective(OpenMPDirectiveKind DKind) {

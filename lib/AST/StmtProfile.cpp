@@ -453,6 +453,13 @@ void OMPClauseProfiler::VisitOMPDeviceClause(const OMPDeviceClause *C) {
 void OMPClauseProfiler::VisitOMPMapClause(const OMPMapClause *C) {
   VisitOMPClauseList(C);
 }
+void OMPClauseProfiler::VisitOMPNumTeamsClause(const OMPNumTeamsClause *C) {
+  Profiler->VisitStmt(C->getNumTeams());
+}
+void OMPClauseProfiler::VisitOMPThreadLimitClause(
+    const OMPThreadLimitClause *C) {
+  Profiler->VisitStmt(C->getThreadLimit());
+}
 }
 
 void
@@ -573,6 +580,10 @@ void StmtProfiler::VisitOMPCancellationPointDirective(
 
 void StmtProfiler::VisitOMPCancelDirective(const OMPCancelDirective *S) {
   VisitOMPExecutableDirective(S);
+}
+
+void StmtProfiler::VisitOMPTaskLoopDirective(const OMPTaskLoopDirective *S) {
+  VisitOMPLoopDirective(S);
 }
 
 void StmtProfiler::VisitExpr(const Expr *S) {
@@ -1124,6 +1135,11 @@ void StmtProfiler::VisitCXXUuidofExpr(const CXXUuidofExpr *S) {
 void StmtProfiler::VisitMSPropertyRefExpr(const MSPropertyRefExpr *S) {
   VisitExpr(S);
   VisitDecl(S->getPropertyDecl());
+}
+
+void StmtProfiler::VisitMSPropertySubscriptExpr(
+    const MSPropertySubscriptExpr *S) {
+  VisitExpr(S);
 }
 
 void StmtProfiler::VisitCXXThisExpr(const CXXThisExpr *S) {
