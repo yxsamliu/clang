@@ -2145,6 +2145,9 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
       return RValue::get(llvm::ConstantExpr::getBitCast(GV, CGM.Int8PtrTy));
     break;
   }
+  case Builtin::BIprintf:
+    if (getLangOpts().CUDA && getLangOpts().CUDAIsDevice)
+      return EmitCUDADevicePrintfCallExpr(E, ReturnValue);
   }
 
   // If this is an alias for a lib function (e.g. __builtin_sin), emit
@@ -7069,8 +7072,8 @@ static Value *emitFPIntBuiltin(CodeGenFunction &CGF,
 Value *CodeGenFunction::EmitAMDGPUBuiltinExpr(unsigned BuiltinID,
                                               const CallExpr *E) {
   switch (BuiltinID) {
-  case AMDGPU::BI__builtin_amdgpu_div_scale:
-  case AMDGPU::BI__builtin_amdgpu_div_scalef: {
+  case AMDGPU::BI__builtin_amdgcn_div_scale:
+  case AMDGPU::BI__builtin_amdgcn_div_scalef: {
     // Translate from the intrinsics's struct return to the builtin's out
     // argument.
 
@@ -7080,7 +7083,7 @@ Value *CodeGenFunction::EmitAMDGPUBuiltinExpr(unsigned BuiltinID,
     llvm::Value *Y = EmitScalarExpr(E->getArg(1));
     llvm::Value *Z = EmitScalarExpr(E->getArg(2));
 
-    llvm::Value *Callee = CGM.getIntrinsic(Intrinsic::AMDGPU_div_scale,
+    llvm::Value *Callee = CGM.getIntrinsic(Intrinsic::amdgcn_div_scale,
                                            X->getType());
 
     llvm::Value *Tmp = Builder.CreateCall(Callee, {X, Y, Z});
@@ -7095,40 +7098,54 @@ Value *CodeGenFunction::EmitAMDGPUBuiltinExpr(unsigned BuiltinID,
     Builder.CreateStore(FlagExt, FlagOutPtr);
     return Result;
   }
-  case AMDGPU::BI__builtin_amdgpu_div_fmas:
-  case AMDGPU::BI__builtin_amdgpu_div_fmasf: {
+  case AMDGPU::BI__builtin_amdgcn_div_fmas:
+  case AMDGPU::BI__builtin_amdgcn_div_fmasf: {
     llvm::Value *Src0 = EmitScalarExpr(E->getArg(0));
     llvm::Value *Src1 = EmitScalarExpr(E->getArg(1));
     llvm::Value *Src2 = EmitScalarExpr(E->getArg(2));
     llvm::Value *Src3 = EmitScalarExpr(E->getArg(3));
 
-    llvm::Value *F = CGM.getIntrinsic(Intrinsic::AMDGPU_div_fmas,
+    llvm::Value *F = CGM.getIntrinsic(Intrinsic::amdgcn_div_fmas,
                                       Src0->getType());
     llvm::Value *Src3ToBool = Builder.CreateIsNotNull(Src3);
     return Builder.CreateCall(F, {Src0, Src1, Src2, Src3ToBool});
   }
-  case AMDGPU::BI__builtin_amdgpu_div_fixup:
-  case AMDGPU::BI__builtin_amdgpu_div_fixupf:
-    return emitTernaryFPBuiltin(*this, E, Intrinsic::AMDGPU_div_fixup);
-  case AMDGPU::BI__builtin_amdgpu_trig_preop:
-  case AMDGPU::BI__builtin_amdgpu_trig_preopf:
-    return emitFPIntBuiltin(*this, E, Intrinsic::AMDGPU_trig_preop);
-  case AMDGPU::BI__builtin_amdgpu_rcp:
-  case AMDGPU::BI__builtin_amdgpu_rcpf:
-    return emitUnaryFPBuiltin(*this, E, Intrinsic::AMDGPU_rcp);
+  case AMDGPU::BI__builtin_amdgcn_div_fixup:
+  case AMDGPU::BI__builtin_amdgcn_div_fixupf:
+    return emitTernaryFPBuiltin(*this, E, Intrinsic::amdgcn_div_fixup);
+  case AMDGPU::BI__builtin_amdgcn_trig_preop:
+  case AMDGPU::BI__builtin_amdgcn_trig_preopf:
+    return emitFPIntBuiltin(*this, E, Intrinsic::amdgcn_trig_preop);
+  case AMDGPU::BI__builtin_amdgcn_rcp:
+  case AMDGPU::BI__builtin_amdgcn_rcpf:
+    return emitUnaryFPBuiltin(*this, E, Intrinsic::amdgcn_rcp);
+  case AMDGPU::BI__builtin_amdgcn_rsq:
+  case AMDGPU::BI__builtin_amdgcn_rsqf:
+    return emitUnaryFPBuiltin(*this, E, Intrinsic::amdgcn_rsq);
+  case AMDGPU::BI__builtin_amdgcn_rsq_clamped:
+  case AMDGPU::BI__builtin_amdgcn_rsq_clampedf:
+    return emitUnaryFPBuiltin(*this, E, Intrinsic::amdgcn_rsq_clamped);
+  case AMDGPU::BI__builtin_amdgcn_ldexp:
+  case AMDGPU::BI__builtin_amdgcn_ldexpf:
+    return emitFPIntBuiltin(*this, E, Intrinsic::amdgcn_ldexp);
+  case AMDGPU::BI__builtin_amdgcn_class:
+  case AMDGPU::BI__builtin_amdgcn_classf:
+    return emitFPIntBuiltin(*this, E, Intrinsic::amdgcn_class);
+
+    // Legacy amdgpu prefix
   case AMDGPU::BI__builtin_amdgpu_rsq:
-  case AMDGPU::BI__builtin_amdgpu_rsqf:
-    return emitUnaryFPBuiltin(*this, E, Intrinsic::AMDGPU_rsq);
-  case AMDGPU::BI__builtin_amdgpu_rsq_clamped:
-  case AMDGPU::BI__builtin_amdgpu_rsq_clampedf:
-    return emitUnaryFPBuiltin(*this, E, Intrinsic::AMDGPU_rsq_clamped);
+  case AMDGPU::BI__builtin_amdgpu_rsqf: {
+    if (getTarget().getTriple().getArch() == Triple::amdgcn)
+      return emitUnaryFPBuiltin(*this, E, Intrinsic::amdgcn_rsq);
+    return emitUnaryFPBuiltin(*this, E, Intrinsic::r600_rsq);
+  }
   case AMDGPU::BI__builtin_amdgpu_ldexp:
-  case AMDGPU::BI__builtin_amdgpu_ldexpf:
+  case AMDGPU::BI__builtin_amdgpu_ldexpf: {
+    if (getTarget().getTriple().getArch() == Triple::amdgcn)
+      return emitFPIntBuiltin(*this, E, Intrinsic::amdgcn_ldexp);
     return emitFPIntBuiltin(*this, E, Intrinsic::AMDGPU_ldexp);
-  case AMDGPU::BI__builtin_amdgpu_class:
-  case AMDGPU::BI__builtin_amdgpu_classf:
-    return emitFPIntBuiltin(*this, E, Intrinsic::AMDGPU_class);
-   default:
+  }
+  default:
     return nullptr;
   }
 }
