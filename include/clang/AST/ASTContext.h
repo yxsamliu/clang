@@ -414,8 +414,6 @@ private:
   ///  this ASTContext object.
   LangOptions &LangOpts;
 
-  bool disabledFPContract;
-
   /// \brief Blacklist object that is used by sanitizers to decide which
   /// entities should not be instrumented.
   std::unique_ptr<SanitizerBlacklist> SanitizerBL;
@@ -600,10 +598,6 @@ public:
   const SanitizerBlacklist &getSanitizerBlacklist() const {
     return *SanitizerBL;
   }
-
-  void disableFPContract() { disabledFPContract = true; }
-
-  bool isFPContractDisabled() const { return disabledFPContract; }
 
   DiagnosticsEngine &getDiagnostics() const;
 
