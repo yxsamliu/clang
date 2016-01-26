@@ -1844,7 +1844,6 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
     Width = Info.Width;
     Align = Info.Align;
   }
-  break;
 
   }
 
