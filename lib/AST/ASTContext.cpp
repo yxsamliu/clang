@@ -749,8 +749,7 @@ ASTContext::ASTContext(LangOptions &LOpts, SourceManager &SM,
       PrintingPolicy(LOpts), Idents(idents), Selectors(sels),
       BuiltinInfo(builtins), DeclarationNames(*this), ExternalSource(nullptr),
       Listener(nullptr), Comments(SM), CommentsLoaded(false),
-      CommentCommandTraits(BumpAlloc, LOpts.CommentOpts), LastSDM(nullptr, 0),
-      disabledFPContract(false) {
+      CommentCommandTraits(BumpAlloc, LOpts.CommentOpts), LastSDM(nullptr, 0) {
   TUDecl = TranslationUnitDecl::Create(*this);
 }
 
