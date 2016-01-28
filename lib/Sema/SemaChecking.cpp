@@ -330,32 +330,6 @@ static bool SemaBuiltinReservedRWPipe(Sema &S, CallExpr *TheCall) {
   return false;
 }
 
-static bool SemaBuiltinCommitRWPipe(Sema &S, CallExpr *TheCall) {
-  PipeBiCallSema PipeSema(S, TheCall);
-
-  if (2U != TheCall->getNumArgs()) {
-    PipeSema.errorNumArguments();
-    return true;
-  }
-
-  // The first parameter should be of type pipe.
-  if (PipeSema.validatePipeArg()) {
-    PipeSema.errorPipeArgument();
-    return true;
-  }
-
-  // The secnod paramter should be of type reserve_id_t.
-  if (!PipeSema.argQuery(1, &Type::isReserveIDT)) {
-      PipeSema.errorReservedIdType();
-      return true;
-  }
-
-  TheCall->setType(S.getASTContext().VoidTy);
-
-  return false;
-}
-
-
 static bool SemaNumPacketesPipe(Sema &S, CallExpr *TheCall) {
   PipeBiCallSema PipeSema(S, TheCall);
 
@@ -972,39 +946,6 @@ Sema::CheckBuiltinFunctionCall(FunctionDecl *FDecl, unsigned BuiltinID,
 #include "clang/Basic/Builtins.def"
   case Builtin::BI__builtin_annotation:
     if (SemaBuiltinAnnotation(*this, TheCall))
-      return ExprError();
-    break;
-  case Builtin::BIread_pipe:
-  case Builtin::BIwrite_pipe:
-    if (SemaBuiltinPipe(*this, TheCall))
-      return ExprError();
-    break;
-  case Builtin::BIreserve_read_pipe:
-  case Builtin::BIreserve_write_pipe:
-  case Builtin::BIwork_group_reserve_read_pipe:
-  case Builtin::BIwork_group_reserve_write_pipe:
-  case Builtin::BIsub_group_reserve_read_pipe:
-  case Builtin::BIsub_group_reserve_write_pipe:
-    // Since those two functions are declared with var args, therefore we need
-    // a semantic check for the argument.
-    if (SemaBuiltinReservedRWPipe(*this, TheCall))
-      return ExprError();
-
-    // We need to override the return type of the call expression.
-    TheCall->setType(Context.OCLReserveIDTy);
-    break;
-  case Builtin::BIcommit_read_pipe:
-  case Builtin::BIcommit_write_pipe:
-  case Builtin::BIwork_group_commit_read_pipe:
-  case Builtin::BIwork_group_commit_write_pipe:
-  case Builtin::BIsub_group_commit_read_pipe:
-  case Builtin::BIsub_group_commit_write_pipe:
-    if (SemaBuiltinCommitRWPipe(*this, TheCall))
-      return ExprError();
-    break;
-  case Builtin::BIget_pipe_num_packets:
-  case Builtin::BIget_pipe_max_packets:
-    if (SemaNumPacketesPipe(*this, TheCall))
       return ExprError();
     break;
   case Builtin::BI__builtin_addressof:
