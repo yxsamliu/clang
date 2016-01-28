@@ -105,6 +105,7 @@ public:
 private:
 
   void ParseNumberStartingWithZero(SourceLocation TokLoc);
+  void ParseDecimalOrOctalCommon(SourceLocation TokLoc);
 
   static bool isDigitSeparator(char C) { return C == '\''; }
 
