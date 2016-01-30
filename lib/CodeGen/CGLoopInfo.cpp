@@ -115,8 +115,8 @@ void LoopInfoStack::push(BasicBlock *Header, clang::ASTContext &Ctx,
   // Identify loop hint attributes from Attrs.
   for (const auto *Attr : Attrs) {
     const LoopHintAttr *LH = dyn_cast<LoopHintAttr>(Attr);
-    const OpenCLUnrollHintAttr *OpenCLHint
-      = dyn_cast<OpenCLUnrollHintAttr>(Attr);
+    const OpenCLUnrollHintAttr *OpenCLHint =
+        dyn_cast<OpenCLUnrollHintAttr>(Attr);
 
     // Skip non loop hint attributes
     if (!LH && !OpenCLHint) {
@@ -126,6 +126,14 @@ void LoopInfoStack::push(BasicBlock *Header, clang::ASTContext &Ctx,
     LoopHintAttr::OptionType Option = LoopHintAttr::Unroll;
     LoopHintAttr::LoopHintState State = LoopHintAttr::Disable;
     unsigned ValueInt = 1;
+    // Translate opencl_unroll_hint attribute argument to
+    // equivalent LoopHintAttr enums.
+    // See OpenCL 2.0 spec section 6.11.5 for details.
+    // 0 corresponds to opencl_unroll_hint attribute without
+    // argument.
+    // 0 - full unroll
+    // 1 - disable unroll
+    // other positive integer n - unroll by n
     if (OpenCLHint) {
       ValueInt = OpenCLHint->getUnrollHint();
       if (ValueInt == 0) {

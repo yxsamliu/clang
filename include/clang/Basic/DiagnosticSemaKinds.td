@@ -7701,7 +7701,7 @@ def err_implicit_pointer_address_space_cast : Error<
   "illegal implicit conversion between two pointers with different address "
   "spaces">;
 def err_opencl_unroll_hint_factor : Error<
-  "opencl_unroll_hint requires a positive integral compile time constant expression">;
+  "opencl_unroll_hint attribute requires a positive integral compile time constant expression">;
 def err_static_variables : Error<
   "static storage class can be specified only for global and constant variables">;
 def err_enqueue_kernel_num_args_mismatch : Error<

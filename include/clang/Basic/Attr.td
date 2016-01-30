@@ -658,7 +658,7 @@ def OpenCLKernel : InheritableAttr {
 def OpenCLUnrollHint : InheritableAttr {
   let Spellings = [GNU<"opencl_unroll_hint">];
   let Args = [UnsignedArgument<"UnrollHint">];
-  let Documentation = [Undocumented];
+  let Documentation = [OpenCLUnrollHintDocs];
 }
 
 // This attribute is both a type attribute, and a declaration attribute (for

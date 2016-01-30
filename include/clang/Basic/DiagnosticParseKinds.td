@@ -903,7 +903,7 @@ def err_pragma_optimize_extra_argument : Error<
   "unexpected extra argument '%0' to '#pragma clang optimize'">;
 
 def err_opencl_unroll_hint_on_non_loop : Error<
-  "OpenCL only supports opencl_unroll_hint on for, while, and do statements">;
+  "OpenCL only supports opencl_unroll_hint attribute on for, while, and do statements">;
 
 // OpenCL EXTENSION pragma (OpenCL 1.1 [9.1])
 def warn_pragma_expected_colon : Warning<

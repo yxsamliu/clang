@@ -107,22 +107,8 @@ Parser::ParseStatementOrDeclaration(StmtVector &Stmts,
 
   ParsedAttributesWithRange Attrs(AttrFactory);
   MaybeParseCXX11Attributes(Attrs, nullptr, /*MightBeObjCMessageSend*/ true);
-
-  if (getLangOpts().OpenCL && getLangOpts().OpenCLVersion >= 120) {
-    bool wasAttribute = Tok.is(tok::kw___attribute);
-    MaybeParseGNUAttributes(Attrs);
-
-    if (!Tok.is(tok::kw___attribute) && wasAttribute) {
-      if (!(Tok.is(tok::kw_for) || Tok.is(tok::kw_while) || Tok.is(tok::kw_do))) {
-        AttributeList *attrList = Attrs.getList();
-        assert(attrList != NULL);
-        if (attrList->getName()->getName() == "opencl_unroll_hint") {
-          Diag(Tok, diag::err_opencl_unroll_hint_on_non_loop);
+  if (!MaybeParseOpenCLUnrollHintAttribute(Attrs))
           return StmtError();
-        }
-      }
-    }
-  }
 
   StmtResult Res = ParseStatementOrDeclarationAfterAttributes(
       Stmts, Allowed, TrailingElseLoc, Attrs);
@@ -2221,4 +2207,20 @@ void Parser::ParseMicrosoftIfExistsStatement(StmtVector &Stmts) {
       Stmts.push_back(R.get());
   }
   Braces.consumeClose();
+}
+
+bool Parser::ParseOpenCLUnrollHintAttribute(ParsedAttributes &Attrs) {
+  MaybeParseGNUAttributes(Attrs);
+
+  if (Attrs.empty())
+    return true;
+
+  if (Attrs.getList()->getName()->getName() != "opencl_unroll_hint")
+    return true;
+
+  if (!(Tok.is(tok::kw_for) || Tok.is(tok::kw_while) || Tok.is(tok::kw_do))) {
+    Diag(Tok, diag::err_opencl_unroll_hint_on_non_loop);
+    return false;
+  }
+  return true;
 }

@@ -1562,6 +1562,19 @@ for further details including limitations of the unroll hints.
   }];
 }
 
+def OpenCLUnrollHintDocs : Documentation {
+  let Category = DocCatStmt;
+  let Heading = "__attribute__((opencl_unroll_hint))";
+  let Content = [{
+The opencl_unroll_hint attribute qualifier can be used to specify that a loop
+(for, while and do loops) can be unrolled. This attribute qualifier can be
+used to specify full unrolling or partial unrolling by a specified amount.
+This is a compiler hint and the compiler may ignore this directive. See
+`OpenCL 2.0 spec <https://www.khronos.org/registry/cl/specs/opencl-2.0.pdf>`_
+section 6.11.5 for details.
+  }];
+}
+
 def DocOpenCLAddressSpaces : DocumentationCategory<"OpenCL Address Spaces"> {
   let Content = [{
 The address space qualifier may be used to specify the region of memory that is

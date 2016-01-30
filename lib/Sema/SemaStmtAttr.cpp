@@ -209,25 +209,26 @@ static Attr *handleOpenCLUnrollHint(Sema &S, Stmt *St, const AttributeList &A,
 
   // opencl_unroll_hint can have 0 arguments (compiler determines unrolling
   // factor) or 1 argument (the unroll factor provided by the user).
+  // See OpenCL 2.0 spec section 6.11.5 for details.
 
-  unsigned numArgs = A.getNumArgs();
+  unsigned NumArgs = A.getNumArgs();
 
-  if (numArgs > 1) {
+  if (NumArgs > 1) {
     S.Diag(A.getLoc(), diag::err_attribute_too_many_arguments) << 1;
     return 0;
   }
 
   unsigned unrollingFactor = 0;
 
-  if (numArgs == 1) {
+  if (NumArgs == 1) {
     Expr *E = A.getArgAsExpr(0);
-    assert(E != NULL);
+    assert(E != nullptr && "Invalid opencl_unroll_hint argument");
     llvm::APSInt ArgVal(32);
 
-    if (E->isTypeDependent() || E->isValueDependent() ||
-        !E->isIntegerConstantExpr(ArgVal, S.Context)) {
+    if (!E->isIntegerConstantExpr(ArgVal, S.Context)) {
       S.Diag(A.getLoc(), diag::err_attribute_argument_type)
-        << A.getName()->getName() << AANT_ArgumentIntegerConstant << E->getSourceRange();
+          << A.getName()->getName() << AANT_ArgumentIntegerConstant
+          << E->getSourceRange();
       return 0;
     }
 
