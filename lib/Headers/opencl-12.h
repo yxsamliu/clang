@@ -8,6 +8,9 @@
 #ifndef _OPENCL_H_
 #define _OPENCL_H_
 
+#define cl_khr_int64_base_atomics
+#define cl_khr_int64_extended_atomics
+
 #if !defined(__SPIR32__) && !defined(__SPIR64__)
 #error "This header file should be used with SPIR target only."
 #endif
