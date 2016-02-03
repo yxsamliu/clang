@@ -2507,6 +2507,11 @@ static bool TypeInfoIsInStandardLibrary(const BuiltinType *Ty) {
   //   long, unsigned long, long long, unsigned long long, float, double,
   //   long double, char16_t, char32_t, and the IEEE 754r decimal and
   //   half-precision floating point types.
+  //
+  // GCC also emits RTTI for __int128.
+  // FIXME: We do not emit RTTI information for decimal types here.
+
+  // Types added here must also be added to EmitFundamentalRTTIDescriptors.
   switch (Ty->getKind()) {
     case BuiltinType::Void:
     case BuiltinType::NullPtr:
@@ -2533,6 +2538,8 @@ static bool TypeInfoIsInStandardLibrary(const BuiltinType *Ty) {
     case BuiltinType::Char32:
     case BuiltinType::Int128:
     case BuiltinType::UInt128:
+      return true;
+
     case BuiltinType::OCLImage1d:
     case BuiltinType::OCLImage1dArray:
     case BuiltinType::OCLImage1dBuffer:
@@ -2551,7 +2558,7 @@ static bool TypeInfoIsInStandardLibrary(const BuiltinType *Ty) {
     case BuiltinType::OCLQueue:
     case BuiltinType::OCLNDRange:
     case BuiltinType::OCLReserveID:
-      return true;
+      return false;
 
     case BuiltinType::Dependent:
 #define BUILTIN_TYPE(Id, SingletonId)
@@ -3343,6 +3350,7 @@ void ItaniumCXXABI::EmitFundamentalRTTIDescriptor(QualType Type) {
 }
 
 void ItaniumCXXABI::EmitFundamentalRTTIDescriptors() {
+  // Types added here must also be added to TypeInfoIsInStandardLibrary.
   QualType FundamentalTypes[] = {
       getContext().VoidTy,             getContext().NullPtrTy,
       getContext().BoolTy,             getContext().WCharTy,
@@ -3351,7 +3359,8 @@ void ItaniumCXXABI::EmitFundamentalRTTIDescriptors() {
       getContext().UnsignedShortTy,    getContext().IntTy,
       getContext().UnsignedIntTy,      getContext().LongTy,
       getContext().UnsignedLongTy,     getContext().LongLongTy,
-      getContext().UnsignedLongLongTy, getContext().HalfTy,
+      getContext().UnsignedLongLongTy, getContext().Int128Ty,
+      getContext().UnsignedInt128Ty,   getContext().HalfTy,
       getContext().FloatTy,            getContext().DoubleTy,
       getContext().LongDoubleTy,       getContext().Char16Ty,
       getContext().Char32Ty,

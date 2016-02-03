@@ -20,6 +20,7 @@
 #include "clang/AST/Expr.h"
 #include "clang/AST/ExprObjC.h"
 #include "clang/AST/ExternalASTSource.h"
+#include "clang/AST/LocInfoType.h"
 #include "clang/AST/MangleNumberingContext.h"
 #include "clang/AST/NSAPI.h"
 #include "clang/AST/PrettyPrinter.h"
@@ -35,7 +36,6 @@
 #include "clang/Sema/DeclSpec.h"
 #include "clang/Sema/ExternalSemaSource.h"
 #include "clang/Sema/IdentifierResolver.h"
-#include "clang/Sema/LocInfoType.h"
 #include "clang/Sema/ObjCMethodList.h"
 #include "clang/Sema/Ownership.h"
 #include "clang/Sema/Scope.h"
@@ -7750,6 +7750,10 @@ public:
   void AddLaunchBoundsAttr(SourceRange AttrRange, Decl *D, Expr *MaxThreads,
                            Expr *MinBlocks, unsigned SpellingListIndex);
 
+  /// AddModeAttr - Adds a mode attribute to a particular declaration.
+  void AddModeAttr(SourceRange AttrRange, Decl *D, IdentifierInfo *Name,
+                   unsigned SpellingListIndex, bool InInstantiation = false);
+
   //===--------------------------------------------------------------------===//
   // C++ Coroutines TS
   //
@@ -7967,6 +7971,12 @@ public:
                                                 Stmt *AStmt,
                                                 SourceLocation StartLoc,
                                                 SourceLocation EndLoc);
+  /// \brief Called on well-formed '\#pragma omp target parallel for' after
+  /// parsing of the  associated statement.
+  StmtResult ActOnOpenMPTargetParallelForDirective(
+      ArrayRef<OMPClause *> Clauses, Stmt *AStmt, SourceLocation StartLoc,
+      SourceLocation EndLoc,
+      llvm::DenseMap<ValueDecl *, Expr *> &VarsWithImplicitDSA);
   /// \brief Called on well-formed '\#pragma omp teams' after parsing of the
   /// associated statement.
   StmtResult ActOnOpenMPTeamsDirective(ArrayRef<OMPClause *> Clauses,
@@ -8829,6 +8839,10 @@ public:
                                                CXXMethodDecl *MemberDecl,
                                                bool ConstRHS,
                                                bool Diagnose);
+
+  /// \return true if \p CD can be considered empty according to CUDA
+  /// (E.2.3.1 in CUDA 7.5 Programming guide).
+  bool isEmptyCudaConstructor(SourceLocation Loc, CXXConstructorDecl *CD);
 
   /// \name Code completion
   //@{

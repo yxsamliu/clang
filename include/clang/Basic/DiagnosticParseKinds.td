@@ -919,9 +919,11 @@ def err_opencl_address_of_label : Error<
   "OpenCL does not support address of label ('&&') GNU extension">;
 
 
-// OpenCL error
+// OpenCL errors.
 def err_opencl_taking_function_address_parser : Error<
   "taking address of function is not allowed">;
+def err_opencl_logical_exclusive_or : Error<
+  "^^ is a reserved operator in OpenCL">;
 
 // OpenMP support.
 def warn_pragma_omp_ignored : Warning<

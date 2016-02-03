@@ -1091,6 +1091,16 @@ TEST(HasType, TakesDeclMatcherAndMatchesValueDecl) {
       notMatches("class X {}; void y() { X *x; }", varDecl(hasType(ClassX))));
 }
 
+TEST(HasType, MatchesTypedefDecl) {
+  EXPECT_TRUE(matches("typedef int X;", typedefDecl(hasType(asString("int")))));
+  EXPECT_TRUE(matches("typedef const int T;",
+                      typedefDecl(hasType(asString("const int")))));
+  EXPECT_TRUE(notMatches("typedef const int T;",
+                         typedefDecl(hasType(asString("int")))));
+  EXPECT_TRUE(matches("typedef int foo; typedef foo bar;",
+                      typedefDecl(hasType(asString("foo")), hasName("bar"))));
+}
+
 TEST(HasTypeLoc, MatchesDeclaratorDecls) {
   EXPECT_TRUE(matches("int x;",
                       varDecl(hasName("x"), hasTypeLoc(loc(asString("int"))))));
@@ -1563,6 +1573,9 @@ TEST(Function, MatchesFunctionDeclarations) {
                          functionDecl(isVariadic())));
   EXPECT_TRUE(notMatches("void f();", functionDecl(isVariadic())));
   EXPECT_TRUE(notMatchesC("void f();", functionDecl(isVariadic())));
+  EXPECT_TRUE(matches("void f(...);", functionDecl(parameterCountIs(0))));
+  EXPECT_TRUE(matchesC("void f();", functionDecl(parameterCountIs(0))));
+  EXPECT_TRUE(matches("void f(int, ...);", functionDecl(parameterCountIs(1))));
 }
 
 TEST(FunctionTemplate, MatchesFunctionTemplateDeclarations) {
@@ -1719,6 +1732,7 @@ TEST(Matcher, ParameterCount) {
   EXPECT_TRUE(matches("class X { void f(int i) {} };", Function1Arg));
   EXPECT_TRUE(notMatches("void f() {}", Function1Arg));
   EXPECT_TRUE(notMatches("void f(int i, int j, int k) {}", Function1Arg));
+  EXPECT_TRUE(matches("void f(int i, ...) {};", Function1Arg));
 }
 
 TEST(Matcher, References) {
@@ -4262,6 +4276,17 @@ TEST(HasAncestor, AnonymousUnionMemberExpr) {
                       declRefExpr(to(decl(hasAncestor(decl()))))));
 }
 
+TEST(HasAncestor, NonParmDependentTemplateParmVarDeclRefExpr) {
+  EXPECT_TRUE(matches("struct PartitionAllocator {\n"
+                      "  template<typename T>\n"
+                      "  static int quantizedSize(int count) {\n"
+                      "    return count;\n"
+                      "  }\n"
+                      "  void f() { quantizedSize<int>(10); }\n"
+                      "};",
+                      declRefExpr(to(decl(hasAncestor(decl()))))));
+}
+
 TEST(HasParent, MatchesAllParents) {
   EXPECT_TRUE(matches(
       "template <typename T> struct C { static void f() { 42; } };"
@@ -4445,6 +4470,15 @@ TEST(TypeMatching, MatchesAutoTypes) {
 TEST(TypeMatching, MatchesFunctionTypes) {
   EXPECT_TRUE(matches("int (*f)(int);", functionType()));
   EXPECT_TRUE(matches("void f(int i) {}", functionType()));
+}
+
+TEST(TypeMatching, MatchesFunctionProtoTypes) {
+  EXPECT_TRUE(matches("int (*f)(int);", functionProtoType()));
+  EXPECT_TRUE(matches("void f(int i);", functionProtoType()));
+  EXPECT_TRUE(matches("void f();", functionProtoType(parameterCountIs(0))));
+  EXPECT_TRUE(notMatchesC("void f();", functionProtoType()));
+  EXPECT_TRUE(
+      matchesC("void f(void);", functionProtoType(parameterCountIs(0))));
 }
 
 TEST(TypeMatching, MatchesParenType) {
@@ -5016,6 +5050,15 @@ TEST(MatchFinder, InterceptsEndOfTranslationUnit) {
   EXPECT_TRUE(VerifyCallback.Called);
 }
 
+TEST(Matcher, matchOverEntireASTContext) {
+  std::unique_ptr<ASTUnit> AST =
+      clang::tooling::buildASTFromCode("struct { int *foo; };");
+  ASSERT_TRUE(AST.get());
+  auto PT = selectFirst<PointerType>(
+      "x", match(pointerType().bind("x"), AST->getASTContext()));
+  EXPECT_NE(nullptr, PT);
+}
+
 TEST(EqualsBoundNodeMatcher, QualType) {
   EXPECT_TRUE(matches(
       "int i = 1;", varDecl(hasType(qualType().bind("type")),
@@ -5148,7 +5191,8 @@ TEST(IsInlineMatcher, IsInline) {
                       namespaceDecl(isInline(), hasName("m"))));
 }
 
-// FIXME: Figure out how to specify paths so the following tests pass on Windows.
+// FIXME: Figure out how to specify paths so the following tests pass on
+// Windows.
 #ifndef LLVM_ON_WIN32
 
 TEST(Matcher, IsExpansionInMainFileMatcher) {
@@ -5241,7 +5285,6 @@ TEST(ObjCMessageExprMatcher, SimpleExprs) {
       objcMessageExpr(matchesSelector("uppercase*"),
                       argumentCountIs(0)
                       )));
-  
 }
 
 } // end namespace ast_matchers

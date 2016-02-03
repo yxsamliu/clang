@@ -1963,6 +1963,8 @@ public:
   void VisitOMPTargetEnterDataDirective(const OMPTargetEnterDataDirective *D);
   void VisitOMPTargetExitDataDirective(const OMPTargetExitDataDirective *D);
   void VisitOMPTargetParallelDirective(const OMPTargetParallelDirective *D);
+  void
+  VisitOMPTargetParallelForDirective(const OMPTargetParallelForDirective *D);
   void VisitOMPTeamsDirective(const OMPTeamsDirective *D);
   void VisitOMPTaskLoopDirective(const OMPTaskLoopDirective *D);
   void VisitOMPTaskLoopSimdDirective(const OMPTaskLoopSimdDirective *D);
@@ -2658,6 +2660,11 @@ void EnqueueVisitor::VisitOMPTargetExitDataDirective(
 void EnqueueVisitor::VisitOMPTargetParallelDirective(
     const OMPTargetParallelDirective *D) {
   VisitOMPExecutableDirective(D);
+}
+
+void EnqueueVisitor::VisitOMPTargetParallelForDirective(
+    const OMPTargetParallelForDirective *D) {
+  VisitOMPLoopDirective(D);
 }
 
 void EnqueueVisitor::VisitOMPTeamsDirective(const OMPTeamsDirective *D) {
@@ -4873,6 +4880,8 @@ CXString clang_getCursorKindSpelling(enum CXCursorKind Kind) {
     return cxstring::createRef("OMPTargetExitDataDirective");
   case CXCursor_OMPTargetParallelDirective:
     return cxstring::createRef("OMPTargetParallelDirective");
+  case CXCursor_OMPTargetParallelForDirective:
+    return cxstring::createRef("OMPTargetParallelForDirective");
   case CXCursor_OMPTeamsDirective:
     return cxstring::createRef("OMPTeamsDirective");
   case CXCursor_OMPCancellationPointDirective:
