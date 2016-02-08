@@ -1598,6 +1598,8 @@ const char *CastExpr::getCastKindName() const {
   switch (getCastKind()) {
 #define CAST_OPERATION(Name) case CK_##Name: return #Name;
 #include "clang/AST/OperationKinds.def"
+  case CK_IntToOCLSampler:
+    return "IntToOCLSampler";
   }
   llvm_unreachable("Unhandled cast kind!");
 }

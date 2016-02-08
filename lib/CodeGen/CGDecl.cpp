@@ -290,7 +290,8 @@ static bool hasNontrivialDestruction(QualType T) {
 llvm::GlobalVariable *
 CodeGenFunction::AddInitializerToStaticVarDecl(const VarDecl &D,
                                                llvm::GlobalVariable *GV) {
-  llvm::Constant *Init = CGM.EmitConstantInit(D, this);
+  llvm::Constant *Init = nullptr;
+    Init = CGM.EmitConstantInit(D, this);
 
   // If constant emission failed, then this should be a C++ static
   // initializer.

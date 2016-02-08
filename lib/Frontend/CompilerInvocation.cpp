@@ -2096,6 +2096,17 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
   Opts.SanitizeAddressFieldPadding =
       getLastArgIntValue(Args, OPT_fsanitize_address_field_padding, 0, Diags);
   Opts.SanitizerBlacklistFiles = Args.getAllArgValues(OPT_fsanitize_blacklist);
+  if(const Arg* A = Args.getLastArg(OPT_cl_sampler_type)) {
+      Opts.CLSamplerOpaque  = llvm::StringSwitch<int>(A->getValue())
+        .Case("i32", 0)
+        .Case("opaque", 1)
+        .Default(-1);
+      if(Opts.CLSamplerOpaque == -1)
+        Diags.Report(diag::err_drv_invalid_value) << A->getAsString(Args)
+                                                  << A->getValue();
+  } else
+    Opts.CLSamplerOpaque = 1;
+
 }
 
 static void ParsePreprocessorArgs(PreprocessorOptions &Opts, ArgList &Args,

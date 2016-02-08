@@ -4885,6 +4885,11 @@ static bool TryOCLSamplerInitialization(Sema &S,
                                         InitializationSequence &Sequence,
                                         QualType DestType,
                                         Expr *Initializer) {
+  if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Initializer))
+    if (const VarDecl *VD = dyn_cast<VarDecl>(DRE->getDecl()))
+      if (const CastExpr* Init = dyn_cast_or_null<CastExpr>(VD->getInit()))
+        Initializer = const_cast<Expr*>(Init->getSubExpr());
+
   if (!S.getLangOpts().OpenCL || !DestType->isSamplerT() ||
     !Initializer->isIntegerConstantExpr(S.getASTContext()))
     return false;
@@ -6885,16 +6890,33 @@ InitializationSequence::Perform(Sema &S,
       assert(Step->Type->isSamplerT() && 
              "Sampler initialization on non-sampler type.");
 
-      QualType SourceType = CurInit.get()->getType();
+      Expr *Init = CurInit.get();
+      // In case of passing sampler or integer variable to a function
+      // use its initializer
+      if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Init))
+        Init = const_cast<Expr*>(cast<VarDecl>(DRE->getDecl())->getInit());
+      if (ImplicitCastExpr *ICE = dyn_cast<ImplicitCastExpr>(Init))
+        if (ICE->getCastKind() == CK_IntToOCLSampler)
+          Init = ICE->getSubExpr();
 
-      if (Entity.isParameterKind()) {
-        if (!SourceType->isSamplerT())
-          S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
+      QualType SourceType = Init->getType();
+      bool isConst = Init->isConstantInitializer(S.Context, false);
+      InitializedEntity::EntityKind EntityKind = Entity.getKind();
+      if (EntityKind == InitializedEntity::EK_Variable ||
+          EntityKind == InitializedEntity::EK_Parameter) {
+        if (!isConst)
+          S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_constant);
+        if (!SourceType->isIntegerType() ||
+            32 != S.Context.getIntWidth(SourceType))
+          S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_integer)
             << SourceType;
       } else if (Entity.getKind() != InitializedEntity::EK_Variable) {
         llvm_unreachable("Invalid EntityKind!");
       }
 
+      CurInit = S.ImpCastExprToType(Init, Step->Type,
+                                    CK_IntToOCLSampler,
+                                    Init->getValueKind());
       break;
     }
     case SK_OCLZeroEvent: {
