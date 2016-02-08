@@ -2595,6 +2595,8 @@ StringRef BuiltinType::getName(const PrintingPolicy &Policy) const {
 #include "clang/Basic/OpenCLImageTypes.def"
   case OCLSampler:
     return "sampler_t";
+  case OCLSamplerInit:
+    return "samper_initializer_t";
   case OCLEvent:
     return "event_t";
   case OCLClkEvent:
@@ -3570,6 +3572,7 @@ bool Type::canHaveNullability() const {
     case BuiltinType::Id:
 #include "clang/Basic/OpenCLImageTypes.def"
     case BuiltinType::OCLSampler:
+    case BuiltinType::OCLSamplerInit:
     case BuiltinType::OCLEvent:
     case BuiltinType::OCLClkEvent:
     case BuiltinType::OCLQueue:

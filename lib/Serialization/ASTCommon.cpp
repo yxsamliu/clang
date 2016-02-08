@@ -138,6 +138,9 @@ serialization::TypeIdxFromBuiltin(const BuiltinType *BT) {
   case BuiltinType::OCLSampler:
     ID = PREDEF_TYPE_SAMPLER_ID;
     break;
+  case BuiltinType::OCLSamplerInit:
+    ID = PREDEF_TYPE_SAMPLER_ID;
+    break;
   case BuiltinType::OCLEvent:
     ID = PREDEF_TYPE_EVENT_ID;
     break;

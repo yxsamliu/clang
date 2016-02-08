@@ -9032,6 +9032,7 @@ bool Sema::CheckForConstantInitializer(Expr *Init, QualType DclT) {
   // (We never end up here for C++, so the constant expression
   // rules there don't matter.)
   const Expr *Culprit;
+  llvm::errs() << "isConstantInitializer: "; Init->dump(); llvm::errs() << '\n';
   if (Init->isConstantInitializer(Context, false, &Culprit))
     return false;
   Diag(Culprit->getExprLoc(), diag::err_init_element_not_constant)
@@ -10249,6 +10250,9 @@ void Sema::CheckCompleteVariableDeclaration(VarDecl *var) {
       var->setInvalidDecl();
       return;
     }
+
+    if (var->getType()->isSamplerT())
+      var->setType(Context.OCLSamplerInitTy);
   }
 
   // In Objective-C, don't allow jumps past the implicit initialization of a

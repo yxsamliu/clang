@@ -690,6 +690,15 @@ public:
     case CK_ConstructorConversion:
       return C;
 
+    case CK_IntToOCLSamplerInitializer: {
+      if (!CGM.getLangOpts().CLSamplerOpaque)
+        return C;
+      return CGM.createIntToSamplerConversion(subExpr, CGF);
+    }
+
+    case CK_OCLSamplerInitializerToSampler:
+      llvm_unreachable("saw dependent cast!");
+
     case CK_Dependent: llvm_unreachable("saw dependent cast!");
 
     case CK_BuiltinFnToFnPtr:

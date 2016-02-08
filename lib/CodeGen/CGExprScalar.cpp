@@ -1573,7 +1573,29 @@ Value *ScalarExprEmitter::VisitCastExpr(CastExpr *CE) {
     return llvm::Constant::getNullValue(ConvertType(DestTy));
   }
 
+  case CK_IntToOCLSamplerInitializer:
+    llvm_unreachable("saw dependent cast!");
+
+  case CK_OCLSamplerInitializerToSampler: {
+    assert(DestTy->isSamplerT() &&
+           "CK_IntToOCLSamplerInitializer cast to non sampler type");
+    if (!CGF.CGM.getLangOpts().CLSamplerOpaque)
+      return Visit(E);
+
+    auto SampInit = Visit(E);
+    auto SamplerTy = CGF.CGM.getModule().getTypeByName("__sampler");
+    if(!SamplerTy)
+      SamplerTy = llvm::StructType::create(VMContext, "__sampler");
+
+    auto AS = CGF.getContext().getTargetAddressSpace(LangAS::opencl_constant);
+    auto FTy = llvm::FunctionType::get(llvm::PointerType::get(SamplerTy, AS),
+                                       {SampInit->getType()}, false);
+    return CGF.Builder.CreateCall(
+      CGF.CGM.CreateRuntimeFunction(FTy, "__translate_sampler_initializer"),
+                                    {SampInit});
   }
+
+  } // end of switch
 
   llvm_unreachable("unknown scalar cast");
 }

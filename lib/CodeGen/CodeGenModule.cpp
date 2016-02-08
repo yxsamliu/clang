@@ -4307,3 +4307,60 @@ llvm::SanitizerStatReport &CodeGenModule::getSanStats() {
 
   return *SanStats;
 }
+llvm::Constant*
+CodeGenModule::createIntToSamplerConversion(const Expr *E,
+                                            CodeGenFunction *CGF,
+                                            llvm::GlobalVariable *InsertBefore,
+                                            StringRef Name) {
+  llvm::Constant *C = EmitConstantExpr(E, E->getType(), CGF);
+  assert(C && "Sampler must be initialized by constant");
+  assert(isa<llvm::ConstantInt>(C) && "Sampler must be initialized by integer");
+  if (!getLangOpts().CLSamplerOpaque)
+    return C;
+
+  llvm::StructType*
+    ConstSamplerTy = TheModule.getTypeByName("__sampler_initializer");
+  if (!ConstSamplerTy ) {
+    llvm::Type* Elements[] = {Int32Ty, Int32Ty, Int32Ty};
+    ConstSamplerTy = llvm::StructType::create(VMContext, Elements,
+                                              "__sampler_initializer");
+  }
+  const llvm::ConstantInt *CI = static_cast<llvm::ConstantInt*>(C);
+  const uint64_t SamplerValue = CI->getValue().getZExtValue();
+  // 32-bit value of sampler's initializer is interpreted as
+  // bit-field with the following structure:
+  // |unspecified|Filter|Addressing Mode| Normalized Coords|
+  // |31        6|5    4|3             1|                 0|
+  // This structure corresponds to values of sampler properties from opencl.h
+  // Mapping these bits to values defined by SPIR-V specification.
+  unsigned NormalizedCoords = 0x01 & SamplerValue;
+  unsigned AddressingMode  = (0x0E & SamplerValue) >> 1;
+  unsigned FilterMode      = (0x30 & SamplerValue) >> 4;
+  // In SPIR sampler's filter bits are defined as the following
+  // #define CLK_FILTER_NEAREST 0x10
+  // #define CLK_FILTER_LINEAR 0x20
+  // corresponding to 1 and 2 in bits 4-5.
+  // SPIR-V defines sampler filter mode enum as: nearest=0, linear=1,
+  // Therefore, to convert FilterMode from SPIR to SPIR-V,
+  // FilterMode value must be decremented
+  if (FilterMode == 1 || FilterMode == 2)
+    --FilterMode;
+   else
+    getDiags().Report(Context.getFullLoc(E->getLocStart()),
+      diag::warn_sampler_initializer_invalid_bits) << "Filter Mode";
+  if (AddressingMode > 4)
+    getDiags().Report(Context.getFullLoc(E->getLocStart()),
+      diag::warn_sampler_initializer_invalid_bits) << "Addressing Mode";
+
+  llvm::Constant *Initializer = llvm::ConstantStruct::get(ConstSamplerTy,
+    llvm::ConstantInt::get(Int32Ty, AddressingMode),
+    llvm::ConstantInt::get(Int32Ty, NormalizedCoords),
+    llvm::ConstantInt::get(Int32Ty, FilterMode),
+    nullptr);
+  auto AS = Context.getTargetAddressSpace(LangAS::opencl_constant);
+  return new llvm::GlobalVariable(TheModule, ConstSamplerTy, true,
+                                  llvm::GlobalVariable::InternalLinkage,
+                                  Initializer, Name + ".sampler.init",
+                                  InsertBefore,
+                                  llvm::GlobalVariable::NotThreadLocal, AS);
+}
