@@ -324,6 +324,11 @@ CAST_OPERATION(ZeroToOCLEvent)
 // Convert a pointer to a different address space.
 CAST_OPERATION(AddressSpaceConversion)
 
+// Convert an integer initializer to an OpenCL sampler initializer.
+CAST_OPERATION(IntToOCLSamplerInitializer)
+
+// Convert an OpenCL sampler initializer to OpenCL sampler.
+CAST_OPERATION(OCLSamplerInitializerToSampler)
 
 //===- Binary Operations  -------------------------------------------------===//
 // Operators listed in order of precedence.

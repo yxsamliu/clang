@@ -476,9 +476,16 @@ llvm::DIType *CGDebugInfo::CreateType(const BuiltinType *BT) {
                                     SingletonId);
 #include "clang/Basic/OpenCLImageTypes.def"
   case BuiltinType::OCLSampler:
-    return DBuilder.createBasicType(
+    if (!CGM.getLangOpts().CLSamplerOpaque)
+      return DBuilder.createBasicType(
         "opencl_sampler_t", CGM.getContext().getTypeSize(BT),
         CGM.getContext().getTypeAlign(BT), llvm::dwarf::DW_ATE_unsigned);
+    else
+      return getOrCreateStructPtrType("opencl_sampler_t",
+                                      OCLSamplerInitDITy);
+  case BuiltinType::OCLSamplerInit:
+    return getOrCreateStructPtrType("opencl_sampler_initializer_t",
+                                    OCLSamplerInitDITy);
   case BuiltinType::OCLEvent:
     return getOrCreateStructPtrType("opencl_event_t", OCLEventDITy);
   case BuiltinType::OCLClkEvent:

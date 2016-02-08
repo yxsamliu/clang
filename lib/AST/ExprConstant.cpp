@@ -6416,6 +6416,7 @@ static int EvaluateBuiltinClassifyType(const CallExpr *E,
     case BuiltinType::Id:
 #include "clang/Basic/OpenCLImageTypes.def"
     case BuiltinType::OCLSampler:
+    case BuiltinType::OCLSamplerInit:
     case BuiltinType::OCLEvent:
     case BuiltinType::OCLClkEvent:
     case BuiltinType::OCLQueue:
@@ -8035,6 +8036,8 @@ bool IntExprEvaluator::VisitCastExpr(const CastExpr *E) {
   case CK_ZeroToOCLEvent:
   case CK_NonAtomicToAtomic:
   case CK_AddressSpaceConversion:
+  case CK_IntToOCLSamplerInitializer:
+  case CK_OCLSamplerInitializerToSampler:
     llvm_unreachable("invalid cast kind for integral value");
 
   case CK_BitCast:
@@ -8526,6 +8529,8 @@ bool ComplexExprEvaluator::VisitCastExpr(const CastExpr *E) {
   case CK_ZeroToOCLEvent:
   case CK_NonAtomicToAtomic:
   case CK_AddressSpaceConversion:
+  case CK_IntToOCLSamplerInitializer:
+  case CK_OCLSamplerInitializerToSampler:
     llvm_unreachable("invalid cast kind for complex value");
 
   case CK_LValueToRValue:

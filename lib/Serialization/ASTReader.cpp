@@ -6087,6 +6087,9 @@ QualType ASTReader::GetType(TypeID ID) {
     case PREDEF_TYPE_SAMPLER_ID:
       T = Context.OCLSamplerTy;
       break;
+    case PREDEF_TYPE_SAMPLER_INIT_ID:
+      T = Context.OCLSamplerInitTy;
+      break;
     case PREDEF_TYPE_EVENT_ID:
       T = Context.OCLEventTy;
       break;

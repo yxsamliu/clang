@@ -47,7 +47,24 @@ llvm::Type *CGOpenCLRuntime::convertOpenCLSpecificType(const Type *T) {
         ImgAddrSpc);
 #include "clang/Basic/OpenCLImageTypes.def"
   case BuiltinType::OCLSampler:
-    return llvm::IntegerType::get(Ctx, 32);
+    if (CGM.getLangOpts().CLSamplerOpaque)
+      return llvm::PointerType::get(llvm::StructType::create(
+                           Ctx, "__sampler"),
+                           CGM.getContext().getTargetAddressSpace(
+                           LangAS::opencl_constant));
+    else
+      return llvm::IntegerType::get(Ctx, 32);
+  case BuiltinType::OCLSamplerInit:
+    if (CGM.getLangOpts().CLSamplerOpaque) {
+      auto Int32Ty = llvm::IntegerType::get(Ctx, 32);
+      llvm::Type* Elements[] = {Int32Ty, Int32Ty, Int32Ty};
+      return llvm::PointerType::get(llvm::StructType::create(
+                           Ctx, Elements, "__sampler_initializer"),
+                           CGM.getContext().getTargetAddressSpace(
+                           LangAS::opencl_constant));
+    }
+    else
+      return llvm::IntegerType::get(Ctx, 32);
   case BuiltinType::OCLEvent:
     return llvm::PointerType::get(llvm::StructType::create(
                            Ctx, "opencl.event_t"), 0);

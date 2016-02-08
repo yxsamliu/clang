@@ -687,6 +687,8 @@ def cl_std_EQ : Joined<["-"], "cl-std=">,
   HelpText<"OpenCL language standard to compile for">;
 def cl_denorms_are_zero : Flag<["-"], "cl-denorms-are-zero">,
   HelpText<"OpenCL only. Allow denormals to be flushed to zero">;
+def cl_sampler_type : Separate<["-"], "cl-sampler-type">,
+  HelpText<"OpenCL only. Specify type of sampler to emit. Valid values: \"opaque\"(default), \"i32\"">;
 
 //===----------------------------------------------------------------------===//
 // CUDA Options

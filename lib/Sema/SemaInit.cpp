@@ -4886,7 +4886,8 @@ static bool TryOCLSamplerInitialization(Sema &S,
                                         QualType DestType,
                                         Expr *Initializer) {
   if (!S.getLangOpts().OpenCL || !DestType->isSamplerT() ||
-    !Initializer->isIntegerConstantExpr(S.getASTContext()))
+      (!Initializer->isIntegerConstantExpr(S.Context) &&
+      !Initializer->getType()->isSamplerInitT()))
     return false;
 
   Sequence.AddOCLSamplerInitStep(DestType);
@@ -6904,19 +6905,27 @@ InitializationSequence::Perform(Sema &S,
     }
 
     case SK_OCLSamplerInit: {
-      assert(Step->Type->isSamplerT() && 
-             "Sampler initialization on non-sampler type.");
-
-      QualType SourceType = CurInit.get()->getType();
-
+      Expr *Init = CurInit.get();
+      QualType SourceType = Init->getType();
       if (Entity.isParameterKind()) {
-        if (!SourceType->isSamplerT())
+        if (SourceType->isSamplerInitT()) {
+          Init->setValueKind(VK_RValue);
+          CurInit = S.ImpCastExprToType(Init, Step->Type,
+                                        CK_OCLSamplerInitializerToSampler);
+        } else if (!SourceType->isSamplerT())
           S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
             << SourceType;
-      } else if (Entity.getKind() != InitializedEntity::EK_Variable) {
-        llvm_unreachable("Invalid EntityKind!");
+      } else {
+        if (!Init->isConstantInitializer(S.Context, false))
+          S.Diag(Kind.getLocation(),
+                 diag::err_sampler_initializer_not_constant);
+        if (!SourceType->isIntegerType() ||
+            32 != S.Context.getIntWidth(SourceType))
+          S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_integer)
+            << SourceType;
+        CurInit = S.ImpCastExprToType(Init, S.Context.OCLSamplerInitTy,
+                                      CK_IntToOCLSamplerInitializer);
       }
-
       break;
     }
     case SK_OCLZeroEvent: {

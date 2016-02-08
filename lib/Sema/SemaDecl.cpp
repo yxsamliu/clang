@@ -10305,6 +10305,9 @@ void Sema::CheckCompleteVariableDeclaration(VarDecl *var) {
       var->setInvalidDecl();
       return;
     }
+
+    if (var->getType()->isSamplerT())
+      var->setType(Context.OCLSamplerInitTy);
   }
 
   // In Objective-C, don't allow jumps past the implicit initialization of a
