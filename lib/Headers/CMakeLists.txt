@@ -45,6 +45,7 @@ set(files
   mm_malloc.h
   module.modulemap
   nmmintrin.h
+  opencl-c.h
   pmmintrin.h
   popcntintrin.h
   prfchwintrin.h
