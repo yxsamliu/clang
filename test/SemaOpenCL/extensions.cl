@@ -1,4 +1,8 @@
+// RUN: %clang_cc1 %s -verify -pedantic -fsyntax-only
 // RUN: %clang_cc1 %s -verify -pedantic -fsyntax-only -cl-std=CL1.1
+
+// Test with a target not supporting fp64.
+// RUN: %clang_cc1 %s -verify -pedantic -fsyntax-only -DNOFP64 -triple r600-unknown-unknown -target-cpu r600
 
 void f1(double da) { // expected-error {{type 'double' requires cl_khr_fp64 extension}}
   double d; // expected-error {{type 'double' requires cl_khr_fp64 extension}}

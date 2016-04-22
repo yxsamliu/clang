@@ -206,8 +206,14 @@ void Sema::Initialize() {
     addImplicitTypedef("size_t", Context.getSizeType());
   }
 
-  // Initialize predefined OpenCL types.
+  // Initialize predefined OpenCL types and supported optional core features.
   if (getLangOpts().OpenCL) {
+#define OPENCLEXT(Ext, AvailVer, CoreVer) \
+    if (OpenCLOptions::is_##Ext##_core(CLVer) && \
+        Context.getTargetInfo().getSupportedOpenCLOpts().Ext) \
+      getOpenCLOptions().Ext = 1;
+#include "clang/Basic/OpenCLExtensions.def"
+
     addImplicitTypedef("sampler_t", Context.OCLSamplerTy);
     addImplicitTypedef("event_t", Context.OCLEventTy);
     if (getLangOpts().OpenCLVersion >= 200) {
