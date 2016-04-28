@@ -49,7 +49,15 @@ public:
   // For supported optional core feature, return false.
 #define OPENCLEXT_INTERNAL(Ext, Avail, Core) \
   bool is_##Ext##_supported_extension(unsigned CLVer) const { \
-    return is_##Ext##_supported(CLVer) && (Core == 0 || CLVer < Core); \
+    return is_##Ext##_supported(CLVer) && (Core == ~0U || CLVer < Core); \
+  }
+#include "clang/Basic/OpenCLExtensions.def"
+
+  // Is supported OpenCL core features with OpenCL version \p OCLVer.
+  // For supported extension, return false.
+#define OPENCLEXT_INTERNAL(Ext, Avail, Core) \
+  bool is_##Ext##_supported_core(unsigned CLVer) const { \
+    return is_##Ext##_supported(CLVer) && Core != ~0U && CLVer >= Core; \
   }
 #include "clang/Basic/OpenCLExtensions.def"
 

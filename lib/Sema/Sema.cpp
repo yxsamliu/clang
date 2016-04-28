@@ -208,10 +208,10 @@ void Sema::Initialize() {
 
   // Initialize predefined OpenCL types and supported optional core features.
   if (getLangOpts().OpenCL) {
-#define OPENCLEXT(Ext, AvailVer, CoreVer) \
-    if (OpenCLOptions::is_##Ext##_core(CLVer) && \
-        Context.getTargetInfo().getSupportedOpenCLOpts().Ext) \
-      getOpenCLOptions().Ext = 1;
+#define OPENCLEXT(Ext) \
+     if (Context.getTargetInfo().getSupportedOpenCLOpts().is_##Ext##_supported_core( \
+         getLangOpts().OpenCLVersion)) \
+       getOpenCLOptions().Ext = 1;
 #include "clang/Basic/OpenCLExtensions.def"
 
     addImplicitTypedef("sampler_t", Context.OCLSamplerTy);

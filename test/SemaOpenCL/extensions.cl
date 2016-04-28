@@ -1,5 +1,5 @@
-// RUN: %clang_cc1 %s -verify -pedantic -fsyntax-only
-// RUN: %clang_cc1 %s -verify -pedantic -fsyntax-only -cl-std=CL1.1
+// RUN: %clang_cc1 %s -target spir-unknown-unknown -verify -pedantic -fsyntax-only
+// RUN: %clang_cc1 %s -target spir-unknown-unknown -verify -pedantic -fsyntax-only -cl-std=CL1.1
 
 // Test with a target not supporting fp64.
 // RUN: %clang_cc1 %s -verify -pedantic -fsyntax-only -DNOFP64 -triple r600-unknown-unknown -target-cpu r600
