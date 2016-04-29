@@ -1,11 +1,14 @@
-// RUN: %clang_cc1 %s -target spir-unknown-unknown -verify -pedantic -fsyntax-only
-// RUN: %clang_cc1 %s -target spir-unknown-unknown -verify -fsyntax-only -cl-std=CL2.0 -DCL20
-// RUN: %clang_cc1 %s -target spir-unknown-unknown -verify -fsyntax-only -cl-std=CL2.0 -DCL20 -DEXT
+// RUN: %clang_cc1 %s -triple spir-unknown-unknown -verify -pedantic -fsyntax-only
+// RUN: %clang_cc1 %s -triple spir-unknown-unknown -verify -fsyntax-only -cl-std=CL2.0 -DCL20
+// RUN: %clang_cc1 %s -triple spir-unknown-unknown -verify -fsyntax-only -cl-std=CL2.0 -DCL20 -DEXT
 
 #ifdef EXT
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics:enable
 #pragma OPENCL EXTENSION cl_khr_int64_extended_atomics:enable
 #pragma OPENCL EXTENSION cl_khr_fp64:enable
+#if __OPENCL_C_VERSION__ >= CL_VERSION_1_2
+// expected-warning@-2{{unknown OpenCL extension 'cl_khr_fp64' - ignoring}}
+#endif
 #endif
 
 void atomic_types_test() {
