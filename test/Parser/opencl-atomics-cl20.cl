@@ -7,7 +7,7 @@
 #pragma OPENCL EXTENSION cl_khr_int64_extended_atomics:enable
 #pragma OPENCL EXTENSION cl_khr_fp64:enable
 #if __OPENCL_C_VERSION__ >= CL_VERSION_1_2
-// expected-warning@-2{{unknown OpenCL extension 'cl_khr_fp64' - ignoring}}
+// expected-warning@-2{{OpenCL extension 'cl_khr_fp64' is core feature or supported optional core feature - ignoring}}
 #endif
 #endif
 

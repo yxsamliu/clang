@@ -11,7 +11,7 @@ void f1(double da) { // expected-error {{type 'double' requires cl_khr_fp64 exte
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #ifdef NOFP64
-// expected-warning@-2{{unknown OpenCL extension 'cl_khr_fp64' - ignoring}}
+// expected-warning@-2{{unsupported OpenCL extension 'cl_khr_fp64' - ignoring}}
 #endif
 
 void f2(void) {
@@ -28,7 +28,7 @@ void f2(void) {
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : disable
 #ifdef NOFP64
-// expected-warning@-2{{unknown OpenCL extension 'cl_khr_fp64' - ignoring}}
+// expected-warning@-2{{unsupported OpenCL extension 'cl_khr_fp64' - ignoring}}
 #endif
 
 void f3(void) {
