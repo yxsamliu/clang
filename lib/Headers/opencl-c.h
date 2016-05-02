@@ -126,11 +126,16 @@ typedef half half4 __attribute__((ext_vector_type(4)));
 typedef half half8 __attribute__((ext_vector_type(8)));
 typedef half half16 __attribute__((ext_vector_type(16)));
 #endif
+#ifdef cl_khr_fp64
+#if __OPENCL_C_VERSION__ < CL_VERSION_1_2
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#endif
 typedef double double2 __attribute__((ext_vector_type(2)));
 typedef double double3 __attribute__((ext_vector_type(3)));
 typedef double double4 __attribute__((ext_vector_type(4)));
 typedef double double8 __attribute__((ext_vector_type(8)));
 typedef double double16 __attribute__((ext_vector_type(16)));
+#endif
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #define NULL                              ((void*)0)
