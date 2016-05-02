@@ -141,7 +141,7 @@ typedef double double8 __attribute__((ext_vector_type(8)));
 typedef double double16 __attribute__((ext_vector_type(16)));
 
 #ifdef _CL20_AND_ABOVE
-#define NULL                              0
+#define NULL                              ((void*)0)
 #endif
 
 /**
