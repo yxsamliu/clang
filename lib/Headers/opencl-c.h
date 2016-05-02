@@ -14,10 +14,6 @@
 #ifndef cl_khr_depth_images
 #define cl_khr_depth_images
 #endif //cl_khr_depth_images
-
-#ifndef _HAS_READ_WRITE_IMAGE
-#define _HAS_READ_WITE_IMAGE
-#endif
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // Optimizations
@@ -15304,7 +15300,7 @@ half4 __attribute__((overloadable)) read_imageh(read_only image2d_array_t image,
 half4 __attribute__((overloadable)) read_imageh(read_only image1d_buffer_t image, int coord);
 #endif //cl_khr_fp16
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float4 __attribute__((overloadable)) read_imagef(read_write image1d_t image, int coord);
 int4 __attribute__((overloadable)) read_imagei(read_write image1d_t image, int coord);
 uint4 __attribute__((overloadable)) read_imageui(read_write image1d_t image, int coord);
@@ -15343,7 +15339,7 @@ half4 __attribute__((overloadable)) read_imageh(read_write image1d_array_t image
 half4 __attribute__((overloadable)) read_imageh(read_write image2d_array_t image, int4 coord);
 half4 __attribute__((overloadable)) read_imageh(read_write image1d_buffer_t image, int coord);
 #endif //cl_khr_fp16
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -15385,11 +15381,11 @@ void __attribute__((overloadable)) write_imagef(write_only image2d_t image, int2
 void __attribute__((overloadable)) write_imagei(write_only image2d_t image, int2 coord, int4 color);
 void __attribute__((overloadable)) write_imageui(write_only image2d_t image, int2 coord, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) write_imagef(read_write image2d_t image, int2 coord, float4 color);
 void __attribute__((overloadable)) write_imagei(read_write image2d_t image, int2 coord, int4 color);
 void __attribute__((overloadable)) write_imageui(read_write image2d_t image, int2 coord, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -15433,11 +15429,11 @@ void __attribute__((overloadable)) write_imagef(write_only image2d_array_t image
 void __attribute__((overloadable)) write_imagei(write_only image2d_array_t image_array, int4 coord, int4 color);
 void __attribute__((overloadable)) write_imageui(write_only image2d_array_t image_array, int4 coord, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) write_imagef(read_write image2d_array_t image_array, int4 coord, float4 color);
 void __attribute__((overloadable)) write_imagei(read_write image2d_array_t image_array, int4 coord, int4 color);
 void __attribute__((overloadable)) write_imageui(read_write image2d_array_t image_array, int4 coord, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -15478,11 +15474,11 @@ void __attribute__((overloadable)) write_imagef(write_only image1d_t image, int 
 void __attribute__((overloadable)) write_imagei(write_only image1d_t image, int coord, int4 color);
 void __attribute__((overloadable)) write_imageui(write_only image1d_t image, int coord, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) write_imagef(read_write image1d_t image, int coord, float4 color);
 void __attribute__((overloadable)) write_imagei(read_write image1d_t image, int coord, int4 color);
 void __attribute__((overloadable)) write_imageui(read_write image1d_t image, int coord, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -15523,11 +15519,11 @@ void __attribute__((overloadable)) write_imagef(write_only image1d_buffer_t imag
 void __attribute__((overloadable)) write_imagei(write_only image1d_buffer_t image, int coord, int4 color);
 void __attribute__((overloadable)) write_imageui(write_only image1d_buffer_t image, int coord, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) write_imagef(read_write image1d_buffer_t image, int coord, float4 color);
 void __attribute__((overloadable)) write_imagei(read_write image1d_buffer_t image, int coord, int4 color);
 void __attribute__((overloadable)) write_imageui(read_write image1d_buffer_t image, int coord, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -15571,11 +15567,11 @@ void __attribute__((overloadable)) write_imagef(write_only image1d_array_t image
 void __attribute__((overloadable)) write_imagei(write_only image1d_array_t image_array, int2 coord, int4 color);
 void __attribute__((overloadable)) write_imageui(write_only image1d_array_t image_array, int2 coord, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) write_imagef(read_write image1d_array_t image_array, int2 coord, float4 color);
 void __attribute__((overloadable)) write_imagei(read_write image1d_array_t image_array, int2 coord, int4 color);
 void __attribute__((overloadable)) write_imageui(read_write image1d_array_t image_array, int2 coord, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -15617,11 +15613,11 @@ void __attribute__((overloadable)) write_imagef(write_only image3d_t image, int4
 void __attribute__((overloadable)) write_imagei(write_only image3d_t image, int4 coord, int4 color);
 void __attribute__((overloadable)) write_imageui(write_only image3d_t image, int4 coord, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) write_imagef(read_write image3d_t image, int4 coord, float4 color);
 void __attribute__((overloadable)) write_imagei(read_write image3d_t image, int4 coord, int4 color);
 void __attribute__((overloadable)) write_imageui(read_write image3d_t image, int4 coord, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -15674,7 +15670,7 @@ void __attribute__((overloadable)) write_imageh(write_only image2d_array_t image
 void __attribute__((overloadable)) write_imageh(write_only image1d_buffer_t image, int coord, half4 color);
 #endif //cl_khr_fp16
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #ifdef cl_khr_depth_images
 void __attribute__((overloadable)) write_imagef(read_write image2d_depth_t image, int2 coord, float color);
 void __attribute__((overloadable)) write_imagef(read_write image2d_array_depth_t image, int4 coord, float color);
@@ -15689,7 +15685,7 @@ void __attribute__((overloadable)) write_imageh(read_write image1d_array_t image
 void __attribute__((overloadable)) write_imageh(read_write image2d_array_t image, int4 coord, half4 color);
 void __attribute__((overloadable)) write_imageh(read_write image1d_buffer_t image, int coord, half4 color);
 #endif //cl_khr_fp16
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 #if defined(cl_khr_gl_msaa_sharing)
 /**
@@ -15724,11 +15720,11 @@ float4 __attribute__((overloadable)) read_imagef(read_only image2d_msaa_t image,
 int4 __attribute__((overloadable)) read_imagei(read_only image2d_msaa_t image, int2 coord, int sample);
 uint4 __attribute__((overloadable)) read_imageui(read_only image2d_msaa_t image, int2 coord, int sample);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float4 __attribute__((overloadable)) read_imagef(read_write image2d_msaa_t image, int2 coord, int sample);
 int4 __attribute__((overloadable)) read_imagei(read_write image2d_msaa_t image, int2 coord, int sample);
 uint4 __attribute__((overloadable)) read_imageui(read_write image2d_msaa_t image, int2 coord, int sample);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Use the coordinate (cood.xy) and sample to do an
@@ -15760,9 +15756,9 @@ uint4 __attribute__((overloadable)) read_imageui(read_write image2d_msaa_t image
  */
 float __attribute__((overloadable)) read_imagef(read_only image2d_msaa_depth_t image, int2 coord, int sample);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) read_imagef(read_write image2d_msaa_depth_t image, int2 coord, int sample);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Use coord.xy and sample to do an element
@@ -15799,11 +15795,11 @@ float4 __attribute__((overloadable)) read_imagef(read_only image2d_array_msaa_t 
 int4 __attribute__((overloadable)) read_imagei(read_only image2d_array_msaa_t image, int4 coord, int sample);
 uint4 __attribute__((overloadable)) read_imageui(read_only image2d_array_msaa_t image, int4 coord, int sample);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float4 __attribute__((overloadable)) read_imagef(read_write image2d_array_msaa_t image, int4 coord, int sample);
 int4 __attribute__((overloadable)) read_imagei(read_write image2d_array_msaa_t image, int4 coord, int sample);
 uint4 __attribute__((overloadable)) read_imageui(read_write image2d_array_msaa_t image, int4 coord, int sample);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Use coord.xy and sample to do an element
@@ -15836,9 +15832,9 @@ uint4 __attribute__((overloadable)) read_imageui(read_write image2d_array_msaa_t
  */
 float __attribute__((overloadable)) read_imagef(read_only image2d_array_msaa_depth_t image, int4 coord, int sample);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) read_imagef(read_write image2d_array_msaa_depth_t image, int4 coord, int sample);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #endif
 
 // Note: In OpenCL v1.0/1.1/1.2, image argument of image query builtin functions does not have
@@ -15883,7 +15879,7 @@ int __const_func __attribute__((overloadable)) get_image_width(write_only image2
 int __const_func __attribute__((overloadable)) get_image_width(write_only image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int __const_func __attribute__((overloadable)) get_image_width(read_write image1d_t image);
 int __const_func __attribute__((overloadable)) get_image_width(read_write image1d_buffer_t image);
 int __const_func __attribute__((overloadable)) get_image_width(read_write image2d_t image);
@@ -15900,7 +15896,7 @@ int __const_func __attribute__((overloadable)) get_image_width(read_write image2
 int __const_func __attribute__((overloadable)) get_image_width(read_write image2d_array_msaa_t image);
 int __const_func __attribute__((overloadable)) get_image_width(read_write image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Return the image height in pixels.
@@ -15933,7 +15929,7 @@ int __const_func __attribute__((overloadable)) get_image_height(write_only image
 int __const_func __attribute__((overloadable)) get_image_height(write_only image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int __const_func __attribute__((overloadable)) get_image_height(read_write image2d_t image);
 int __const_func __attribute__((overloadable)) get_image_height(read_write image3d_t image);
 int __const_func __attribute__((overloadable)) get_image_height(read_write image2d_array_t image);
@@ -15947,7 +15943,7 @@ int __const_func __attribute__((overloadable)) get_image_height(read_write image
 int __const_func __attribute__((overloadable)) get_image_height(read_write image2d_array_msaa_t image);
 int __const_func __attribute__((overloadable)) get_image_height(read_write image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Return the image depth in pixels.
@@ -15956,9 +15952,9 @@ int __const_func __attribute__((overloadable)) get_image_depth(read_only image3d
 
 int __const_func __attribute__((overloadable)) get_image_depth(write_only image3d_t image);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int __const_func __attribute__((overloadable)) get_image_depth(read_write image3d_t image);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Return the channel data type. Valid values are:
@@ -16033,7 +16029,7 @@ int __const_func __attribute__((overloadable)) get_image_channel_data_type(write
 int __const_func __attribute__((overloadable)) get_image_channel_data_type(write_only image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int __const_func __attribute__((overloadable)) get_image_channel_data_type(read_write image1d_t image);
 int __const_func __attribute__((overloadable)) get_image_channel_data_type(read_write image1d_buffer_t image);
 int __const_func __attribute__((overloadable)) get_image_channel_data_type(read_write image2d_t image);
@@ -16050,7 +16046,7 @@ int __const_func __attribute__((overloadable)) get_image_channel_data_type(read_
 int __const_func __attribute__((overloadable)) get_image_channel_data_type(read_write image2d_array_msaa_t image);
 int __const_func __attribute__((overloadable)) get_image_channel_data_type(read_write image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Return the image channel order. Valid values are:
@@ -16126,7 +16122,7 @@ int __const_func __attribute__((overloadable)) get_image_channel_order(write_onl
 int __const_func __attribute__((overloadable)) get_image_channel_order(write_only image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int __const_func __attribute__((overloadable)) get_image_channel_order(read_write image1d_t image);
 int __const_func __attribute__((overloadable)) get_image_channel_order(read_write image1d_buffer_t image);
 int __const_func __attribute__((overloadable)) get_image_channel_order(read_write image2d_t image);
@@ -16143,7 +16139,7 @@ int __const_func __attribute__((overloadable)) get_image_channel_order(read_writ
 int __const_func __attribute__((overloadable)) get_image_channel_order(read_write image2d_array_msaa_t image);
 int __const_func __attribute__((overloadable)) get_image_channel_order(read_write image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Return the 2D image width and height as an int2
@@ -16176,7 +16172,7 @@ int2 __const_func __attribute__((overloadable)) get_image_dim(write_only image2d
 int2 __const_func __attribute__((overloadable)) get_image_dim(write_only image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int2 __const_func __attribute__((overloadable)) get_image_dim(read_write image2d_t image);
 int2 __const_func __attribute__((overloadable)) get_image_dim(read_write image2d_array_t image);
 #ifdef cl_khr_depth_images
@@ -16189,7 +16185,7 @@ int2 __const_func __attribute__((overloadable)) get_image_dim(read_write image2d
 int2 __const_func __attribute__((overloadable)) get_image_dim(read_write image2d_array_msaa_t image);
 int2 __const_func __attribute__((overloadable)) get_image_dim(read_write image2d_array_msaa_depth_t image);
 #endif //cl_khr_gl_msaa_sharing
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Return the 3D image width, height, and depth as an
@@ -16199,9 +16195,9 @@ int2 __const_func __attribute__((overloadable)) get_image_dim(read_write image2d
  */
 int4 __const_func __attribute__((overloadable)) get_image_dim(read_only image3d_t image);
 int4 __const_func __attribute__((overloadable)) get_image_dim(write_only image3d_t image);
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int4 __const_func __attribute__((overloadable)) get_image_dim(read_write image3d_t image);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Return the image array size.
@@ -16227,7 +16223,7 @@ size_t __const_func __attribute__((overloadable)) get_image_array_size(write_onl
 size_t __const_func __attribute__((overloadable)) get_image_array_size(write_only image2d_array_msaa_depth_t image_array);
 #endif //cl_khr_gl_msaa_sharing
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 size_t __const_func __attribute__((overloadable)) get_image_array_size(read_write image1d_array_t image_array);
 size_t __const_func __attribute__((overloadable)) get_image_array_size(read_write image2d_array_t image_array);
 #ifdef cl_khr_depth_images
@@ -16237,7 +16233,7 @@ size_t __const_func __attribute__((overloadable)) get_image_array_size(read_writ
 size_t __const_func __attribute__((overloadable)) get_image_array_size(read_write image2d_array_msaa_t image_array);
 size_t __const_func __attribute__((overloadable)) get_image_array_size(read_write image2d_array_msaa_depth_t image_array);
 #endif //cl_khr_gl_msaa_sharing
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
 * Return the number of samples associated with image
@@ -16255,13 +16251,13 @@ int __attribute__((overloadable)) get_image_num_samples(write_only image2d_array
 int __attribute__((overloadable)) get_image_num_samples(write_only image2d_array_msaa_t image);
 int __attribute__((overloadable)) get_image_num_samples(write_only image2d_array_msaa_depth_t image);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int __attribute__((overloadable)) get_image_num_samples(read_write image2d_msaa_t image);
 int __attribute__((overloadable)) get_image_num_samples(read_write image2d_msaa_depth_t image);
 int __attribute__((overloadable)) get_image_num_samples(read_write image2d_array_msaa_depth_t image);
 int __attribute__((overloadable)) get_image_num_samples(read_write image2d_array_msaa_t image);
 int __attribute__((overloadable)) get_image_num_samples(read_write image2d_array_msaa_depth_t image);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #endif
 
 // OpenCL v2.0 s6.13.15 - Work-group Functions
@@ -18038,14 +18034,14 @@ write_imagei(write_only image1d_t image, int coord, int lod, int4 color);
 void __attribute__((overloadable))
 write_imageui(write_only image1d_t image, int coord, int lod, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable))
 write_imagef(read_write image1d_t image, int coord, int lod, float4 color);
 void __attribute__((overloadable))
 write_imagei(read_write image1d_t image, int coord, int lod, int4 color);
 void __attribute__((overloadable))
 write_imageui(read_write image1d_t image, int coord, int lod, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coord.x in
@@ -18094,14 +18090,14 @@ write_imagei(write_only image1d_array_t image_array, int2 coord, int lod, int4 c
 void __attribute__((overloadable))
 write_imageui(write_only image1d_array_t image_array, int2 coord, int lod, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable))
 write_imagef(read_write image1d_array_t image_array, int2 coord, int lod, float4 color);
 void __attribute__((overloadable))
 write_imagei(read_write image1d_array_t image_array, int2 coord, int lod, int4 color);
 void __attribute__((overloadable))
 write_imageui(read_write image1d_array_t image_array, int2 coord, int lod, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // 2D writes with mipmap support
 /**
@@ -18149,14 +18145,14 @@ write_imagei(write_only image2d_t image, int2 coord, int lod, int4 color);
 void __attribute__((overloadable))
 write_imageui(write_only image2d_t image, int2 coord, int lod, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable))
 write_imagef(read_write image2d_t image, int2 coord, int lod, float4 color);
 void __attribute__((overloadable))
 write_imagei(read_write image2d_t image, int2 coord, int lod, int4 color);
 void __attribute__((overloadable))
 write_imageui(read_write image2d_t image, int2 coord, int lod, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -18205,14 +18201,14 @@ write_imagei(write_only image2d_array_t image_array, int4 coord, int lod, int4 c
 void __attribute__((overloadable))
 write_imageui(write_only image2d_array_t image_array, int4 coord, int lod, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable))
 write_imagef(read_write image2d_array_t image_array, int4 coord, int lod, float4 color);
 void __attribute__((overloadable))
 write_imagei(read_write image2d_array_t image_array, int4 coord, int lod, int4 color);
 void __attribute__((overloadable))
 write_imageui(read_write image2d_array_t image_array, int4 coord, int lod, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write color value to location specified by coordinate
@@ -18257,12 +18253,12 @@ write_imagef(write_only image2d_depth_t image, int2 coord, int lod, float color)
 void __attribute__((overloadable))
 write_imagef(write_only image2d_array_depth_t image, int4 coord, int lod, float color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable))
 write_imagef(read_write image2d_depth_t image, int2 coord, int lod, float color);
 void __attribute__((overloadable))
 write_imagef(read_write image2d_array_depth_t image, int4 coord, int lod, float color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // 3D image write support with mipmaps
 /**
@@ -18310,14 +18306,14 @@ write_imagei(write_only image3d_t image, int4 coord, int lod, int4 color);
 void __attribute__((overloadable))
 write_imageui(write_only image3d_t image, int4 coord, int lod, uint4 color);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable))
 write_imagef(read_write image3d_t image, int4 coord, int lod, float4 color);
 void __attribute__((overloadable))
 write_imagei(read_write image3d_t image, int4 coord, int lod, int4 color);
 void __attribute__((overloadable))
 write_imageui(read_write image3d_t image, int4 coord, int lod, uint4 color);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Return the image miplevels.
@@ -18331,11 +18327,11 @@ int __attribute__((overloadable)) get_image_num_mip_levels(write_only image1d_t 
 int __attribute__((overloadable)) get_image_num_mip_levels(write_only image2d_t image);
 int __attribute__((overloadable)) get_image_num_mip_levels(write_only image3d_t image);
 
-#ifdef _HAS_READ_WRITE_IMAGE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int __attribute__((overloadable)) get_image_num_mip_levels(read_write image1d_t image);
 int __attribute__((overloadable)) get_image_num_mip_levels(read_write image2d_t image);
 int __attribute__((overloadable)) get_image_num_mip_levels(read_write image3d_t image);
-#endif //_HAS_READ_WRITE_IMAGE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 int __attribute__((overloadable))
 get_image_num_mip_levels(image1d_array_t image);
