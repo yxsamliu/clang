@@ -11,10 +11,6 @@
 #define _OPENCL_H_
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-#define _CL20_AND_ABOVE 1
-#endif
-
-#ifdef _CL20_AND_ABOVE
 #ifndef cl_khr_depth_images
 #define cl_khr_depth_images
 #endif //cl_khr_depth_images
@@ -22,7 +18,7 @@
 #ifndef _HAS_READ_WRITE_IMAGE
 #define _HAS_READ_WITE_IMAGE
 #endif
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // Optimizations
 
@@ -140,7 +136,7 @@ typedef double double4 __attribute__((ext_vector_type(4)));
 typedef double double8 __attribute__((ext_vector_type(8)));
 typedef double double16 __attribute__((ext_vector_type(16)));
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #define NULL                              ((void*)0)
 #endif
 
@@ -6752,11 +6748,11 @@ size_t __const_func __attribute__((overloadable)) get_group_id(uint dimindx);
  */
 size_t __const_func __attribute__((overloadable)) get_global_offset(uint dimindx);
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 size_t __attribute__((overloadable)) get_enqueued_local_size(uint dimindx);
 size_t __attribute__((overloadable)) get_global_linear_id(void);
 size_t __attribute__((overloadable)) get_local_linear_id(void);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v1.2 s6.12.2, v2.0 s6.13.2 - Math functions
 
@@ -7588,7 +7584,7 @@ half16 __const_func __attribute__((overloadable)) fmod(half16 x, half16 y);
  * Returns fmin(x - floor (x), 0x1.fffffep-1f ).
  * floor(x) is returned in iptr.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) fract(float x, float *iptr);
 float2 __attribute__((overloadable)) fract(float2 x, float2 *iptr);
 float3 __attribute__((overloadable)) fract(float3 x, float3 *iptr);
@@ -7670,7 +7666,7 @@ half4 __attribute__((overloadable)) fract(half4 x, __private half4 *iptr);
 half8 __attribute__((overloadable)) fract(half8 x, __private half8 *iptr);
 half16 __attribute__((overloadable)) fract(half16 x, __private half16 *iptr);
 #endif //cl_khr_fp16
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Extract mantissa and exponent from x. For each
@@ -7678,7 +7674,7 @@ half16 __attribute__((overloadable)) fract(half16 x, __private half16 *iptr);
  * magnitude in the interval [1/2, 1) or 0. Each
  * component of x equals mantissa returned * 2^exp.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) frexp(float x, int *exp);
 float2 __attribute__((overloadable)) frexp(float2 x, int2 *exp);
 float3 __attribute__((overloadable)) frexp(float3 x, int3 *exp);
@@ -7760,7 +7756,7 @@ half4 __attribute__((overloadable)) frexp(half4 x, __private int4 *exp);
 half8 __attribute__((overloadable)) frexp(half8 x, __private int8 *exp);
 half16 __attribute__((overloadable)) frexp(half16 x, __private int16 *exp);
 #endif //cl_khr_fp16
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Compute the value of the square root of x^2+ y^2
@@ -7885,7 +7881,7 @@ half8 __const_func __attribute__((overloadable)) lgamma(half8 x);
 half16 __const_func __attribute__((overloadable)) lgamma(half16 x);
 #endif //cl_khr_fp16
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) lgamma_r(float x, int *signp);
 float2 __attribute__((overloadable)) lgamma_r(float2 x, int2 *signp);
 float3 __attribute__((overloadable)) lgamma_r(float3 x, int3 *signp);
@@ -7967,7 +7963,7 @@ half4 __attribute__((overloadable)) lgamma_r(half4 x, __private int4 *signp);
 half8 __attribute__((overloadable)) lgamma_r(half8 x, __private int8 *signp);
 half16 __attribute__((overloadable)) lgamma_r(half16 x, __private int16 *signp);
 #endif //cl_khr_fp16
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Compute natural logarithm.
@@ -8191,7 +8187,7 @@ half16 __const_func __attribute__((overloadable)) minmag(half16 x, half16 y);
  * the argument. It stores the integral part in the object
  * pointed to by iptr.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) modf(float x, float *iptr);
 float2 __attribute__((overloadable)) modf(float2 x, float2 *iptr);
 float3 __attribute__((overloadable)) modf(float3 x, float3 *iptr);
@@ -8273,7 +8269,7 @@ half4 __attribute__((overloadable)) modf(half4 x, __private half4 *iptr);
 half8 __attribute__((overloadable)) modf(half8 x, __private half8 *iptr);
 half16 __attribute__((overloadable)) modf(half16 x, __private half16 *iptr);
 #endif //cl_khr_fp16
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Returns a quiet NaN. The nancode may be placed
@@ -8451,7 +8447,7 @@ half16 __const_func __attribute__((overloadable)) remainder(half16 x, half16 y);
  * sign as x/y. It stores this signed value in the object
  * pointed to by quo.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) remquo(float x, float y, int *quo);
 float2 __attribute__((overloadable)) remquo(float2 x, float2 y, int2 *quo);
 float3 __attribute__((overloadable)) remquo(float3 x, float3 y, int3 *quo);
@@ -8534,7 +8530,7 @@ half4 __attribute__((overloadable)) remquo(half4 x, half4 y, __private int4 *quo
 half8 __attribute__((overloadable)) remquo(half8 x, half8 y, __private int8 *quo);
 half16 __attribute__((overloadable)) remquo(half16 x, half16 y, __private int16 *quo);
 #endif //cl_khr_fp16
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 /**
  * Round to integral value (using round to nearest
  * even rounding mode) in floating-point format.
@@ -8675,7 +8671,7 @@ half16 __const_func __attribute__((overloadable)) sin(half16);
  * is the return value and computed cosine is returned
  * in cosval.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) sincos(float x, float *cosval);
 float2 __attribute__((overloadable)) sincos(float2 x, float2 *cosval);
 float3 __attribute__((overloadable)) sincos(float3 x, float3 *cosval);
@@ -8757,7 +8753,7 @@ half4 __attribute__((overloadable)) sincos(half4 x, __private half4 *cosval);
 half8 __attribute__((overloadable)) sincos(half8 x, __private half8 *cosval);
 half16 __attribute__((overloadable)) sincos(half16 x, __private half16 *cosval);
 #endif //cl_khr_fp16
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Compute hyperbolic sine.
@@ -9802,7 +9798,7 @@ ulong16 __const_func __attribute__((overloadable)) clz(ulong16 x);
  * returns the size in bits of the type of x or
  * component type of x, if x is a vector.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 char __attribute__((overloadable)) ctz(char x);
 uchar __attribute__((overloadable)) ctz(uchar x);
 char2 __attribute__((overloadable)) ctz(char2 x);
@@ -9851,7 +9847,7 @@ long8 __attribute__((overloadable)) ctz(long8 x);
 ulong8 __attribute__((overloadable)) ctz(ulong8 x);
 long16 __attribute__((overloadable)) ctz(long16 x);
 ulong16 __attribute__((overloadable)) ctz(ulong16 x);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Returns mul_hi(a, b) + c.
@@ -12022,7 +12018,7 @@ half8 __attribute__((overloadable)) vload8(size_t offset, const __constant half 
 half16 __attribute__((overloadable)) vload16(size_t offset, const __constant half *p);
 #endif //cl_khr_fp16
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 char2 __attribute__((overloadable)) vload2(size_t offset, const char *p);
 uchar2 __attribute__((overloadable)) vload2(size_t offset, const uchar *p);
 short2 __attribute__((overloadable)) vload2(size_t offset, const short *p);
@@ -12260,7 +12256,7 @@ half4 __attribute__((overloadable)) vload4(size_t offset, const __private half *
 half8 __attribute__((overloadable)) vload8(size_t offset, const __private half *p);
 half16 __attribute__((overloadable)) vload16(size_t offset, const __private half *p);
 #endif //cl_khr_fp16
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Write sizeof (gentypen) bytes given by data
@@ -12271,7 +12267,7 @@ half16 __attribute__((overloadable)) vload16(size_t offset, const __private half
  * aligned if gentype is int, uint, float; 64-bit
  * aligned if gentype is long, ulong.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) vstore2(char2 data, size_t offset, char *p);
 void __attribute__((overloadable)) vstore2(uchar2 data, size_t offset, uchar *p);
 void __attribute__((overloadable)) vstore2(short2 data, size_t offset, short *p);
@@ -12505,7 +12501,7 @@ void __attribute__((overloadable)) vstore4(half4 data, size_t offset, __private 
 void __attribute__((overloadable)) vstore8(half8 data, size_t offset, __private half *p);
 void __attribute__((overloadable)) vstore16(half16 data, size_t offset, __private half *p);
 #endif //cl_khr_fp16
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Read sizeof (half) bytes of data from address
@@ -12516,13 +12512,13 @@ void __attribute__((overloadable)) vstore16(half16 data, size_t offset, __privat
  * must be 16-bit aligned.
  */
 float __attribute__((overloadable)) vload_half(size_t offset, const __constant half *p);
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) vload_half(size_t offset, const half *p);
 #else
 float __attribute__((overloadable)) vload_half(size_t offset, const __global half *p);
 float __attribute__((overloadable)) vload_half(size_t offset, const __local half *p);
 float __attribute__((overloadable)) vload_half(size_t offset, const __private half *p);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * Read sizeof (halfn) bytes of data from address
@@ -12537,7 +12533,7 @@ float3 __attribute__((overloadable)) vload_half3(size_t offset, const __constant
 float4 __attribute__((overloadable)) vload_half4(size_t offset, const __constant half *p);
 float8 __attribute__((overloadable)) vload_half8(size_t offset, const __constant half *p);
 float16 __attribute__((overloadable)) vload_half16(size_t offset, const __constant half *p);
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float2 __attribute__((overloadable)) vload_half2(size_t offset, const half *p);
 float3 __attribute__((overloadable)) vload_half3(size_t offset, const half *p);
 float4 __attribute__((overloadable)) vload_half4(size_t offset, const half *p);
@@ -12559,7 +12555,7 @@ float3 __attribute__((overloadable)) vload_half3(size_t offset, const __private 
 float4 __attribute__((overloadable)) vload_half4(size_t offset, const __private half *p);
 float8 __attribute__((overloadable)) vload_half8(size_t offset, const __private half *p);
 float16 __attribute__((overloadable)) vload_half16(size_t offset, const __private half *p);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * The float value given by data is first
@@ -12572,7 +12568,7 @@ float16 __attribute__((overloadable)) vload_half16(size_t offset, const __privat
  * The default current rounding mode is round to
  * nearest even.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) vstore_half(float data, size_t offset, half *p);
 void __attribute__((overloadable)) vstore_half_rte(float data, size_t offset, half *p);
 void __attribute__((overloadable)) vstore_half_rtz(float data, size_t offset, half *p);
@@ -12618,7 +12614,7 @@ void __attribute__((overloadable)) vstore_half_rtz(double data, size_t offset, _
 void __attribute__((overloadable)) vstore_half_rtp(double data, size_t offset, __private half *p);
 void __attribute__((overloadable)) vstore_half_rtn(double data, size_t offset, __private half *p);
 #endif //cl_khr_fp64
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * The floatn value given by data is converted to
@@ -12631,7 +12627,7 @@ void __attribute__((overloadable)) vstore_half_rtn(double data, size_t offset, _
  * The default current rounding mode is round to
  * nearest even.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) vstore_half2(float2 data, size_t offset, half *p);
 void __attribute__((overloadable)) vstore_half3(float3 data, size_t offset, half *p);
 void __attribute__((overloadable)) vstore_half4(float4 data, size_t offset, half *p);
@@ -12837,7 +12833,7 @@ void __attribute__((overloadable)) vstore_half4_rtn(double4 data, size_t offset,
 void __attribute__((overloadable)) vstore_half8_rtn(double8 data, size_t offset, __private half *p);
 void __attribute__((overloadable)) vstore_half16_rtn(double16 data, size_t offset, __private half *p);
 #endif //cl_khr_fp64
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * For n = 1, 2, 4, 8 and 16 read sizeof (halfn)
@@ -12858,7 +12854,7 @@ float3 __attribute__((overloadable)) vloada_half3(size_t offset, const __constan
 float4 __attribute__((overloadable)) vloada_half4(size_t offset, const __constant half *p);
 float8 __attribute__((overloadable)) vloada_half8(size_t offset, const __constant half *p);
 float16 __attribute__((overloadable)) vloada_half16(size_t offset, const __constant half *p);
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float __attribute__((overloadable)) vloada_half(size_t offset, const half *p);
 float2 __attribute__((overloadable)) vloada_half2(size_t offset, const half *p);
 float3 __attribute__((overloadable)) vloada_half3(size_t offset, const half *p);
@@ -12884,7 +12880,7 @@ float3 __attribute__((overloadable)) vloada_half3(size_t offset, const __private
 float4 __attribute__((overloadable)) vloada_half4(size_t offset, const __private half *p);
 float8 __attribute__((overloadable)) vloada_half8(size_t offset, const __private half *p);
 float16 __attribute__((overloadable)) vloada_half16(size_t offset, const __private half *p);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * The floatn value given by data is converted to
@@ -12902,7 +12898,7 @@ float16 __attribute__((overloadable)) vloada_half16(size_t offset, const __priva
  * mode. The default current rounding mode is
  * round to nearest even.
  */
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __attribute__((overloadable)) vstorea_half(float data, size_t offset, half *p);
 void __attribute__((overloadable)) vstorea_half2(float2 data, size_t offset, half *p);
 void __attribute__((overloadable)) vstorea_half3(float3 data, size_t offset, half *p);
@@ -13187,7 +13183,7 @@ void __attribute__((overloadable)) vstorea_half4_rtn(double4 data,size_t offset,
 void __attribute__((overloadable)) vstorea_half8_rtn(double8 data,size_t offset, __private half *p);
 void __attribute__((overloadable)) vstorea_half16_rtn(double16 data,size_t offset, __private half *p);
 #endif //cl_khr_fp64
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v1.2 s6.12.8, v2.0 s6.13.8 - Synchronization Functions
 
@@ -13206,14 +13202,14 @@ typedef uint cl_mem_fence_flags;
  */
 #define CLK_GLOBAL_MEM_FENCE   0x02
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 /**
  * Queue a memory fence to ensure correct ordering of memory
  * operations between work-items of a work-group to
  * image memory.
  */
 #define CLK_IMAGE_MEM_FENCE  0x04
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
  * All work-items in a work-group executing the kernel
@@ -13247,7 +13243,7 @@ typedef uint cl_mem_fence_flags;
 
 void __attribute__((overloadable)) barrier(cl_mem_fence_flags flags);
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 typedef enum memory_scope
 {
@@ -13260,7 +13256,7 @@ typedef enum memory_scope
 
 void __attribute__((overloadable)) work_group_barrier(cl_mem_fence_flags flags, memory_scope scope);
 void __attribute__((overloadable)) work_group_barrier(cl_mem_fence_flags flags);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v1.2 s6.12.9 - Explicit Memory Fence Functions
 
@@ -13305,7 +13301,7 @@ void __attribute__((overloadable)) write_mem_fence(cl_mem_fence_flags flags);
 
 // OpenCL v2.0 s6.13.9 - Address Space Qualifier Functions
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 cl_mem_fence_flags __attribute__((overloadable)) get_fence(const void *ptr);
 cl_mem_fence_flags __attribute__((overloadable)) get_fence(void *ptr);
 
@@ -13322,7 +13318,7 @@ __private void* __attribute__((overloadable)) to_private(void*);
 __global  const void* __attribute__((overloadable)) to_global(const void*);
 __local   const void* __attribute__((overloadable)) to_local(const void*);
 __private const void* __attribute__((overloadable)) to_private(const void*);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v1.2 s6.12.10, v2.0 s6.13.10 - Async Copies from Global to Local Memory, Local to Global Memory, and Prefetch
 
@@ -14052,7 +14048,7 @@ unsigned int __attribute__((overloadable)) atom_xor(volatile __local unsigned in
 
 // OpenCL v2.0 s6.13.11 - Atomics Functions
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #define ATOMIC_VAR_INIT(x) (x)
 
 #define ATOMIC_FLAG_INIT 0
@@ -14282,7 +14278,7 @@ ATOMIC_FLAG_PROTOTYPE(clear, void)
 #undef ATOMIC_INIT_PROTOTYPE
 #undef ATOMIC_INIT_PROTOTYPE_ADDRSPACE
 
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v1.2 s6.12.12, v2.0 s6.13.12 - Miscellaneous Vector Functions
 
@@ -16089,12 +16085,12 @@ int __const_func __attribute__((overloadable)) get_image_channel_data_type(read_
 #define CLK_RGBx              0x10BC
 #define CLK_DEPTH             0x10BD
 #define CLK_DEPTH_STENCIL     0x10BE
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #define CLK_sRGB              0x10BF
 #define CLK_sRGBA             0x10C1
 #define CLK_sRGBx             0x10C0
 #define CLK_sBGRA             0x10C2
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 int __const_func __attribute__((overloadable)) get_image_channel_order(read_only image1d_t image);
 int __const_func __attribute__((overloadable)) get_image_channel_order(read_only image1d_buffer_t image);
@@ -16270,7 +16266,7 @@ int __attribute__((overloadable)) get_image_num_samples(read_write image2d_array
 
 // OpenCL v2.0 s6.13.15 - Work-group Functions
 
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 int __attribute__((overloadable)) work_group_all(int predicate);
 int __attribute__((overloadable)) work_group_any(int predicate);
 
@@ -16346,18 +16342,18 @@ DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(double)
 DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(double)
 #endif //cl_khr_fp64
 
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v2.0 s6.13.16 - Pipe Functions
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #define PIPE_RESERVE_ID_VALID_BIT (1U << 30)
 #define CLK_NULL_RESERVE_ID (__builtin_astype(((void*)(__SIZE_MAX__)), reserve_id_t))
 bool __attribute__((overloadable)) is_valid_reserve_id(reserve_id_t reserve_id);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 
 // OpenCL v2.0 s6.13.17 - Enqueue Kernels
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 #define CL_COMPLETE                                 0x0
 #define CL_RUNNING                                  0x1
@@ -16457,7 +16453,7 @@ bool is_valid_event (clk_event_t event);
 void __attribute__((overloadable)) capture_event_profiling_info(clk_event_t, clk_profiling_info, __global void* value);
 
 queue_t __attribute__((overloadable)) get_default_queue(void);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL Extension v2.0 s9.17 - Sub-groups
 
@@ -16466,16 +16462,16 @@ queue_t __attribute__((overloadable)) get_default_queue(void);
 uint    __attribute__((overloadable)) get_sub_group_size(void);
 uint    __attribute__((overloadable)) get_max_sub_group_size(void);
 uint    __attribute__((overloadable)) get_num_sub_groups(void);
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 uint    __attribute__((overloadable)) get_enqueued_num_sub_groups(void);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 uint    __attribute__((overloadable)) get_sub_group_id(void);
 uint    __attribute__((overloadable)) get_sub_group_local_id(void);
 
 void    __attribute__((overloadable)) sub_group_barrier(cl_mem_fence_flags flags);
-#ifdef _CL20_AND_ABOVE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void    __attribute__((overloadable)) sub_group_barrier(cl_mem_fence_flags flags, memory_scope scope);
-#endif //_CL20_AND_ABOVE
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 int     __attribute__((overloadable)) sub_group_all(int predicate);
 int     __attribute__((overloadable)) sub_group_any(int predicate);
