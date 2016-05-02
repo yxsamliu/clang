@@ -479,8 +479,13 @@ void Parser::HandlePragmaOpenCLExtension() {
       f.nm = 0;
 #include "clang/Basic/OpenCLExtensions.def"
   }
-#define OPENCLEXT(nm) else if (ename->isStr(#nm) \
-   && Supp.is_##nm##_supported_extension(CLVer)) { f.nm = state; }
+#define OPENCLEXT(nm) else if (ename->isStr(#nm)) \
+   if (Supp.is_##nm##_supported_extension(CLVer)) \
+     f.nm = state; \
+   else if (Supp.is_##nm##_supported_core(CLVer)) { \
+     PP.Diag(NameLoc, diag::warn_pragma_extension_is_core) << ename; \
+   else \
+     PP.Diag(NameLoc, diag::warn_pragma_unsupported_extension) << ename;
 #include "clang/Basic/OpenCLExtensions.def"
   else {
     PP.Diag(NameLoc, diag::warn_pragma_unknown_extension) << ename;
