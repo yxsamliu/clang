@@ -14000,19 +14000,11 @@ void __attribute__((overloadable)) write_mem_fence(cl_mem_fence_flags flags);
 cl_mem_fence_flags __attribute__((overloadable)) get_fence(const void *ptr);
 cl_mem_fence_flags __attribute__((overloadable)) get_fence(void *ptr);
 
-
-// ToDo: These functions need to be declared as Clang builtin functions
+// Builtin functions to_global, to_local, and to_private need to be declared as Clang builtin functions
 // and checked in Sema since they should be declared as
 //   addr gentype* to_addr (gentype*);
 // where gentype is builtin type or user defined type.
-// The current declaration is more tolerant then they should be.
-__global  void* __attribute__((overloadable)) to_global(void*);
-__local   void* __attribute__((overloadable)) to_local(void*);
-__private void* __attribute__((overloadable)) to_private(void*);
 
-__global  const void* __attribute__((overloadable)) to_global(const void*);
-__local   const void* __attribute__((overloadable)) to_local(const void*);
-__private const void* __attribute__((overloadable)) to_private(const void*);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v1.2 s6.12.10, v2.0 s6.13.10 - Async Copies from Global to Local Memory, Local to Global Memory, and Prefetch
