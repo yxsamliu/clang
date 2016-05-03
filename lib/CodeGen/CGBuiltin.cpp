@@ -2128,13 +2128,6 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
   case Builtin::BIto_global:
   case Builtin::BIto_local:
   case Builtin::BIto_private: {
-    const char *Name;
-    if (BuiltinID == Builtin::BIto_global)
-      Name = "to_global";
-    else if (BuiltinID == Builtin::BIto_local)
-      Name = "to_local";
-    else
-      Name = "to_private";
     Value *Arg0 = EmitScalarExpr(E->getArg(0));
     llvm::Type *ArgTys[] = {Arg0->getType()};
     llvm::FunctionType *FTy = llvm::FunctionType::get(
