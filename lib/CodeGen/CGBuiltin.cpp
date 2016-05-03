@@ -2124,6 +2124,27 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
         Builder.CreateCall(CGM.CreateRuntimeFunction(FTy, Name), {Arg0}));
   }
 
+  // OpenCL v2.0 s6.13.9 Address space qualifier functions.
+  case Builtin::BIto_global:
+  case Builtin::BIto_local:
+  case Builtin::BIto_private: {
+    const char *Name;
+    if (BuiltinID == Builtin::BIto_global)
+      Name = "to_global";
+    else if (BuiltinID == Builtin::BIto_local)
+      Name = "to_local";
+    else
+      Name = "to_private";
+    Value *Arg0 = EmitScalarExpr(E->getArg(0));
+    llvm::Type *ArgTys[] = {Arg0->getType()};
+    llvm::FunctionType *FTy = llvm::FunctionType::get(
+        ConvertType(E->getType()), llvm::ArrayRef<llvm::Type *>(ArgTys),
+        false);
+    return RValue::get(
+        Builder.CreateCall(CGM.CreateRuntimeFunction(FTy,
+          CGM.getMangledName(E->getDirectCallee())), {Arg0}));
+  }
+
   case Builtin::BIprintf:
     if (getLangOpts().CUDA && getLangOpts().CUDAIsDevice)
       return EmitCUDADevicePrintfCallExpr(E, ReturnValue);

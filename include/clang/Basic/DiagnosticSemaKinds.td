@@ -498,6 +498,8 @@ def err_builtin_definition : Error<"definition of builtin function %0">;
 def err_arm_invalid_specialreg : Error<"invalid special register for builtin">;
 def err_invalid_cpu_supports : Error<"invalid cpu feature string for builtin">;
 def err_builtin_needs_feature : Error<"%0 needs target feature %1">;
+def err_builtin_needs_opencl_version
+    : Error<"%0 needs OpenCL version %1%select{| or above}2">;
 def err_function_needs_feature
     : Error<"always_inline function %1 requires target feature '%2', but would "
             "be inlined into function %0 that is compiled without support for "
@@ -7860,6 +7862,11 @@ def err_opencl_invalid_block_declaration : Error<
 def err_opencl_extern_block_declaration : Error<
   "invalid block variable declaration - using 'extern' storage class is disallowed">;
 
+// OpenCL v2.0 s6.13.9 - Address space qualifier functions. 
+def err_opencl_builtin_to_addr_arg_num : Error<
+  "invalid number of arguments to function: %0">;
+def err_opencl_builtin_to_addr_invalid_arg : Error<
+  "invalid argument %0 to function: %1">;
 } // end of sema category
 
 let CategoryName = "OpenMP Issue" in {

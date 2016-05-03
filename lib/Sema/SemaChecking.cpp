@@ -455,6 +455,50 @@ static bool SemaBuiltinPipePackets(Sema &S, CallExpr *Call) {
   return false;
 }
 
+// \brief Performs semantic analysis for the to_global/local/private call.
+// \param S Reference to the semantic analyzer.
+// \param BuiltinID ID of the builtin function.
+// \param Call A pointer to the builtin call.
+// \return True if a semantic error has been found, false otherwise.
+static bool SemaBuiltinToAddr(Sema &S, unsigned BuiltinID, CallExpr *Call) {
+  // OpenCL v2.0 s6.13.9 - Address space qualifier functions.
+  if (S.getLangOpts().OpenCLVersion < 200) {
+    S.Diag(Call->getLocStart(), diag::err_builtin_needs_opencl_version)
+        << Call->getDirectCallee() << "2.0" << 1 << Call->getSourceRange();
+    return true;
+  }
+
+  if (Call->getNumArgs() != 1) {
+    S.Diag(Call->getLocStart(), diag::err_opencl_builtin_to_addr_arg_num)
+        << Call->getDirectCallee() << Call->getSourceRange();
+    return true;
+  }
+
+  auto RT = Call->getArg(0)->getType()->getPointeeType().getCanonicalType();
+  auto Qual = RT.getQualifiers();
+  if (Qual.getAddressSpace() == LangAS::opencl_constant) {
+    S.Diag(Call->getLocStart(), diag::err_opencl_builtin_to_addr_invalid_arg)
+        << Call->getArg(0) << Call->getDirectCallee() << Call->getSourceRange();
+    return true;
+  }
+
+  switch (BuiltinID) {
+  case Builtin::BIto_global:
+    Qual.setAddressSpace(LangAS::opencl_global);
+    break;
+  case Builtin::BIto_local:
+    Qual.setAddressSpace(LangAS::opencl_local);
+    break;
+  default:
+    Qual.removeAddressSpace();
+  }
+  Call->getCalleeDecl()->addAttr(OverloadableAttr::CreateImplicit(S.Context));
+  Call->setType(S.Context.getPointerType(S.Context.getQualifiedType(
+      RT.getUnqualifiedType(), Qual)));
+
+  return false;
+}
+
 ExprResult
 Sema::CheckBuiltinFunctionCall(FunctionDecl *FDecl, unsigned BuiltinID,
                                CallExpr *TheCall) {
@@ -787,6 +831,12 @@ Sema::CheckBuiltinFunctionCall(FunctionDecl *FDecl, unsigned BuiltinID,
   case Builtin::BIget_pipe_num_packets:
   case Builtin::BIget_pipe_max_packets:
     if (SemaBuiltinPipePackets(*this, TheCall))
+      return ExprError();
+    break;
+  case Builtin::BIto_global:
+  case Builtin::BIto_local:
+  case Builtin::BIto_private:
+    if (SemaBuiltinToAddr(*this, BuiltinID, TheCall))
       return ExprError();
     break;
   }
