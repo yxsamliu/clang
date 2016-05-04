@@ -474,9 +474,9 @@ static bool SemaBuiltinToAddr(Sema &S, unsigned BuiltinID, CallExpr *Call) {
     return true;
   }
 
-  auto RT = Call->getArg(0)->getType()->getPointeeType().getCanonicalType();
-  auto Qual = RT.getQualifiers();
-  if (Qual.getAddressSpace() == LangAS::opencl_constant) {
+  auto RT = Call->getArg(0)->getType();
+  if (!RT->isPointerType() || RT->getPointeeType().getCanonicalType()
+      .getQualifiers().getAddressSpace() == LangAS::opencl_constant) {
     S.Diag(Call->getLocStart(), diag::err_opencl_builtin_to_addr_invalid_arg)
         << Call->getArg(0) << Call->getDirectCallee() << Call->getSourceRange();
     return true;

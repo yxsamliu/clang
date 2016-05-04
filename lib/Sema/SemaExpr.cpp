@@ -5070,6 +5070,9 @@ rewriteBuiltinFunctionDeclForOpenCLToAddr(Sema *Sema, ASTContext &Context,
     return nullptr;
 
   auto ArgT = ArgExprs[0]->getType();
+  if (!ArgT->isPointerType())
+    return nullptr;
+
   auto RT = ArgT->getPointeeType().getCanonicalType();
   auto Qual = RT.getQualifiers();
   switch (ID) {
