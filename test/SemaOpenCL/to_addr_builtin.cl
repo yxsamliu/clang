@@ -13,6 +13,14 @@ void test(void) {
   // expected-error@-4{{invalid number of arguments to function: 'to_global'}}
 #endif
 
+  int x;
+  glob = to_global(x);
+#if __OPENCL_C_VERSION__ < CL_VERSION_2_0
+  // expected-error@-2{{'to_global' needs OpenCL version 2.0 or above}}
+#else
+  // expected-error@-4{{invalid argument x to function: 'to_global'}}
+#endif
+
   glob = to_global(con);
 #if __OPENCL_C_VERSION__ < CL_VERSION_2_0
   // expected-error@-2{{'to_global' needs OpenCL version 2.0 or above}}

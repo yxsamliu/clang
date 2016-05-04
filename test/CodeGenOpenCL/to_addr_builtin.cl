@@ -1,5 +1,11 @@
 // RUN: %clang_cc1 -triple spir-unknown-unknown -emit-llvm -O0 -cl-std=CL2.0 -o - %s | FileCheck %s
 
+typedef struct {
+  float x,y,z;
+} A;
+typedef private A *PA;
+typedef global A *GA;
+
 void test(void) {
   global int *glob;
   local int *loc;
@@ -41,4 +47,8 @@ void test(void) {
 
   //CHECK: call i32* @_Z10to_privatePU3AS4v(i32 addrspace(4)* %{{.*}})
   priv = to_private(gen);
+
+  PA pA;
+  GA gA = to_global(pA);
+  };
 }

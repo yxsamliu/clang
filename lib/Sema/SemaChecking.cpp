@@ -482,19 +482,9 @@ static bool SemaBuiltinToAddr(Sema &S, unsigned BuiltinID, CallExpr *Call) {
     return true;
   }
 
-  switch (BuiltinID) {
-  case Builtin::BIto_global:
-    Qual.setAddressSpace(LangAS::opencl_global);
-    break;
-  case Builtin::BIto_local:
-    Qual.setAddressSpace(LangAS::opencl_local);
-    break;
-  default:
-    Qual.removeAddressSpace();
-  }
-  Call->getCalleeDecl()->addAttr(OverloadableAttr::CreateImplicit(S.Context));
-  Call->setType(S.Context.getPointerType(S.Context.getQualifiedType(
-      RT.getUnqualifiedType(), Qual)));
+  // Builtin functions with custom check need to set the correct type of call
+  // expression by themselves since Sema::BuildResolvedCallExpr does not do that.
+  Call->setType(cast<FunctionDecl>(Call->getCalleeDecl())->getReturnType());
 
   return false;
 }

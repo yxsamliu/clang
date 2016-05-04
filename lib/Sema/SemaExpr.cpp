@@ -5055,6 +5055,58 @@ static bool isNumberOfArgsValidForCall(Sema &S, const FunctionDecl *Callee,
   return Callee->getMinRequiredArguments() <= NumArgs;
 }
 
+/// OpenCL to_addr function accepts pointers to arbitrary type as argument.
+/// This function change the original declaration to match the argument.
+/// \return nullptr if this builtin is not OpenCL to_addr builtin function or
+///         there is no need to change the function declaration.
+static FunctionDecl *
+rewriteBuiltinFunctionDeclForOpenCLToAddr(Sema *Sema, ASTContext &Context,
+                                          const FunctionDecl *FDecl,
+                                          MultiExprArg ArgExprs) {
+  auto ID = FDecl->getBuiltinID();
+  if (ID != Builtin::BIto_global &&
+      ID != Builtin::BIto_local &&
+      ID != Builtin::BIto_private)
+    return nullptr;
+
+  auto ArgT = ArgExprs[0]->getType();
+  auto RT = ArgT->getPointeeType().getCanonicalType();
+  auto Qual = RT.getQualifiers();
+  switch (ID) {
+  case Builtin::BIto_global:
+    Qual.setAddressSpace(LangAS::opencl_global);
+    break;
+  case Builtin::BIto_local:
+    Qual.setAddressSpace(LangAS::opencl_local);
+    break;
+  default:
+    Qual.removeAddressSpace();
+  }
+  RT = Sema->Context.getPointerType(
+         Sema->Context.getQualifiedType(RT.getUnqualifiedType(), Qual));
+
+  QualType ParmTy[] = {ArgT};
+  FunctionProtoType::ExtProtoInfo EPI;
+  QualType OverloadTy = Context.getFunctionType(RT, ParmTy, EPI);
+  DeclContext *Parent = Context.getTranslationUnitDecl();
+  FunctionDecl *OverloadDecl = FunctionDecl::Create(Context, Parent,
+                                                    FDecl->getLocation(),
+                                                    FDecl->getLocation(),
+                                                    FDecl->getIdentifier(),
+                                                    OverloadTy,
+                                                    /*TInfo=*/nullptr,
+                                                    SC_Extern, false,
+                                                    /*hasPrototype=*/true);
+  ParmVarDecl *Parm[] = {
+    ParmVarDecl::Create(Context, OverloadDecl, SourceLocation(),
+                        SourceLocation(), nullptr, ArgT,
+                        /*TInfo=*/nullptr, SC_None, nullptr)};
+  Parm[0]->setScopeInfo(0, 0);
+  OverloadDecl->setParams(Parm);
+  OverloadDecl->addAttr(OverloadableAttr::CreateImplicit(Sema->Context));
+  return OverloadDecl;
+}
+
 /// ActOnCallExpr - Handle a call to Fn with the specified array of arguments.
 /// This provides the location of the left/right parens and a list of comma
 /// locations.
@@ -5164,10 +5216,17 @@ Sema::ActOnCallExpr(Scope *S, Expr *Fn, SourceLocation LParenLoc,
 
     FunctionDecl *FDecl = dyn_cast<FunctionDecl>(NDecl);
     if (FDecl && FDecl->getBuiltinID()) {
-      // Rewrite the function decl for this builtin by replacing parameters
-      // with no explicit address space with the address space of the arguments
-      // in ArgExprs.
-      if ((FDecl = rewriteBuiltinFunctionDecl(this, Context, FDecl, ArgExprs))) {
+      // Rewrite the function decl for OpenCL to_addr builtin.
+      if (FunctionDecl *NFDecl = rewriteBuiltinFunctionDeclForOpenCLToAddr(
+        this, Context, FDecl, ArgExprs))
+        FDecl = NFDecl;
+      else {
+        // Rewrite the function decl for this builtin by replacing parameters
+        // with no explicit address space with the address space of the arguments
+        // in ArgExprs.
+        FDecl = rewriteBuiltinFunctionDecl(this, Context, FDecl, ArgExprs);
+      }
+      if (FDecl) {
         NDecl = FDecl;
         Fn = DeclRefExpr::Create(Context, FDecl->getQualifierLoc(),
                            SourceLocation(), FDecl, false,
