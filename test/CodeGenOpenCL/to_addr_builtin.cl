@@ -13,43 +13,77 @@ void test(void) {
   private int *priv;
   generic int *gen;
 
-  //CHECK: call i32 addrspace(1)* @_Z9to_globalPU3AS1i(i32 addrspace(1)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32 addrspace(1)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(1)* @to_global(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(1)* %[[RET]] to i32 addrspace(1)*
   glob = to_global(glob);
   
-  //CHECK: call i32 addrspace(1)* @_Z9to_globalPU3AS3i(i32 addrspace(3)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32 addrspace(3)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(1)* @to_global(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(1)* %[[RET]] to i32 addrspace(1)*
   glob = to_global(loc);
  
-   //CHECK: call i32 addrspace(1)* @_Z9to_globalPi(i32* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(1)* @to_global(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(1)* %[[RET]] to i32 addrspace(1)*
   glob = to_global(priv);
  
-   //CHECK: call i32 addrspace(1)* @_Z9to_globalPU3AS4i(i32 addrspace(4)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = bitcast i32 addrspace(4)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(1)* @to_global(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(1)* %[[RET]] to i32 addrspace(1)*
   glob = to_global(gen);
   
-  //CHECK: call i32 addrspace(3)* @_Z8to_localPU3AS1i(i32 addrspace(1)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32 addrspace(1)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(3)* @to_local(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(3)* %[[RET]] to i32 addrspace(3)*
   loc = to_local(glob);
 
-  //CHECK: call i32 addrspace(3)* @_Z8to_localPU3AS3i(i32 addrspace(3)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32 addrspace(3)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(3)* @to_local(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(3)* %[[RET]] to i32 addrspace(3)*
   loc = to_local(loc);
 
-  //CHECK: call i32 addrspace(3)* @_Z8to_localPi(i32* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(3)* @to_local(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(3)* %[[RET]] to i32 addrspace(3)*
   loc = to_local(priv);
 
-  //CHECK: call i32 addrspace(3)* @_Z8to_localPU3AS4i(i32 addrspace(4)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = bitcast i32 addrspace(4)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(3)* @to_local(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(3)* %[[RET]] to i32 addrspace(3)*
   loc = to_local(gen);
 
-  //CHECK: call i32* @_Z10to_privatePU3AS1i(i32 addrspace(1)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32 addrspace(1)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8* @to_private(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8* %[[RET]] to i32*
   priv = to_private(glob);
 
-  //CHECK: call i32* @_Z10to_privatePU3AS3i(i32 addrspace(3)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32 addrspace(3)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8* @to_private(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8* %[[RET]] to i32*
   priv = to_private(loc);
 
-  //CHECK: call i32* @_Z10to_privatePi(i32* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast i32* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8* @to_private(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8* %[[RET]] to i32*
   priv = to_private(priv);
 
-  //CHECK: call i32* @_Z10to_privatePU3AS4i(i32 addrspace(4)* %{{.*}})
+  //CHECK: %[[ARG:.*]] = bitcast i32 addrspace(4)* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8* @to_private(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8* %[[RET]] to i32*
   priv = to_private(gen);
 
-  //CHECK; call %[[A]] addrspace(1)* @_Z9to_globalP1A(%[[A]]* %{{.*}})
+  //CHECK: %[[ARG:.*]] = addrspacecast %[[A]]* %{{.*}} to i8 addrspace(4)*
+  //CHECK: %[[RET:.*]] = call i8 addrspace(1)* @to_global(i8 addrspace(4)* %[[ARG]])
+  //CHECK: %{{.*}} = bitcast i8 addrspace(1)* %[[RET]] to %[[A]] addrspace(1)*
   PA pA;
   GA gA = to_global(pA);
+
+  //CHECK-NOT: addrspacecast
+  //CHECK-NOT: bitcast
+  //CHECK: call i8 addrspace(1)* @to_global(i8 addrspace(4)* %{{.*}})
+  //CHECK-NOT: addrspacecast
+  //CHECK-NOT: bitcast
+  generic void *gen_v;
+  global void *glob_v = to_global(gen_v);
 }
