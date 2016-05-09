@@ -2124,18 +2124,22 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
         Builder.CreateCall(CGM.CreateRuntimeFunction(FTy, Name), {Arg0}));
   }
 
-  // OpenCL v2.0 s6.13.9 Address space qualifier functions.
+  // OpenCL v2.0 s6.13.9 - Address space qualifier functions.
   case Builtin::BIto_global:
   case Builtin::BIto_local:
   case Builtin::BIto_private: {
-    Value *Arg0 = EmitScalarExpr(E->getArg(0));
-    llvm::Type *ArgTys[] = {Arg0->getType()};
-    llvm::FunctionType *FTy = llvm::FunctionType::get(
-        ConvertType(E->getType()), llvm::ArrayRef<llvm::Type *>(ArgTys),
-        false);
-    return RValue::get(
-        Builder.CreateCall(CGM.CreateRuntimeFunction(FTy,
-          CGM.getMangledName(E->getDirectCallee())), {Arg0}));
+    auto Arg0 = EmitScalarExpr(E->getArg(0));
+    auto NewArgT = llvm::PointerType::get(Int8Ty,
+      CGM.getContext().getTargetAddressSpace(LangAS::opencl_generic));
+    auto NewRetT = llvm::PointerType::get(Int8Ty,
+      CGM.getContext().getTargetAddressSpace(
+        E->getType()->getPointeeType().getAddressSpace()));
+    auto FTy = llvm::FunctionType::get(NewRetT, {NewArgT}, false);
+    auto NewArg = Builder.CreateBitOrPointerCast(Arg0, NewArgT);
+    auto NewCall = Builder.CreateCall(CGM.CreateRuntimeFunction(FTy,
+      E->getDirectCallee()->getName()), {NewArg});
+    return RValue::get(Builder.CreateBitOrPointerCast(NewCall,
+      ConvertType(E->getType())));
   }
 
   case Builtin::BIprintf:
