@@ -7866,7 +7866,7 @@ def err_opencl_extern_block_declaration : Error<
 def err_opencl_builtin_to_addr_arg_num : Error<
   "invalid number of arguments to function: %0">;
 def err_opencl_builtin_to_addr_invalid_arg : Error<
-  "invalid argument %0 to function: %1">;
+  "invalid argument %0 to function: %1, expecting a generic pointer argument">;
 } // end of sema category
 
 let CategoryName = "OpenMP Issue" in {
