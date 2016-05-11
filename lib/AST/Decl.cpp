@@ -2719,8 +2719,7 @@ unsigned FunctionDecl::getBuiltinID() const {
 
   // If the function is marked "overloadable", it has a different mangled name
   // and is not the C library function.
-  // OpenCL builtin functions can be overloaded.
-  if (hasAttr<OverloadableAttr>() && !Context.getLangOpts().OpenCL)
+  if (hasAttr<OverloadableAttr>())
     return 0;
 
   if (!Context.BuiltinInfo.isPredefinedLibFunction(BuiltinID))
