@@ -53,15 +53,16 @@ OPENCLEXT_INTERNAL(cl_khr_int64_extended_atomics, 110, ~0U)
 
 // OpenCL 1.2.
 OPENCLEXT_INTERNAL(cl_khr_d3d11_sharing, 120, ~0U)
+OPENCLEXT_INTERNAL(cl_khr_depth_images, 120, ~0U)
 OPENCLEXT_INTERNAL(cl_khr_dx9_media_sharing, 120, ~0U)
+OPENCLEXT_INTERNAL(cl_khr_gl_depth_images, 120, ~0U)
+OPENCLEXT_INTERNAL(cl_khr_spir, 120, ~0U)
 
 // OpenCL 2.0.
 OPENCLEXT_INTERNAL(cl_khr_egl_event, 200, ~0U)
 OPENCLEXT_INTERNAL(cl_khr_egl_image, 200, ~0U)
-OPENCLEXT_INTERNAL(cl_khr_gl_depth_images, 200, ~0U)
 OPENCLEXT_INTERNAL(cl_khr_gl_msaa_sharing, 200, ~0U)
 OPENCLEXT_INTERNAL(cl_khr_initialize_memory, 200, ~0U)
-OPENCLEXT_INTERNAL(cl_khr_spir, 200, ~0U)
 OPENCLEXT_INTERNAL(cl_khr_srgb_image_writes, 200, ~0U)
 OPENCLEXT_INTERNAL(cl_khr_subgroups, 200, ~0U)
 OPENCLEXT_INTERNAL(cl_khr_terminate_context, 200, ~0U)
