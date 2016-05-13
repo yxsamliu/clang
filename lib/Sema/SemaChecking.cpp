@@ -460,10 +460,11 @@ static bool SemaBuiltinPipePackets(Sema &S, CallExpr *Call) {
 // \param BuiltinID ID of the builtin function.
 // \param Call A pointer to the builtin call.
 // \return True if a semantic error has been found, false otherwise.
-static bool SemaBuiltinToAddr(Sema &S, unsigned BuiltinID, CallExpr *Call) {
+static bool SemaOpenCLBuiltinToAddr(Sema &S, unsigned BuiltinID,
+                                    CallExpr *Call) {
   // OpenCL v2.0 s6.13.9 - Address space qualifier functions.
   if (S.getLangOpts().OpenCLVersion < 200) {
-    S.Diag(Call->getLocStart(), diag::err_builtin_needs_opencl_version)
+    S.Diag(Call->getLocStart(), diag::err_opencl_builtin_requires_version)
         << Call->getDirectCallee() << "2.0" << 1 << Call->getSourceRange();
     return true;
   }
@@ -837,7 +838,7 @@ Sema::CheckBuiltinFunctionCall(FunctionDecl *FDecl, unsigned BuiltinID,
   case Builtin::BIto_global:
   case Builtin::BIto_local:
   case Builtin::BIto_private:
-    if (SemaBuiltinToAddr(*this, BuiltinID, TheCall))
+    if (SemaOpenCLBuiltinToAddr(*this, BuiltinID, TheCall))
       return ExprError();
     break;
   }

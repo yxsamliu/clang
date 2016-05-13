@@ -499,8 +499,6 @@ def err_builtin_definition : Error<"definition of builtin function %0">;
 def err_arm_invalid_specialreg : Error<"invalid special register for builtin">;
 def err_invalid_cpu_supports : Error<"invalid cpu feature string for builtin">;
 def err_builtin_needs_feature : Error<"%0 needs target feature %1">;
-def err_builtin_needs_opencl_version
-    : Error<"%0 needs OpenCL version %1%select{| or above}2">;
 def err_function_needs_feature
     : Error<"always_inline function %1 requires target feature '%2', but would "
             "be inlined into function %0 that is compiled without support for "
@@ -7856,6 +7854,8 @@ def err_opencl_type_can_only_be_used_as_function_parameter : Error <
 def warn_opencl_attr_deprecated_ignored : Warning <
   "%0 attribute is deprecated and ignored in OpenCL version %1">,
   InGroup<IgnoredAttributes>;
+def err_opencl_builtin_requires_version : Error<
+  "%0 requires OpenCL version %1%select{| or above}2">;
 
 // OpenCL v2.0 s6.13.6 -- Builtin Pipe Functions
 def err_opencl_builtin_pipe_first_arg : Error<
