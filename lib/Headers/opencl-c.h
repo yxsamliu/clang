@@ -16,6 +16,8 @@
 #endif //cl_khr_depth_images
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
+#define __overload __attribute__((overloadable))
+
 // Optimizations
 
 #define __const_func __attribute__((const, overloadable))
@@ -7444,9 +7446,9 @@ size_t __const_func get_group_id(uint dimindx);
 size_t __const_func get_global_offset(uint dimindx);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-size_t __attribute__((overloadable)) get_enqueued_local_size(uint dimindx);
-size_t __attribute__((overloadable)) get_global_linear_id(void);
-size_t __attribute__((overloadable)) get_local_linear_id(void);
+size_t __overload get_enqueued_local_size(uint dimindx);
+size_t __overload get_global_linear_id(void);
+size_t __overload get_local_linear_id(void);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v1.1 s6.11.2, v1.2 s6.12.2, v2.0 s6.13.2 - Math functions
@@ -8279,86 +8281,86 @@ half16 __const_func fmod(half16 x, half16 y);
  * floor(x) is returned in iptr.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) fract(float x, float *iptr);
-float2 __attribute__((overloadable)) fract(float2 x, float2 *iptr);
-float3 __attribute__((overloadable)) fract(float3 x, float3 *iptr);
-float4 __attribute__((overloadable)) fract(float4 x, float4 *iptr);
-float8 __attribute__((overloadable)) fract(float8 x, float8 *iptr);
-float16 __attribute__((overloadable)) fract(float16 x, float16 *iptr);
+float __overload fract(float x, float *iptr);
+float2 __overload fract(float2 x, float2 *iptr);
+float3 __overload fract(float3 x, float3 *iptr);
+float4 __overload fract(float4 x, float4 *iptr);
+float8 __overload fract(float8 x, float8 *iptr);
+float16 __overload fract(float16 x, float16 *iptr);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) fract(double x, double *iptr);
-double2 __attribute__((overloadable)) fract(double2 x, double2 *iptr);
-double3 __attribute__((overloadable)) fract(double3 x, double3 *iptr);
-double4 __attribute__((overloadable)) fract(double4 x, double4 *iptr);
-double8 __attribute__((overloadable)) fract(double8 x, double8 *iptr);
-double16 __attribute__((overloadable)) fract(double16 x, double16 *iptr);
+double __overload fract(double x, double *iptr);
+double2 __overload fract(double2 x, double2 *iptr);
+double3 __overload fract(double3 x, double3 *iptr);
+double4 __overload fract(double4 x, double4 *iptr);
+double8 __overload fract(double8 x, double8 *iptr);
+double16 __overload fract(double16 x, double16 *iptr);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) fract(half x, half *iptr);
-half2 __attribute__((overloadable)) fract(half2 x, half2 *iptr);
-half3 __attribute__((overloadable)) fract(half3 x, half3 *iptr);
-half4 __attribute__((overloadable)) fract(half4 x, half4 *iptr);
-half8 __attribute__((overloadable)) fract(half8 x, half8 *iptr);
-half16 __attribute__((overloadable)) fract(half16 x, half16 *iptr);
+half __overload fract(half x, half *iptr);
+half2 __overload fract(half2 x, half2 *iptr);
+half3 __overload fract(half3 x, half3 *iptr);
+half4 __overload fract(half4 x, half4 *iptr);
+half8 __overload fract(half8 x, half8 *iptr);
+half16 __overload fract(half16 x, half16 *iptr);
 #endif //cl_khr_fp16
 #else
-float __attribute__((overloadable)) fract(float x, __global float *iptr);
-float2 __attribute__((overloadable)) fract(float2 x, __global float2 *iptr);
-float3 __attribute__((overloadable)) fract(float3 x, __global float3 *iptr);
-float4 __attribute__((overloadable)) fract(float4 x, __global float4 *iptr);
-float8 __attribute__((overloadable)) fract(float8 x, __global float8 *iptr);
-float16 __attribute__((overloadable)) fract(float16 x, __global float16 *iptr);
-float __attribute__((overloadable)) fract(float x, __local float *iptr);
-float2 __attribute__((overloadable)) fract(float2 x, __local float2 *iptr);
-float3 __attribute__((overloadable)) fract(float3 x, __local float3 *iptr);
-float4 __attribute__((overloadable)) fract(float4 x, __local float4 *iptr);
-float8 __attribute__((overloadable)) fract(float8 x, __local float8 *iptr);
-float16 __attribute__((overloadable)) fract(float16 x, __local float16 *iptr);
-float __attribute__((overloadable)) fract(float x, __private float *iptr);
-float2 __attribute__((overloadable)) fract(float2 x, __private float2 *iptr);
-float3 __attribute__((overloadable)) fract(float3 x, __private float3 *iptr);
-float4 __attribute__((overloadable)) fract(float4 x, __private float4 *iptr);
-float8 __attribute__((overloadable)) fract(float8 x, __private float8 *iptr);
-float16 __attribute__((overloadable)) fract(float16 x, __private float16 *iptr);
+float __overload fract(float x, __global float *iptr);
+float2 __overload fract(float2 x, __global float2 *iptr);
+float3 __overload fract(float3 x, __global float3 *iptr);
+float4 __overload fract(float4 x, __global float4 *iptr);
+float8 __overload fract(float8 x, __global float8 *iptr);
+float16 __overload fract(float16 x, __global float16 *iptr);
+float __overload fract(float x, __local float *iptr);
+float2 __overload fract(float2 x, __local float2 *iptr);
+float3 __overload fract(float3 x, __local float3 *iptr);
+float4 __overload fract(float4 x, __local float4 *iptr);
+float8 __overload fract(float8 x, __local float8 *iptr);
+float16 __overload fract(float16 x, __local float16 *iptr);
+float __overload fract(float x, __private float *iptr);
+float2 __overload fract(float2 x, __private float2 *iptr);
+float3 __overload fract(float3 x, __private float3 *iptr);
+float4 __overload fract(float4 x, __private float4 *iptr);
+float8 __overload fract(float8 x, __private float8 *iptr);
+float16 __overload fract(float16 x, __private float16 *iptr);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) fract(double x, __global double *iptr);
-double2 __attribute__((overloadable)) fract(double2 x, __global double2 *iptr);
-double3 __attribute__((overloadable)) fract(double3 x, __global double3 *iptr);
-double4 __attribute__((overloadable)) fract(double4 x, __global double4 *iptr);
-double8 __attribute__((overloadable)) fract(double8 x, __global double8 *iptr);
-double16 __attribute__((overloadable)) fract(double16 x, __global double16 *iptr);
-double __attribute__((overloadable)) fract(double x, __local double *iptr);
-double2 __attribute__((overloadable)) fract(double2 x, __local double2 *iptr);
-double3 __attribute__((overloadable)) fract(double3 x, __local double3 *iptr);
-double4 __attribute__((overloadable)) fract(double4 x, __local double4 *iptr);
-double8 __attribute__((overloadable)) fract(double8 x, __local double8 *iptr);
-double16 __attribute__((overloadable)) fract(double16 x, __local double16 *iptr);
-double __attribute__((overloadable)) fract(double x, __private double *iptr);
-double2 __attribute__((overloadable)) fract(double2 x, __private double2 *iptr);
-double3 __attribute__((overloadable)) fract(double3 x, __private double3 *iptr);
-double4 __attribute__((overloadable)) fract(double4 x, __private double4 *iptr);
-double8 __attribute__((overloadable)) fract(double8 x, __private double8 *iptr);
-double16 __attribute__((overloadable)) fract(double16 x, __private double16 *iptr);
+double __overload fract(double x, __global double *iptr);
+double2 __overload fract(double2 x, __global double2 *iptr);
+double3 __overload fract(double3 x, __global double3 *iptr);
+double4 __overload fract(double4 x, __global double4 *iptr);
+double8 __overload fract(double8 x, __global double8 *iptr);
+double16 __overload fract(double16 x, __global double16 *iptr);
+double __overload fract(double x, __local double *iptr);
+double2 __overload fract(double2 x, __local double2 *iptr);
+double3 __overload fract(double3 x, __local double3 *iptr);
+double4 __overload fract(double4 x, __local double4 *iptr);
+double8 __overload fract(double8 x, __local double8 *iptr);
+double16 __overload fract(double16 x, __local double16 *iptr);
+double __overload fract(double x, __private double *iptr);
+double2 __overload fract(double2 x, __private double2 *iptr);
+double3 __overload fract(double3 x, __private double3 *iptr);
+double4 __overload fract(double4 x, __private double4 *iptr);
+double8 __overload fract(double8 x, __private double8 *iptr);
+double16 __overload fract(double16 x, __private double16 *iptr);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) fract(half x, __global half *iptr);
-half2 __attribute__((overloadable)) fract(half2 x, __global half2 *iptr);
-half3 __attribute__((overloadable)) fract(half3 x, __global half3 *iptr);
-half4 __attribute__((overloadable)) fract(half4 x, __global half4 *iptr);
-half8 __attribute__((overloadable)) fract(half8 x, __global half8 *iptr);
-half16 __attribute__((overloadable)) fract(half16 x, __global half16 *iptr);
-half __attribute__((overloadable)) fract(half x, __local half *iptr);
-half2 __attribute__((overloadable)) fract(half2 x, __local half2 *iptr);
-half3 __attribute__((overloadable)) fract(half3 x, __local half3 *iptr);
-half4 __attribute__((overloadable)) fract(half4 x, __local half4 *iptr);
-half8 __attribute__((overloadable)) fract(half8 x, __local half8 *iptr);
-half16 __attribute__((overloadable)) fract(half16 x, __local half16 *iptr);
-half __attribute__((overloadable)) fract(half x, __private half *iptr);
-half2 __attribute__((overloadable)) fract(half2 x, __private half2 *iptr);
-half3 __attribute__((overloadable)) fract(half3 x, __private half3 *iptr);
-half4 __attribute__((overloadable)) fract(half4 x, __private half4 *iptr);
-half8 __attribute__((overloadable)) fract(half8 x, __private half8 *iptr);
-half16 __attribute__((overloadable)) fract(half16 x, __private half16 *iptr);
+half __overload fract(half x, __global half *iptr);
+half2 __overload fract(half2 x, __global half2 *iptr);
+half3 __overload fract(half3 x, __global half3 *iptr);
+half4 __overload fract(half4 x, __global half4 *iptr);
+half8 __overload fract(half8 x, __global half8 *iptr);
+half16 __overload fract(half16 x, __global half16 *iptr);
+half __overload fract(half x, __local half *iptr);
+half2 __overload fract(half2 x, __local half2 *iptr);
+half3 __overload fract(half3 x, __local half3 *iptr);
+half4 __overload fract(half4 x, __local half4 *iptr);
+half8 __overload fract(half8 x, __local half8 *iptr);
+half16 __overload fract(half16 x, __local half16 *iptr);
+half __overload fract(half x, __private half *iptr);
+half2 __overload fract(half2 x, __private half2 *iptr);
+half3 __overload fract(half3 x, __private half3 *iptr);
+half4 __overload fract(half4 x, __private half4 *iptr);
+half8 __overload fract(half8 x, __private half8 *iptr);
+half16 __overload fract(half16 x, __private half16 *iptr);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -8369,86 +8371,86 @@ half16 __attribute__((overloadable)) fract(half16 x, __private half16 *iptr);
  * component of x equals mantissa returned * 2^exp.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) frexp(float x, int *exp);
-float2 __attribute__((overloadable)) frexp(float2 x, int2 *exp);
-float3 __attribute__((overloadable)) frexp(float3 x, int3 *exp);
-float4 __attribute__((overloadable)) frexp(float4 x, int4 *exp);
-float8 __attribute__((overloadable)) frexp(float8 x, int8 *exp);
-float16 __attribute__((overloadable)) frexp(float16 x, int16 *exp);
+float __overload frexp(float x, int *exp);
+float2 __overload frexp(float2 x, int2 *exp);
+float3 __overload frexp(float3 x, int3 *exp);
+float4 __overload frexp(float4 x, int4 *exp);
+float8 __overload frexp(float8 x, int8 *exp);
+float16 __overload frexp(float16 x, int16 *exp);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) frexp(double x, int *exp);
-double2 __attribute__((overloadable)) frexp(double2 x, int2 *exp);
-double3 __attribute__((overloadable)) frexp(double3 x, int3 *exp);
-double4 __attribute__((overloadable)) frexp(double4 x, int4 *exp);
-double8 __attribute__((overloadable)) frexp(double8 x, int8 *exp);
-double16 __attribute__((overloadable)) frexp(double16 x, int16 *exp);
+double __overload frexp(double x, int *exp);
+double2 __overload frexp(double2 x, int2 *exp);
+double3 __overload frexp(double3 x, int3 *exp);
+double4 __overload frexp(double4 x, int4 *exp);
+double8 __overload frexp(double8 x, int8 *exp);
+double16 __overload frexp(double16 x, int16 *exp);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) frexp(half x, int *exp);
-half2 __attribute__((overloadable)) frexp(half2 x, int2 *exp);
-half3 __attribute__((overloadable)) frexp(half3 x, int3 *exp);
-half4 __attribute__((overloadable)) frexp(half4 x, int4 *exp);
-half8 __attribute__((overloadable)) frexp(half8 x, int8 *exp);
-half16 __attribute__((overloadable)) frexp(half16 x, int16 *exp);
+half __overload frexp(half x, int *exp);
+half2 __overload frexp(half2 x, int2 *exp);
+half3 __overload frexp(half3 x, int3 *exp);
+half4 __overload frexp(half4 x, int4 *exp);
+half8 __overload frexp(half8 x, int8 *exp);
+half16 __overload frexp(half16 x, int16 *exp);
 #endif //cl_khr_fp16
 #else
-float __attribute__((overloadable)) frexp(float x, __global int *exp);
-float2 __attribute__((overloadable)) frexp(float2 x, __global int2 *exp);
-float3 __attribute__((overloadable)) frexp(float3 x, __global int3 *exp);
-float4 __attribute__((overloadable)) frexp(float4 x, __global int4 *exp);
-float8 __attribute__((overloadable)) frexp(float8 x, __global int8 *exp);
-float16 __attribute__((overloadable)) frexp(float16 x, __global int16 *exp);
-float __attribute__((overloadable)) frexp(float x, __local int *exp);
-float2 __attribute__((overloadable)) frexp(float2 x, __local int2 *exp);
-float3 __attribute__((overloadable)) frexp(float3 x, __local int3 *exp);
-float4 __attribute__((overloadable)) frexp(float4 x, __local int4 *exp);
-float8 __attribute__((overloadable)) frexp(float8 x, __local int8 *exp);
-float16 __attribute__((overloadable)) frexp(float16 x, __local int16 *exp);
-float __attribute__((overloadable)) frexp(float x, __private int *exp);
-float2 __attribute__((overloadable)) frexp(float2 x, __private int2 *exp);
-float3 __attribute__((overloadable)) frexp(float3 x, __private int3 *exp);
-float4 __attribute__((overloadable)) frexp(float4 x, __private int4 *exp);
-float8 __attribute__((overloadable)) frexp(float8 x, __private int8 *exp);
-float16 __attribute__((overloadable)) frexp(float16 x, __private int16 *exp);
+float __overload frexp(float x, __global int *exp);
+float2 __overload frexp(float2 x, __global int2 *exp);
+float3 __overload frexp(float3 x, __global int3 *exp);
+float4 __overload frexp(float4 x, __global int4 *exp);
+float8 __overload frexp(float8 x, __global int8 *exp);
+float16 __overload frexp(float16 x, __global int16 *exp);
+float __overload frexp(float x, __local int *exp);
+float2 __overload frexp(float2 x, __local int2 *exp);
+float3 __overload frexp(float3 x, __local int3 *exp);
+float4 __overload frexp(float4 x, __local int4 *exp);
+float8 __overload frexp(float8 x, __local int8 *exp);
+float16 __overload frexp(float16 x, __local int16 *exp);
+float __overload frexp(float x, __private int *exp);
+float2 __overload frexp(float2 x, __private int2 *exp);
+float3 __overload frexp(float3 x, __private int3 *exp);
+float4 __overload frexp(float4 x, __private int4 *exp);
+float8 __overload frexp(float8 x, __private int8 *exp);
+float16 __overload frexp(float16 x, __private int16 *exp);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) frexp(double x, __global int *exp);
-double2 __attribute__((overloadable)) frexp(double2 x, __global int2 *exp);
-double3 __attribute__((overloadable)) frexp(double3 x, __global int3 *exp);
-double4 __attribute__((overloadable)) frexp(double4 x, __global int4 *exp);
-double8 __attribute__((overloadable)) frexp(double8 x, __global int8 *exp);
-double16 __attribute__((overloadable)) frexp(double16 x, __global int16 *exp);
-double __attribute__((overloadable)) frexp(double x, __local int *exp);
-double2 __attribute__((overloadable)) frexp(double2 x, __local int2 *exp);
-double3 __attribute__((overloadable)) frexp(double3 x, __local int3 *exp);
-double4 __attribute__((overloadable)) frexp(double4 x, __local int4 *exp);
-double8 __attribute__((overloadable)) frexp(double8 x, __local int8 *exp);
-double16 __attribute__((overloadable)) frexp(double16 x, __local int16 *exp);
-double __attribute__((overloadable)) frexp(double x, __private int *exp);
-double2 __attribute__((overloadable)) frexp(double2 x, __private int2 *exp);
-double3 __attribute__((overloadable)) frexp(double3 x, __private int3 *exp);
-double4 __attribute__((overloadable)) frexp(double4 x, __private int4 *exp);
-double8 __attribute__((overloadable)) frexp(double8 x, __private int8 *exp);
-double16 __attribute__((overloadable)) frexp(double16 x, __private int16 *exp);
+double __overload frexp(double x, __global int *exp);
+double2 __overload frexp(double2 x, __global int2 *exp);
+double3 __overload frexp(double3 x, __global int3 *exp);
+double4 __overload frexp(double4 x, __global int4 *exp);
+double8 __overload frexp(double8 x, __global int8 *exp);
+double16 __overload frexp(double16 x, __global int16 *exp);
+double __overload frexp(double x, __local int *exp);
+double2 __overload frexp(double2 x, __local int2 *exp);
+double3 __overload frexp(double3 x, __local int3 *exp);
+double4 __overload frexp(double4 x, __local int4 *exp);
+double8 __overload frexp(double8 x, __local int8 *exp);
+double16 __overload frexp(double16 x, __local int16 *exp);
+double __overload frexp(double x, __private int *exp);
+double2 __overload frexp(double2 x, __private int2 *exp);
+double3 __overload frexp(double3 x, __private int3 *exp);
+double4 __overload frexp(double4 x, __private int4 *exp);
+double8 __overload frexp(double8 x, __private int8 *exp);
+double16 __overload frexp(double16 x, __private int16 *exp);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) frexp(half x, __global int *exp);
-half2 __attribute__((overloadable)) frexp(half2 x, __global int2 *exp);
-half3 __attribute__((overloadable)) frexp(half3 x, __global int3 *exp);
-half4 __attribute__((overloadable)) frexp(half4 x, __global int4 *exp);
-half8 __attribute__((overloadable)) frexp(half8 x, __global int8 *exp);
-half16 __attribute__((overloadable)) frexp(half16 x, __global int16 *exp);
-half __attribute__((overloadable)) frexp(half x, __local int *exp);
-half2 __attribute__((overloadable)) frexp(half2 x, __local int2 *exp);
-half3 __attribute__((overloadable)) frexp(half3 x, __local int3 *exp);
-half4 __attribute__((overloadable)) frexp(half4 x, __local int4 *exp);
-half8 __attribute__((overloadable)) frexp(half8 x, __local int8 *exp);
-half16 __attribute__((overloadable)) frexp(half16 x, __local int16 *exp);
-half __attribute__((overloadable)) frexp(half x, __private int *exp);
-half2 __attribute__((overloadable)) frexp(half2 x, __private int2 *exp);
-half3 __attribute__((overloadable)) frexp(half3 x, __private int3 *exp);
-half4 __attribute__((overloadable)) frexp(half4 x, __private int4 *exp);
-half8 __attribute__((overloadable)) frexp(half8 x, __private int8 *exp);
-half16 __attribute__((overloadable)) frexp(half16 x, __private int16 *exp);
+half __overload frexp(half x, __global int *exp);
+half2 __overload frexp(half2 x, __global int2 *exp);
+half3 __overload frexp(half3 x, __global int3 *exp);
+half4 __overload frexp(half4 x, __global int4 *exp);
+half8 __overload frexp(half8 x, __global int8 *exp);
+half16 __overload frexp(half16 x, __global int16 *exp);
+half __overload frexp(half x, __local int *exp);
+half2 __overload frexp(half2 x, __local int2 *exp);
+half3 __overload frexp(half3 x, __local int3 *exp);
+half4 __overload frexp(half4 x, __local int4 *exp);
+half8 __overload frexp(half8 x, __local int8 *exp);
+half16 __overload frexp(half16 x, __local int16 *exp);
+half __overload frexp(half x, __private int *exp);
+half2 __overload frexp(half2 x, __private int2 *exp);
+half3 __overload frexp(half3 x, __private int3 *exp);
+half4 __overload frexp(half4 x, __private int4 *exp);
+half8 __overload frexp(half8 x, __private int8 *exp);
+half16 __overload frexp(half16 x, __private int16 *exp);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -8576,86 +8578,86 @@ half16 __const_func lgamma(half16 x);
 #endif //cl_khr_fp16
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) lgamma_r(float x, int *signp);
-float2 __attribute__((overloadable)) lgamma_r(float2 x, int2 *signp);
-float3 __attribute__((overloadable)) lgamma_r(float3 x, int3 *signp);
-float4 __attribute__((overloadable)) lgamma_r(float4 x, int4 *signp);
-float8 __attribute__((overloadable)) lgamma_r(float8 x, int8 *signp);
-float16 __attribute__((overloadable)) lgamma_r(float16 x, int16 *signp);
+float __overload lgamma_r(float x, int *signp);
+float2 __overload lgamma_r(float2 x, int2 *signp);
+float3 __overload lgamma_r(float3 x, int3 *signp);
+float4 __overload lgamma_r(float4 x, int4 *signp);
+float8 __overload lgamma_r(float8 x, int8 *signp);
+float16 __overload lgamma_r(float16 x, int16 *signp);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) lgamma_r(double x, int *signp);
-double2 __attribute__((overloadable)) lgamma_r(double2 x, int2 *signp);
-double3 __attribute__((overloadable)) lgamma_r(double3 x, int3 *signp);
-double4 __attribute__((overloadable)) lgamma_r(double4 x, int4 *signp);
-double8 __attribute__((overloadable)) lgamma_r(double8 x, int8 *signp);
-double16 __attribute__((overloadable)) lgamma_r(double16 x, int16 *signp);
+double __overload lgamma_r(double x, int *signp);
+double2 __overload lgamma_r(double2 x, int2 *signp);
+double3 __overload lgamma_r(double3 x, int3 *signp);
+double4 __overload lgamma_r(double4 x, int4 *signp);
+double8 __overload lgamma_r(double8 x, int8 *signp);
+double16 __overload lgamma_r(double16 x, int16 *signp);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) lgamma_r(half x, int *signp);
-half2 __attribute__((overloadable)) lgamma_r(half2 x, int2 *signp);
-half3 __attribute__((overloadable)) lgamma_r(half3 x, int3 *signp);
-half4 __attribute__((overloadable)) lgamma_r(half4 x, int4 *signp);
-half8 __attribute__((overloadable)) lgamma_r(half8 x, int8 *signp);
-half16 __attribute__((overloadable)) lgamma_r(half16 x, int16 *signp);
+half __overload lgamma_r(half x, int *signp);
+half2 __overload lgamma_r(half2 x, int2 *signp);
+half3 __overload lgamma_r(half3 x, int3 *signp);
+half4 __overload lgamma_r(half4 x, int4 *signp);
+half8 __overload lgamma_r(half8 x, int8 *signp);
+half16 __overload lgamma_r(half16 x, int16 *signp);
 #endif //cl_khr_fp16
 #else
-float __attribute__((overloadable)) lgamma_r(float x, __global int *signp);
-float2 __attribute__((overloadable)) lgamma_r(float2 x, __global int2 *signp);
-float3 __attribute__((overloadable)) lgamma_r(float3 x, __global int3 *signp);
-float4 __attribute__((overloadable)) lgamma_r(float4 x, __global int4 *signp);
-float8 __attribute__((overloadable)) lgamma_r(float8 x, __global int8 *signp);
-float16 __attribute__((overloadable)) lgamma_r(float16 x, __global int16 *signp);
-float __attribute__((overloadable)) lgamma_r(float x, __local int *signp);
-float2 __attribute__((overloadable)) lgamma_r(float2 x, __local int2 *signp);
-float3 __attribute__((overloadable)) lgamma_r(float3 x, __local int3 *signp);
-float4 __attribute__((overloadable)) lgamma_r(float4 x, __local int4 *signp);
-float8 __attribute__((overloadable)) lgamma_r(float8 x, __local int8 *signp);
-float16 __attribute__((overloadable)) lgamma_r(float16 x, __local int16 *signp);
-float __attribute__((overloadable)) lgamma_r(float x, __private int *signp);
-float2 __attribute__((overloadable)) lgamma_r(float2 x, __private int2 *signp);
-float3 __attribute__((overloadable)) lgamma_r(float3 x, __private int3 *signp);
-float4 __attribute__((overloadable)) lgamma_r(float4 x, __private int4 *signp);
-float8 __attribute__((overloadable)) lgamma_r(float8 x, __private int8 *signp);
-float16 __attribute__((overloadable)) lgamma_r(float16 x, __private int16 *signp);
+float __overload lgamma_r(float x, __global int *signp);
+float2 __overload lgamma_r(float2 x, __global int2 *signp);
+float3 __overload lgamma_r(float3 x, __global int3 *signp);
+float4 __overload lgamma_r(float4 x, __global int4 *signp);
+float8 __overload lgamma_r(float8 x, __global int8 *signp);
+float16 __overload lgamma_r(float16 x, __global int16 *signp);
+float __overload lgamma_r(float x, __local int *signp);
+float2 __overload lgamma_r(float2 x, __local int2 *signp);
+float3 __overload lgamma_r(float3 x, __local int3 *signp);
+float4 __overload lgamma_r(float4 x, __local int4 *signp);
+float8 __overload lgamma_r(float8 x, __local int8 *signp);
+float16 __overload lgamma_r(float16 x, __local int16 *signp);
+float __overload lgamma_r(float x, __private int *signp);
+float2 __overload lgamma_r(float2 x, __private int2 *signp);
+float3 __overload lgamma_r(float3 x, __private int3 *signp);
+float4 __overload lgamma_r(float4 x, __private int4 *signp);
+float8 __overload lgamma_r(float8 x, __private int8 *signp);
+float16 __overload lgamma_r(float16 x, __private int16 *signp);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) lgamma_r(double x, __global int *signp);
-double2 __attribute__((overloadable)) lgamma_r(double2 x, __global int2 *signp);
-double3 __attribute__((overloadable)) lgamma_r(double3 x, __global int3 *signp);
-double4 __attribute__((overloadable)) lgamma_r(double4 x, __global int4 *signp);
-double8 __attribute__((overloadable)) lgamma_r(double8 x, __global int8 *signp);
-double16 __attribute__((overloadable)) lgamma_r(double16 x, __global int16 *signp);
-double __attribute__((overloadable)) lgamma_r(double x, __local int *signp);
-double2 __attribute__((overloadable)) lgamma_r(double2 x, __local int2 *signp);
-double3 __attribute__((overloadable)) lgamma_r(double3 x, __local int3 *signp);
-double4 __attribute__((overloadable)) lgamma_r(double4 x, __local int4 *signp);
-double8 __attribute__((overloadable)) lgamma_r(double8 x, __local int8 *signp);
-double16 __attribute__((overloadable)) lgamma_r(double16 x, __local int16 *signp);
-double __attribute__((overloadable)) lgamma_r(double x, __private int *signp);
-double2 __attribute__((overloadable)) lgamma_r(double2 x, __private int2 *signp);
-double3 __attribute__((overloadable)) lgamma_r(double3 x, __private int3 *signp);
-double4 __attribute__((overloadable)) lgamma_r(double4 x, __private int4 *signp);
-double8 __attribute__((overloadable)) lgamma_r(double8 x, __private int8 *signp);
-double16 __attribute__((overloadable)) lgamma_r(double16 x, __private int16 *signp);
+double __overload lgamma_r(double x, __global int *signp);
+double2 __overload lgamma_r(double2 x, __global int2 *signp);
+double3 __overload lgamma_r(double3 x, __global int3 *signp);
+double4 __overload lgamma_r(double4 x, __global int4 *signp);
+double8 __overload lgamma_r(double8 x, __global int8 *signp);
+double16 __overload lgamma_r(double16 x, __global int16 *signp);
+double __overload lgamma_r(double x, __local int *signp);
+double2 __overload lgamma_r(double2 x, __local int2 *signp);
+double3 __overload lgamma_r(double3 x, __local int3 *signp);
+double4 __overload lgamma_r(double4 x, __local int4 *signp);
+double8 __overload lgamma_r(double8 x, __local int8 *signp);
+double16 __overload lgamma_r(double16 x, __local int16 *signp);
+double __overload lgamma_r(double x, __private int *signp);
+double2 __overload lgamma_r(double2 x, __private int2 *signp);
+double3 __overload lgamma_r(double3 x, __private int3 *signp);
+double4 __overload lgamma_r(double4 x, __private int4 *signp);
+double8 __overload lgamma_r(double8 x, __private int8 *signp);
+double16 __overload lgamma_r(double16 x, __private int16 *signp);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) lgamma_r(half x, __global int *signp);
-half2 __attribute__((overloadable)) lgamma_r(half2 x, __global int2 *signp);
-half3 __attribute__((overloadable)) lgamma_r(half3 x, __global int3 *signp);
-half4 __attribute__((overloadable)) lgamma_r(half4 x, __global int4 *signp);
-half8 __attribute__((overloadable)) lgamma_r(half8 x, __global int8 *signp);
-half16 __attribute__((overloadable)) lgamma_r(half16 x, __global int16 *signp);
-half __attribute__((overloadable)) lgamma_r(half x, __local int *signp);
-half2 __attribute__((overloadable)) lgamma_r(half2 x, __local int2 *signp);
-half3 __attribute__((overloadable)) lgamma_r(half3 x, __local int3 *signp);
-half4 __attribute__((overloadable)) lgamma_r(half4 x, __local int4 *signp);
-half8 __attribute__((overloadable)) lgamma_r(half8 x, __local int8 *signp);
-half16 __attribute__((overloadable)) lgamma_r(half16 x, __local int16 *signp);
-half __attribute__((overloadable)) lgamma_r(half x, __private int *signp);
-half2 __attribute__((overloadable)) lgamma_r(half2 x, __private int2 *signp);
-half3 __attribute__((overloadable)) lgamma_r(half3 x, __private int3 *signp);
-half4 __attribute__((overloadable)) lgamma_r(half4 x, __private int4 *signp);
-half8 __attribute__((overloadable)) lgamma_r(half8 x, __private int8 *signp);
-half16 __attribute__((overloadable)) lgamma_r(half16 x, __private int16 *signp);
+half __overload lgamma_r(half x, __global int *signp);
+half2 __overload lgamma_r(half2 x, __global int2 *signp);
+half3 __overload lgamma_r(half3 x, __global int3 *signp);
+half4 __overload lgamma_r(half4 x, __global int4 *signp);
+half8 __overload lgamma_r(half8 x, __global int8 *signp);
+half16 __overload lgamma_r(half16 x, __global int16 *signp);
+half __overload lgamma_r(half x, __local int *signp);
+half2 __overload lgamma_r(half2 x, __local int2 *signp);
+half3 __overload lgamma_r(half3 x, __local int3 *signp);
+half4 __overload lgamma_r(half4 x, __local int4 *signp);
+half8 __overload lgamma_r(half8 x, __local int8 *signp);
+half16 __overload lgamma_r(half16 x, __local int16 *signp);
+half __overload lgamma_r(half x, __private int *signp);
+half2 __overload lgamma_r(half2 x, __private int2 *signp);
+half3 __overload lgamma_r(half3 x, __private int3 *signp);
+half4 __overload lgamma_r(half4 x, __private int4 *signp);
+half8 __overload lgamma_r(half8 x, __private int8 *signp);
+half16 __overload lgamma_r(half16 x, __private int16 *signp);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -8882,86 +8884,86 @@ half16 __const_func minmag(half16 x, half16 y);
  * pointed to by iptr.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) modf(float x, float *iptr);
-float2 __attribute__((overloadable)) modf(float2 x, float2 *iptr);
-float3 __attribute__((overloadable)) modf(float3 x, float3 *iptr);
-float4 __attribute__((overloadable)) modf(float4 x, float4 *iptr);
-float8 __attribute__((overloadable)) modf(float8 x, float8 *iptr);
-float16 __attribute__((overloadable)) modf(float16 x, float16 *iptr);
+float __overload modf(float x, float *iptr);
+float2 __overload modf(float2 x, float2 *iptr);
+float3 __overload modf(float3 x, float3 *iptr);
+float4 __overload modf(float4 x, float4 *iptr);
+float8 __overload modf(float8 x, float8 *iptr);
+float16 __overload modf(float16 x, float16 *iptr);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) modf(double x, double *iptr);
-double2 __attribute__((overloadable)) modf(double2 x, double2 *iptr);
-double3 __attribute__((overloadable)) modf(double3 x, double3 *iptr);
-double4 __attribute__((overloadable)) modf(double4 x, double4 *iptr);
-double8 __attribute__((overloadable)) modf(double8 x, double8 *iptr);
-double16 __attribute__((overloadable)) modf(double16 x, double16 *iptr);
+double __overload modf(double x, double *iptr);
+double2 __overload modf(double2 x, double2 *iptr);
+double3 __overload modf(double3 x, double3 *iptr);
+double4 __overload modf(double4 x, double4 *iptr);
+double8 __overload modf(double8 x, double8 *iptr);
+double16 __overload modf(double16 x, double16 *iptr);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) modf(half x, half *iptr);
-half2 __attribute__((overloadable)) modf(half2 x, half2 *iptr);
-half3 __attribute__((overloadable)) modf(half3 x, half3 *iptr);
-half4 __attribute__((overloadable)) modf(half4 x, half4 *iptr);
-half8 __attribute__((overloadable)) modf(half8 x, half8 *iptr);
-half16 __attribute__((overloadable)) modf(half16 x, half16 *iptr);
+half __overload modf(half x, half *iptr);
+half2 __overload modf(half2 x, half2 *iptr);
+half3 __overload modf(half3 x, half3 *iptr);
+half4 __overload modf(half4 x, half4 *iptr);
+half8 __overload modf(half8 x, half8 *iptr);
+half16 __overload modf(half16 x, half16 *iptr);
 #endif //cl_khr_fp16
 #else
-float __attribute__((overloadable)) modf(float x, __global float *iptr);
-float2 __attribute__((overloadable)) modf(float2 x, __global float2 *iptr);
-float3 __attribute__((overloadable)) modf(float3 x, __global float3 *iptr);
-float4 __attribute__((overloadable)) modf(float4 x, __global float4 *iptr);
-float8 __attribute__((overloadable)) modf(float8 x, __global float8 *iptr);
-float16 __attribute__((overloadable)) modf(float16 x, __global float16 *iptr);
-float __attribute__((overloadable)) modf(float x, __local float *iptr);
-float2 __attribute__((overloadable)) modf(float2 x, __local float2 *iptr);
-float3 __attribute__((overloadable)) modf(float3 x, __local float3 *iptr);
-float4 __attribute__((overloadable)) modf(float4 x, __local float4 *iptr);
-float8 __attribute__((overloadable)) modf(float8 x, __local float8 *iptr);
-float16 __attribute__((overloadable)) modf(float16 x, __local float16 *iptr);
-float __attribute__((overloadable)) modf(float x, __private float *iptr);
-float2 __attribute__((overloadable)) modf(float2 x, __private float2 *iptr);
-float3 __attribute__((overloadable)) modf(float3 x, __private float3 *iptr);
-float4 __attribute__((overloadable)) modf(float4 x, __private float4 *iptr);
-float8 __attribute__((overloadable)) modf(float8 x, __private float8 *iptr);
-float16 __attribute__((overloadable)) modf(float16 x, __private float16 *iptr);
+float __overload modf(float x, __global float *iptr);
+float2 __overload modf(float2 x, __global float2 *iptr);
+float3 __overload modf(float3 x, __global float3 *iptr);
+float4 __overload modf(float4 x, __global float4 *iptr);
+float8 __overload modf(float8 x, __global float8 *iptr);
+float16 __overload modf(float16 x, __global float16 *iptr);
+float __overload modf(float x, __local float *iptr);
+float2 __overload modf(float2 x, __local float2 *iptr);
+float3 __overload modf(float3 x, __local float3 *iptr);
+float4 __overload modf(float4 x, __local float4 *iptr);
+float8 __overload modf(float8 x, __local float8 *iptr);
+float16 __overload modf(float16 x, __local float16 *iptr);
+float __overload modf(float x, __private float *iptr);
+float2 __overload modf(float2 x, __private float2 *iptr);
+float3 __overload modf(float3 x, __private float3 *iptr);
+float4 __overload modf(float4 x, __private float4 *iptr);
+float8 __overload modf(float8 x, __private float8 *iptr);
+float16 __overload modf(float16 x, __private float16 *iptr);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) modf(double x, __global double *iptr);
-double2 __attribute__((overloadable)) modf(double2 x, __global double2 *iptr);
-double3 __attribute__((overloadable)) modf(double3 x, __global double3 *iptr);
-double4 __attribute__((overloadable)) modf(double4 x, __global double4 *iptr);
-double8 __attribute__((overloadable)) modf(double8 x, __global double8 *iptr);
-double16 __attribute__((overloadable)) modf(double16 x, __global double16 *iptr);
-double __attribute__((overloadable)) modf(double x, __local double *iptr);
-double2 __attribute__((overloadable)) modf(double2 x, __local double2 *iptr);
-double3 __attribute__((overloadable)) modf(double3 x, __local double3 *iptr);
-double4 __attribute__((overloadable)) modf(double4 x, __local double4 *iptr);
-double8 __attribute__((overloadable)) modf(double8 x, __local double8 *iptr);
-double16 __attribute__((overloadable)) modf(double16 x, __local double16 *iptr);
-double __attribute__((overloadable)) modf(double x, __private double *iptr);
-double2 __attribute__((overloadable)) modf(double2 x, __private double2 *iptr);
-double3 __attribute__((overloadable)) modf(double3 x, __private double3 *iptr);
-double4 __attribute__((overloadable)) modf(double4 x, __private double4 *iptr);
-double8 __attribute__((overloadable)) modf(double8 x, __private double8 *iptr);
-double16 __attribute__((overloadable)) modf(double16 x, __private double16 *iptr);
+double __overload modf(double x, __global double *iptr);
+double2 __overload modf(double2 x, __global double2 *iptr);
+double3 __overload modf(double3 x, __global double3 *iptr);
+double4 __overload modf(double4 x, __global double4 *iptr);
+double8 __overload modf(double8 x, __global double8 *iptr);
+double16 __overload modf(double16 x, __global double16 *iptr);
+double __overload modf(double x, __local double *iptr);
+double2 __overload modf(double2 x, __local double2 *iptr);
+double3 __overload modf(double3 x, __local double3 *iptr);
+double4 __overload modf(double4 x, __local double4 *iptr);
+double8 __overload modf(double8 x, __local double8 *iptr);
+double16 __overload modf(double16 x, __local double16 *iptr);
+double __overload modf(double x, __private double *iptr);
+double2 __overload modf(double2 x, __private double2 *iptr);
+double3 __overload modf(double3 x, __private double3 *iptr);
+double4 __overload modf(double4 x, __private double4 *iptr);
+double8 __overload modf(double8 x, __private double8 *iptr);
+double16 __overload modf(double16 x, __private double16 *iptr);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) modf(half x, __global half *iptr);
-half2 __attribute__((overloadable)) modf(half2 x, __global half2 *iptr);
-half3 __attribute__((overloadable)) modf(half3 x, __global half3 *iptr);
-half4 __attribute__((overloadable)) modf(half4 x, __global half4 *iptr);
-half8 __attribute__((overloadable)) modf(half8 x, __global half8 *iptr);
-half16 __attribute__((overloadable)) modf(half16 x, __global half16 *iptr);
-half __attribute__((overloadable)) modf(half x, __local half *iptr);
-half2 __attribute__((overloadable)) modf(half2 x, __local half2 *iptr);
-half3 __attribute__((overloadable)) modf(half3 x, __local half3 *iptr);
-half4 __attribute__((overloadable)) modf(half4 x, __local half4 *iptr);
-half8 __attribute__((overloadable)) modf(half8 x, __local half8 *iptr);
-half16 __attribute__((overloadable)) modf(half16 x, __local half16 *iptr);
-half __attribute__((overloadable)) modf(half x, __private half *iptr);
-half2 __attribute__((overloadable)) modf(half2 x, __private half2 *iptr);
-half3 __attribute__((overloadable)) modf(half3 x, __private half3 *iptr);
-half4 __attribute__((overloadable)) modf(half4 x, __private half4 *iptr);
-half8 __attribute__((overloadable)) modf(half8 x, __private half8 *iptr);
-half16 __attribute__((overloadable)) modf(half16 x, __private half16 *iptr);
+half __overload modf(half x, __global half *iptr);
+half2 __overload modf(half2 x, __global half2 *iptr);
+half3 __overload modf(half3 x, __global half3 *iptr);
+half4 __overload modf(half4 x, __global half4 *iptr);
+half8 __overload modf(half8 x, __global half8 *iptr);
+half16 __overload modf(half16 x, __global half16 *iptr);
+half __overload modf(half x, __local half *iptr);
+half2 __overload modf(half2 x, __local half2 *iptr);
+half3 __overload modf(half3 x, __local half3 *iptr);
+half4 __overload modf(half4 x, __local half4 *iptr);
+half8 __overload modf(half8 x, __local half8 *iptr);
+half16 __overload modf(half16 x, __local half16 *iptr);
+half __overload modf(half x, __private half *iptr);
+half2 __overload modf(half2 x, __private half2 *iptr);
+half3 __overload modf(half3 x, __private half3 *iptr);
+half4 __overload modf(half4 x, __private half4 *iptr);
+half8 __overload modf(half8 x, __private half8 *iptr);
+half16 __overload modf(half16 x, __private half16 *iptr);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -9142,87 +9144,87 @@ half16 __const_func remainder(half16 x, half16 y);
  * pointed to by quo.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) remquo(float x, float y, int *quo);
-float2 __attribute__((overloadable)) remquo(float2 x, float2 y, int2 *quo);
-float3 __attribute__((overloadable)) remquo(float3 x, float3 y, int3 *quo);
-float4 __attribute__((overloadable)) remquo(float4 x, float4 y, int4 *quo);
-float8 __attribute__((overloadable)) remquo(float8 x, float8 y, int8 *quo);
-float16 __attribute__((overloadable)) remquo(float16 x, float16 y, int16 *quo);
+float __overload remquo(float x, float y, int *quo);
+float2 __overload remquo(float2 x, float2 y, int2 *quo);
+float3 __overload remquo(float3 x, float3 y, int3 *quo);
+float4 __overload remquo(float4 x, float4 y, int4 *quo);
+float8 __overload remquo(float8 x, float8 y, int8 *quo);
+float16 __overload remquo(float16 x, float16 y, int16 *quo);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) remquo(double x, double y, int *quo);
-double2 __attribute__((overloadable)) remquo(double2 x, double2 y, int2 *quo);
-double3 __attribute__((overloadable)) remquo(double3 x, double3 y, int3 *quo);
-double4 __attribute__((overloadable)) remquo(double4 x, double4 y, int4 *quo);
-double8 __attribute__((overloadable)) remquo(double8 x, double8 y, int8 *quo);
-double16 __attribute__((overloadable)) remquo(double16 x, double16 y, int16 *quo);
+double __overload remquo(double x, double y, int *quo);
+double2 __overload remquo(double2 x, double2 y, int2 *quo);
+double3 __overload remquo(double3 x, double3 y, int3 *quo);
+double4 __overload remquo(double4 x, double4 y, int4 *quo);
+double8 __overload remquo(double8 x, double8 y, int8 *quo);
+double16 __overload remquo(double16 x, double16 y, int16 *quo);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) remquo(half x, half y, int *quo);
-half2 __attribute__((overloadable)) remquo(half2 x, half2 y, int2 *quo);
-half3 __attribute__((overloadable)) remquo(half3 x, half3 y, int3 *quo);
-half4 __attribute__((overloadable)) remquo(half4 x, half4 y, int4 *quo);
-half8 __attribute__((overloadable)) remquo(half8 x, half8 y, int8 *quo);
-half16 __attribute__((overloadable)) remquo(half16 x, half16 y, int16 *quo);
+half __overload remquo(half x, half y, int *quo);
+half2 __overload remquo(half2 x, half2 y, int2 *quo);
+half3 __overload remquo(half3 x, half3 y, int3 *quo);
+half4 __overload remquo(half4 x, half4 y, int4 *quo);
+half8 __overload remquo(half8 x, half8 y, int8 *quo);
+half16 __overload remquo(half16 x, half16 y, int16 *quo);
 
 #endif //cl_khr_fp16
 #else
-float __attribute__((overloadable)) remquo(float x, float y, __global int *quo);
-float2 __attribute__((overloadable)) remquo(float2 x, float2 y, __global int2 *quo);
-float3 __attribute__((overloadable)) remquo(float3 x, float3 y, __global int3 *quo);
-float4 __attribute__((overloadable)) remquo(float4 x, float4 y, __global int4 *quo);
-float8 __attribute__((overloadable)) remquo(float8 x, float8 y, __global int8 *quo);
-float16 __attribute__((overloadable)) remquo(float16 x, float16 y, __global int16 *quo);
-float __attribute__((overloadable)) remquo(float x, float y, __local int *quo);
-float2 __attribute__((overloadable)) remquo(float2 x, float2 y, __local int2 *quo);
-float3 __attribute__((overloadable)) remquo(float3 x, float3 y, __local int3 *quo);
-float4 __attribute__((overloadable)) remquo(float4 x, float4 y, __local int4 *quo);
-float8 __attribute__((overloadable)) remquo(float8 x, float8 y, __local int8 *quo);
-float16 __attribute__((overloadable)) remquo(float16 x, float16 y, __local int16 *quo);
-float __attribute__((overloadable)) remquo(float x, float y, __private int *quo);
-float2 __attribute__((overloadable)) remquo(float2 x, float2 y, __private int2 *quo);
-float3 __attribute__((overloadable)) remquo(float3 x, float3 y, __private int3 *quo);
-float4 __attribute__((overloadable)) remquo(float4 x, float4 y, __private int4 *quo);
-float8 __attribute__((overloadable)) remquo(float8 x, float8 y, __private int8 *quo);
-float16 __attribute__((overloadable)) remquo(float16 x, float16 y, __private int16 *quo);
+float __overload remquo(float x, float y, __global int *quo);
+float2 __overload remquo(float2 x, float2 y, __global int2 *quo);
+float3 __overload remquo(float3 x, float3 y, __global int3 *quo);
+float4 __overload remquo(float4 x, float4 y, __global int4 *quo);
+float8 __overload remquo(float8 x, float8 y, __global int8 *quo);
+float16 __overload remquo(float16 x, float16 y, __global int16 *quo);
+float __overload remquo(float x, float y, __local int *quo);
+float2 __overload remquo(float2 x, float2 y, __local int2 *quo);
+float3 __overload remquo(float3 x, float3 y, __local int3 *quo);
+float4 __overload remquo(float4 x, float4 y, __local int4 *quo);
+float8 __overload remquo(float8 x, float8 y, __local int8 *quo);
+float16 __overload remquo(float16 x, float16 y, __local int16 *quo);
+float __overload remquo(float x, float y, __private int *quo);
+float2 __overload remquo(float2 x, float2 y, __private int2 *quo);
+float3 __overload remquo(float3 x, float3 y, __private int3 *quo);
+float4 __overload remquo(float4 x, float4 y, __private int4 *quo);
+float8 __overload remquo(float8 x, float8 y, __private int8 *quo);
+float16 __overload remquo(float16 x, float16 y, __private int16 *quo);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) remquo(double x, double y, __global int *quo);
-double2 __attribute__((overloadable)) remquo(double2 x, double2 y, __global int2 *quo);
-double3 __attribute__((overloadable)) remquo(double3 x, double3 y, __global int3 *quo);
-double4 __attribute__((overloadable)) remquo(double4 x, double4 y, __global int4 *quo);
-double8 __attribute__((overloadable)) remquo(double8 x, double8 y, __global int8 *quo);
-double16 __attribute__((overloadable)) remquo(double16 x, double16 y, __global int16 *quo);
-double __attribute__((overloadable)) remquo(double x, double y, __local int *quo);
-double2 __attribute__((overloadable)) remquo(double2 x, double2 y, __local int2 *quo);
-double3 __attribute__((overloadable)) remquo(double3 x, double3 y, __local int3 *quo);
-double4 __attribute__((overloadable)) remquo(double4 x, double4 y, __local int4 *quo);
-double8 __attribute__((overloadable)) remquo(double8 x, double8 y, __local int8 *quo);
-double16 __attribute__((overloadable)) remquo(double16 x, double16 y, __local int16 *quo);
-double __attribute__((overloadable)) remquo(double x, double y, __private int *quo);
-double2 __attribute__((overloadable)) remquo(double2 x, double2 y, __private int2 *quo);
-double3 __attribute__((overloadable)) remquo(double3 x, double3 y, __private int3 *quo);
-double4 __attribute__((overloadable)) remquo(double4 x, double4 y, __private int4 *quo);
-double8 __attribute__((overloadable)) remquo(double8 x, double8 y, __private int8 *quo);
-double16 __attribute__((overloadable)) remquo(double16 x, double16 y, __private int16 *quo);
+double __overload remquo(double x, double y, __global int *quo);
+double2 __overload remquo(double2 x, double2 y, __global int2 *quo);
+double3 __overload remquo(double3 x, double3 y, __global int3 *quo);
+double4 __overload remquo(double4 x, double4 y, __global int4 *quo);
+double8 __overload remquo(double8 x, double8 y, __global int8 *quo);
+double16 __overload remquo(double16 x, double16 y, __global int16 *quo);
+double __overload remquo(double x, double y, __local int *quo);
+double2 __overload remquo(double2 x, double2 y, __local int2 *quo);
+double3 __overload remquo(double3 x, double3 y, __local int3 *quo);
+double4 __overload remquo(double4 x, double4 y, __local int4 *quo);
+double8 __overload remquo(double8 x, double8 y, __local int8 *quo);
+double16 __overload remquo(double16 x, double16 y, __local int16 *quo);
+double __overload remquo(double x, double y, __private int *quo);
+double2 __overload remquo(double2 x, double2 y, __private int2 *quo);
+double3 __overload remquo(double3 x, double3 y, __private int3 *quo);
+double4 __overload remquo(double4 x, double4 y, __private int4 *quo);
+double8 __overload remquo(double8 x, double8 y, __private int8 *quo);
+double16 __overload remquo(double16 x, double16 y, __private int16 *quo);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) remquo(half x, half y, __global int *quo);
-half2 __attribute__((overloadable)) remquo(half2 x, half2 y, __global int2 *quo);
-half3 __attribute__((overloadable)) remquo(half3 x, half3 y, __global int3 *quo);
-half4 __attribute__((overloadable)) remquo(half4 x, half4 y, __global int4 *quo);
-half8 __attribute__((overloadable)) remquo(half8 x, half8 y, __global int8 *quo);
-half16 __attribute__((overloadable)) remquo(half16 x, half16 y, __global int16 *quo);
-half __attribute__((overloadable)) remquo(half x, half y, __local int *quo);
-half2 __attribute__((overloadable)) remquo(half2 x, half2 y, __local int2 *quo);
-half3 __attribute__((overloadable)) remquo(half3 x, half3 y, __local int3 *quo);
-half4 __attribute__((overloadable)) remquo(half4 x, half4 y, __local int4 *quo);
-half8 __attribute__((overloadable)) remquo(half8 x, half8 y, __local int8 *quo);
-half16 __attribute__((overloadable)) remquo(half16 x, half16 y, __local int16 *quo);
-half __attribute__((overloadable)) remquo(half x, half y, __private int *quo);
-half2 __attribute__((overloadable)) remquo(half2 x, half2 y, __private int2 *quo);
-half3 __attribute__((overloadable)) remquo(half3 x, half3 y, __private int3 *quo);
-half4 __attribute__((overloadable)) remquo(half4 x, half4 y, __private int4 *quo);
-half8 __attribute__((overloadable)) remquo(half8 x, half8 y, __private int8 *quo);
-half16 __attribute__((overloadable)) remquo(half16 x, half16 y, __private int16 *quo);
+half __overload remquo(half x, half y, __global int *quo);
+half2 __overload remquo(half2 x, half2 y, __global int2 *quo);
+half3 __overload remquo(half3 x, half3 y, __global int3 *quo);
+half4 __overload remquo(half4 x, half4 y, __global int4 *quo);
+half8 __overload remquo(half8 x, half8 y, __global int8 *quo);
+half16 __overload remquo(half16 x, half16 y, __global int16 *quo);
+half __overload remquo(half x, half y, __local int *quo);
+half2 __overload remquo(half2 x, half2 y, __local int2 *quo);
+half3 __overload remquo(half3 x, half3 y, __local int3 *quo);
+half4 __overload remquo(half4 x, half4 y, __local int4 *quo);
+half8 __overload remquo(half8 x, half8 y, __local int8 *quo);
+half16 __overload remquo(half16 x, half16 y, __local int16 *quo);
+half __overload remquo(half x, half y, __private int *quo);
+half2 __overload remquo(half2 x, half2 y, __private int2 *quo);
+half3 __overload remquo(half3 x, half3 y, __private int3 *quo);
+half4 __overload remquo(half4 x, half4 y, __private int4 *quo);
+half8 __overload remquo(half8 x, half8 y, __private int8 *quo);
+half16 __overload remquo(half16 x, half16 y, __private int16 *quo);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 /**
@@ -9366,86 +9368,86 @@ half16 __const_func sin(half16);
  * in cosval.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) sincos(float x, float *cosval);
-float2 __attribute__((overloadable)) sincos(float2 x, float2 *cosval);
-float3 __attribute__((overloadable)) sincos(float3 x, float3 *cosval);
-float4 __attribute__((overloadable)) sincos(float4 x, float4 *cosval);
-float8 __attribute__((overloadable)) sincos(float8 x, float8 *cosval);
-float16 __attribute__((overloadable)) sincos(float16 x, float16 *cosval);
+float __overload sincos(float x, float *cosval);
+float2 __overload sincos(float2 x, float2 *cosval);
+float3 __overload sincos(float3 x, float3 *cosval);
+float4 __overload sincos(float4 x, float4 *cosval);
+float8 __overload sincos(float8 x, float8 *cosval);
+float16 __overload sincos(float16 x, float16 *cosval);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) sincos(double x, double *cosval);
-double2 __attribute__((overloadable)) sincos(double2 x, double2 *cosval);
-double3 __attribute__((overloadable)) sincos(double3 x, double3 *cosval);
-double4 __attribute__((overloadable)) sincos(double4 x, double4 *cosval);
-double8 __attribute__((overloadable)) sincos(double8 x, double8 *cosval);
-double16 __attribute__((overloadable)) sincos(double16 x, double16 *cosval);
+double __overload sincos(double x, double *cosval);
+double2 __overload sincos(double2 x, double2 *cosval);
+double3 __overload sincos(double3 x, double3 *cosval);
+double4 __overload sincos(double4 x, double4 *cosval);
+double8 __overload sincos(double8 x, double8 *cosval);
+double16 __overload sincos(double16 x, double16 *cosval);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) sincos(half x, half *cosval);
-half2 __attribute__((overloadable)) sincos(half2 x, half2 *cosval);
-half3 __attribute__((overloadable)) sincos(half3 x, half3 *cosval);
-half4 __attribute__((overloadable)) sincos(half4 x, half4 *cosval);
-half8 __attribute__((overloadable)) sincos(half8 x, half8 *cosval);
-half16 __attribute__((overloadable)) sincos(half16 x, half16 *cosval);
+half __overload sincos(half x, half *cosval);
+half2 __overload sincos(half2 x, half2 *cosval);
+half3 __overload sincos(half3 x, half3 *cosval);
+half4 __overload sincos(half4 x, half4 *cosval);
+half8 __overload sincos(half8 x, half8 *cosval);
+half16 __overload sincos(half16 x, half16 *cosval);
 #endif //cl_khr_fp16
 #else
-float __attribute__((overloadable)) sincos(float x, __global float *cosval);
-float2 __attribute__((overloadable)) sincos(float2 x, __global float2 *cosval);
-float3 __attribute__((overloadable)) sincos(float3 x, __global float3 *cosval);
-float4 __attribute__((overloadable)) sincos(float4 x, __global float4 *cosval);
-float8 __attribute__((overloadable)) sincos(float8 x, __global float8 *cosval);
-float16 __attribute__((overloadable)) sincos(float16 x, __global float16 *cosval);
-float __attribute__((overloadable)) sincos(float x, __local float *cosval);
-float2 __attribute__((overloadable)) sincos(float2 x, __local float2 *cosval);
-float3 __attribute__((overloadable)) sincos(float3 x, __local float3 *cosval);
-float4 __attribute__((overloadable)) sincos(float4 x, __local float4 *cosval);
-float8 __attribute__((overloadable)) sincos(float8 x, __local float8 *cosval);
-float16 __attribute__((overloadable)) sincos(float16 x, __local float16 *cosval);
-float __attribute__((overloadable)) sincos(float x, __private float *cosval);
-float2 __attribute__((overloadable)) sincos(float2 x, __private float2 *cosval);
-float3 __attribute__((overloadable)) sincos(float3 x, __private float3 *cosval);
-float4 __attribute__((overloadable)) sincos(float4 x, __private float4 *cosval);
-float8 __attribute__((overloadable)) sincos(float8 x, __private float8 *cosval);
-float16 __attribute__((overloadable)) sincos(float16 x, __private float16 *cosval);
+float __overload sincos(float x, __global float *cosval);
+float2 __overload sincos(float2 x, __global float2 *cosval);
+float3 __overload sincos(float3 x, __global float3 *cosval);
+float4 __overload sincos(float4 x, __global float4 *cosval);
+float8 __overload sincos(float8 x, __global float8 *cosval);
+float16 __overload sincos(float16 x, __global float16 *cosval);
+float __overload sincos(float x, __local float *cosval);
+float2 __overload sincos(float2 x, __local float2 *cosval);
+float3 __overload sincos(float3 x, __local float3 *cosval);
+float4 __overload sincos(float4 x, __local float4 *cosval);
+float8 __overload sincos(float8 x, __local float8 *cosval);
+float16 __overload sincos(float16 x, __local float16 *cosval);
+float __overload sincos(float x, __private float *cosval);
+float2 __overload sincos(float2 x, __private float2 *cosval);
+float3 __overload sincos(float3 x, __private float3 *cosval);
+float4 __overload sincos(float4 x, __private float4 *cosval);
+float8 __overload sincos(float8 x, __private float8 *cosval);
+float16 __overload sincos(float16 x, __private float16 *cosval);
 #ifdef cl_khr_fp64
-double __attribute__((overloadable)) sincos(double x, __global double *cosval);
-double2 __attribute__((overloadable)) sincos(double2 x, __global double2 *cosval);
-double3 __attribute__((overloadable)) sincos(double3 x, __global double3 *cosval);
-double4 __attribute__((overloadable)) sincos(double4 x, __global double4 *cosval);
-double8 __attribute__((overloadable)) sincos(double8 x, __global double8 *cosval);
-double16 __attribute__((overloadable)) sincos(double16 x, __global double16 *cosval);
-double __attribute__((overloadable)) sincos(double x, __local double *cosval);
-double2 __attribute__((overloadable)) sincos(double2 x, __local double2 *cosval);
-double3 __attribute__((overloadable)) sincos(double3 x, __local double3 *cosval);
-double4 __attribute__((overloadable)) sincos(double4 x, __local double4 *cosval);
-double8 __attribute__((overloadable)) sincos(double8 x, __local double8 *cosval);
-double16 __attribute__((overloadable)) sincos(double16 x, __local double16 *cosval);
-double __attribute__((overloadable)) sincos(double x, __private double *cosval);
-double2 __attribute__((overloadable)) sincos(double2 x, __private double2 *cosval);
-double3 __attribute__((overloadable)) sincos(double3 x, __private double3 *cosval);
-double4 __attribute__((overloadable)) sincos(double4 x, __private double4 *cosval);
-double8 __attribute__((overloadable)) sincos(double8 x, __private double8 *cosval);
-double16 __attribute__((overloadable)) sincos(double16 x, __private double16 *cosval);
+double __overload sincos(double x, __global double *cosval);
+double2 __overload sincos(double2 x, __global double2 *cosval);
+double3 __overload sincos(double3 x, __global double3 *cosval);
+double4 __overload sincos(double4 x, __global double4 *cosval);
+double8 __overload sincos(double8 x, __global double8 *cosval);
+double16 __overload sincos(double16 x, __global double16 *cosval);
+double __overload sincos(double x, __local double *cosval);
+double2 __overload sincos(double2 x, __local double2 *cosval);
+double3 __overload sincos(double3 x, __local double3 *cosval);
+double4 __overload sincos(double4 x, __local double4 *cosval);
+double8 __overload sincos(double8 x, __local double8 *cosval);
+double16 __overload sincos(double16 x, __local double16 *cosval);
+double __overload sincos(double x, __private double *cosval);
+double2 __overload sincos(double2 x, __private double2 *cosval);
+double3 __overload sincos(double3 x, __private double3 *cosval);
+double4 __overload sincos(double4 x, __private double4 *cosval);
+double8 __overload sincos(double8 x, __private double8 *cosval);
+double16 __overload sincos(double16 x, __private double16 *cosval);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) sincos(half x, __global half *cosval);
-half2 __attribute__((overloadable)) sincos(half2 x, __global half2 *cosval);
-half3 __attribute__((overloadable)) sincos(half3 x, __global half3 *cosval);
-half4 __attribute__((overloadable)) sincos(half4 x, __global half4 *cosval);
-half8 __attribute__((overloadable)) sincos(half8 x, __global half8 *cosval);
-half16 __attribute__((overloadable)) sincos(half16 x, __global half16 *cosval);
-half __attribute__((overloadable)) sincos(half x, __local half *cosval);
-half2 __attribute__((overloadable)) sincos(half2 x, __local half2 *cosval);
-half3 __attribute__((overloadable)) sincos(half3 x, __local half3 *cosval);
-half4 __attribute__((overloadable)) sincos(half4 x, __local half4 *cosval);
-half8 __attribute__((overloadable)) sincos(half8 x, __local half8 *cosval);
-half16 __attribute__((overloadable)) sincos(half16 x, __local half16 *cosval);
-half __attribute__((overloadable)) sincos(half x, __private half *cosval);
-half2 __attribute__((overloadable)) sincos(half2 x, __private half2 *cosval);
-half3 __attribute__((overloadable)) sincos(half3 x, __private half3 *cosval);
-half4 __attribute__((overloadable)) sincos(half4 x, __private half4 *cosval);
-half8 __attribute__((overloadable)) sincos(half8 x, __private half8 *cosval);
-half16 __attribute__((overloadable)) sincos(half16 x, __private half16 *cosval);
+half __overload sincos(half x, __global half *cosval);
+half2 __overload sincos(half2 x, __global half2 *cosval);
+half3 __overload sincos(half3 x, __global half3 *cosval);
+half4 __overload sincos(half4 x, __global half4 *cosval);
+half8 __overload sincos(half8 x, __global half8 *cosval);
+half16 __overload sincos(half16 x, __global half16 *cosval);
+half __overload sincos(half x, __local half *cosval);
+half2 __overload sincos(half2 x, __local half2 *cosval);
+half3 __overload sincos(half3 x, __local half3 *cosval);
+half4 __overload sincos(half4 x, __local half4 *cosval);
+half8 __overload sincos(half8 x, __local half8 *cosval);
+half16 __overload sincos(half16 x, __local half16 *cosval);
+half __overload sincos(half x, __private half *cosval);
+half2 __overload sincos(half2 x, __private half2 *cosval);
+half3 __overload sincos(half3 x, __private half3 *cosval);
+half4 __overload sincos(half4 x, __private half4 *cosval);
+half8 __overload sincos(half8 x, __private half8 *cosval);
+half16 __overload sincos(half16 x, __private half16 *cosval);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -10493,54 +10495,54 @@ ulong16 __const_func clz(ulong16 x);
  * component type of x, if x is a vector.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-char __attribute__((overloadable)) ctz(char x);
-uchar __attribute__((overloadable)) ctz(uchar x);
-char2 __attribute__((overloadable)) ctz(char2 x);
-uchar2 __attribute__((overloadable)) ctz(uchar2 x);
-char3 __attribute__((overloadable)) ctz(char3 x);
-uchar3 __attribute__((overloadable)) ctz(uchar3 x);
-char4 __attribute__((overloadable)) ctz(char4 x);
-uchar4 __attribute__((overloadable)) ctz(uchar4 x);
-char8 __attribute__((overloadable)) ctz(char8 x);
-uchar8 __attribute__((overloadable)) ctz(uchar8 x);
-char16 __attribute__((overloadable)) ctz(char16 x);
-uchar16 __attribute__((overloadable)) ctz(uchar16 x);
-short __attribute__((overloadable)) ctz(short x);
-ushort __attribute__((overloadable)) ctz(ushort x);
-short2 __attribute__((overloadable)) ctz(short2 x);
-ushort2 __attribute__((overloadable)) ctz(ushort2 x);
-short3 __attribute__((overloadable)) ctz(short3 x);
-ushort3 __attribute__((overloadable)) ctz(ushort3 x);
-short4 __attribute__((overloadable)) ctz(short4 x);
-ushort4 __attribute__((overloadable)) ctz(ushort4 x);
-short8 __attribute__((overloadable)) ctz(short8 x);
-ushort8 __attribute__((overloadable)) ctz(ushort8 x);
-short16 __attribute__((overloadable)) ctz(short16 x);
-ushort16 __attribute__((overloadable)) ctz(ushort16 x);
-int __attribute__((overloadable)) ctz(int x);
-uint __attribute__((overloadable)) ctz(uint x);
-int2 __attribute__((overloadable)) ctz(int2 x);
-uint2 __attribute__((overloadable)) ctz(uint2 x);
-int3 __attribute__((overloadable)) ctz(int3 x);
-uint3 __attribute__((overloadable)) ctz(uint3 x);
-int4 __attribute__((overloadable)) ctz(int4 x);
-uint4 __attribute__((overloadable)) ctz(uint4 x);
-int8 __attribute__((overloadable)) ctz(int8 x);
-uint8 __attribute__((overloadable)) ctz(uint8 x);
-int16 __attribute__((overloadable)) ctz(int16 x);
-uint16 __attribute__((overloadable)) ctz(uint16 x);
-long __attribute__((overloadable)) ctz(long x);
-ulong __attribute__((overloadable)) ctz(ulong x);
-long2 __attribute__((overloadable)) ctz(long2 x);
-ulong2 __attribute__((overloadable)) ctz(ulong2 x);
-long3 __attribute__((overloadable)) ctz(long3 x);
-ulong3 __attribute__((overloadable)) ctz(ulong3 x);
-long4 __attribute__((overloadable)) ctz(long4 x);
-ulong4 __attribute__((overloadable)) ctz(ulong4 x);
-long8 __attribute__((overloadable)) ctz(long8 x);
-ulong8 __attribute__((overloadable)) ctz(ulong8 x);
-long16 __attribute__((overloadable)) ctz(long16 x);
-ulong16 __attribute__((overloadable)) ctz(ulong16 x);
+char __overload ctz(char x);
+uchar __overload ctz(uchar x);
+char2 __overload ctz(char2 x);
+uchar2 __overload ctz(uchar2 x);
+char3 __overload ctz(char3 x);
+uchar3 __overload ctz(uchar3 x);
+char4 __overload ctz(char4 x);
+uchar4 __overload ctz(uchar4 x);
+char8 __overload ctz(char8 x);
+uchar8 __overload ctz(uchar8 x);
+char16 __overload ctz(char16 x);
+uchar16 __overload ctz(uchar16 x);
+short __overload ctz(short x);
+ushort __overload ctz(ushort x);
+short2 __overload ctz(short2 x);
+ushort2 __overload ctz(ushort2 x);
+short3 __overload ctz(short3 x);
+ushort3 __overload ctz(ushort3 x);
+short4 __overload ctz(short4 x);
+ushort4 __overload ctz(ushort4 x);
+short8 __overload ctz(short8 x);
+ushort8 __overload ctz(ushort8 x);
+short16 __overload ctz(short16 x);
+ushort16 __overload ctz(ushort16 x);
+int __overload ctz(int x);
+uint __overload ctz(uint x);
+int2 __overload ctz(int2 x);
+uint2 __overload ctz(uint2 x);
+int3 __overload ctz(int3 x);
+uint3 __overload ctz(uint3 x);
+int4 __overload ctz(int4 x);
+uint4 __overload ctz(uint4 x);
+int8 __overload ctz(int8 x);
+uint8 __overload ctz(uint8 x);
+int16 __overload ctz(int16 x);
+uint16 __overload ctz(uint16 x);
+long __overload ctz(long x);
+ulong __overload ctz(ulong x);
+long2 __overload ctz(long2 x);
+ulong2 __overload ctz(ulong2 x);
+long3 __overload ctz(long3 x);
+ulong3 __overload ctz(ulong3 x);
+long4 __overload ctz(long4 x);
+ulong4 __overload ctz(ulong4 x);
+long8 __overload ctz(long8 x);
+ulong8 __overload ctz(ulong8 x);
+long16 __overload ctz(long16 x);
+ulong16 __overload ctz(ulong16 x);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -12650,305 +12652,305 @@ half16 __const_func select(half16 a, half16 b, ushort16 c);
  * aligned if gentype is long, ulong.
  */
 
-char2 __attribute__((overloadable)) vload2(size_t offset, const __constant char *p);
-uchar2 __attribute__((overloadable)) vload2(size_t offset, const __constant uchar *p);
-short2 __attribute__((overloadable)) vload2(size_t offset, const __constant short *p);
-ushort2 __attribute__((overloadable)) vload2(size_t offset, const __constant ushort *p);
-int2 __attribute__((overloadable)) vload2(size_t offset, const __constant int *p);
-uint2 __attribute__((overloadable)) vload2(size_t offset, const __constant uint *p);
-long2 __attribute__((overloadable)) vload2(size_t offset, const __constant long *p);
-ulong2 __attribute__((overloadable)) vload2(size_t offset, const __constant ulong *p);
-float2 __attribute__((overloadable)) vload2(size_t offset, const __constant float *p);
-char3 __attribute__((overloadable)) vload3(size_t offset, const __constant char *p);
-uchar3 __attribute__((overloadable)) vload3(size_t offset, const __constant uchar *p);
-short3 __attribute__((overloadable)) vload3(size_t offset, const __constant short *p);
-ushort3 __attribute__((overloadable)) vload3(size_t offset, const __constant ushort *p);
-int3 __attribute__((overloadable)) vload3(size_t offset, const __constant int *p);
-uint3 __attribute__((overloadable)) vload3(size_t offset, const __constant uint *p);
-long3 __attribute__((overloadable)) vload3(size_t offset, const __constant long *p);
-ulong3 __attribute__((overloadable)) vload3(size_t offset, const __constant ulong *p);
-float3 __attribute__((overloadable)) vload3(size_t offset, const __constant float *p);
-char4 __attribute__((overloadable)) vload4(size_t offset, const __constant char *p);
-uchar4 __attribute__((overloadable)) vload4(size_t offset, const __constant uchar *p);
-short4 __attribute__((overloadable)) vload4(size_t offset, const __constant short *p);
-ushort4 __attribute__((overloadable)) vload4(size_t offset, const __constant ushort *p);
-int4 __attribute__((overloadable)) vload4(size_t offset, const __constant int *p);
-uint4 __attribute__((overloadable)) vload4(size_t offset, const __constant uint *p);
-long4 __attribute__((overloadable)) vload4(size_t offset, const __constant long *p);
-ulong4 __attribute__((overloadable)) vload4(size_t offset, const __constant ulong *p);
-float4 __attribute__((overloadable)) vload4(size_t offset, const __constant float *p);
-char8 __attribute__((overloadable)) vload8(size_t offset, const __constant char *p);
-uchar8 __attribute__((overloadable)) vload8(size_t offset, const __constant uchar *p);
-short8 __attribute__((overloadable)) vload8(size_t offset, const __constant short *p);
-ushort8 __attribute__((overloadable)) vload8(size_t offset, const __constant ushort *p);
-int8 __attribute__((overloadable)) vload8(size_t offset, const __constant int *p);
-uint8 __attribute__((overloadable)) vload8(size_t offset, const __constant uint *p);
-long8 __attribute__((overloadable)) vload8(size_t offset, const __constant long *p);
-ulong8 __attribute__((overloadable)) vload8(size_t offset, const __constant ulong *p);
-float8 __attribute__((overloadable)) vload8(size_t offset, const __constant float *p);
-char16 __attribute__((overloadable)) vload16(size_t offset, const __constant char *p);
-uchar16 __attribute__((overloadable)) vload16(size_t offset, const __constant uchar *p);
-short16 __attribute__((overloadable)) vload16(size_t offset, const __constant short *p);
-ushort16 __attribute__((overloadable)) vload16(size_t offset, const __constant ushort *p);
-int16 __attribute__((overloadable)) vload16(size_t offset, const __constant int *p);
-uint16 __attribute__((overloadable)) vload16(size_t offset, const __constant uint *p);
-long16 __attribute__((overloadable)) vload16(size_t offset, const __constant long *p);
-ulong16 __attribute__((overloadable)) vload16(size_t offset, const __constant ulong *p);
-float16 __attribute__((overloadable)) vload16(size_t offset, const __constant float *p);
+char2 __overload vload2(size_t offset, const __constant char *p);
+uchar2 __overload vload2(size_t offset, const __constant uchar *p);
+short2 __overload vload2(size_t offset, const __constant short *p);
+ushort2 __overload vload2(size_t offset, const __constant ushort *p);
+int2 __overload vload2(size_t offset, const __constant int *p);
+uint2 __overload vload2(size_t offset, const __constant uint *p);
+long2 __overload vload2(size_t offset, const __constant long *p);
+ulong2 __overload vload2(size_t offset, const __constant ulong *p);
+float2 __overload vload2(size_t offset, const __constant float *p);
+char3 __overload vload3(size_t offset, const __constant char *p);
+uchar3 __overload vload3(size_t offset, const __constant uchar *p);
+short3 __overload vload3(size_t offset, const __constant short *p);
+ushort3 __overload vload3(size_t offset, const __constant ushort *p);
+int3 __overload vload3(size_t offset, const __constant int *p);
+uint3 __overload vload3(size_t offset, const __constant uint *p);
+long3 __overload vload3(size_t offset, const __constant long *p);
+ulong3 __overload vload3(size_t offset, const __constant ulong *p);
+float3 __overload vload3(size_t offset, const __constant float *p);
+char4 __overload vload4(size_t offset, const __constant char *p);
+uchar4 __overload vload4(size_t offset, const __constant uchar *p);
+short4 __overload vload4(size_t offset, const __constant short *p);
+ushort4 __overload vload4(size_t offset, const __constant ushort *p);
+int4 __overload vload4(size_t offset, const __constant int *p);
+uint4 __overload vload4(size_t offset, const __constant uint *p);
+long4 __overload vload4(size_t offset, const __constant long *p);
+ulong4 __overload vload4(size_t offset, const __constant ulong *p);
+float4 __overload vload4(size_t offset, const __constant float *p);
+char8 __overload vload8(size_t offset, const __constant char *p);
+uchar8 __overload vload8(size_t offset, const __constant uchar *p);
+short8 __overload vload8(size_t offset, const __constant short *p);
+ushort8 __overload vload8(size_t offset, const __constant ushort *p);
+int8 __overload vload8(size_t offset, const __constant int *p);
+uint8 __overload vload8(size_t offset, const __constant uint *p);
+long8 __overload vload8(size_t offset, const __constant long *p);
+ulong8 __overload vload8(size_t offset, const __constant ulong *p);
+float8 __overload vload8(size_t offset, const __constant float *p);
+char16 __overload vload16(size_t offset, const __constant char *p);
+uchar16 __overload vload16(size_t offset, const __constant uchar *p);
+short16 __overload vload16(size_t offset, const __constant short *p);
+ushort16 __overload vload16(size_t offset, const __constant ushort *p);
+int16 __overload vload16(size_t offset, const __constant int *p);
+uint16 __overload vload16(size_t offset, const __constant uint *p);
+long16 __overload vload16(size_t offset, const __constant long *p);
+ulong16 __overload vload16(size_t offset, const __constant ulong *p);
+float16 __overload vload16(size_t offset, const __constant float *p);
 #ifdef cl_khr_fp64
-double2 __attribute__((overloadable)) vload2(size_t offset, const __constant double *p);
-double3 __attribute__((overloadable)) vload3(size_t offset, const __constant double *p);
-double4 __attribute__((overloadable)) vload4(size_t offset, const __constant double *p);
-double8 __attribute__((overloadable)) vload8(size_t offset, const __constant double *p);
-double16 __attribute__((overloadable)) vload16(size_t offset, const __constant double *p);
+double2 __overload vload2(size_t offset, const __constant double *p);
+double3 __overload vload3(size_t offset, const __constant double *p);
+double4 __overload vload4(size_t offset, const __constant double *p);
+double8 __overload vload8(size_t offset, const __constant double *p);
+double16 __overload vload16(size_t offset, const __constant double *p);
 #endif //cl_khr_fp64
 
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) vload(size_t offset, const __constant half *p);
-half2 __attribute__((overloadable)) vload2(size_t offset, const __constant half *p);
-half3 __attribute__((overloadable)) vload3(size_t offset, const __constant half *p);
-half4 __attribute__((overloadable)) vload4(size_t offset, const __constant half *p);
-half8 __attribute__((overloadable)) vload8(size_t offset, const __constant half *p);
-half16 __attribute__((overloadable)) vload16(size_t offset, const __constant half *p);
+half __overload vload(size_t offset, const __constant half *p);
+half2 __overload vload2(size_t offset, const __constant half *p);
+half3 __overload vload3(size_t offset, const __constant half *p);
+half4 __overload vload4(size_t offset, const __constant half *p);
+half8 __overload vload8(size_t offset, const __constant half *p);
+half16 __overload vload16(size_t offset, const __constant half *p);
 #endif //cl_khr_fp16
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-char2 __attribute__((overloadable)) vload2(size_t offset, const char *p);
-uchar2 __attribute__((overloadable)) vload2(size_t offset, const uchar *p);
-short2 __attribute__((overloadable)) vload2(size_t offset, const short *p);
-ushort2 __attribute__((overloadable)) vload2(size_t offset, const ushort *p);
-int2 __attribute__((overloadable)) vload2(size_t offset, const int *p);
-uint2 __attribute__((overloadable)) vload2(size_t offset, const uint *p);
-long2 __attribute__((overloadable)) vload2(size_t offset, const long *p);
-ulong2 __attribute__((overloadable)) vload2(size_t offset, const ulong *p);
-float2 __attribute__((overloadable)) vload2(size_t offset, const float *p);
-char3 __attribute__((overloadable)) vload3(size_t offset, const char *p);
-uchar3 __attribute__((overloadable)) vload3(size_t offset, const uchar *p);
-short3 __attribute__((overloadable)) vload3(size_t offset, const short *p);
-ushort3 __attribute__((overloadable)) vload3(size_t offset, const ushort *p);
-int3 __attribute__((overloadable)) vload3(size_t offset, const int *p);
-uint3 __attribute__((overloadable)) vload3(size_t offset, const uint *p);
-long3 __attribute__((overloadable)) vload3(size_t offset, const long *p);
-ulong3 __attribute__((overloadable)) vload3(size_t offset, const ulong *p);
-float3 __attribute__((overloadable)) vload3(size_t offset, const float *p);
-char4 __attribute__((overloadable)) vload4(size_t offset, const char *p);
-uchar4 __attribute__((overloadable)) vload4(size_t offset, const uchar *p);
-short4 __attribute__((overloadable)) vload4(size_t offset, const short *p);
-ushort4 __attribute__((overloadable)) vload4(size_t offset, const ushort *p);
-int4 __attribute__((overloadable)) vload4(size_t offset, const int *p);
-uint4 __attribute__((overloadable)) vload4(size_t offset, const uint *p);
-long4 __attribute__((overloadable)) vload4(size_t offset, const long *p);
-ulong4 __attribute__((overloadable)) vload4(size_t offset, const ulong *p);
-float4 __attribute__((overloadable)) vload4(size_t offset, const float *p);
-char8 __attribute__((overloadable)) vload8(size_t offset, const char *p);
-uchar8 __attribute__((overloadable)) vload8(size_t offset, const uchar *p);
-short8 __attribute__((overloadable)) vload8(size_t offset, const short *p);
-ushort8 __attribute__((overloadable)) vload8(size_t offset, const ushort *p);
-int8 __attribute__((overloadable)) vload8(size_t offset, const int *p);
-uint8 __attribute__((overloadable)) vload8(size_t offset, const uint *p);
-long8 __attribute__((overloadable)) vload8(size_t offset, const long *p);
-ulong8 __attribute__((overloadable)) vload8(size_t offset, const ulong *p);
-float8 __attribute__((overloadable)) vload8(size_t offset, const float *p);
-char16 __attribute__((overloadable)) vload16(size_t offset, const char *p);
-uchar16 __attribute__((overloadable)) vload16(size_t offset, const uchar *p);
-short16 __attribute__((overloadable)) vload16(size_t offset, const short *p);
-ushort16 __attribute__((overloadable)) vload16(size_t offset, const ushort *p);
-int16 __attribute__((overloadable)) vload16(size_t offset, const int *p);
-uint16 __attribute__((overloadable)) vload16(size_t offset, const uint *p);
-long16 __attribute__((overloadable)) vload16(size_t offset, const long *p);
-ulong16 __attribute__((overloadable)) vload16(size_t offset, const ulong *p);
-float16 __attribute__((overloadable)) vload16(size_t offset, const float *p);
+char2 __overload vload2(size_t offset, const char *p);
+uchar2 __overload vload2(size_t offset, const uchar *p);
+short2 __overload vload2(size_t offset, const short *p);
+ushort2 __overload vload2(size_t offset, const ushort *p);
+int2 __overload vload2(size_t offset, const int *p);
+uint2 __overload vload2(size_t offset, const uint *p);
+long2 __overload vload2(size_t offset, const long *p);
+ulong2 __overload vload2(size_t offset, const ulong *p);
+float2 __overload vload2(size_t offset, const float *p);
+char3 __overload vload3(size_t offset, const char *p);
+uchar3 __overload vload3(size_t offset, const uchar *p);
+short3 __overload vload3(size_t offset, const short *p);
+ushort3 __overload vload3(size_t offset, const ushort *p);
+int3 __overload vload3(size_t offset, const int *p);
+uint3 __overload vload3(size_t offset, const uint *p);
+long3 __overload vload3(size_t offset, const long *p);
+ulong3 __overload vload3(size_t offset, const ulong *p);
+float3 __overload vload3(size_t offset, const float *p);
+char4 __overload vload4(size_t offset, const char *p);
+uchar4 __overload vload4(size_t offset, const uchar *p);
+short4 __overload vload4(size_t offset, const short *p);
+ushort4 __overload vload4(size_t offset, const ushort *p);
+int4 __overload vload4(size_t offset, const int *p);
+uint4 __overload vload4(size_t offset, const uint *p);
+long4 __overload vload4(size_t offset, const long *p);
+ulong4 __overload vload4(size_t offset, const ulong *p);
+float4 __overload vload4(size_t offset, const float *p);
+char8 __overload vload8(size_t offset, const char *p);
+uchar8 __overload vload8(size_t offset, const uchar *p);
+short8 __overload vload8(size_t offset, const short *p);
+ushort8 __overload vload8(size_t offset, const ushort *p);
+int8 __overload vload8(size_t offset, const int *p);
+uint8 __overload vload8(size_t offset, const uint *p);
+long8 __overload vload8(size_t offset, const long *p);
+ulong8 __overload vload8(size_t offset, const ulong *p);
+float8 __overload vload8(size_t offset, const float *p);
+char16 __overload vload16(size_t offset, const char *p);
+uchar16 __overload vload16(size_t offset, const uchar *p);
+short16 __overload vload16(size_t offset, const short *p);
+ushort16 __overload vload16(size_t offset, const ushort *p);
+int16 __overload vload16(size_t offset, const int *p);
+uint16 __overload vload16(size_t offset, const uint *p);
+long16 __overload vload16(size_t offset, const long *p);
+ulong16 __overload vload16(size_t offset, const ulong *p);
+float16 __overload vload16(size_t offset, const float *p);
 
 #ifdef cl_khr_fp64
-double2 __attribute__((overloadable)) vload2(size_t offset, const double *p);
-double3 __attribute__((overloadable)) vload3(size_t offset, const double *p);
-double4 __attribute__((overloadable)) vload4(size_t offset, const double *p);
-double8 __attribute__((overloadable)) vload8(size_t offset, const double *p);
-double16 __attribute__((overloadable)) vload16(size_t offset, const double *p);
+double2 __overload vload2(size_t offset, const double *p);
+double3 __overload vload3(size_t offset, const double *p);
+double4 __overload vload4(size_t offset, const double *p);
+double8 __overload vload8(size_t offset, const double *p);
+double16 __overload vload16(size_t offset, const double *p);
 #endif //cl_khr_fp64
 
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) vload(size_t offset, const half *p);
-half2 __attribute__((overloadable)) vload2(size_t offset, const half *p);
-half3 __attribute__((overloadable)) vload3(size_t offset, const half *p);
-half4 __attribute__((overloadable)) vload4(size_t offset, const half *p);
-half8 __attribute__((overloadable)) vload8(size_t offset, const half *p);
-half16 __attribute__((overloadable)) vload16(size_t offset, const half *p);
+half __overload vload(size_t offset, const half *p);
+half2 __overload vload2(size_t offset, const half *p);
+half3 __overload vload3(size_t offset, const half *p);
+half4 __overload vload4(size_t offset, const half *p);
+half8 __overload vload8(size_t offset, const half *p);
+half16 __overload vload16(size_t offset, const half *p);
 #endif //cl_khr_fp16
 #else
-char2 __attribute__((overloadable)) vload2(size_t offset, const __global char *p);
-uchar2 __attribute__((overloadable)) vload2(size_t offset, const __global uchar *p);
-short2 __attribute__((overloadable)) vload2(size_t offset, const __global short *p);
-ushort2 __attribute__((overloadable)) vload2(size_t offset, const __global ushort *p);
-int2 __attribute__((overloadable)) vload2(size_t offset, const __global int *p);
-uint2 __attribute__((overloadable)) vload2(size_t offset, const __global uint *p);
-long2 __attribute__((overloadable)) vload2(size_t offset, const __global long *p);
-ulong2 __attribute__((overloadable)) vload2(size_t offset, const __global ulong *p);
-float2 __attribute__((overloadable)) vload2(size_t offset, const __global float *p);
-char3 __attribute__((overloadable)) vload3(size_t offset, const __global char *p);
-uchar3 __attribute__((overloadable)) vload3(size_t offset, const __global uchar *p);
-short3 __attribute__((overloadable)) vload3(size_t offset, const __global short *p);
-ushort3 __attribute__((overloadable)) vload3(size_t offset, const __global ushort *p);
-int3 __attribute__((overloadable)) vload3(size_t offset, const __global int *p);
-uint3 __attribute__((overloadable)) vload3(size_t offset, const __global uint *p);
-long3 __attribute__((overloadable)) vload3(size_t offset, const __global long *p);
-ulong3 __attribute__((overloadable)) vload3(size_t offset, const __global ulong *p);
-float3 __attribute__((overloadable)) vload3(size_t offset, const __global float *p);
-char4 __attribute__((overloadable)) vload4(size_t offset, const __global char *p);
-uchar4 __attribute__((overloadable)) vload4(size_t offset, const __global uchar *p);
-short4 __attribute__((overloadable)) vload4(size_t offset, const __global short *p);
-ushort4 __attribute__((overloadable)) vload4(size_t offset, const __global ushort *p);
-int4 __attribute__((overloadable)) vload4(size_t offset, const __global int *p);
-uint4 __attribute__((overloadable)) vload4(size_t offset, const __global uint *p);
-long4 __attribute__((overloadable)) vload4(size_t offset, const __global long *p);
-ulong4 __attribute__((overloadable)) vload4(size_t offset, const __global ulong *p);
-float4 __attribute__((overloadable)) vload4(size_t offset, const __global float *p);
-char8 __attribute__((overloadable)) vload8(size_t offset, const __global char *p);
-uchar8 __attribute__((overloadable)) vload8(size_t offset, const __global uchar *p);
-short8 __attribute__((overloadable)) vload8(size_t offset, const __global short *p);
-ushort8 __attribute__((overloadable)) vload8(size_t offset, const __global ushort *p);
-int8 __attribute__((overloadable)) vload8(size_t offset, const __global int *p);
-uint8 __attribute__((overloadable)) vload8(size_t offset, const __global uint *p);
-long8 __attribute__((overloadable)) vload8(size_t offset, const __global long *p);
-ulong8 __attribute__((overloadable)) vload8(size_t offset, const __global ulong *p);
-float8 __attribute__((overloadable)) vload8(size_t offset, const __global float *p);
-char16 __attribute__((overloadable)) vload16(size_t offset, const __global char *p);
-uchar16 __attribute__((overloadable)) vload16(size_t offset, const __global uchar *p);
-short16 __attribute__((overloadable)) vload16(size_t offset, const __global short *p);
-ushort16 __attribute__((overloadable)) vload16(size_t offset, const __global ushort *p);
-int16 __attribute__((overloadable)) vload16(size_t offset, const __global int *p);
-uint16 __attribute__((overloadable)) vload16(size_t offset, const __global uint *p);
-long16 __attribute__((overloadable)) vload16(size_t offset, const __global long *p);
-ulong16 __attribute__((overloadable)) vload16(size_t offset, const __global ulong *p);
-float16 __attribute__((overloadable)) vload16(size_t offset, const __global float *p);
-char2 __attribute__((overloadable)) vload2(size_t offset, const __local char *p);
-uchar2 __attribute__((overloadable)) vload2(size_t offset, const __local uchar *p);
-short2 __attribute__((overloadable)) vload2(size_t offset, const __local short *p);
-ushort2 __attribute__((overloadable)) vload2(size_t offset, const __local ushort *p);
-int2 __attribute__((overloadable)) vload2(size_t offset, const __local int *p);
-uint2 __attribute__((overloadable)) vload2(size_t offset, const __local uint *p);
-long2 __attribute__((overloadable)) vload2(size_t offset, const __local long *p);
-ulong2 __attribute__((overloadable)) vload2(size_t offset, const __local ulong *p);
-float2 __attribute__((overloadable)) vload2(size_t offset, const __local float *p);
-char3 __attribute__((overloadable)) vload3(size_t offset, const __local char *p);
-uchar3 __attribute__((overloadable)) vload3(size_t offset, const __local uchar *p);
-short3 __attribute__((overloadable)) vload3(size_t offset, const __local short *p);
-ushort3 __attribute__((overloadable)) vload3(size_t offset, const __local ushort *p);
-int3 __attribute__((overloadable)) vload3(size_t offset, const __local int *p);
-uint3 __attribute__((overloadable)) vload3(size_t offset, const __local uint *p);
-long3 __attribute__((overloadable)) vload3(size_t offset, const __local long *p);
-ulong3 __attribute__((overloadable)) vload3(size_t offset, const __local ulong *p);
-float3 __attribute__((overloadable)) vload3(size_t offset, const __local float *p);
-char4 __attribute__((overloadable)) vload4(size_t offset, const __local char *p);
-uchar4 __attribute__((overloadable)) vload4(size_t offset, const __local uchar *p);
-short4 __attribute__((overloadable)) vload4(size_t offset, const __local short *p);
-ushort4 __attribute__((overloadable)) vload4(size_t offset, const __local ushort *p);
-int4 __attribute__((overloadable)) vload4(size_t offset, const __local int *p);
-uint4 __attribute__((overloadable)) vload4(size_t offset, const __local uint *p);
-long4 __attribute__((overloadable)) vload4(size_t offset, const __local long *p);
-ulong4 __attribute__((overloadable)) vload4(size_t offset, const __local ulong *p);
-float4 __attribute__((overloadable)) vload4(size_t offset, const __local float *p);
-char8 __attribute__((overloadable)) vload8(size_t offset, const __local char *p);
-uchar8 __attribute__((overloadable)) vload8(size_t offset, const __local uchar *p);
-short8 __attribute__((overloadable)) vload8(size_t offset, const __local short *p);
-ushort8 __attribute__((overloadable)) vload8(size_t offset, const __local ushort *p);
-int8 __attribute__((overloadable)) vload8(size_t offset, const __local int *p);
-uint8 __attribute__((overloadable)) vload8(size_t offset, const __local uint *p);
-long8 __attribute__((overloadable)) vload8(size_t offset, const __local long *p);
-ulong8 __attribute__((overloadable)) vload8(size_t offset, const __local ulong *p);
-float8 __attribute__((overloadable)) vload8(size_t offset, const __local float *p);
-char16 __attribute__((overloadable)) vload16(size_t offset, const __local char *p);
-uchar16 __attribute__((overloadable)) vload16(size_t offset, const __local uchar *p);
-short16 __attribute__((overloadable)) vload16(size_t offset, const __local short *p);
-ushort16 __attribute__((overloadable)) vload16(size_t offset, const __local ushort *p);
-int16 __attribute__((overloadable)) vload16(size_t offset, const __local int *p);
-uint16 __attribute__((overloadable)) vload16(size_t offset, const __local uint *p);
-long16 __attribute__((overloadable)) vload16(size_t offset, const __local long *p);
-ulong16 __attribute__((overloadable)) vload16(size_t offset, const __local ulong *p);
-float16 __attribute__((overloadable)) vload16(size_t offset, const __local float *p);
-char2 __attribute__((overloadable)) vload2(size_t offset, const __private char *p);
-uchar2 __attribute__((overloadable)) vload2(size_t offset, const __private uchar *p);
-short2 __attribute__((overloadable)) vload2(size_t offset, const __private short *p);
-ushort2 __attribute__((overloadable)) vload2(size_t offset, const __private ushort *p);
-int2 __attribute__((overloadable)) vload2(size_t offset, const __private int *p);
-uint2 __attribute__((overloadable)) vload2(size_t offset, const __private uint *p);
-long2 __attribute__((overloadable)) vload2(size_t offset, const __private long *p);
-ulong2 __attribute__((overloadable)) vload2(size_t offset, const __private ulong *p);
-float2 __attribute__((overloadable)) vload2(size_t offset, const __private float *p);
-char3 __attribute__((overloadable)) vload3(size_t offset, const __private char *p);
-uchar3 __attribute__((overloadable)) vload3(size_t offset, const __private uchar *p);
-short3 __attribute__((overloadable)) vload3(size_t offset, const __private short *p);
-ushort3 __attribute__((overloadable)) vload3(size_t offset, const __private ushort *p);
-int3 __attribute__((overloadable)) vload3(size_t offset, const __private int *p);
-uint3 __attribute__((overloadable)) vload3(size_t offset, const __private uint *p);
-long3 __attribute__((overloadable)) vload3(size_t offset, const __private long *p);
-ulong3 __attribute__((overloadable)) vload3(size_t offset, const __private ulong *p);
-float3 __attribute__((overloadable)) vload3(size_t offset, const __private float *p);
-char4 __attribute__((overloadable)) vload4(size_t offset, const __private char *p);
-uchar4 __attribute__((overloadable)) vload4(size_t offset, const __private uchar *p);
-short4 __attribute__((overloadable)) vload4(size_t offset, const __private short *p);
-ushort4 __attribute__((overloadable)) vload4(size_t offset, const __private ushort *p);
-int4 __attribute__((overloadable)) vload4(size_t offset, const __private int *p);
-uint4 __attribute__((overloadable)) vload4(size_t offset, const __private uint *p);
-long4 __attribute__((overloadable)) vload4(size_t offset, const __private long *p);
-ulong4 __attribute__((overloadable)) vload4(size_t offset, const __private ulong *p);
-float4 __attribute__((overloadable)) vload4(size_t offset, const __private float *p);
-char8 __attribute__((overloadable)) vload8(size_t offset, const __private char *p);
-uchar8 __attribute__((overloadable)) vload8(size_t offset, const __private uchar *p);
-short8 __attribute__((overloadable)) vload8(size_t offset, const __private short *p);
-ushort8 __attribute__((overloadable)) vload8(size_t offset, const __private ushort *p);
-int8 __attribute__((overloadable)) vload8(size_t offset, const __private int *p);
-uint8 __attribute__((overloadable)) vload8(size_t offset, const __private uint *p);
-long8 __attribute__((overloadable)) vload8(size_t offset, const __private long *p);
-ulong8 __attribute__((overloadable)) vload8(size_t offset, const __private ulong *p);
-float8 __attribute__((overloadable)) vload8(size_t offset, const __private float *p);
-char16 __attribute__((overloadable)) vload16(size_t offset, const __private char *p);
-uchar16 __attribute__((overloadable)) vload16(size_t offset, const __private uchar *p);
-short16 __attribute__((overloadable)) vload16(size_t offset, const __private short *p);
-ushort16 __attribute__((overloadable)) vload16(size_t offset, const __private ushort *p);
-int16 __attribute__((overloadable)) vload16(size_t offset, const __private int *p);
-uint16 __attribute__((overloadable)) vload16(size_t offset, const __private uint *p);
-long16 __attribute__((overloadable)) vload16(size_t offset, const __private long *p);
-ulong16 __attribute__((overloadable)) vload16(size_t offset, const __private ulong *p);
-float16 __attribute__((overloadable)) vload16(size_t offset, const __private float *p);
+char2 __overload vload2(size_t offset, const __global char *p);
+uchar2 __overload vload2(size_t offset, const __global uchar *p);
+short2 __overload vload2(size_t offset, const __global short *p);
+ushort2 __overload vload2(size_t offset, const __global ushort *p);
+int2 __overload vload2(size_t offset, const __global int *p);
+uint2 __overload vload2(size_t offset, const __global uint *p);
+long2 __overload vload2(size_t offset, const __global long *p);
+ulong2 __overload vload2(size_t offset, const __global ulong *p);
+float2 __overload vload2(size_t offset, const __global float *p);
+char3 __overload vload3(size_t offset, const __global char *p);
+uchar3 __overload vload3(size_t offset, const __global uchar *p);
+short3 __overload vload3(size_t offset, const __global short *p);
+ushort3 __overload vload3(size_t offset, const __global ushort *p);
+int3 __overload vload3(size_t offset, const __global int *p);
+uint3 __overload vload3(size_t offset, const __global uint *p);
+long3 __overload vload3(size_t offset, const __global long *p);
+ulong3 __overload vload3(size_t offset, const __global ulong *p);
+float3 __overload vload3(size_t offset, const __global float *p);
+char4 __overload vload4(size_t offset, const __global char *p);
+uchar4 __overload vload4(size_t offset, const __global uchar *p);
+short4 __overload vload4(size_t offset, const __global short *p);
+ushort4 __overload vload4(size_t offset, const __global ushort *p);
+int4 __overload vload4(size_t offset, const __global int *p);
+uint4 __overload vload4(size_t offset, const __global uint *p);
+long4 __overload vload4(size_t offset, const __global long *p);
+ulong4 __overload vload4(size_t offset, const __global ulong *p);
+float4 __overload vload4(size_t offset, const __global float *p);
+char8 __overload vload8(size_t offset, const __global char *p);
+uchar8 __overload vload8(size_t offset, const __global uchar *p);
+short8 __overload vload8(size_t offset, const __global short *p);
+ushort8 __overload vload8(size_t offset, const __global ushort *p);
+int8 __overload vload8(size_t offset, const __global int *p);
+uint8 __overload vload8(size_t offset, const __global uint *p);
+long8 __overload vload8(size_t offset, const __global long *p);
+ulong8 __overload vload8(size_t offset, const __global ulong *p);
+float8 __overload vload8(size_t offset, const __global float *p);
+char16 __overload vload16(size_t offset, const __global char *p);
+uchar16 __overload vload16(size_t offset, const __global uchar *p);
+short16 __overload vload16(size_t offset, const __global short *p);
+ushort16 __overload vload16(size_t offset, const __global ushort *p);
+int16 __overload vload16(size_t offset, const __global int *p);
+uint16 __overload vload16(size_t offset, const __global uint *p);
+long16 __overload vload16(size_t offset, const __global long *p);
+ulong16 __overload vload16(size_t offset, const __global ulong *p);
+float16 __overload vload16(size_t offset, const __global float *p);
+char2 __overload vload2(size_t offset, const __local char *p);
+uchar2 __overload vload2(size_t offset, const __local uchar *p);
+short2 __overload vload2(size_t offset, const __local short *p);
+ushort2 __overload vload2(size_t offset, const __local ushort *p);
+int2 __overload vload2(size_t offset, const __local int *p);
+uint2 __overload vload2(size_t offset, const __local uint *p);
+long2 __overload vload2(size_t offset, const __local long *p);
+ulong2 __overload vload2(size_t offset, const __local ulong *p);
+float2 __overload vload2(size_t offset, const __local float *p);
+char3 __overload vload3(size_t offset, const __local char *p);
+uchar3 __overload vload3(size_t offset, const __local uchar *p);
+short3 __overload vload3(size_t offset, const __local short *p);
+ushort3 __overload vload3(size_t offset, const __local ushort *p);
+int3 __overload vload3(size_t offset, const __local int *p);
+uint3 __overload vload3(size_t offset, const __local uint *p);
+long3 __overload vload3(size_t offset, const __local long *p);
+ulong3 __overload vload3(size_t offset, const __local ulong *p);
+float3 __overload vload3(size_t offset, const __local float *p);
+char4 __overload vload4(size_t offset, const __local char *p);
+uchar4 __overload vload4(size_t offset, const __local uchar *p);
+short4 __overload vload4(size_t offset, const __local short *p);
+ushort4 __overload vload4(size_t offset, const __local ushort *p);
+int4 __overload vload4(size_t offset, const __local int *p);
+uint4 __overload vload4(size_t offset, const __local uint *p);
+long4 __overload vload4(size_t offset, const __local long *p);
+ulong4 __overload vload4(size_t offset, const __local ulong *p);
+float4 __overload vload4(size_t offset, const __local float *p);
+char8 __overload vload8(size_t offset, const __local char *p);
+uchar8 __overload vload8(size_t offset, const __local uchar *p);
+short8 __overload vload8(size_t offset, const __local short *p);
+ushort8 __overload vload8(size_t offset, const __local ushort *p);
+int8 __overload vload8(size_t offset, const __local int *p);
+uint8 __overload vload8(size_t offset, const __local uint *p);
+long8 __overload vload8(size_t offset, const __local long *p);
+ulong8 __overload vload8(size_t offset, const __local ulong *p);
+float8 __overload vload8(size_t offset, const __local float *p);
+char16 __overload vload16(size_t offset, const __local char *p);
+uchar16 __overload vload16(size_t offset, const __local uchar *p);
+short16 __overload vload16(size_t offset, const __local short *p);
+ushort16 __overload vload16(size_t offset, const __local ushort *p);
+int16 __overload vload16(size_t offset, const __local int *p);
+uint16 __overload vload16(size_t offset, const __local uint *p);
+long16 __overload vload16(size_t offset, const __local long *p);
+ulong16 __overload vload16(size_t offset, const __local ulong *p);
+float16 __overload vload16(size_t offset, const __local float *p);
+char2 __overload vload2(size_t offset, const __private char *p);
+uchar2 __overload vload2(size_t offset, const __private uchar *p);
+short2 __overload vload2(size_t offset, const __private short *p);
+ushort2 __overload vload2(size_t offset, const __private ushort *p);
+int2 __overload vload2(size_t offset, const __private int *p);
+uint2 __overload vload2(size_t offset, const __private uint *p);
+long2 __overload vload2(size_t offset, const __private long *p);
+ulong2 __overload vload2(size_t offset, const __private ulong *p);
+float2 __overload vload2(size_t offset, const __private float *p);
+char3 __overload vload3(size_t offset, const __private char *p);
+uchar3 __overload vload3(size_t offset, const __private uchar *p);
+short3 __overload vload3(size_t offset, const __private short *p);
+ushort3 __overload vload3(size_t offset, const __private ushort *p);
+int3 __overload vload3(size_t offset, const __private int *p);
+uint3 __overload vload3(size_t offset, const __private uint *p);
+long3 __overload vload3(size_t offset, const __private long *p);
+ulong3 __overload vload3(size_t offset, const __private ulong *p);
+float3 __overload vload3(size_t offset, const __private float *p);
+char4 __overload vload4(size_t offset, const __private char *p);
+uchar4 __overload vload4(size_t offset, const __private uchar *p);
+short4 __overload vload4(size_t offset, const __private short *p);
+ushort4 __overload vload4(size_t offset, const __private ushort *p);
+int4 __overload vload4(size_t offset, const __private int *p);
+uint4 __overload vload4(size_t offset, const __private uint *p);
+long4 __overload vload4(size_t offset, const __private long *p);
+ulong4 __overload vload4(size_t offset, const __private ulong *p);
+float4 __overload vload4(size_t offset, const __private float *p);
+char8 __overload vload8(size_t offset, const __private char *p);
+uchar8 __overload vload8(size_t offset, const __private uchar *p);
+short8 __overload vload8(size_t offset, const __private short *p);
+ushort8 __overload vload8(size_t offset, const __private ushort *p);
+int8 __overload vload8(size_t offset, const __private int *p);
+uint8 __overload vload8(size_t offset, const __private uint *p);
+long8 __overload vload8(size_t offset, const __private long *p);
+ulong8 __overload vload8(size_t offset, const __private ulong *p);
+float8 __overload vload8(size_t offset, const __private float *p);
+char16 __overload vload16(size_t offset, const __private char *p);
+uchar16 __overload vload16(size_t offset, const __private uchar *p);
+short16 __overload vload16(size_t offset, const __private short *p);
+ushort16 __overload vload16(size_t offset, const __private ushort *p);
+int16 __overload vload16(size_t offset, const __private int *p);
+uint16 __overload vload16(size_t offset, const __private uint *p);
+long16 __overload vload16(size_t offset, const __private long *p);
+ulong16 __overload vload16(size_t offset, const __private ulong *p);
+float16 __overload vload16(size_t offset, const __private float *p);
 
 #ifdef cl_khr_fp64
-double2 __attribute__((overloadable)) vload2(size_t offset, const __global double *p);
-double3 __attribute__((overloadable)) vload3(size_t offset, const __global double *p);
-double4 __attribute__((overloadable)) vload4(size_t offset, const __global double *p);
-double8 __attribute__((overloadable)) vload8(size_t offset, const __global double *p);
-double16 __attribute__((overloadable)) vload16(size_t offset, const __global double *p);
-double2 __attribute__((overloadable)) vload2(size_t offset, const __local double *p);
-double3 __attribute__((overloadable)) vload3(size_t offset, const __local double *p);
-double4 __attribute__((overloadable)) vload4(size_t offset, const __local double *p);
-double8 __attribute__((overloadable)) vload8(size_t offset, const __local double *p);
-double16 __attribute__((overloadable)) vload16(size_t offset, const __local double *p);
-double2 __attribute__((overloadable)) vload2(size_t offset, const __private double *p);
-double3 __attribute__((overloadable)) vload3(size_t offset, const __private double *p);
-double4 __attribute__((overloadable)) vload4(size_t offset, const __private double *p);
-double8 __attribute__((overloadable)) vload8(size_t offset, const __private double *p);
-double16 __attribute__((overloadable)) vload16(size_t offset, const __private double *p);
+double2 __overload vload2(size_t offset, const __global double *p);
+double3 __overload vload3(size_t offset, const __global double *p);
+double4 __overload vload4(size_t offset, const __global double *p);
+double8 __overload vload8(size_t offset, const __global double *p);
+double16 __overload vload16(size_t offset, const __global double *p);
+double2 __overload vload2(size_t offset, const __local double *p);
+double3 __overload vload3(size_t offset, const __local double *p);
+double4 __overload vload4(size_t offset, const __local double *p);
+double8 __overload vload8(size_t offset, const __local double *p);
+double16 __overload vload16(size_t offset, const __local double *p);
+double2 __overload vload2(size_t offset, const __private double *p);
+double3 __overload vload3(size_t offset, const __private double *p);
+double4 __overload vload4(size_t offset, const __private double *p);
+double8 __overload vload8(size_t offset, const __private double *p);
+double16 __overload vload16(size_t offset, const __private double *p);
 #endif //cl_khr_fp64
 
 #ifdef cl_khr_fp16
-half __attribute__((overloadable)) vload(size_t offset, const __global half *p);
-half2 __attribute__((overloadable)) vload2(size_t offset, const __global half *p);
-half3 __attribute__((overloadable)) vload3(size_t offset, const __global half *p);
-half4 __attribute__((overloadable)) vload4(size_t offset, const __global half *p);
-half8 __attribute__((overloadable)) vload8(size_t offset, const __global half *p);
-half16 __attribute__((overloadable)) vload16(size_t offset, const __global half *p);
-half __attribute__((overloadable)) vload(size_t offset, const __local half *p);
-half2 __attribute__((overloadable)) vload2(size_t offset, const __local half *p);
-half3 __attribute__((overloadable)) vload3(size_t offset, const __local half *p);
-half4 __attribute__((overloadable)) vload4(size_t offset, const __local half *p);
-half8 __attribute__((overloadable)) vload8(size_t offset, const __local half *p);
-half16 __attribute__((overloadable)) vload16(size_t offset, const __local half *p);
-half __attribute__((overloadable)) vload(size_t offset, const __private half *p);
-half2 __attribute__((overloadable)) vload2(size_t offset, const __private half *p);
-half3 __attribute__((overloadable)) vload3(size_t offset, const __private half *p);
-half4 __attribute__((overloadable)) vload4(size_t offset, const __private half *p);
-half8 __attribute__((overloadable)) vload8(size_t offset, const __private half *p);
-half16 __attribute__((overloadable)) vload16(size_t offset, const __private half *p);
+half __overload vload(size_t offset, const __global half *p);
+half2 __overload vload2(size_t offset, const __global half *p);
+half3 __overload vload3(size_t offset, const __global half *p);
+half4 __overload vload4(size_t offset, const __global half *p);
+half8 __overload vload8(size_t offset, const __global half *p);
+half16 __overload vload16(size_t offset, const __global half *p);
+half __overload vload(size_t offset, const __local half *p);
+half2 __overload vload2(size_t offset, const __local half *p);
+half3 __overload vload3(size_t offset, const __local half *p);
+half4 __overload vload4(size_t offset, const __local half *p);
+half8 __overload vload8(size_t offset, const __local half *p);
+half16 __overload vload16(size_t offset, const __local half *p);
+half __overload vload(size_t offset, const __private half *p);
+half2 __overload vload2(size_t offset, const __private half *p);
+half3 __overload vload3(size_t offset, const __private half *p);
+half4 __overload vload4(size_t offset, const __private half *p);
+half8 __overload vload8(size_t offset, const __private half *p);
+half16 __overload vload16(size_t offset, const __private half *p);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -12962,238 +12964,238 @@ half16 __attribute__((overloadable)) vload16(size_t offset, const __private half
  * aligned if gentype is long, ulong.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) vstore2(char2 data, size_t offset, char *p);
-void __attribute__((overloadable)) vstore2(uchar2 data, size_t offset, uchar *p);
-void __attribute__((overloadable)) vstore2(short2 data, size_t offset, short *p);
-void __attribute__((overloadable)) vstore2(ushort2 data, size_t offset, ushort *p);
-void __attribute__((overloadable)) vstore2(int2 data, size_t offset, int *p);
-void __attribute__((overloadable)) vstore2(uint2 data, size_t offset, uint *p);
-void __attribute__((overloadable)) vstore2(long2 data, size_t offset, long *p);
-void __attribute__((overloadable)) vstore2(ulong2 data, size_t offset, ulong *p);
-void __attribute__((overloadable)) vstore2(float2 data, size_t offset, float *p);
-void __attribute__((overloadable)) vstore3(char3 data, size_t offset, char *p);
-void __attribute__((overloadable)) vstore3(uchar3 data, size_t offset, uchar *p);
-void __attribute__((overloadable)) vstore3(short3 data, size_t offset, short *p);
-void __attribute__((overloadable)) vstore3(ushort3 data, size_t offset, ushort *p);
-void __attribute__((overloadable)) vstore3(int3 data, size_t offset, int *p);
-void __attribute__((overloadable)) vstore3(uint3 data, size_t offset, uint *p);
-void __attribute__((overloadable)) vstore3(long3 data, size_t offset, long *p);
-void __attribute__((overloadable)) vstore3(ulong3 data, size_t offset, ulong *p);
-void __attribute__((overloadable)) vstore3(float3 data, size_t offset, float *p);
-void __attribute__((overloadable)) vstore4(char4 data, size_t offset, char *p);
-void __attribute__((overloadable)) vstore4(uchar4 data, size_t offset, uchar *p);
-void __attribute__((overloadable)) vstore4(short4 data, size_t offset, short *p);
-void __attribute__((overloadable)) vstore4(ushort4 data, size_t offset, ushort *p);
-void __attribute__((overloadable)) vstore4(int4 data, size_t offset, int *p);
-void __attribute__((overloadable)) vstore4(uint4 data, size_t offset, uint *p);
-void __attribute__((overloadable)) vstore4(long4 data, size_t offset, long *p);
-void __attribute__((overloadable)) vstore4(ulong4 data, size_t offset, ulong *p);
-void __attribute__((overloadable)) vstore4(float4 data, size_t offset, float *p);
-void __attribute__((overloadable)) vstore8(char8 data, size_t offset, char *p);
-void __attribute__((overloadable)) vstore8(uchar8 data, size_t offset, uchar *p);
-void __attribute__((overloadable)) vstore8(short8 data, size_t offset, short *p);
-void __attribute__((overloadable)) vstore8(ushort8 data, size_t offset, ushort *p);
-void __attribute__((overloadable)) vstore8(int8 data, size_t offset, int *p);
-void __attribute__((overloadable)) vstore8(uint8 data, size_t offset, uint *p);
-void __attribute__((overloadable)) vstore8(long8 data, size_t offset, long *p);
-void __attribute__((overloadable)) vstore8(ulong8 data, size_t offset, ulong *p);
-void __attribute__((overloadable)) vstore8(float8 data, size_t offset, float *p);
-void __attribute__((overloadable)) vstore16(char16 data, size_t offset, char *p);
-void __attribute__((overloadable)) vstore16(uchar16 data, size_t offset, uchar *p);
-void __attribute__((overloadable)) vstore16(short16 data, size_t offset, short *p);
-void __attribute__((overloadable)) vstore16(ushort16 data, size_t offset, ushort *p);
-void __attribute__((overloadable)) vstore16(int16 data, size_t offset, int *p);
-void __attribute__((overloadable)) vstore16(uint16 data, size_t offset, uint *p);
-void __attribute__((overloadable)) vstore16(long16 data, size_t offset, long *p);
-void __attribute__((overloadable)) vstore16(ulong16 data, size_t offset, ulong *p);
-void __attribute__((overloadable)) vstore16(float16 data, size_t offset, float *p);
+void __overload vstore2(char2 data, size_t offset, char *p);
+void __overload vstore2(uchar2 data, size_t offset, uchar *p);
+void __overload vstore2(short2 data, size_t offset, short *p);
+void __overload vstore2(ushort2 data, size_t offset, ushort *p);
+void __overload vstore2(int2 data, size_t offset, int *p);
+void __overload vstore2(uint2 data, size_t offset, uint *p);
+void __overload vstore2(long2 data, size_t offset, long *p);
+void __overload vstore2(ulong2 data, size_t offset, ulong *p);
+void __overload vstore2(float2 data, size_t offset, float *p);
+void __overload vstore3(char3 data, size_t offset, char *p);
+void __overload vstore3(uchar3 data, size_t offset, uchar *p);
+void __overload vstore3(short3 data, size_t offset, short *p);
+void __overload vstore3(ushort3 data, size_t offset, ushort *p);
+void __overload vstore3(int3 data, size_t offset, int *p);
+void __overload vstore3(uint3 data, size_t offset, uint *p);
+void __overload vstore3(long3 data, size_t offset, long *p);
+void __overload vstore3(ulong3 data, size_t offset, ulong *p);
+void __overload vstore3(float3 data, size_t offset, float *p);
+void __overload vstore4(char4 data, size_t offset, char *p);
+void __overload vstore4(uchar4 data, size_t offset, uchar *p);
+void __overload vstore4(short4 data, size_t offset, short *p);
+void __overload vstore4(ushort4 data, size_t offset, ushort *p);
+void __overload vstore4(int4 data, size_t offset, int *p);
+void __overload vstore4(uint4 data, size_t offset, uint *p);
+void __overload vstore4(long4 data, size_t offset, long *p);
+void __overload vstore4(ulong4 data, size_t offset, ulong *p);
+void __overload vstore4(float4 data, size_t offset, float *p);
+void __overload vstore8(char8 data, size_t offset, char *p);
+void __overload vstore8(uchar8 data, size_t offset, uchar *p);
+void __overload vstore8(short8 data, size_t offset, short *p);
+void __overload vstore8(ushort8 data, size_t offset, ushort *p);
+void __overload vstore8(int8 data, size_t offset, int *p);
+void __overload vstore8(uint8 data, size_t offset, uint *p);
+void __overload vstore8(long8 data, size_t offset, long *p);
+void __overload vstore8(ulong8 data, size_t offset, ulong *p);
+void __overload vstore8(float8 data, size_t offset, float *p);
+void __overload vstore16(char16 data, size_t offset, char *p);
+void __overload vstore16(uchar16 data, size_t offset, uchar *p);
+void __overload vstore16(short16 data, size_t offset, short *p);
+void __overload vstore16(ushort16 data, size_t offset, ushort *p);
+void __overload vstore16(int16 data, size_t offset, int *p);
+void __overload vstore16(uint16 data, size_t offset, uint *p);
+void __overload vstore16(long16 data, size_t offset, long *p);
+void __overload vstore16(ulong16 data, size_t offset, ulong *p);
+void __overload vstore16(float16 data, size_t offset, float *p);
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) vstore2(double2 data, size_t offset, double *p);
-void __attribute__((overloadable)) vstore3(double3 data, size_t offset, double *p);
-void __attribute__((overloadable)) vstore4(double4 data, size_t offset, double *p);
-void __attribute__((overloadable)) vstore8(double8 data, size_t offset, double *p);
-void __attribute__((overloadable)) vstore16(double16 data, size_t offset, double *p);
+void __overload vstore2(double2 data, size_t offset, double *p);
+void __overload vstore3(double3 data, size_t offset, double *p);
+void __overload vstore4(double4 data, size_t offset, double *p);
+void __overload vstore8(double8 data, size_t offset, double *p);
+void __overload vstore16(double16 data, size_t offset, double *p);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-void __attribute__((overloadable)) vstore(half data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore2(half2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore3(half3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore4(half4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore8(half8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore16(half16 data, size_t offset, half *p);
+void __overload vstore(half data, size_t offset, half *p);
+void __overload vstore2(half2 data, size_t offset, half *p);
+void __overload vstore3(half3 data, size_t offset, half *p);
+void __overload vstore4(half4 data, size_t offset, half *p);
+void __overload vstore8(half8 data, size_t offset, half *p);
+void __overload vstore16(half16 data, size_t offset, half *p);
 #endif //cl_khr_fp16
 #else
-void __attribute__((overloadable)) vstore2(char2 data, size_t offset, __global char *p);
-void __attribute__((overloadable)) vstore2(uchar2 data, size_t offset, __global uchar *p);
-void __attribute__((overloadable)) vstore2(short2 data, size_t offset, __global short *p);
-void __attribute__((overloadable)) vstore2(ushort2 data, size_t offset, __global ushort *p);
-void __attribute__((overloadable)) vstore2(int2 data, size_t offset, __global int *p);
-void __attribute__((overloadable)) vstore2(uint2 data, size_t offset, __global uint *p);
-void __attribute__((overloadable)) vstore2(long2 data, size_t offset, __global long *p);
-void __attribute__((overloadable)) vstore2(ulong2 data, size_t offset, __global ulong *p);
-void __attribute__((overloadable)) vstore2(float2 data, size_t offset, __global float *p);
-void __attribute__((overloadable)) vstore3(char3 data, size_t offset, __global char *p);
-void __attribute__((overloadable)) vstore3(uchar3 data, size_t offset, __global uchar *p);
-void __attribute__((overloadable)) vstore3(short3 data, size_t offset, __global short *p);
-void __attribute__((overloadable)) vstore3(ushort3 data, size_t offset, __global ushort *p);
-void __attribute__((overloadable)) vstore3(int3 data, size_t offset, __global int *p);
-void __attribute__((overloadable)) vstore3(uint3 data, size_t offset, __global uint *p);
-void __attribute__((overloadable)) vstore3(long3 data, size_t offset, __global long *p);
-void __attribute__((overloadable)) vstore3(ulong3 data, size_t offset, __global ulong *p);
-void __attribute__((overloadable)) vstore3(float3 data, size_t offset, __global float *p);
-void __attribute__((overloadable)) vstore4(char4 data, size_t offset, __global char *p);
-void __attribute__((overloadable)) vstore4(uchar4 data, size_t offset, __global uchar *p);
-void __attribute__((overloadable)) vstore4(short4 data, size_t offset, __global short *p);
-void __attribute__((overloadable)) vstore4(ushort4 data, size_t offset, __global ushort *p);
-void __attribute__((overloadable)) vstore4(int4 data, size_t offset, __global int *p);
-void __attribute__((overloadable)) vstore4(uint4 data, size_t offset, __global uint *p);
-void __attribute__((overloadable)) vstore4(long4 data, size_t offset, __global long *p);
-void __attribute__((overloadable)) vstore4(ulong4 data, size_t offset, __global ulong *p);
-void __attribute__((overloadable)) vstore4(float4 data, size_t offset, __global float *p);
-void __attribute__((overloadable)) vstore8(char8 data, size_t offset, __global char *p);
-void __attribute__((overloadable)) vstore8(uchar8 data, size_t offset, __global uchar *p);
-void __attribute__((overloadable)) vstore8(short8 data, size_t offset, __global short *p);
-void __attribute__((overloadable)) vstore8(ushort8 data, size_t offset, __global ushort *p);
-void __attribute__((overloadable)) vstore8(int8 data, size_t offset, __global int *p);
-void __attribute__((overloadable)) vstore8(uint8 data, size_t offset, __global uint *p);
-void __attribute__((overloadable)) vstore8(long8 data, size_t offset, __global long *p);
-void __attribute__((overloadable)) vstore8(ulong8 data, size_t offset, __global ulong *p);
-void __attribute__((overloadable)) vstore8(float8 data, size_t offset, __global float *p);
-void __attribute__((overloadable)) vstore16(char16 data, size_t offset, __global char *p);
-void __attribute__((overloadable)) vstore16(uchar16 data, size_t offset, __global uchar *p);
-void __attribute__((overloadable)) vstore16(short16 data, size_t offset, __global short *p);
-void __attribute__((overloadable)) vstore16(ushort16 data, size_t offset, __global ushort *p);
-void __attribute__((overloadable)) vstore16(int16 data, size_t offset, __global int *p);
-void __attribute__((overloadable)) vstore16(uint16 data, size_t offset, __global uint *p);
-void __attribute__((overloadable)) vstore16(long16 data, size_t offset, __global long *p);
-void __attribute__((overloadable)) vstore16(ulong16 data, size_t offset, __global ulong *p);
-void __attribute__((overloadable)) vstore16(float16 data, size_t offset, __global float *p);
-void __attribute__((overloadable)) vstore2(char2 data, size_t offset, __local char *p);
-void __attribute__((overloadable)) vstore2(uchar2 data, size_t offset, __local uchar *p);
-void __attribute__((overloadable)) vstore2(short2 data, size_t offset, __local short *p);
-void __attribute__((overloadable)) vstore2(ushort2 data, size_t offset, __local ushort *p);
-void __attribute__((overloadable)) vstore2(int2 data, size_t offset, __local int *p);
-void __attribute__((overloadable)) vstore2(uint2 data, size_t offset, __local uint *p);
-void __attribute__((overloadable)) vstore2(long2 data, size_t offset, __local long *p);
-void __attribute__((overloadable)) vstore2(ulong2 data, size_t offset, __local ulong *p);
-void __attribute__((overloadable)) vstore2(float2 data, size_t offset, __local float *p);
-void __attribute__((overloadable)) vstore3(char3 data, size_t offset, __local char *p);
-void __attribute__((overloadable)) vstore3(uchar3 data, size_t offset, __local uchar *p);
-void __attribute__((overloadable)) vstore3(short3 data, size_t offset, __local short *p);
-void __attribute__((overloadable)) vstore3(ushort3 data, size_t offset, __local ushort *p);
-void __attribute__((overloadable)) vstore3(int3 data, size_t offset, __local int *p);
-void __attribute__((overloadable)) vstore3(uint3 data, size_t offset, __local uint *p);
-void __attribute__((overloadable)) vstore3(long3 data, size_t offset, __local long *p);
-void __attribute__((overloadable)) vstore3(ulong3 data, size_t offset, __local ulong *p);
-void __attribute__((overloadable)) vstore3(float3 data, size_t offset, __local float *p);
-void __attribute__((overloadable)) vstore4(char4 data, size_t offset, __local char *p);
-void __attribute__((overloadable)) vstore4(uchar4 data, size_t offset, __local uchar *p);
-void __attribute__((overloadable)) vstore4(short4 data, size_t offset, __local short *p);
-void __attribute__((overloadable)) vstore4(ushort4 data, size_t offset, __local ushort *p);
-void __attribute__((overloadable)) vstore4(int4 data, size_t offset, __local int *p);
-void __attribute__((overloadable)) vstore4(uint4 data, size_t offset, __local uint *p);
-void __attribute__((overloadable)) vstore4(long4 data, size_t offset, __local long *p);
-void __attribute__((overloadable)) vstore4(ulong4 data, size_t offset, __local ulong *p);
-void __attribute__((overloadable)) vstore4(float4 data, size_t offset, __local float *p);
-void __attribute__((overloadable)) vstore8(char8 data, size_t offset, __local char *p);
-void __attribute__((overloadable)) vstore8(uchar8 data, size_t offset, __local uchar *p);
-void __attribute__((overloadable)) vstore8(short8 data, size_t offset, __local short *p);
-void __attribute__((overloadable)) vstore8(ushort8 data, size_t offset, __local ushort *p);
-void __attribute__((overloadable)) vstore8(int8 data, size_t offset, __local int *p);
-void __attribute__((overloadable)) vstore8(uint8 data, size_t offset, __local uint *p);
-void __attribute__((overloadable)) vstore8(long8 data, size_t offset, __local long *p);
-void __attribute__((overloadable)) vstore8(ulong8 data, size_t offset, __local ulong *p);
-void __attribute__((overloadable)) vstore8(float8 data, size_t offset, __local float *p);
-void __attribute__((overloadable)) vstore16(char16 data, size_t offset, __local char *p);
-void __attribute__((overloadable)) vstore16(uchar16 data, size_t offset, __local uchar *p);
-void __attribute__((overloadable)) vstore16(short16 data, size_t offset, __local short *p);
-void __attribute__((overloadable)) vstore16(ushort16 data, size_t offset, __local ushort *p);
-void __attribute__((overloadable)) vstore16(int16 data, size_t offset, __local int *p);
-void __attribute__((overloadable)) vstore16(uint16 data, size_t offset, __local uint *p);
-void __attribute__((overloadable)) vstore16(long16 data, size_t offset, __local long *p);
-void __attribute__((overloadable)) vstore16(ulong16 data, size_t offset, __local ulong *p);
-void __attribute__((overloadable)) vstore16(float16 data, size_t offset, __local float *p);
-void __attribute__((overloadable)) vstore2(char2 data, size_t offset, __private char *p);
-void __attribute__((overloadable)) vstore2(uchar2 data, size_t offset, __private uchar *p);
-void __attribute__((overloadable)) vstore2(short2 data, size_t offset, __private short *p);
-void __attribute__((overloadable)) vstore2(ushort2 data, size_t offset, __private ushort *p);
-void __attribute__((overloadable)) vstore2(int2 data, size_t offset, __private int *p);
-void __attribute__((overloadable)) vstore2(uint2 data, size_t offset, __private uint *p);
-void __attribute__((overloadable)) vstore2(long2 data, size_t offset, __private long *p);
-void __attribute__((overloadable)) vstore2(ulong2 data, size_t offset, __private ulong *p);
-void __attribute__((overloadable)) vstore2(float2 data, size_t offset, __private float *p);
-void __attribute__((overloadable)) vstore3(char3 data, size_t offset, __private char *p);
-void __attribute__((overloadable)) vstore3(uchar3 data, size_t offset, __private uchar *p);
-void __attribute__((overloadable)) vstore3(short3 data, size_t offset, __private short *p);
-void __attribute__((overloadable)) vstore3(ushort3 data, size_t offset, __private ushort *p);
-void __attribute__((overloadable)) vstore3(int3 data, size_t offset, __private int *p);
-void __attribute__((overloadable)) vstore3(uint3 data, size_t offset, __private uint *p);
-void __attribute__((overloadable)) vstore3(long3 data, size_t offset, __private long *p);
-void __attribute__((overloadable)) vstore3(ulong3 data, size_t offset, __private ulong *p);
-void __attribute__((overloadable)) vstore3(float3 data, size_t offset, __private float *p);
-void __attribute__((overloadable)) vstore4(char4 data, size_t offset, __private char *p);
-void __attribute__((overloadable)) vstore4(uchar4 data, size_t offset, __private uchar *p);
-void __attribute__((overloadable)) vstore4(short4 data, size_t offset, __private short *p);
-void __attribute__((overloadable)) vstore4(ushort4 data, size_t offset, __private ushort *p);
-void __attribute__((overloadable)) vstore4(int4 data, size_t offset, __private int *p);
-void __attribute__((overloadable)) vstore4(uint4 data, size_t offset, __private uint *p);
-void __attribute__((overloadable)) vstore4(long4 data, size_t offset, __private long *p);
-void __attribute__((overloadable)) vstore4(ulong4 data, size_t offset, __private ulong *p);
-void __attribute__((overloadable)) vstore4(float4 data, size_t offset, __private float *p);
-void __attribute__((overloadable)) vstore8(char8 data, size_t offset, __private char *p);
-void __attribute__((overloadable)) vstore8(uchar8 data, size_t offset, __private uchar *p);
-void __attribute__((overloadable)) vstore8(short8 data, size_t offset, __private short *p);
-void __attribute__((overloadable)) vstore8(ushort8 data, size_t offset, __private ushort *p);
-void __attribute__((overloadable)) vstore8(int8 data, size_t offset, __private int *p);
-void __attribute__((overloadable)) vstore8(uint8 data, size_t offset, __private uint *p);
-void __attribute__((overloadable)) vstore8(long8 data, size_t offset, __private long *p);
-void __attribute__((overloadable)) vstore8(ulong8 data, size_t offset, __private ulong *p);
-void __attribute__((overloadable)) vstore8(float8 data, size_t offset, __private float *p);
-void __attribute__((overloadable)) vstore16(char16 data, size_t offset, __private char *p);
-void __attribute__((overloadable)) vstore16(uchar16 data, size_t offset, __private uchar *p);
-void __attribute__((overloadable)) vstore16(short16 data, size_t offset, __private short *p);
-void __attribute__((overloadable)) vstore16(ushort16 data, size_t offset, __private ushort *p);
-void __attribute__((overloadable)) vstore16(int16 data, size_t offset, __private int *p);
-void __attribute__((overloadable)) vstore16(uint16 data, size_t offset, __private uint *p);
-void __attribute__((overloadable)) vstore16(long16 data, size_t offset, __private long *p);
-void __attribute__((overloadable)) vstore16(ulong16 data, size_t offset, __private ulong *p);
-void __attribute__((overloadable)) vstore16(float16 data, size_t offset, __private float *p);
+void __overload vstore2(char2 data, size_t offset, __global char *p);
+void __overload vstore2(uchar2 data, size_t offset, __global uchar *p);
+void __overload vstore2(short2 data, size_t offset, __global short *p);
+void __overload vstore2(ushort2 data, size_t offset, __global ushort *p);
+void __overload vstore2(int2 data, size_t offset, __global int *p);
+void __overload vstore2(uint2 data, size_t offset, __global uint *p);
+void __overload vstore2(long2 data, size_t offset, __global long *p);
+void __overload vstore2(ulong2 data, size_t offset, __global ulong *p);
+void __overload vstore2(float2 data, size_t offset, __global float *p);
+void __overload vstore3(char3 data, size_t offset, __global char *p);
+void __overload vstore3(uchar3 data, size_t offset, __global uchar *p);
+void __overload vstore3(short3 data, size_t offset, __global short *p);
+void __overload vstore3(ushort3 data, size_t offset, __global ushort *p);
+void __overload vstore3(int3 data, size_t offset, __global int *p);
+void __overload vstore3(uint3 data, size_t offset, __global uint *p);
+void __overload vstore3(long3 data, size_t offset, __global long *p);
+void __overload vstore3(ulong3 data, size_t offset, __global ulong *p);
+void __overload vstore3(float3 data, size_t offset, __global float *p);
+void __overload vstore4(char4 data, size_t offset, __global char *p);
+void __overload vstore4(uchar4 data, size_t offset, __global uchar *p);
+void __overload vstore4(short4 data, size_t offset, __global short *p);
+void __overload vstore4(ushort4 data, size_t offset, __global ushort *p);
+void __overload vstore4(int4 data, size_t offset, __global int *p);
+void __overload vstore4(uint4 data, size_t offset, __global uint *p);
+void __overload vstore4(long4 data, size_t offset, __global long *p);
+void __overload vstore4(ulong4 data, size_t offset, __global ulong *p);
+void __overload vstore4(float4 data, size_t offset, __global float *p);
+void __overload vstore8(char8 data, size_t offset, __global char *p);
+void __overload vstore8(uchar8 data, size_t offset, __global uchar *p);
+void __overload vstore8(short8 data, size_t offset, __global short *p);
+void __overload vstore8(ushort8 data, size_t offset, __global ushort *p);
+void __overload vstore8(int8 data, size_t offset, __global int *p);
+void __overload vstore8(uint8 data, size_t offset, __global uint *p);
+void __overload vstore8(long8 data, size_t offset, __global long *p);
+void __overload vstore8(ulong8 data, size_t offset, __global ulong *p);
+void __overload vstore8(float8 data, size_t offset, __global float *p);
+void __overload vstore16(char16 data, size_t offset, __global char *p);
+void __overload vstore16(uchar16 data, size_t offset, __global uchar *p);
+void __overload vstore16(short16 data, size_t offset, __global short *p);
+void __overload vstore16(ushort16 data, size_t offset, __global ushort *p);
+void __overload vstore16(int16 data, size_t offset, __global int *p);
+void __overload vstore16(uint16 data, size_t offset, __global uint *p);
+void __overload vstore16(long16 data, size_t offset, __global long *p);
+void __overload vstore16(ulong16 data, size_t offset, __global ulong *p);
+void __overload vstore16(float16 data, size_t offset, __global float *p);
+void __overload vstore2(char2 data, size_t offset, __local char *p);
+void __overload vstore2(uchar2 data, size_t offset, __local uchar *p);
+void __overload vstore2(short2 data, size_t offset, __local short *p);
+void __overload vstore2(ushort2 data, size_t offset, __local ushort *p);
+void __overload vstore2(int2 data, size_t offset, __local int *p);
+void __overload vstore2(uint2 data, size_t offset, __local uint *p);
+void __overload vstore2(long2 data, size_t offset, __local long *p);
+void __overload vstore2(ulong2 data, size_t offset, __local ulong *p);
+void __overload vstore2(float2 data, size_t offset, __local float *p);
+void __overload vstore3(char3 data, size_t offset, __local char *p);
+void __overload vstore3(uchar3 data, size_t offset, __local uchar *p);
+void __overload vstore3(short3 data, size_t offset, __local short *p);
+void __overload vstore3(ushort3 data, size_t offset, __local ushort *p);
+void __overload vstore3(int3 data, size_t offset, __local int *p);
+void __overload vstore3(uint3 data, size_t offset, __local uint *p);
+void __overload vstore3(long3 data, size_t offset, __local long *p);
+void __overload vstore3(ulong3 data, size_t offset, __local ulong *p);
+void __overload vstore3(float3 data, size_t offset, __local float *p);
+void __overload vstore4(char4 data, size_t offset, __local char *p);
+void __overload vstore4(uchar4 data, size_t offset, __local uchar *p);
+void __overload vstore4(short4 data, size_t offset, __local short *p);
+void __overload vstore4(ushort4 data, size_t offset, __local ushort *p);
+void __overload vstore4(int4 data, size_t offset, __local int *p);
+void __overload vstore4(uint4 data, size_t offset, __local uint *p);
+void __overload vstore4(long4 data, size_t offset, __local long *p);
+void __overload vstore4(ulong4 data, size_t offset, __local ulong *p);
+void __overload vstore4(float4 data, size_t offset, __local float *p);
+void __overload vstore8(char8 data, size_t offset, __local char *p);
+void __overload vstore8(uchar8 data, size_t offset, __local uchar *p);
+void __overload vstore8(short8 data, size_t offset, __local short *p);
+void __overload vstore8(ushort8 data, size_t offset, __local ushort *p);
+void __overload vstore8(int8 data, size_t offset, __local int *p);
+void __overload vstore8(uint8 data, size_t offset, __local uint *p);
+void __overload vstore8(long8 data, size_t offset, __local long *p);
+void __overload vstore8(ulong8 data, size_t offset, __local ulong *p);
+void __overload vstore8(float8 data, size_t offset, __local float *p);
+void __overload vstore16(char16 data, size_t offset, __local char *p);
+void __overload vstore16(uchar16 data, size_t offset, __local uchar *p);
+void __overload vstore16(short16 data, size_t offset, __local short *p);
+void __overload vstore16(ushort16 data, size_t offset, __local ushort *p);
+void __overload vstore16(int16 data, size_t offset, __local int *p);
+void __overload vstore16(uint16 data, size_t offset, __local uint *p);
+void __overload vstore16(long16 data, size_t offset, __local long *p);
+void __overload vstore16(ulong16 data, size_t offset, __local ulong *p);
+void __overload vstore16(float16 data, size_t offset, __local float *p);
+void __overload vstore2(char2 data, size_t offset, __private char *p);
+void __overload vstore2(uchar2 data, size_t offset, __private uchar *p);
+void __overload vstore2(short2 data, size_t offset, __private short *p);
+void __overload vstore2(ushort2 data, size_t offset, __private ushort *p);
+void __overload vstore2(int2 data, size_t offset, __private int *p);
+void __overload vstore2(uint2 data, size_t offset, __private uint *p);
+void __overload vstore2(long2 data, size_t offset, __private long *p);
+void __overload vstore2(ulong2 data, size_t offset, __private ulong *p);
+void __overload vstore2(float2 data, size_t offset, __private float *p);
+void __overload vstore3(char3 data, size_t offset, __private char *p);
+void __overload vstore3(uchar3 data, size_t offset, __private uchar *p);
+void __overload vstore3(short3 data, size_t offset, __private short *p);
+void __overload vstore3(ushort3 data, size_t offset, __private ushort *p);
+void __overload vstore3(int3 data, size_t offset, __private int *p);
+void __overload vstore3(uint3 data, size_t offset, __private uint *p);
+void __overload vstore3(long3 data, size_t offset, __private long *p);
+void __overload vstore3(ulong3 data, size_t offset, __private ulong *p);
+void __overload vstore3(float3 data, size_t offset, __private float *p);
+void __overload vstore4(char4 data, size_t offset, __private char *p);
+void __overload vstore4(uchar4 data, size_t offset, __private uchar *p);
+void __overload vstore4(short4 data, size_t offset, __private short *p);
+void __overload vstore4(ushort4 data, size_t offset, __private ushort *p);
+void __overload vstore4(int4 data, size_t offset, __private int *p);
+void __overload vstore4(uint4 data, size_t offset, __private uint *p);
+void __overload vstore4(long4 data, size_t offset, __private long *p);
+void __overload vstore4(ulong4 data, size_t offset, __private ulong *p);
+void __overload vstore4(float4 data, size_t offset, __private float *p);
+void __overload vstore8(char8 data, size_t offset, __private char *p);
+void __overload vstore8(uchar8 data, size_t offset, __private uchar *p);
+void __overload vstore8(short8 data, size_t offset, __private short *p);
+void __overload vstore8(ushort8 data, size_t offset, __private ushort *p);
+void __overload vstore8(int8 data, size_t offset, __private int *p);
+void __overload vstore8(uint8 data, size_t offset, __private uint *p);
+void __overload vstore8(long8 data, size_t offset, __private long *p);
+void __overload vstore8(ulong8 data, size_t offset, __private ulong *p);
+void __overload vstore8(float8 data, size_t offset, __private float *p);
+void __overload vstore16(char16 data, size_t offset, __private char *p);
+void __overload vstore16(uchar16 data, size_t offset, __private uchar *p);
+void __overload vstore16(short16 data, size_t offset, __private short *p);
+void __overload vstore16(ushort16 data, size_t offset, __private ushort *p);
+void __overload vstore16(int16 data, size_t offset, __private int *p);
+void __overload vstore16(uint16 data, size_t offset, __private uint *p);
+void __overload vstore16(long16 data, size_t offset, __private long *p);
+void __overload vstore16(ulong16 data, size_t offset, __private ulong *p);
+void __overload vstore16(float16 data, size_t offset, __private float *p);
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) vstore2(double2 data, size_t offset, __global double *p);
-void __attribute__((overloadable)) vstore3(double3 data, size_t offset, __global double *p);
-void __attribute__((overloadable)) vstore4(double4 data, size_t offset, __global double *p);
-void __attribute__((overloadable)) vstore8(double8 data, size_t offset, __global double *p);
-void __attribute__((overloadable)) vstore16(double16 data, size_t offset, __global double *p);
-void __attribute__((overloadable)) vstore2(double2 data, size_t offset, __local double *p);
-void __attribute__((overloadable)) vstore3(double3 data, size_t offset, __local double *p);
-void __attribute__((overloadable)) vstore4(double4 data, size_t offset, __local double *p);
-void __attribute__((overloadable)) vstore8(double8 data, size_t offset, __local double *p);
-void __attribute__((overloadable)) vstore16(double16 data, size_t offset, __local double *p);
-void __attribute__((overloadable)) vstore2(double2 data, size_t offset, __private double *p);
-void __attribute__((overloadable)) vstore3(double3 data, size_t offset, __private double *p);
-void __attribute__((overloadable)) vstore4(double4 data, size_t offset, __private double *p);
-void __attribute__((overloadable)) vstore8(double8 data, size_t offset, __private double *p);
-void __attribute__((overloadable)) vstore16(double16 data, size_t offset, __private double *p);
+void __overload vstore2(double2 data, size_t offset, __global double *p);
+void __overload vstore3(double3 data, size_t offset, __global double *p);
+void __overload vstore4(double4 data, size_t offset, __global double *p);
+void __overload vstore8(double8 data, size_t offset, __global double *p);
+void __overload vstore16(double16 data, size_t offset, __global double *p);
+void __overload vstore2(double2 data, size_t offset, __local double *p);
+void __overload vstore3(double3 data, size_t offset, __local double *p);
+void __overload vstore4(double4 data, size_t offset, __local double *p);
+void __overload vstore8(double8 data, size_t offset, __local double *p);
+void __overload vstore16(double16 data, size_t offset, __local double *p);
+void __overload vstore2(double2 data, size_t offset, __private double *p);
+void __overload vstore3(double3 data, size_t offset, __private double *p);
+void __overload vstore4(double4 data, size_t offset, __private double *p);
+void __overload vstore8(double8 data, size_t offset, __private double *p);
+void __overload vstore16(double16 data, size_t offset, __private double *p);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-void __attribute__((overloadable)) vstore(half data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore2(half2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore3(half3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore4(half4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore8(half8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore16(half16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore(half data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore2(half2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore3(half3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore4(half4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore8(half8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore16(half16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore(half data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore2(half2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore3(half3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore4(half4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore8(half8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore16(half16 data, size_t offset, __private half *p);
+void __overload vstore(half data, size_t offset, __global half *p);
+void __overload vstore2(half2 data, size_t offset, __global half *p);
+void __overload vstore3(half3 data, size_t offset, __global half *p);
+void __overload vstore4(half4 data, size_t offset, __global half *p);
+void __overload vstore8(half8 data, size_t offset, __global half *p);
+void __overload vstore16(half16 data, size_t offset, __global half *p);
+void __overload vstore(half data, size_t offset, __local half *p);
+void __overload vstore2(half2 data, size_t offset, __local half *p);
+void __overload vstore3(half3 data, size_t offset, __local half *p);
+void __overload vstore4(half4 data, size_t offset, __local half *p);
+void __overload vstore8(half8 data, size_t offset, __local half *p);
+void __overload vstore16(half16 data, size_t offset, __local half *p);
+void __overload vstore(half data, size_t offset, __private half *p);
+void __overload vstore2(half2 data, size_t offset, __private half *p);
+void __overload vstore3(half3 data, size_t offset, __private half *p);
+void __overload vstore4(half4 data, size_t offset, __private half *p);
+void __overload vstore8(half8 data, size_t offset, __private half *p);
+void __overload vstore16(half16 data, size_t offset, __private half *p);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -13205,13 +13207,13 @@ void __attribute__((overloadable)) vstore16(half16 data, size_t offset, __privat
  * The read address computed as (p + offset)
  * must be 16-bit aligned.
  */
-float __attribute__((overloadable)) vload_half(size_t offset, const __constant half *p);
+float __overload vload_half(size_t offset, const __constant half *p);
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) vload_half(size_t offset, const half *p);
+float __overload vload_half(size_t offset, const half *p);
 #else
-float __attribute__((overloadable)) vload_half(size_t offset, const __global half *p);
-float __attribute__((overloadable)) vload_half(size_t offset, const __local half *p);
-float __attribute__((overloadable)) vload_half(size_t offset, const __private half *p);
+float __overload vload_half(size_t offset, const __global half *p);
+float __overload vload_half(size_t offset, const __local half *p);
+float __overload vload_half(size_t offset, const __private half *p);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -13222,33 +13224,33 @@ float __attribute__((overloadable)) vload_half(size_t offset, const __private ha
  * value is returned. The read address computed
  * as (p + (offset * n)) must be 16-bit aligned.
  */
-float2 __attribute__((overloadable)) vload_half2(size_t offset, const __constant half *p);
-float3 __attribute__((overloadable)) vload_half3(size_t offset, const __constant half *p);
-float4 __attribute__((overloadable)) vload_half4(size_t offset, const __constant half *p);
-float8 __attribute__((overloadable)) vload_half8(size_t offset, const __constant half *p);
-float16 __attribute__((overloadable)) vload_half16(size_t offset, const __constant half *p);
+float2 __overload vload_half2(size_t offset, const __constant half *p);
+float3 __overload vload_half3(size_t offset, const __constant half *p);
+float4 __overload vload_half4(size_t offset, const __constant half *p);
+float8 __overload vload_half8(size_t offset, const __constant half *p);
+float16 __overload vload_half16(size_t offset, const __constant half *p);
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float2 __attribute__((overloadable)) vload_half2(size_t offset, const half *p);
-float3 __attribute__((overloadable)) vload_half3(size_t offset, const half *p);
-float4 __attribute__((overloadable)) vload_half4(size_t offset, const half *p);
-float8 __attribute__((overloadable)) vload_half8(size_t offset, const half *p);
-float16 __attribute__((overloadable)) vload_half16(size_t offset, const half *p);
+float2 __overload vload_half2(size_t offset, const half *p);
+float3 __overload vload_half3(size_t offset, const half *p);
+float4 __overload vload_half4(size_t offset, const half *p);
+float8 __overload vload_half8(size_t offset, const half *p);
+float16 __overload vload_half16(size_t offset, const half *p);
 #else
-float2 __attribute__((overloadable)) vload_half2(size_t offset, const __global half *p);
-float3 __attribute__((overloadable)) vload_half3(size_t offset, const __global half *p);
-float4 __attribute__((overloadable)) vload_half4(size_t offset, const __global half *p);
-float8 __attribute__((overloadable)) vload_half8(size_t offset, const __global half *p);
-float16 __attribute__((overloadable)) vload_half16(size_t offset, const __global half *p);
-float2 __attribute__((overloadable)) vload_half2(size_t offset, const __local half *p);
-float3 __attribute__((overloadable)) vload_half3(size_t offset, const __local half *p);
-float4 __attribute__((overloadable)) vload_half4(size_t offset, const __local half *p);
-float8 __attribute__((overloadable)) vload_half8(size_t offset, const __local half *p);
-float16 __attribute__((overloadable)) vload_half16(size_t offset, const __local half *p);
-float2 __attribute__((overloadable)) vload_half2(size_t offset, const __private half *p);
-float3 __attribute__((overloadable)) vload_half3(size_t offset, const __private half *p);
-float4 __attribute__((overloadable)) vload_half4(size_t offset, const __private half *p);
-float8 __attribute__((overloadable)) vload_half8(size_t offset, const __private half *p);
-float16 __attribute__((overloadable)) vload_half16(size_t offset, const __private half *p);
+float2 __overload vload_half2(size_t offset, const __global half *p);
+float3 __overload vload_half3(size_t offset, const __global half *p);
+float4 __overload vload_half4(size_t offset, const __global half *p);
+float8 __overload vload_half8(size_t offset, const __global half *p);
+float16 __overload vload_half16(size_t offset, const __global half *p);
+float2 __overload vload_half2(size_t offset, const __local half *p);
+float3 __overload vload_half3(size_t offset, const __local half *p);
+float4 __overload vload_half4(size_t offset, const __local half *p);
+float8 __overload vload_half8(size_t offset, const __local half *p);
+float16 __overload vload_half16(size_t offset, const __local half *p);
+float2 __overload vload_half2(size_t offset, const __private half *p);
+float3 __overload vload_half3(size_t offset, const __private half *p);
+float4 __overload vload_half4(size_t offset, const __private half *p);
+float8 __overload vload_half8(size_t offset, const __private half *p);
+float16 __overload vload_half16(size_t offset, const __private half *p);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -13263,50 +13265,50 @@ float16 __attribute__((overloadable)) vload_half16(size_t offset, const __privat
  * nearest even.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) vstore_half(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half_rte(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half_rtz(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half_rtp(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half_rtn(float data, size_t offset, half *p);
+void __overload vstore_half(float data, size_t offset, half *p);
+void __overload vstore_half_rte(float data, size_t offset, half *p);
+void __overload vstore_half_rtz(float data, size_t offset, half *p);
+void __overload vstore_half_rtp(float data, size_t offset, half *p);
+void __overload vstore_half_rtn(float data, size_t offset, half *p);
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) vstore_half(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half_rte(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half_rtz(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half_rtp(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half_rtn(double data, size_t offset, half *p);
+void __overload vstore_half(double data, size_t offset, half *p);
+void __overload vstore_half_rte(double data, size_t offset, half *p);
+void __overload vstore_half_rtz(double data, size_t offset, half *p);
+void __overload vstore_half_rtp(double data, size_t offset, half *p);
+void __overload vstore_half_rtn(double data, size_t offset, half *p);
 #endif //cl_khr_fp64
 #else
-void __attribute__((overloadable)) vstore_half(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half_rte(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half_rtz(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half_rtp(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half_rtn(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half_rte(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half_rtz(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half_rtp(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half_rtn(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half_rte(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half_rtz(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half_rtp(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half_rtn(float data, size_t offset, __private half *p);
+void __overload vstore_half(float data, size_t offset, __global half *p);
+void __overload vstore_half_rte(float data, size_t offset, __global half *p);
+void __overload vstore_half_rtz(float data, size_t offset, __global half *p);
+void __overload vstore_half_rtp(float data, size_t offset, __global half *p);
+void __overload vstore_half_rtn(float data, size_t offset, __global half *p);
+void __overload vstore_half(float data, size_t offset, __local half *p);
+void __overload vstore_half_rte(float data, size_t offset, __local half *p);
+void __overload vstore_half_rtz(float data, size_t offset, __local half *p);
+void __overload vstore_half_rtp(float data, size_t offset, __local half *p);
+void __overload vstore_half_rtn(float data, size_t offset, __local half *p);
+void __overload vstore_half(float data, size_t offset, __private half *p);
+void __overload vstore_half_rte(float data, size_t offset, __private half *p);
+void __overload vstore_half_rtz(float data, size_t offset, __private half *p);
+void __overload vstore_half_rtp(float data, size_t offset, __private half *p);
+void __overload vstore_half_rtn(float data, size_t offset, __private half *p);
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) vstore_half(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half_rte(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half_rtz(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half_rtp(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half_rtn(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half_rte(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half_rtz(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half_rtp(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half_rtn(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half_rte(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half_rtz(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half_rtp(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half_rtn(double data, size_t offset, __private half *p);
+void __overload vstore_half(double data, size_t offset, __global half *p);
+void __overload vstore_half_rte(double data, size_t offset, __global half *p);
+void __overload vstore_half_rtz(double data, size_t offset, __global half *p);
+void __overload vstore_half_rtp(double data, size_t offset, __global half *p);
+void __overload vstore_half_rtn(double data, size_t offset, __global half *p);
+void __overload vstore_half(double data, size_t offset, __local half *p);
+void __overload vstore_half_rte(double data, size_t offset, __local half *p);
+void __overload vstore_half_rtz(double data, size_t offset, __local half *p);
+void __overload vstore_half_rtp(double data, size_t offset, __local half *p);
+void __overload vstore_half_rtn(double data, size_t offset, __local half *p);
+void __overload vstore_half(double data, size_t offset, __private half *p);
+void __overload vstore_half_rte(double data, size_t offset, __private half *p);
+void __overload vstore_half_rtz(double data, size_t offset, __private half *p);
+void __overload vstore_half_rtp(double data, size_t offset, __private half *p);
+void __overload vstore_half_rtn(double data, size_t offset, __private half *p);
 #endif //cl_khr_fp64
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -13322,210 +13324,210 @@ void __attribute__((overloadable)) vstore_half_rtn(double data, size_t offset, _
  * nearest even.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) vstore_half2(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16(float16 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half2_rte(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3_rte(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4_rte(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8_rte(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16_rte(float16 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half2_rtz(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3_rtz(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4_rtz(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8_rtz(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16_rtz(float16 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half2_rtp(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3_rtp(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4_rtp(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8_rtp(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16_rtp(float16 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half2_rtn(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3_rtn(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4_rtn(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8_rtn(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16_rtn(float16 data, size_t offset, half *p);
+void __overload vstore_half2(float2 data, size_t offset, half *p);
+void __overload vstore_half3(float3 data, size_t offset, half *p);
+void __overload vstore_half4(float4 data, size_t offset, half *p);
+void __overload vstore_half8(float8 data, size_t offset, half *p);
+void __overload vstore_half16(float16 data, size_t offset, half *p);
+void __overload vstore_half2_rte(float2 data, size_t offset, half *p);
+void __overload vstore_half3_rte(float3 data, size_t offset, half *p);
+void __overload vstore_half4_rte(float4 data, size_t offset, half *p);
+void __overload vstore_half8_rte(float8 data, size_t offset, half *p);
+void __overload vstore_half16_rte(float16 data, size_t offset, half *p);
+void __overload vstore_half2_rtz(float2 data, size_t offset, half *p);
+void __overload vstore_half3_rtz(float3 data, size_t offset, half *p);
+void __overload vstore_half4_rtz(float4 data, size_t offset, half *p);
+void __overload vstore_half8_rtz(float8 data, size_t offset, half *p);
+void __overload vstore_half16_rtz(float16 data, size_t offset, half *p);
+void __overload vstore_half2_rtp(float2 data, size_t offset, half *p);
+void __overload vstore_half3_rtp(float3 data, size_t offset, half *p);
+void __overload vstore_half4_rtp(float4 data, size_t offset, half *p);
+void __overload vstore_half8_rtp(float8 data, size_t offset, half *p);
+void __overload vstore_half16_rtp(float16 data, size_t offset, half *p);
+void __overload vstore_half2_rtn(float2 data, size_t offset, half *p);
+void __overload vstore_half3_rtn(float3 data, size_t offset, half *p);
+void __overload vstore_half4_rtn(float4 data, size_t offset, half *p);
+void __overload vstore_half8_rtn(float8 data, size_t offset, half *p);
+void __overload vstore_half16_rtn(float16 data, size_t offset, half *p);
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) vstore_half2(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16(double16 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half2_rte(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3_rte(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4_rte(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8_rte(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16_rte(double16 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half2_rtz(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3_rtz(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4_rtz(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8_rtz(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16_rtz(double16 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half2_rtp(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3_rtp(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4_rtp(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8_rtp(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16_rtp(double16 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half2_rtn(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half3_rtn(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half4_rtn(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half8_rtn(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstore_half16_rtn(double16 data, size_t offset, half *p);
+void __overload vstore_half2(double2 data, size_t offset, half *p);
+void __overload vstore_half3(double3 data, size_t offset, half *p);
+void __overload vstore_half4(double4 data, size_t offset, half *p);
+void __overload vstore_half8(double8 data, size_t offset, half *p);
+void __overload vstore_half16(double16 data, size_t offset, half *p);
+void __overload vstore_half2_rte(double2 data, size_t offset, half *p);
+void __overload vstore_half3_rte(double3 data, size_t offset, half *p);
+void __overload vstore_half4_rte(double4 data, size_t offset, half *p);
+void __overload vstore_half8_rte(double8 data, size_t offset, half *p);
+void __overload vstore_half16_rte(double16 data, size_t offset, half *p);
+void __overload vstore_half2_rtz(double2 data, size_t offset, half *p);
+void __overload vstore_half3_rtz(double3 data, size_t offset, half *p);
+void __overload vstore_half4_rtz(double4 data, size_t offset, half *p);
+void __overload vstore_half8_rtz(double8 data, size_t offset, half *p);
+void __overload vstore_half16_rtz(double16 data, size_t offset, half *p);
+void __overload vstore_half2_rtp(double2 data, size_t offset, half *p);
+void __overload vstore_half3_rtp(double3 data, size_t offset, half *p);
+void __overload vstore_half4_rtp(double4 data, size_t offset, half *p);
+void __overload vstore_half8_rtp(double8 data, size_t offset, half *p);
+void __overload vstore_half16_rtp(double16 data, size_t offset, half *p);
+void __overload vstore_half2_rtn(double2 data, size_t offset, half *p);
+void __overload vstore_half3_rtn(double3 data, size_t offset, half *p);
+void __overload vstore_half4_rtn(double4 data, size_t offset, half *p);
+void __overload vstore_half8_rtn(double8 data, size_t offset, half *p);
+void __overload vstore_half16_rtn(double16 data, size_t offset, half *p);
 #endif //cl_khr_fp64
 #else
-void __attribute__((overloadable)) vstore_half2(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16(float16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2_rte(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3_rte(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4_rte(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8_rte(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16_rte(float16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2_rtz(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3_rtz(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4_rtz(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8_rtz(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16_rtz(float16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2_rtp(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3_rtp(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4_rtp(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8_rtp(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16_rtp(float16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2_rtn(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3_rtn(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4_rtn(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8_rtn(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16_rtn(float16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16(float16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2_rte(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3_rte(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4_rte(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8_rte(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16_rte(float16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2_rtz(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3_rtz(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4_rtz(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8_rtz(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16_rtz(float16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2_rtp(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3_rtp(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4_rtp(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8_rtp(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16_rtp(float16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2_rtn(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3_rtn(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4_rtn(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8_rtn(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16_rtn(float16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16(float16 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half2_rte(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3_rte(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4_rte(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8_rte(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16_rte(float16 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half2_rtz(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3_rtz(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4_rtz(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8_rtz(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16_rtz(float16 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half2_rtp(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3_rtp(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4_rtp(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8_rtp(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16_rtp(float16 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half2_rtn(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3_rtn(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4_rtn(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8_rtn(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16_rtn(float16 data, size_t offset, __private half *p);
+void __overload vstore_half2(float2 data, size_t offset, __global half *p);
+void __overload vstore_half3(float3 data, size_t offset, __global half *p);
+void __overload vstore_half4(float4 data, size_t offset, __global half *p);
+void __overload vstore_half8(float8 data, size_t offset, __global half *p);
+void __overload vstore_half16(float16 data, size_t offset, __global half *p);
+void __overload vstore_half2_rte(float2 data, size_t offset, __global half *p);
+void __overload vstore_half3_rte(float3 data, size_t offset, __global half *p);
+void __overload vstore_half4_rte(float4 data, size_t offset, __global half *p);
+void __overload vstore_half8_rte(float8 data, size_t offset, __global half *p);
+void __overload vstore_half16_rte(float16 data, size_t offset, __global half *p);
+void __overload vstore_half2_rtz(float2 data, size_t offset, __global half *p);
+void __overload vstore_half3_rtz(float3 data, size_t offset, __global half *p);
+void __overload vstore_half4_rtz(float4 data, size_t offset, __global half *p);
+void __overload vstore_half8_rtz(float8 data, size_t offset, __global half *p);
+void __overload vstore_half16_rtz(float16 data, size_t offset, __global half *p);
+void __overload vstore_half2_rtp(float2 data, size_t offset, __global half *p);
+void __overload vstore_half3_rtp(float3 data, size_t offset, __global half *p);
+void __overload vstore_half4_rtp(float4 data, size_t offset, __global half *p);
+void __overload vstore_half8_rtp(float8 data, size_t offset, __global half *p);
+void __overload vstore_half16_rtp(float16 data, size_t offset, __global half *p);
+void __overload vstore_half2_rtn(float2 data, size_t offset, __global half *p);
+void __overload vstore_half3_rtn(float3 data, size_t offset, __global half *p);
+void __overload vstore_half4_rtn(float4 data, size_t offset, __global half *p);
+void __overload vstore_half8_rtn(float8 data, size_t offset, __global half *p);
+void __overload vstore_half16_rtn(float16 data, size_t offset, __global half *p);
+void __overload vstore_half2(float2 data, size_t offset, __local half *p);
+void __overload vstore_half3(float3 data, size_t offset, __local half *p);
+void __overload vstore_half4(float4 data, size_t offset, __local half *p);
+void __overload vstore_half8(float8 data, size_t offset, __local half *p);
+void __overload vstore_half16(float16 data, size_t offset, __local half *p);
+void __overload vstore_half2_rte(float2 data, size_t offset, __local half *p);
+void __overload vstore_half3_rte(float3 data, size_t offset, __local half *p);
+void __overload vstore_half4_rte(float4 data, size_t offset, __local half *p);
+void __overload vstore_half8_rte(float8 data, size_t offset, __local half *p);
+void __overload vstore_half16_rte(float16 data, size_t offset, __local half *p);
+void __overload vstore_half2_rtz(float2 data, size_t offset, __local half *p);
+void __overload vstore_half3_rtz(float3 data, size_t offset, __local half *p);
+void __overload vstore_half4_rtz(float4 data, size_t offset, __local half *p);
+void __overload vstore_half8_rtz(float8 data, size_t offset, __local half *p);
+void __overload vstore_half16_rtz(float16 data, size_t offset, __local half *p);
+void __overload vstore_half2_rtp(float2 data, size_t offset, __local half *p);
+void __overload vstore_half3_rtp(float3 data, size_t offset, __local half *p);
+void __overload vstore_half4_rtp(float4 data, size_t offset, __local half *p);
+void __overload vstore_half8_rtp(float8 data, size_t offset, __local half *p);
+void __overload vstore_half16_rtp(float16 data, size_t offset, __local half *p);
+void __overload vstore_half2_rtn(float2 data, size_t offset, __local half *p);
+void __overload vstore_half3_rtn(float3 data, size_t offset, __local half *p);
+void __overload vstore_half4_rtn(float4 data, size_t offset, __local half *p);
+void __overload vstore_half8_rtn(float8 data, size_t offset, __local half *p);
+void __overload vstore_half16_rtn(float16 data, size_t offset, __local half *p);
+void __overload vstore_half2(float2 data, size_t offset, __private half *p);
+void __overload vstore_half3(float3 data, size_t offset, __private half *p);
+void __overload vstore_half4(float4 data, size_t offset, __private half *p);
+void __overload vstore_half8(float8 data, size_t offset, __private half *p);
+void __overload vstore_half16(float16 data, size_t offset, __private half *p);
+void __overload vstore_half2_rte(float2 data, size_t offset, __private half *p);
+void __overload vstore_half3_rte(float3 data, size_t offset, __private half *p);
+void __overload vstore_half4_rte(float4 data, size_t offset, __private half *p);
+void __overload vstore_half8_rte(float8 data, size_t offset, __private half *p);
+void __overload vstore_half16_rte(float16 data, size_t offset, __private half *p);
+void __overload vstore_half2_rtz(float2 data, size_t offset, __private half *p);
+void __overload vstore_half3_rtz(float3 data, size_t offset, __private half *p);
+void __overload vstore_half4_rtz(float4 data, size_t offset, __private half *p);
+void __overload vstore_half8_rtz(float8 data, size_t offset, __private half *p);
+void __overload vstore_half16_rtz(float16 data, size_t offset, __private half *p);
+void __overload vstore_half2_rtp(float2 data, size_t offset, __private half *p);
+void __overload vstore_half3_rtp(float3 data, size_t offset, __private half *p);
+void __overload vstore_half4_rtp(float4 data, size_t offset, __private half *p);
+void __overload vstore_half8_rtp(float8 data, size_t offset, __private half *p);
+void __overload vstore_half16_rtp(float16 data, size_t offset, __private half *p);
+void __overload vstore_half2_rtn(float2 data, size_t offset, __private half *p);
+void __overload vstore_half3_rtn(float3 data, size_t offset, __private half *p);
+void __overload vstore_half4_rtn(float4 data, size_t offset, __private half *p);
+void __overload vstore_half8_rtn(float8 data, size_t offset, __private half *p);
+void __overload vstore_half16_rtn(float16 data, size_t offset, __private half *p);
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) vstore_half2(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16(double16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2_rte(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3_rte(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4_rte(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8_rte(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16_rte(double16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2_rtz(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3_rtz(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4_rtz(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8_rtz(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16_rtz(double16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2_rtp(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3_rtp(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4_rtp(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8_rtp(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16_rtp(double16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2_rtn(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half3_rtn(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half4_rtn(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half8_rtn(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half16_rtn(double16 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstore_half2(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16(double16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2_rte(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3_rte(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4_rte(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8_rte(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16_rte(double16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2_rtz(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3_rtz(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4_rtz(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8_rtz(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16_rtz(double16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2_rtp(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3_rtp(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4_rtp(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8_rtp(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16_rtp(double16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2_rtn(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half3_rtn(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half4_rtn(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half8_rtn(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half16_rtn(double16 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstore_half2(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16(double16 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half2_rte(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3_rte(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4_rte(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8_rte(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16_rte(double16 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half2_rtz(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3_rtz(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4_rtz(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8_rtz(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16_rtz(double16 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half2_rtp(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3_rtp(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4_rtp(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8_rtp(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16_rtp(double16 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half2_rtn(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half3_rtn(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half4_rtn(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half8_rtn(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstore_half16_rtn(double16 data, size_t offset, __private half *p);
+void __overload vstore_half2(double2 data, size_t offset, __global half *p);
+void __overload vstore_half3(double3 data, size_t offset, __global half *p);
+void __overload vstore_half4(double4 data, size_t offset, __global half *p);
+void __overload vstore_half8(double8 data, size_t offset, __global half *p);
+void __overload vstore_half16(double16 data, size_t offset, __global half *p);
+void __overload vstore_half2_rte(double2 data, size_t offset, __global half *p);
+void __overload vstore_half3_rte(double3 data, size_t offset, __global half *p);
+void __overload vstore_half4_rte(double4 data, size_t offset, __global half *p);
+void __overload vstore_half8_rte(double8 data, size_t offset, __global half *p);
+void __overload vstore_half16_rte(double16 data, size_t offset, __global half *p);
+void __overload vstore_half2_rtz(double2 data, size_t offset, __global half *p);
+void __overload vstore_half3_rtz(double3 data, size_t offset, __global half *p);
+void __overload vstore_half4_rtz(double4 data, size_t offset, __global half *p);
+void __overload vstore_half8_rtz(double8 data, size_t offset, __global half *p);
+void __overload vstore_half16_rtz(double16 data, size_t offset, __global half *p);
+void __overload vstore_half2_rtp(double2 data, size_t offset, __global half *p);
+void __overload vstore_half3_rtp(double3 data, size_t offset, __global half *p);
+void __overload vstore_half4_rtp(double4 data, size_t offset, __global half *p);
+void __overload vstore_half8_rtp(double8 data, size_t offset, __global half *p);
+void __overload vstore_half16_rtp(double16 data, size_t offset, __global half *p);
+void __overload vstore_half2_rtn(double2 data, size_t offset, __global half *p);
+void __overload vstore_half3_rtn(double3 data, size_t offset, __global half *p);
+void __overload vstore_half4_rtn(double4 data, size_t offset, __global half *p);
+void __overload vstore_half8_rtn(double8 data, size_t offset, __global half *p);
+void __overload vstore_half16_rtn(double16 data, size_t offset, __global half *p);
+void __overload vstore_half2(double2 data, size_t offset, __local half *p);
+void __overload vstore_half3(double3 data, size_t offset, __local half *p);
+void __overload vstore_half4(double4 data, size_t offset, __local half *p);
+void __overload vstore_half8(double8 data, size_t offset, __local half *p);
+void __overload vstore_half16(double16 data, size_t offset, __local half *p);
+void __overload vstore_half2_rte(double2 data, size_t offset, __local half *p);
+void __overload vstore_half3_rte(double3 data, size_t offset, __local half *p);
+void __overload vstore_half4_rte(double4 data, size_t offset, __local half *p);
+void __overload vstore_half8_rte(double8 data, size_t offset, __local half *p);
+void __overload vstore_half16_rte(double16 data, size_t offset, __local half *p);
+void __overload vstore_half2_rtz(double2 data, size_t offset, __local half *p);
+void __overload vstore_half3_rtz(double3 data, size_t offset, __local half *p);
+void __overload vstore_half4_rtz(double4 data, size_t offset, __local half *p);
+void __overload vstore_half8_rtz(double8 data, size_t offset, __local half *p);
+void __overload vstore_half16_rtz(double16 data, size_t offset, __local half *p);
+void __overload vstore_half2_rtp(double2 data, size_t offset, __local half *p);
+void __overload vstore_half3_rtp(double3 data, size_t offset, __local half *p);
+void __overload vstore_half4_rtp(double4 data, size_t offset, __local half *p);
+void __overload vstore_half8_rtp(double8 data, size_t offset, __local half *p);
+void __overload vstore_half16_rtp(double16 data, size_t offset, __local half *p);
+void __overload vstore_half2_rtn(double2 data, size_t offset, __local half *p);
+void __overload vstore_half3_rtn(double3 data, size_t offset, __local half *p);
+void __overload vstore_half4_rtn(double4 data, size_t offset, __local half *p);
+void __overload vstore_half8_rtn(double8 data, size_t offset, __local half *p);
+void __overload vstore_half16_rtn(double16 data, size_t offset, __local half *p);
+void __overload vstore_half2(double2 data, size_t offset, __private half *p);
+void __overload vstore_half3(double3 data, size_t offset, __private half *p);
+void __overload vstore_half4(double4 data, size_t offset, __private half *p);
+void __overload vstore_half8(double8 data, size_t offset, __private half *p);
+void __overload vstore_half16(double16 data, size_t offset, __private half *p);
+void __overload vstore_half2_rte(double2 data, size_t offset, __private half *p);
+void __overload vstore_half3_rte(double3 data, size_t offset, __private half *p);
+void __overload vstore_half4_rte(double4 data, size_t offset, __private half *p);
+void __overload vstore_half8_rte(double8 data, size_t offset, __private half *p);
+void __overload vstore_half16_rte(double16 data, size_t offset, __private half *p);
+void __overload vstore_half2_rtz(double2 data, size_t offset, __private half *p);
+void __overload vstore_half3_rtz(double3 data, size_t offset, __private half *p);
+void __overload vstore_half4_rtz(double4 data, size_t offset, __private half *p);
+void __overload vstore_half8_rtz(double8 data, size_t offset, __private half *p);
+void __overload vstore_half16_rtz(double16 data, size_t offset, __private half *p);
+void __overload vstore_half2_rtp(double2 data, size_t offset, __private half *p);
+void __overload vstore_half3_rtp(double3 data, size_t offset, __private half *p);
+void __overload vstore_half4_rtp(double4 data, size_t offset, __private half *p);
+void __overload vstore_half8_rtp(double8 data, size_t offset, __private half *p);
+void __overload vstore_half16_rtp(double16 data, size_t offset, __private half *p);
+void __overload vstore_half2_rtn(double2 data, size_t offset, __private half *p);
+void __overload vstore_half3_rtn(double3 data, size_t offset, __private half *p);
+void __overload vstore_half4_rtn(double4 data, size_t offset, __private half *p);
+void __overload vstore_half8_rtn(double8 data, size_t offset, __private half *p);
+void __overload vstore_half16_rtn(double16 data, size_t offset, __private half *p);
 #endif //cl_khr_fp64
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -13542,38 +13544,38 @@ void __attribute__((overloadable)) vstore_half16_rtn(double16 data, size_t offse
  * The address computed as (p + (offset * 4))
  * must be aligned to sizeof (half) * 4 bytes.
  */
-float __attribute__((overloadable)) vloada_half(size_t offset, const __constant half *p);
-float2 __attribute__((overloadable)) vloada_half2(size_t offset, const __constant half *p);
-float3 __attribute__((overloadable)) vloada_half3(size_t offset, const __constant half *p);
-float4 __attribute__((overloadable)) vloada_half4(size_t offset, const __constant half *p);
-float8 __attribute__((overloadable)) vloada_half8(size_t offset, const __constant half *p);
-float16 __attribute__((overloadable)) vloada_half16(size_t offset, const __constant half *p);
+float __overload vloada_half(size_t offset, const __constant half *p);
+float2 __overload vloada_half2(size_t offset, const __constant half *p);
+float3 __overload vloada_half3(size_t offset, const __constant half *p);
+float4 __overload vloada_half4(size_t offset, const __constant half *p);
+float8 __overload vloada_half8(size_t offset, const __constant half *p);
+float16 __overload vloada_half16(size_t offset, const __constant half *p);
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) vloada_half(size_t offset, const half *p);
-float2 __attribute__((overloadable)) vloada_half2(size_t offset, const half *p);
-float3 __attribute__((overloadable)) vloada_half3(size_t offset, const half *p);
-float4 __attribute__((overloadable)) vloada_half4(size_t offset, const half *p);
-float8 __attribute__((overloadable)) vloada_half8(size_t offset, const half *p);
-float16 __attribute__((overloadable)) vloada_half16(size_t offset, const half *p);
+float __overload vloada_half(size_t offset, const half *p);
+float2 __overload vloada_half2(size_t offset, const half *p);
+float3 __overload vloada_half3(size_t offset, const half *p);
+float4 __overload vloada_half4(size_t offset, const half *p);
+float8 __overload vloada_half8(size_t offset, const half *p);
+float16 __overload vloada_half16(size_t offset, const half *p);
 #else
-float __attribute__((overloadable)) vloada_half(size_t offset, const __global half *p);
-float2 __attribute__((overloadable)) vloada_half2(size_t offset, const __global half *p);
-float3 __attribute__((overloadable)) vloada_half3(size_t offset, const __global half *p);
-float4 __attribute__((overloadable)) vloada_half4(size_t offset, const __global half *p);
-float8 __attribute__((overloadable)) vloada_half8(size_t offset, const __global half *p);
-float16 __attribute__((overloadable)) vloada_half16(size_t offset, const __global half *p);
-float __attribute__((overloadable)) vloada_half(size_t offset, const __local half *p);
-float2 __attribute__((overloadable)) vloada_half2(size_t offset, const __local half *p);
-float3 __attribute__((overloadable)) vloada_half3(size_t offset, const __local half *p);
-float4 __attribute__((overloadable)) vloada_half4(size_t offset, const __local half *p);
-float8 __attribute__((overloadable)) vloada_half8(size_t offset, const __local half *p);
-float16 __attribute__((overloadable)) vloada_half16(size_t offset, const __local half *p);
-float __attribute__((overloadable)) vloada_half(size_t offset, const __private half *p);
-float2 __attribute__((overloadable)) vloada_half2(size_t offset, const __private half *p);
-float3 __attribute__((overloadable)) vloada_half3(size_t offset, const __private half *p);
-float4 __attribute__((overloadable)) vloada_half4(size_t offset, const __private half *p);
-float8 __attribute__((overloadable)) vloada_half8(size_t offset, const __private half *p);
-float16 __attribute__((overloadable)) vloada_half16(size_t offset, const __private half *p);
+float __overload vloada_half(size_t offset, const __global half *p);
+float2 __overload vloada_half2(size_t offset, const __global half *p);
+float3 __overload vloada_half3(size_t offset, const __global half *p);
+float4 __overload vloada_half4(size_t offset, const __global half *p);
+float8 __overload vloada_half8(size_t offset, const __global half *p);
+float16 __overload vloada_half16(size_t offset, const __global half *p);
+float __overload vloada_half(size_t offset, const __local half *p);
+float2 __overload vloada_half2(size_t offset, const __local half *p);
+float3 __overload vloada_half3(size_t offset, const __local half *p);
+float4 __overload vloada_half4(size_t offset, const __local half *p);
+float8 __overload vloada_half8(size_t offset, const __local half *p);
+float16 __overload vloada_half16(size_t offset, const __local half *p);
+float __overload vloada_half(size_t offset, const __private half *p);
+float2 __overload vloada_half2(size_t offset, const __private half *p);
+float3 __overload vloada_half3(size_t offset, const __private half *p);
+float4 __overload vloada_half4(size_t offset, const __private half *p);
+float8 __overload vloada_half8(size_t offset, const __private half *p);
+float16 __overload vloada_half16(size_t offset, const __private half *p);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -13593,289 +13595,289 @@ float16 __attribute__((overloadable)) vloada_half16(size_t offset, const __priva
  * round to nearest even.
  */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) vstorea_half(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16(float16 data, size_t offset, half *p);
+void __overload vstorea_half(float data, size_t offset, half *p);
+void __overload vstorea_half2(float2 data, size_t offset, half *p);
+void __overload vstorea_half3(float3 data, size_t offset, half *p);
+void __overload vstorea_half4(float4 data, size_t offset, half *p);
+void __overload vstorea_half8(float8 data, size_t offset, half *p);
+void __overload vstorea_half16(float16 data, size_t offset, half *p);
 
-void __attribute__((overloadable)) vstorea_half_rte(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2_rte(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3_rte(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4_rte(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8_rte(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16_rte(float16 data, size_t offset, half *p);
+void __overload vstorea_half_rte(float data, size_t offset, half *p);
+void __overload vstorea_half2_rte(float2 data, size_t offset, half *p);
+void __overload vstorea_half3_rte(float3 data, size_t offset, half *p);
+void __overload vstorea_half4_rte(float4 data, size_t offset, half *p);
+void __overload vstorea_half8_rte(float8 data, size_t offset, half *p);
+void __overload vstorea_half16_rte(float16 data, size_t offset, half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtz(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2_rtz(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3_rtz(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4_rtz(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8_rtz(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16_rtz(float16 data, size_t offset, half *p);
+void __overload vstorea_half_rtz(float data, size_t offset, half *p);
+void __overload vstorea_half2_rtz(float2 data, size_t offset, half *p);
+void __overload vstorea_half3_rtz(float3 data, size_t offset, half *p);
+void __overload vstorea_half4_rtz(float4 data, size_t offset, half *p);
+void __overload vstorea_half8_rtz(float8 data, size_t offset, half *p);
+void __overload vstorea_half16_rtz(float16 data, size_t offset, half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtp(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2_rtp(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3_rtp(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4_rtp(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8_rtp(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16_rtp(float16 data, size_t offset, half *p);
+void __overload vstorea_half_rtp(float data, size_t offset, half *p);
+void __overload vstorea_half2_rtp(float2 data, size_t offset, half *p);
+void __overload vstorea_half3_rtp(float3 data, size_t offset, half *p);
+void __overload vstorea_half4_rtp(float4 data, size_t offset, half *p);
+void __overload vstorea_half8_rtp(float8 data, size_t offset, half *p);
+void __overload vstorea_half16_rtp(float16 data, size_t offset, half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtn(float data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2_rtn(float2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3_rtn(float3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4_rtn(float4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8_rtn(float8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16_rtn(float16 data, size_t offset, half *p);
+void __overload vstorea_half_rtn(float data, size_t offset, half *p);
+void __overload vstorea_half2_rtn(float2 data, size_t offset, half *p);
+void __overload vstorea_half3_rtn(float3 data, size_t offset, half *p);
+void __overload vstorea_half4_rtn(float4 data, size_t offset, half *p);
+void __overload vstorea_half8_rtn(float8 data, size_t offset, half *p);
+void __overload vstorea_half16_rtn(float16 data, size_t offset, half *p);
 
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) vstorea_half(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16(double16 data, size_t offset, half *p);
+void __overload vstorea_half(double data, size_t offset, half *p);
+void __overload vstorea_half2(double2 data, size_t offset, half *p);
+void __overload vstorea_half3(double3 data, size_t offset, half *p);
+void __overload vstorea_half4(double4 data, size_t offset, half *p);
+void __overload vstorea_half8(double8 data, size_t offset, half *p);
+void __overload vstorea_half16(double16 data, size_t offset, half *p);
 
-void __attribute__((overloadable)) vstorea_half_rte(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2_rte(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3_rte(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4_rte(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8_rte(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16_rte(double16 data, size_t offset, half *p);
+void __overload vstorea_half_rte(double data, size_t offset, half *p);
+void __overload vstorea_half2_rte(double2 data, size_t offset, half *p);
+void __overload vstorea_half3_rte(double3 data, size_t offset, half *p);
+void __overload vstorea_half4_rte(double4 data, size_t offset, half *p);
+void __overload vstorea_half8_rte(double8 data, size_t offset, half *p);
+void __overload vstorea_half16_rte(double16 data, size_t offset, half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtz(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2_rtz(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3_rtz(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4_rtz(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8_rtz(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16_rtz(double16 data, size_t offset, half *p);
+void __overload vstorea_half_rtz(double data, size_t offset, half *p);
+void __overload vstorea_half2_rtz(double2 data, size_t offset, half *p);
+void __overload vstorea_half3_rtz(double3 data, size_t offset, half *p);
+void __overload vstorea_half4_rtz(double4 data, size_t offset, half *p);
+void __overload vstorea_half8_rtz(double8 data, size_t offset, half *p);
+void __overload vstorea_half16_rtz(double16 data, size_t offset, half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtp(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2_rtp(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3_rtp(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4_rtp(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8_rtp(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16_rtp(double16 data, size_t offset, half *p);
+void __overload vstorea_half_rtp(double data, size_t offset, half *p);
+void __overload vstorea_half2_rtp(double2 data, size_t offset, half *p);
+void __overload vstorea_half3_rtp(double3 data, size_t offset, half *p);
+void __overload vstorea_half4_rtp(double4 data, size_t offset, half *p);
+void __overload vstorea_half8_rtp(double8 data, size_t offset, half *p);
+void __overload vstorea_half16_rtp(double16 data, size_t offset, half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtn(double data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half2_rtn(double2 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half3_rtn(double3 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half4_rtn(double4 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half8_rtn(double8 data, size_t offset, half *p);
-void __attribute__((overloadable)) vstorea_half16_rtn(double16 data, size_t offset, half *p);
+void __overload vstorea_half_rtn(double data, size_t offset, half *p);
+void __overload vstorea_half2_rtn(double2 data, size_t offset, half *p);
+void __overload vstorea_half3_rtn(double3 data, size_t offset, half *p);
+void __overload vstorea_half4_rtn(double4 data, size_t offset, half *p);
+void __overload vstorea_half8_rtn(double8 data, size_t offset, half *p);
+void __overload vstorea_half16_rtn(double16 data, size_t offset, half *p);
 #endif //cl_khr_fp64
 
 #else
-void __attribute__((overloadable)) vstorea_half(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16(float16 data, size_t offset, __global half *p);
+void __overload vstorea_half(float data, size_t offset, __global half *p);
+void __overload vstorea_half2(float2 data, size_t offset, __global half *p);
+void __overload vstorea_half3(float3 data, size_t offset, __global half *p);
+void __overload vstorea_half4(float4 data, size_t offset, __global half *p);
+void __overload vstorea_half8(float8 data, size_t offset, __global half *p);
+void __overload vstorea_half16(float16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half_rte(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2_rte(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3_rte(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4_rte(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8_rte(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16_rte(float16 data, size_t offset, __global half *p);
+void __overload vstorea_half_rte(float data, size_t offset, __global half *p);
+void __overload vstorea_half2_rte(float2 data, size_t offset, __global half *p);
+void __overload vstorea_half3_rte(float3 data, size_t offset, __global half *p);
+void __overload vstorea_half4_rte(float4 data, size_t offset, __global half *p);
+void __overload vstorea_half8_rte(float8 data, size_t offset, __global half *p);
+void __overload vstorea_half16_rte(float16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtz(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2_rtz(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3_rtz(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4_rtz(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8_rtz(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16_rtz(float16 data, size_t offset, __global half *p);
+void __overload vstorea_half_rtz(float data, size_t offset, __global half *p);
+void __overload vstorea_half2_rtz(float2 data, size_t offset, __global half *p);
+void __overload vstorea_half3_rtz(float3 data, size_t offset, __global half *p);
+void __overload vstorea_half4_rtz(float4 data, size_t offset, __global half *p);
+void __overload vstorea_half8_rtz(float8 data, size_t offset, __global half *p);
+void __overload vstorea_half16_rtz(float16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtp(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2_rtp(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3_rtp(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4_rtp(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8_rtp(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16_rtp(float16 data, size_t offset, __global half *p);
+void __overload vstorea_half_rtp(float data, size_t offset, __global half *p);
+void __overload vstorea_half2_rtp(float2 data, size_t offset, __global half *p);
+void __overload vstorea_half3_rtp(float3 data, size_t offset, __global half *p);
+void __overload vstorea_half4_rtp(float4 data, size_t offset, __global half *p);
+void __overload vstorea_half8_rtp(float8 data, size_t offset, __global half *p);
+void __overload vstorea_half16_rtp(float16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtn(float data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2_rtn(float2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3_rtn(float3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4_rtn(float4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8_rtn(float8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16_rtn(float16 data, size_t offset, __global half *p);
+void __overload vstorea_half_rtn(float data, size_t offset, __global half *p);
+void __overload vstorea_half2_rtn(float2 data, size_t offset, __global half *p);
+void __overload vstorea_half3_rtn(float3 data, size_t offset, __global half *p);
+void __overload vstorea_half4_rtn(float4 data, size_t offset, __global half *p);
+void __overload vstorea_half8_rtn(float8 data, size_t offset, __global half *p);
+void __overload vstorea_half16_rtn(float16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16(float16 data, size_t offset, __local half *p);
+void __overload vstorea_half(float data, size_t offset, __local half *p);
+void __overload vstorea_half2(float2 data, size_t offset, __local half *p);
+void __overload vstorea_half3(float3 data, size_t offset, __local half *p);
+void __overload vstorea_half4(float4 data, size_t offset, __local half *p);
+void __overload vstorea_half8(float8 data, size_t offset, __local half *p);
+void __overload vstorea_half16(float16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half_rte(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2_rte(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3_rte(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4_rte(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8_rte(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16_rte(float16 data, size_t offset, __local half *p);
+void __overload vstorea_half_rte(float data, size_t offset, __local half *p);
+void __overload vstorea_half2_rte(float2 data, size_t offset, __local half *p);
+void __overload vstorea_half3_rte(float3 data, size_t offset, __local half *p);
+void __overload vstorea_half4_rte(float4 data, size_t offset, __local half *p);
+void __overload vstorea_half8_rte(float8 data, size_t offset, __local half *p);
+void __overload vstorea_half16_rte(float16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtz(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2_rtz(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3_rtz(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4_rtz(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8_rtz(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16_rtz(float16 data, size_t offset, __local half *p);
+void __overload vstorea_half_rtz(float data, size_t offset, __local half *p);
+void __overload vstorea_half2_rtz(float2 data, size_t offset, __local half *p);
+void __overload vstorea_half3_rtz(float3 data, size_t offset, __local half *p);
+void __overload vstorea_half4_rtz(float4 data, size_t offset, __local half *p);
+void __overload vstorea_half8_rtz(float8 data, size_t offset, __local half *p);
+void __overload vstorea_half16_rtz(float16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtp(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2_rtp(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3_rtp(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4_rtp(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8_rtp(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16_rtp(float16 data, size_t offset, __local half *p);
+void __overload vstorea_half_rtp(float data, size_t offset, __local half *p);
+void __overload vstorea_half2_rtp(float2 data, size_t offset, __local half *p);
+void __overload vstorea_half3_rtp(float3 data, size_t offset, __local half *p);
+void __overload vstorea_half4_rtp(float4 data, size_t offset, __local half *p);
+void __overload vstorea_half8_rtp(float8 data, size_t offset, __local half *p);
+void __overload vstorea_half16_rtp(float16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtn(float data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2_rtn(float2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3_rtn(float3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4_rtn(float4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8_rtn(float8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16_rtn(float16 data, size_t offset, __local half *p);
+void __overload vstorea_half_rtn(float data, size_t offset, __local half *p);
+void __overload vstorea_half2_rtn(float2 data, size_t offset, __local half *p);
+void __overload vstorea_half3_rtn(float3 data, size_t offset, __local half *p);
+void __overload vstorea_half4_rtn(float4 data, size_t offset, __local half *p);
+void __overload vstorea_half8_rtn(float8 data, size_t offset, __local half *p);
+void __overload vstorea_half16_rtn(float16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16(float16 data, size_t offset, __private half *p);
+void __overload vstorea_half(float data, size_t offset, __private half *p);
+void __overload vstorea_half2(float2 data, size_t offset, __private half *p);
+void __overload vstorea_half3(float3 data, size_t offset, __private half *p);
+void __overload vstorea_half4(float4 data, size_t offset, __private half *p);
+void __overload vstorea_half8(float8 data, size_t offset, __private half *p);
+void __overload vstorea_half16(float16 data, size_t offset, __private half *p);
 
-void __attribute__((overloadable)) vstorea_half_rte(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2_rte(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3_rte(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4_rte(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8_rte(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16_rte(float16 data, size_t offset, __private half *p);
+void __overload vstorea_half_rte(float data, size_t offset, __private half *p);
+void __overload vstorea_half2_rte(float2 data, size_t offset, __private half *p);
+void __overload vstorea_half3_rte(float3 data, size_t offset, __private half *p);
+void __overload vstorea_half4_rte(float4 data, size_t offset, __private half *p);
+void __overload vstorea_half8_rte(float8 data, size_t offset, __private half *p);
+void __overload vstorea_half16_rte(float16 data, size_t offset, __private half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtz(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2_rtz(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3_rtz(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4_rtz(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8_rtz(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16_rtz(float16 data, size_t offset, __private half *p);
+void __overload vstorea_half_rtz(float data, size_t offset, __private half *p);
+void __overload vstorea_half2_rtz(float2 data, size_t offset, __private half *p);
+void __overload vstorea_half3_rtz(float3 data, size_t offset, __private half *p);
+void __overload vstorea_half4_rtz(float4 data, size_t offset, __private half *p);
+void __overload vstorea_half8_rtz(float8 data, size_t offset, __private half *p);
+void __overload vstorea_half16_rtz(float16 data, size_t offset, __private half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtp(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2_rtp(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3_rtp(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4_rtp(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8_rtp(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16_rtp(float16 data, size_t offset, __private half *p);
+void __overload vstorea_half_rtp(float data, size_t offset, __private half *p);
+void __overload vstorea_half2_rtp(float2 data, size_t offset, __private half *p);
+void __overload vstorea_half3_rtp(float3 data, size_t offset, __private half *p);
+void __overload vstorea_half4_rtp(float4 data, size_t offset, __private half *p);
+void __overload vstorea_half8_rtp(float8 data, size_t offset, __private half *p);
+void __overload vstorea_half16_rtp(float16 data, size_t offset, __private half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtn(float data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2_rtn(float2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3_rtn(float3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4_rtn(float4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8_rtn(float8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16_rtn(float16 data, size_t offset, __private half *p);
+void __overload vstorea_half_rtn(float data, size_t offset, __private half *p);
+void __overload vstorea_half2_rtn(float2 data, size_t offset, __private half *p);
+void __overload vstorea_half3_rtn(float3 data, size_t offset, __private half *p);
+void __overload vstorea_half4_rtn(float4 data, size_t offset, __private half *p);
+void __overload vstorea_half8_rtn(float8 data, size_t offset, __private half *p);
+void __overload vstorea_half16_rtn(float16 data, size_t offset, __private half *p);
 
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) vstorea_half(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16(double16 data, size_t offset, __global half *p);
+void __overload vstorea_half(double data, size_t offset, __global half *p);
+void __overload vstorea_half2(double2 data, size_t offset, __global half *p);
+void __overload vstorea_half3(double3 data, size_t offset, __global half *p);
+void __overload vstorea_half4(double4 data, size_t offset, __global half *p);
+void __overload vstorea_half8(double8 data, size_t offset, __global half *p);
+void __overload vstorea_half16(double16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half_rte(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2_rte(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3_rte(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4_rte(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8_rte(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16_rte(double16 data, size_t offset, __global half *p);
+void __overload vstorea_half_rte(double data, size_t offset, __global half *p);
+void __overload vstorea_half2_rte(double2 data, size_t offset, __global half *p);
+void __overload vstorea_half3_rte(double3 data, size_t offset, __global half *p);
+void __overload vstorea_half4_rte(double4 data, size_t offset, __global half *p);
+void __overload vstorea_half8_rte(double8 data, size_t offset, __global half *p);
+void __overload vstorea_half16_rte(double16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtz(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2_rtz(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3_rtz(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4_rtz(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8_rtz(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16_rtz(double16 data, size_t offset, __global half *p);
+void __overload vstorea_half_rtz(double data, size_t offset, __global half *p);
+void __overload vstorea_half2_rtz(double2 data, size_t offset, __global half *p);
+void __overload vstorea_half3_rtz(double3 data, size_t offset, __global half *p);
+void __overload vstorea_half4_rtz(double4 data, size_t offset, __global half *p);
+void __overload vstorea_half8_rtz(double8 data, size_t offset, __global half *p);
+void __overload vstorea_half16_rtz(double16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtp(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2_rtp(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3_rtp(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4_rtp(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8_rtp(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16_rtp(double16 data, size_t offset, __global half *p);
+void __overload vstorea_half_rtp(double data, size_t offset, __global half *p);
+void __overload vstorea_half2_rtp(double2 data, size_t offset, __global half *p);
+void __overload vstorea_half3_rtp(double3 data, size_t offset, __global half *p);
+void __overload vstorea_half4_rtp(double4 data, size_t offset, __global half *p);
+void __overload vstorea_half8_rtp(double8 data, size_t offset, __global half *p);
+void __overload vstorea_half16_rtp(double16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtn(double data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half2_rtn(double2 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half3_rtn(double3 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half4_rtn(double4 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half8_rtn(double8 data, size_t offset, __global half *p);
-void __attribute__((overloadable)) vstorea_half16_rtn(double16 data, size_t offset, __global half *p);
+void __overload vstorea_half_rtn(double data, size_t offset, __global half *p);
+void __overload vstorea_half2_rtn(double2 data, size_t offset, __global half *p);
+void __overload vstorea_half3_rtn(double3 data, size_t offset, __global half *p);
+void __overload vstorea_half4_rtn(double4 data, size_t offset, __global half *p);
+void __overload vstorea_half8_rtn(double8 data, size_t offset, __global half *p);
+void __overload vstorea_half16_rtn(double16 data, size_t offset, __global half *p);
 
-void __attribute__((overloadable)) vstorea_half(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16(double16 data, size_t offset, __local half *p);
+void __overload vstorea_half(double data, size_t offset, __local half *p);
+void __overload vstorea_half2(double2 data, size_t offset, __local half *p);
+void __overload vstorea_half3(double3 data, size_t offset, __local half *p);
+void __overload vstorea_half4(double4 data, size_t offset, __local half *p);
+void __overload vstorea_half8(double8 data, size_t offset, __local half *p);
+void __overload vstorea_half16(double16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half_rte(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2_rte(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3_rte(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4_rte(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8_rte(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16_rte(double16 data, size_t offset, __local half *p);
+void __overload vstorea_half_rte(double data, size_t offset, __local half *p);
+void __overload vstorea_half2_rte(double2 data, size_t offset, __local half *p);
+void __overload vstorea_half3_rte(double3 data, size_t offset, __local half *p);
+void __overload vstorea_half4_rte(double4 data, size_t offset, __local half *p);
+void __overload vstorea_half8_rte(double8 data, size_t offset, __local half *p);
+void __overload vstorea_half16_rte(double16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtz(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2_rtz(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3_rtz(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4_rtz(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8_rtz(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16_rtz(double16 data, size_t offset, __local half *p);
+void __overload vstorea_half_rtz(double data, size_t offset, __local half *p);
+void __overload vstorea_half2_rtz(double2 data, size_t offset, __local half *p);
+void __overload vstorea_half3_rtz(double3 data, size_t offset, __local half *p);
+void __overload vstorea_half4_rtz(double4 data, size_t offset, __local half *p);
+void __overload vstorea_half8_rtz(double8 data, size_t offset, __local half *p);
+void __overload vstorea_half16_rtz(double16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtp(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2_rtp(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3_rtp(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4_rtp(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8_rtp(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16_rtp(double16 data, size_t offset, __local half *p);
+void __overload vstorea_half_rtp(double data, size_t offset, __local half *p);
+void __overload vstorea_half2_rtp(double2 data, size_t offset, __local half *p);
+void __overload vstorea_half3_rtp(double3 data, size_t offset, __local half *p);
+void __overload vstorea_half4_rtp(double4 data, size_t offset, __local half *p);
+void __overload vstorea_half8_rtp(double8 data, size_t offset, __local half *p);
+void __overload vstorea_half16_rtp(double16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtn(double data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half2_rtn(double2 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half3_rtn(double3 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half4_rtn(double4 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half8_rtn(double8 data, size_t offset, __local half *p);
-void __attribute__((overloadable)) vstorea_half16_rtn(double16 data, size_t offset, __local half *p);
+void __overload vstorea_half_rtn(double data, size_t offset, __local half *p);
+void __overload vstorea_half2_rtn(double2 data, size_t offset, __local half *p);
+void __overload vstorea_half3_rtn(double3 data, size_t offset, __local half *p);
+void __overload vstorea_half4_rtn(double4 data, size_t offset, __local half *p);
+void __overload vstorea_half8_rtn(double8 data, size_t offset, __local half *p);
+void __overload vstorea_half16_rtn(double16 data, size_t offset, __local half *p);
 
-void __attribute__((overloadable)) vstorea_half(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16(double16 data, size_t offset, __private half *p);
+void __overload vstorea_half(double data, size_t offset, __private half *p);
+void __overload vstorea_half2(double2 data, size_t offset, __private half *p);
+void __overload vstorea_half3(double3 data, size_t offset, __private half *p);
+void __overload vstorea_half4(double4 data, size_t offset, __private half *p);
+void __overload vstorea_half8(double8 data, size_t offset, __private half *p);
+void __overload vstorea_half16(double16 data, size_t offset, __private half *p);
 
-void __attribute__((overloadable)) vstorea_half_rte(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2_rte(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3_rte(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4_rte(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8_rte(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16_rte(double16 data, size_t offset, __private half *p);
+void __overload vstorea_half_rte(double data, size_t offset, __private half *p);
+void __overload vstorea_half2_rte(double2 data, size_t offset, __private half *p);
+void __overload vstorea_half3_rte(double3 data, size_t offset, __private half *p);
+void __overload vstorea_half4_rte(double4 data, size_t offset, __private half *p);
+void __overload vstorea_half8_rte(double8 data, size_t offset, __private half *p);
+void __overload vstorea_half16_rte(double16 data, size_t offset, __private half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtz(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2_rtz(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3_rtz(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4_rtz(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8_rtz(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16_rtz(double16 data, size_t offset, __private half *p);
+void __overload vstorea_half_rtz(double data, size_t offset, __private half *p);
+void __overload vstorea_half2_rtz(double2 data, size_t offset, __private half *p);
+void __overload vstorea_half3_rtz(double3 data, size_t offset, __private half *p);
+void __overload vstorea_half4_rtz(double4 data, size_t offset, __private half *p);
+void __overload vstorea_half8_rtz(double8 data, size_t offset, __private half *p);
+void __overload vstorea_half16_rtz(double16 data, size_t offset, __private half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtp(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2_rtp(double2 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3_rtp(double3 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4_rtp(double4 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8_rtp(double8 data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16_rtp(double16 data, size_t offset, __private half *p);
+void __overload vstorea_half_rtp(double data, size_t offset, __private half *p);
+void __overload vstorea_half2_rtp(double2 data, size_t offset, __private half *p);
+void __overload vstorea_half3_rtp(double3 data, size_t offset, __private half *p);
+void __overload vstorea_half4_rtp(double4 data, size_t offset, __private half *p);
+void __overload vstorea_half8_rtp(double8 data, size_t offset, __private half *p);
+void __overload vstorea_half16_rtp(double16 data, size_t offset, __private half *p);
 
-void __attribute__((overloadable)) vstorea_half_rtn(double data, size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half2_rtn(double2 data,size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half3_rtn(double3 data,size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half4_rtn(double4 data,size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half8_rtn(double8 data,size_t offset, __private half *p);
-void __attribute__((overloadable)) vstorea_half16_rtn(double16 data,size_t offset, __private half *p);
+void __overload vstorea_half_rtn(double data, size_t offset, __private half *p);
+void __overload vstorea_half2_rtn(double2 data,size_t offset, __private half *p);
+void __overload vstorea_half3_rtn(double3 data,size_t offset, __private half *p);
+void __overload vstorea_half4_rtn(double4 data,size_t offset, __private half *p);
+void __overload vstorea_half8_rtn(double8 data,size_t offset, __private half *p);
+void __overload vstorea_half16_rtn(double16 data,size_t offset, __private half *p);
 #endif //cl_khr_fp64
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -13935,7 +13937,7 @@ typedef uint cl_mem_fence_flags;
  * image objects and then want to read the updated data.
  */
 
-void __attribute__((overloadable)) barrier(cl_mem_fence_flags flags);
+void __overload barrier(cl_mem_fence_flags flags);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -13948,8 +13950,8 @@ typedef enum memory_scope
   memory_scope_sub_group
 } memory_scope;
 
-void __attribute__((overloadable)) work_group_barrier(cl_mem_fence_flags flags, memory_scope scope);
-void __attribute__((overloadable)) work_group_barrier(cl_mem_fence_flags flags);
+void __overload work_group_barrier(cl_mem_fence_flags flags, memory_scope scope);
+void __overload work_group_barrier(cl_mem_fence_flags flags);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL v1.1 s6.11.9, v1.2 s6.12.9 - Explicit Memory Fence Functions
@@ -13967,7 +13969,7 @@ void __attribute__((overloadable)) work_group_barrier(cl_mem_fence_flags flags);
  * CLK_LOCAL_MEM_FENCE
  * CLK_GLOBAL_MEM_FENCE.
  */
-void __attribute__((overloadable)) mem_fence(cl_mem_fence_flags flags);
+void __overload mem_fence(cl_mem_fence_flags flags);
 
 /**
  * Read memory barrier that orders only
@@ -13979,7 +13981,7 @@ void __attribute__((overloadable)) mem_fence(cl_mem_fence_flags flags);
  * CLK_LOCAL_MEM_FENCE
  * CLK_GLOBAL_MEM_FENCE.
  */
-void __attribute__((overloadable)) read_mem_fence(cl_mem_fence_flags flags);
+void __overload read_mem_fence(cl_mem_fence_flags flags);
 
 /**
  * Write memory barrier that orders only
@@ -13991,13 +13993,13 @@ void __attribute__((overloadable)) read_mem_fence(cl_mem_fence_flags flags);
  * CLK_LOCAL_MEM_FENCE
  * CLK_GLOBAL_MEM_FENCE.
  */
-void __attribute__((overloadable)) write_mem_fence(cl_mem_fence_flags flags);
+void __overload write_mem_fence(cl_mem_fence_flags flags);
 
 // OpenCL v2.0 s6.13.9 - Address Space Qualifier Functions
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-cl_mem_fence_flags __attribute__((overloadable)) get_fence(const void *ptr);
-cl_mem_fence_flags __attribute__((overloadable)) get_fence(void *ptr);
+cl_mem_fence_flags __overload get_fence(const void *ptr);
+cl_mem_fence_flags __overload get_fence(void *ptr);
 
 // Builtin functions to_global, to_local, and to_private need to be declared as Clang builtin functions
 // and checked in Sema since they should be declared as
@@ -14035,141 +14037,141 @@ cl_mem_fence_flags __attribute__((overloadable)) get_fence(void *ptr);
  * synchronization of source data such as using a
  * barrier before performing the copy.
  */
-event_t __attribute__((overloadable)) async_work_group_copy(__local char *dst, const __global char *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uchar *dst, const __global uchar *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local short *dst, const __global short *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ushort *dst, const __global ushort *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local int *dst, const __global int *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uint *dst, const __global uint *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local long *dst, const __global long *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ulong *dst, const __global ulong *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local float *dst, const __global float *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local char2 *dst, const __global char2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uchar2 *dst, const __global uchar2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local short2 *dst, const __global short2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ushort2 *dst, const __global ushort2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local int2 *dst, const __global int2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uint2 *dst, const __global uint2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local long2 *dst, const __global long2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ulong2 *dst, const __global ulong2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local float2 *dst, const __global float2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local char3 *dst, const __global char3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uchar3 *dst, const __global uchar3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local short3 *dst, const __global short3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ushort3 *dst, const __global ushort3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local int3 *dst, const __global int3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uint3 *dst, const __global uint3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local long3 *dst, const __global long3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ulong3 *dst, const __global ulong3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local float3 *dst, const __global float3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local char4 *dst, const __global char4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uchar4 *dst, const __global uchar4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local short4 *dst, const __global short4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ushort4 *dst, const __global ushort4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local int4 *dst, const __global int4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uint4 *dst, const __global uint4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local long4 *dst, const __global long4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ulong4 *dst, const __global ulong4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local float4 *dst, const __global float4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local char8 *dst, const __global char8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uchar8 *dst, const __global uchar8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local short8 *dst, const __global short8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ushort8 *dst, const __global ushort8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local int8 *dst, const __global int8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uint8 *dst, const __global uint8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local long8 *dst, const __global long8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ulong8 *dst, const __global ulong8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local float8 *dst, const __global float8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local char16 *dst, const __global char16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uchar16 *dst, const __global uchar16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local short16 *dst, const __global short16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ushort16 *dst, const __global ushort16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local int16 *dst, const __global int16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local uint16 *dst, const __global uint16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local long16 *dst, const __global long16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local ulong16 *dst, const __global ulong16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local float16 *dst, const __global float16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global char *dst, const __local char *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uchar *dst, const __local uchar *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global short *dst, const __local short *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ushort *dst, const __local ushort *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global int *dst, const __local int *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uint *dst, const __local uint *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global long *dst, const __local long *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ulong *dst, const __local ulong *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global float *dst, const __local float *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global char2 *dst, const __local char2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uchar2 *dst, const __local uchar2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global short2 *dst, const __local short2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ushort2 *dst, const __local ushort2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global int2 *dst, const __local int2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uint2 *dst, const __local uint2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global long2 *dst, const __local long2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ulong2 *dst, const __local ulong2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global float2 *dst, const __local float2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global char3 *dst, const __local char3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uchar3 *dst, const __local uchar3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global short3 *dst, const __local short3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ushort3 *dst, const __local ushort3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global int3 *dst, const __local int3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uint3 *dst, const __local uint3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global long3 *dst, const __local long3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ulong3 *dst, const __local ulong3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global float3 *dst, const __local float3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global char4 *dst, const __local char4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uchar4 *dst, const __local uchar4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global short4 *dst, const __local short4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ushort4 *dst, const __local ushort4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global int4 *dst, const __local int4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uint4 *dst, const __local uint4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global long4 *dst, const __local long4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ulong4 *dst, const __local ulong4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global float4 *dst, const __local float4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global char8 *dst, const __local char8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uchar8 *dst, const __local uchar8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global short8 *dst, const __local short8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ushort8 *dst, const __local ushort8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global int8 *dst, const __local int8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uint8 *dst, const __local uint8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global long8 *dst, const __local long8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ulong8 *dst, const __local ulong8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global float8 *dst, const __local float8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global char16 *dst, const __local char16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uchar16 *dst, const __local uchar16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global short16 *dst, const __local short16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ushort16 *dst, const __local ushort16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global int16 *dst, const __local int16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global uint16 *dst, const __local uint16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global long16 *dst, const __local long16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global ulong16 *dst, const __local ulong16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global float16 *dst, const __local float16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local char *dst, const __global char *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uchar *dst, const __global uchar *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local short *dst, const __global short *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ushort *dst, const __global ushort *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local int *dst, const __global int *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uint *dst, const __global uint *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local long *dst, const __global long *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ulong *dst, const __global ulong *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local float *dst, const __global float *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local char2 *dst, const __global char2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uchar2 *dst, const __global uchar2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local short2 *dst, const __global short2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ushort2 *dst, const __global ushort2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local int2 *dst, const __global int2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uint2 *dst, const __global uint2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local long2 *dst, const __global long2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ulong2 *dst, const __global ulong2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local float2 *dst, const __global float2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local char3 *dst, const __global char3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uchar3 *dst, const __global uchar3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local short3 *dst, const __global short3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ushort3 *dst, const __global ushort3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local int3 *dst, const __global int3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uint3 *dst, const __global uint3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local long3 *dst, const __global long3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ulong3 *dst, const __global ulong3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local float3 *dst, const __global float3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local char4 *dst, const __global char4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uchar4 *dst, const __global uchar4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local short4 *dst, const __global short4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ushort4 *dst, const __global ushort4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local int4 *dst, const __global int4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uint4 *dst, const __global uint4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local long4 *dst, const __global long4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ulong4 *dst, const __global ulong4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local float4 *dst, const __global float4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local char8 *dst, const __global char8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uchar8 *dst, const __global uchar8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local short8 *dst, const __global short8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ushort8 *dst, const __global ushort8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local int8 *dst, const __global int8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uint8 *dst, const __global uint8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local long8 *dst, const __global long8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ulong8 *dst, const __global ulong8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local float8 *dst, const __global float8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local char16 *dst, const __global char16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uchar16 *dst, const __global uchar16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local short16 *dst, const __global short16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ushort16 *dst, const __global ushort16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local int16 *dst, const __global int16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local uint16 *dst, const __global uint16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local long16 *dst, const __global long16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local ulong16 *dst, const __global ulong16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local float16 *dst, const __global float16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global char *dst, const __local char *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uchar *dst, const __local uchar *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global short *dst, const __local short *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ushort *dst, const __local ushort *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global int *dst, const __local int *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uint *dst, const __local uint *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global long *dst, const __local long *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ulong *dst, const __local ulong *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global float *dst, const __local float *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global char2 *dst, const __local char2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uchar2 *dst, const __local uchar2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global short2 *dst, const __local short2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ushort2 *dst, const __local ushort2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global int2 *dst, const __local int2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uint2 *dst, const __local uint2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global long2 *dst, const __local long2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ulong2 *dst, const __local ulong2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global float2 *dst, const __local float2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global char3 *dst, const __local char3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uchar3 *dst, const __local uchar3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global short3 *dst, const __local short3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ushort3 *dst, const __local ushort3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global int3 *dst, const __local int3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uint3 *dst, const __local uint3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global long3 *dst, const __local long3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ulong3 *dst, const __local ulong3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global float3 *dst, const __local float3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global char4 *dst, const __local char4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uchar4 *dst, const __local uchar4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global short4 *dst, const __local short4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ushort4 *dst, const __local ushort4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global int4 *dst, const __local int4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uint4 *dst, const __local uint4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global long4 *dst, const __local long4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ulong4 *dst, const __local ulong4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global float4 *dst, const __local float4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global char8 *dst, const __local char8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uchar8 *dst, const __local uchar8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global short8 *dst, const __local short8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ushort8 *dst, const __local ushort8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global int8 *dst, const __local int8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uint8 *dst, const __local uint8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global long8 *dst, const __local long8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ulong8 *dst, const __local ulong8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global float8 *dst, const __local float8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global char16 *dst, const __local char16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uchar16 *dst, const __local uchar16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global short16 *dst, const __local short16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ushort16 *dst, const __local ushort16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global int16 *dst, const __local int16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global uint16 *dst, const __local uint16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global long16 *dst, const __local long16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global ulong16 *dst, const __local ulong16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global float16 *dst, const __local float16 *src, size_t num_elements, event_t event);
 #ifdef cl_khr_fp64
-event_t __attribute__((overloadable)) async_work_group_copy(__local double *dst, const __global double *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local double2 *dst, const __global double2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local double3 *dst, const __global double3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local double4 *dst, const __global double4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local double8 *dst, const __global double8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local double16 *dst, const __global double16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global double *dst, const __local double *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global double2 *dst, const __local double2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global double3 *dst, const __local double3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global double4 *dst, const __local double4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global double8 *dst, const __local double8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global double16 *dst, const __local double16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local double *dst, const __global double *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local double2 *dst, const __global double2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local double3 *dst, const __global double3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local double4 *dst, const __global double4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local double8 *dst, const __global double8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local double16 *dst, const __global double16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global double *dst, const __local double *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global double2 *dst, const __local double2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global double3 *dst, const __local double3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global double4 *dst, const __local double4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global double8 *dst, const __local double8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global double16 *dst, const __local double16 *src, size_t num_elements, event_t event);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-event_t __attribute__((overloadable)) async_work_group_copy(__local half *dst, const __global half *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local half2 *dst, const __global half2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local half3 *dst, const __global half3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local half4 *dst, const __global half4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local half8 *dst, const __global half8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__local half16 *dst, const __global half16 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global half *dst, const __local half *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global half2 *dst, const __local half2 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global half3 *dst, const __local half3 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global half4 *dst, const __local half4 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global half8 *dst, const __local half8 *src, size_t num_elements, event_t event);
-event_t __attribute__((overloadable)) async_work_group_copy(__global half16 *dst, const __local half16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local half *dst, const __global half *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local half2 *dst, const __global half2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local half3 *dst, const __global half3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local half4 *dst, const __global half4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local half8 *dst, const __global half8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__local half16 *dst, const __global half16 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global half *dst, const __local half *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global half2 *dst, const __local half2 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global half3 *dst, const __local half3 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global half4 *dst, const __local half4 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global half8 *dst, const __local half8 *src, size_t num_elements, event_t event);
+event_t __overload async_work_group_copy(__global half16 *dst, const __local half16 *src, size_t num_elements, event_t event);
 #endif //cl_khr_fp16
 
 /**
@@ -14198,141 +14200,141 @@ event_t __attribute__((overloadable)) async_work_group_copy(__global half16 *dst
  * synchronization of source data such as using a
  * barrier before performing the copy.
  */
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local char *dst, const __global char *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uchar *dst, const __global uchar *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local short *dst, const __global short *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ushort *dst, const __global ushort *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local int *dst, const __global int *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uint *dst, const __global uint *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local long *dst, const __global long *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ulong *dst, const __global ulong *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local float *dst, const __global float *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local char2 *dst, const __global char2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uchar2 *dst, const __global uchar2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local short2 *dst, const __global short2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ushort2 *dst, const __global ushort2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local int2 *dst, const __global int2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uint2 *dst, const __global uint2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local long2 *dst, const __global long2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ulong2 *dst, const __global ulong2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local float2 *dst, const __global float2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local char3 *dst, const __global char3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uchar3 *dst, const __global uchar3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local short3 *dst, const __global short3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ushort3 *dst, const __global ushort3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local int3 *dst, const __global int3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uint3 *dst, const __global uint3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local long3 *dst, const __global long3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ulong3 *dst, const __global ulong3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local float3 *dst, const __global float3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local char4 *dst, const __global char4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uchar4 *dst, const __global uchar4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local short4 *dst, const __global short4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ushort4 *dst, const __global ushort4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local int4 *dst, const __global int4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uint4 *dst, const __global uint4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local long4 *dst, const __global long4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ulong4 *dst, const __global ulong4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local float4 *dst, const __global float4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local char8 *dst, const __global char8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uchar8 *dst, const __global uchar8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local short8 *dst, const __global short8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ushort8 *dst, const __global ushort8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local int8 *dst, const __global int8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uint8 *dst, const __global uint8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local long8 *dst, const __global long8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ulong8 *dst, const __global ulong8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local float8 *dst, const __global float8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local char16 *dst, const __global char16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uchar16 *dst, const __global uchar16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local short16 *dst, const __global short16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ushort16 *dst, const __global ushort16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local int16 *dst, const __global int16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local uint16 *dst, const __global uint16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local long16 *dst, const __global long16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local ulong16 *dst, const __global ulong16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local float16 *dst, const __global float16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global char *dst, const __local char *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uchar *dst, const __local uchar *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global short *dst, const __local short *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ushort *dst, const __local ushort *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global int *dst, const __local int *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uint *dst, const __local uint *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global long *dst, const __local long *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ulong *dst, const __local ulong *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global float *dst, const __local float *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global char2 *dst, const __local char2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uchar2 *dst, const __local uchar2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global short2 *dst, const __local short2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ushort2 *dst, const __local ushort2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global int2 *dst, const __local int2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uint2 *dst, const __local uint2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global long2 *dst, const __local long2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ulong2 *dst, const __local ulong2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global float2 *dst, const __local float2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global char3 *dst, const __local char3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uchar3 *dst, const __local uchar3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global short3 *dst, const __local short3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ushort3 *dst, const __local ushort3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global int3 *dst, const __local int3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uint3 *dst, const __local uint3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global long3 *dst, const __local long3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ulong3 *dst, const __local ulong3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global float3 *dst, const __local float3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global char4 *dst, const __local char4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uchar4 *dst, const __local uchar4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global short4 *dst, const __local short4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ushort4 *dst, const __local ushort4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global int4 *dst, const __local int4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uint4 *dst, const __local uint4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global long4 *dst, const __local long4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ulong4 *dst, const __local ulong4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global float4 *dst, const __local float4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global char8 *dst, const __local char8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uchar8 *dst, const __local uchar8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global short8 *dst, const __local short8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ushort8 *dst, const __local ushort8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global int8 *dst, const __local int8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uint8 *dst, const __local uint8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global long8 *dst, const __local long8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ulong8 *dst, const __local ulong8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global float8 *dst, const __local float8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global char16 *dst, const __local char16 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uchar16 *dst, const __local uchar16 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global short16 *dst, const __local short16 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ushort16 *dst, const __local ushort16 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global int16 *dst, const __local int16 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global uint16 *dst, const __local uint16 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global long16 *dst, const __local long16 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global ulong16 *dst, const __local ulong16 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global float16 *dst, const __local float16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local char *dst, const __global char *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uchar *dst, const __global uchar *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local short *dst, const __global short *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ushort *dst, const __global ushort *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local int *dst, const __global int *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uint *dst, const __global uint *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local long *dst, const __global long *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ulong *dst, const __global ulong *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local float *dst, const __global float *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local char2 *dst, const __global char2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uchar2 *dst, const __global uchar2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local short2 *dst, const __global short2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ushort2 *dst, const __global ushort2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local int2 *dst, const __global int2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uint2 *dst, const __global uint2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local long2 *dst, const __global long2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ulong2 *dst, const __global ulong2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local float2 *dst, const __global float2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local char3 *dst, const __global char3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uchar3 *dst, const __global uchar3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local short3 *dst, const __global short3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ushort3 *dst, const __global ushort3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local int3 *dst, const __global int3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uint3 *dst, const __global uint3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local long3 *dst, const __global long3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ulong3 *dst, const __global ulong3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local float3 *dst, const __global float3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local char4 *dst, const __global char4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uchar4 *dst, const __global uchar4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local short4 *dst, const __global short4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ushort4 *dst, const __global ushort4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local int4 *dst, const __global int4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uint4 *dst, const __global uint4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local long4 *dst, const __global long4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ulong4 *dst, const __global ulong4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local float4 *dst, const __global float4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local char8 *dst, const __global char8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uchar8 *dst, const __global uchar8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local short8 *dst, const __global short8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ushort8 *dst, const __global ushort8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local int8 *dst, const __global int8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uint8 *dst, const __global uint8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local long8 *dst, const __global long8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ulong8 *dst, const __global ulong8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local float8 *dst, const __global float8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local char16 *dst, const __global char16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uchar16 *dst, const __global uchar16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local short16 *dst, const __global short16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ushort16 *dst, const __global ushort16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local int16 *dst, const __global int16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local uint16 *dst, const __global uint16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local long16 *dst, const __global long16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local ulong16 *dst, const __global ulong16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local float16 *dst, const __global float16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global char *dst, const __local char *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uchar *dst, const __local uchar *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global short *dst, const __local short *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ushort *dst, const __local ushort *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global int *dst, const __local int *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uint *dst, const __local uint *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global long *dst, const __local long *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ulong *dst, const __local ulong *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global float *dst, const __local float *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global char2 *dst, const __local char2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uchar2 *dst, const __local uchar2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global short2 *dst, const __local short2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ushort2 *dst, const __local ushort2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global int2 *dst, const __local int2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uint2 *dst, const __local uint2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global long2 *dst, const __local long2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ulong2 *dst, const __local ulong2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global float2 *dst, const __local float2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global char3 *dst, const __local char3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uchar3 *dst, const __local uchar3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global short3 *dst, const __local short3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ushort3 *dst, const __local ushort3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global int3 *dst, const __local int3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uint3 *dst, const __local uint3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global long3 *dst, const __local long3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ulong3 *dst, const __local ulong3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global float3 *dst, const __local float3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global char4 *dst, const __local char4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uchar4 *dst, const __local uchar4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global short4 *dst, const __local short4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ushort4 *dst, const __local ushort4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global int4 *dst, const __local int4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uint4 *dst, const __local uint4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global long4 *dst, const __local long4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ulong4 *dst, const __local ulong4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global float4 *dst, const __local float4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global char8 *dst, const __local char8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uchar8 *dst, const __local uchar8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global short8 *dst, const __local short8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ushort8 *dst, const __local ushort8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global int8 *dst, const __local int8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uint8 *dst, const __local uint8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global long8 *dst, const __local long8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ulong8 *dst, const __local ulong8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global float8 *dst, const __local float8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global char16 *dst, const __local char16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uchar16 *dst, const __local uchar16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global short16 *dst, const __local short16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ushort16 *dst, const __local ushort16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global int16 *dst, const __local int16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global uint16 *dst, const __local uint16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global long16 *dst, const __local long16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global ulong16 *dst, const __local ulong16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global float16 *dst, const __local float16 *src, size_t num_elements, size_t dst_stride, event_t event);
 #ifdef cl_khr_fp64
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local double *dst, const __global double *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local double2 *dst, const __global double2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local double3 *dst, const __global double3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local double4 *dst, const __global double4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local double8 *dst, const __global double8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local double16 *dst, const __global double16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global double *dst, const __local double *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global double2 *dst, const __local double2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global double3 *dst, const __local double3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global double4 *dst, const __local double4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global double8 *dst, const __local double8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global double16 *dst, const __local double16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local double *dst, const __global double *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local double2 *dst, const __global double2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local double3 *dst, const __global double3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local double4 *dst, const __global double4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local double8 *dst, const __global double8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local double16 *dst, const __global double16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global double *dst, const __local double *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global double2 *dst, const __local double2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global double3 *dst, const __local double3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global double4 *dst, const __local double4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global double8 *dst, const __local double8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global double16 *dst, const __local double16 *src, size_t num_elements, size_t dst_stride, event_t event);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local half *dst, const __global half *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local half2 *dst, const __global half2 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local half3 *dst, const __global half3 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local half4 *dst, const __global half4 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local half8 *dst, const __global half8 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__local half16 *dst, const __global half16 *src, size_t num_elements, size_t src_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global half *dst, const __local half *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global half2 *dst, const __local half2 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global half3 *dst, const __local half3 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global half4 *dst, const __local half4 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global half8 *dst, const __local half8 *src, size_t num_elements, size_t dst_stride, event_t event);
-event_t __attribute__((overloadable)) async_work_group_strided_copy(__global half16 *dst, const __local half16 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local half *dst, const __global half *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local half2 *dst, const __global half2 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local half3 *dst, const __global half3 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local half4 *dst, const __global half4 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local half8 *dst, const __global half8 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__local half16 *dst, const __global half16 *src, size_t num_elements, size_t src_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global half *dst, const __local half *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global half2 *dst, const __local half2 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global half3 *dst, const __local half3 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global half4 *dst, const __local half4 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global half8 *dst, const __local half8 *src, size_t num_elements, size_t dst_stride, event_t event);
+event_t __overload async_work_group_strided_copy(__global half16 *dst, const __local half16 *src, size_t num_elements, size_t dst_stride, event_t event);
 #endif //cl_khr_fp16
 
 /**
@@ -14346,7 +14348,7 @@ event_t __attribute__((overloadable)) async_work_group_strided_copy(__global hal
  * the same num_events and event objects specified
  * in event_list; otherwise the results are undefined.
  */
-void __attribute__((overloadable)) wait_group_events(int num_events, event_t *event_list);
+void __overload wait_group_events(int num_events, event_t *event_list);
 
 /**
  * Prefetch num_elements * sizeof(gentype)
@@ -14355,75 +14357,75 @@ void __attribute__((overloadable)) wait_group_events(int num_events, event_t *ev
  * and does not affect the functional
  * behavior of the kernel.
  */
-void __attribute__((overloadable)) prefetch(const __global char *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uchar *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global short *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ushort *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global int *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uint *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global long *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ulong *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global float *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global char2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uchar2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global short2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ushort2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global int2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uint2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global long2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ulong2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global float2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global char3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uchar3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global short3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ushort3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global int3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uint3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global long3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ulong3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global float3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global char4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uchar4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global short4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ushort4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global int4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uint4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global long4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ulong4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global float4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global char8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uchar8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global short8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ushort8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global int8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uint8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global long8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ulong8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global float8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global char16 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uchar16 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global short16 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ushort16 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global int16 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global uint16 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global long16 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global ulong16 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global float16 *p, size_t num_elements);
+void __overload prefetch(const __global char *p, size_t num_elements);
+void __overload prefetch(const __global uchar *p, size_t num_elements);
+void __overload prefetch(const __global short *p, size_t num_elements);
+void __overload prefetch(const __global ushort *p, size_t num_elements);
+void __overload prefetch(const __global int *p, size_t num_elements);
+void __overload prefetch(const __global uint *p, size_t num_elements);
+void __overload prefetch(const __global long *p, size_t num_elements);
+void __overload prefetch(const __global ulong *p, size_t num_elements);
+void __overload prefetch(const __global float *p, size_t num_elements);
+void __overload prefetch(const __global char2 *p, size_t num_elements);
+void __overload prefetch(const __global uchar2 *p, size_t num_elements);
+void __overload prefetch(const __global short2 *p, size_t num_elements);
+void __overload prefetch(const __global ushort2 *p, size_t num_elements);
+void __overload prefetch(const __global int2 *p, size_t num_elements);
+void __overload prefetch(const __global uint2 *p, size_t num_elements);
+void __overload prefetch(const __global long2 *p, size_t num_elements);
+void __overload prefetch(const __global ulong2 *p, size_t num_elements);
+void __overload prefetch(const __global float2 *p, size_t num_elements);
+void __overload prefetch(const __global char3 *p, size_t num_elements);
+void __overload prefetch(const __global uchar3 *p, size_t num_elements);
+void __overload prefetch(const __global short3 *p, size_t num_elements);
+void __overload prefetch(const __global ushort3 *p, size_t num_elements);
+void __overload prefetch(const __global int3 *p, size_t num_elements);
+void __overload prefetch(const __global uint3 *p, size_t num_elements);
+void __overload prefetch(const __global long3 *p, size_t num_elements);
+void __overload prefetch(const __global ulong3 *p, size_t num_elements);
+void __overload prefetch(const __global float3 *p, size_t num_elements);
+void __overload prefetch(const __global char4 *p, size_t num_elements);
+void __overload prefetch(const __global uchar4 *p, size_t num_elements);
+void __overload prefetch(const __global short4 *p, size_t num_elements);
+void __overload prefetch(const __global ushort4 *p, size_t num_elements);
+void __overload prefetch(const __global int4 *p, size_t num_elements);
+void __overload prefetch(const __global uint4 *p, size_t num_elements);
+void __overload prefetch(const __global long4 *p, size_t num_elements);
+void __overload prefetch(const __global ulong4 *p, size_t num_elements);
+void __overload prefetch(const __global float4 *p, size_t num_elements);
+void __overload prefetch(const __global char8 *p, size_t num_elements);
+void __overload prefetch(const __global uchar8 *p, size_t num_elements);
+void __overload prefetch(const __global short8 *p, size_t num_elements);
+void __overload prefetch(const __global ushort8 *p, size_t num_elements);
+void __overload prefetch(const __global int8 *p, size_t num_elements);
+void __overload prefetch(const __global uint8 *p, size_t num_elements);
+void __overload prefetch(const __global long8 *p, size_t num_elements);
+void __overload prefetch(const __global ulong8 *p, size_t num_elements);
+void __overload prefetch(const __global float8 *p, size_t num_elements);
+void __overload prefetch(const __global char16 *p, size_t num_elements);
+void __overload prefetch(const __global uchar16 *p, size_t num_elements);
+void __overload prefetch(const __global short16 *p, size_t num_elements);
+void __overload prefetch(const __global ushort16 *p, size_t num_elements);
+void __overload prefetch(const __global int16 *p, size_t num_elements);
+void __overload prefetch(const __global uint16 *p, size_t num_elements);
+void __overload prefetch(const __global long16 *p, size_t num_elements);
+void __overload prefetch(const __global ulong16 *p, size_t num_elements);
+void __overload prefetch(const __global float16 *p, size_t num_elements);
 #ifdef cl_khr_fp64
-void __attribute__((overloadable)) prefetch(const __global double *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global double2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global double3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global double4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global double8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global double16 *p, size_t num_elements);
+void __overload prefetch(const __global double *p, size_t num_elements);
+void __overload prefetch(const __global double2 *p, size_t num_elements);
+void __overload prefetch(const __global double3 *p, size_t num_elements);
+void __overload prefetch(const __global double4 *p, size_t num_elements);
+void __overload prefetch(const __global double8 *p, size_t num_elements);
+void __overload prefetch(const __global double16 *p, size_t num_elements);
 #endif //cl_khr_fp64
 #ifdef cl_khr_fp16
-void __attribute__((overloadable)) prefetch(const __global half *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global half2 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global half3 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global half4 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global half8 *p, size_t num_elements);
-void __attribute__((overloadable)) prefetch(const __global half16 *p, size_t num_elements);
+void __overload prefetch(const __global half *p, size_t num_elements);
+void __overload prefetch(const __global half2 *p, size_t num_elements);
+void __overload prefetch(const __global half3 *p, size_t num_elements);
+void __overload prefetch(const __global half4 *p, size_t num_elements);
+void __overload prefetch(const __global half8 *p, size_t num_elements);
+void __overload prefetch(const __global half16 *p, size_t num_elements);
 #endif // cl_khr_fp16
 
 // OpenCL v1.1 s6.11.1, v1.2 s6.12.11 - Atomic Functions
@@ -14438,25 +14440,25 @@ void __attribute__((overloadable)) prefetch(const __global half16 *p, size_t num
  * (old + val) and store result at location
  * pointed by p. The function returns old.
  */
-int __attribute__((overloadable)) atomic_add(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_add(volatile __global unsigned int *p, unsigned int val);
-int __attribute__((overloadable)) atomic_add(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_add(volatile __local unsigned int *p, unsigned int val);
+int __overload atomic_add(volatile __global int *p, int val);
+unsigned int __overload atomic_add(volatile __global unsigned int *p, unsigned int val);
+int __overload atomic_add(volatile __local int *p, int val);
+unsigned int __overload atomic_add(volatile __local unsigned int *p, unsigned int val);
 
 #if defined(cl_khr_global_int32_base_atomics)
-int __attribute__((overloadable)) atom_add(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atom_add(volatile __global unsigned int *p, unsigned int val);
+int __overload atom_add(volatile __global int *p, int val);
+unsigned int __overload atom_add(volatile __global unsigned int *p, unsigned int val);
 #endif
 #if defined(cl_khr_local_int32_base_atomics)
-int __attribute__((overloadable)) atom_add(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atom_add(volatile __local unsigned int *p, unsigned int val);
+int __overload atom_add(volatile __local int *p, int val);
+unsigned int __overload atom_add(volatile __local unsigned int *p, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_base_atomics)
-long __attribute__((overloadable)) atom_add(volatile __global long *p, long val);
-unsigned long __attribute__((overloadable)) atom_add(volatile __global unsigned long *p, unsigned long val);
-long __attribute__((overloadable)) atom_add(volatile __local long *p, long val);
-unsigned long __attribute__((overloadable)) atom_add(volatile __local unsigned long *p, unsigned long val);
+long __overload atom_add(volatile __global long *p, long val);
+unsigned long __overload atom_add(volatile __global unsigned long *p, unsigned long val);
+long __overload atom_add(volatile __local long *p, long val);
+unsigned long __overload atom_add(volatile __local unsigned long *p, unsigned long val);
 #endif
 
 /**
@@ -14464,25 +14466,25 @@ unsigned long __attribute__((overloadable)) atom_add(volatile __local unsigned l
  * Compute (old - val) and store result at location pointed by p. The function
  * returns old.
  */
-int __attribute__((overloadable)) atomic_sub(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_sub(volatile __global unsigned int *p, unsigned int val);
-int __attribute__((overloadable)) atomic_sub(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_sub(volatile __local unsigned int *p, unsigned int val);
+int __overload atomic_sub(volatile __global int *p, int val);
+unsigned int __overload atomic_sub(volatile __global unsigned int *p, unsigned int val);
+int __overload atomic_sub(volatile __local int *p, int val);
+unsigned int __overload atomic_sub(volatile __local unsigned int *p, unsigned int val);
 
 #if defined(cl_khr_global_int32_base_atomics)
-int __attribute__((overloadable)) atom_sub(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atom_sub(volatile __global unsigned int *p, unsigned int val);
+int __overload atom_sub(volatile __global int *p, int val);
+unsigned int __overload atom_sub(volatile __global unsigned int *p, unsigned int val);
 #endif
 #if defined(cl_khr_local_int32_base_atomics)
-int __attribute__((overloadable)) atom_sub(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atom_sub(volatile __local unsigned int *p, unsigned int val);
+int __overload atom_sub(volatile __local int *p, int val);
+unsigned int __overload atom_sub(volatile __local unsigned int *p, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_base_atomics)
-long __attribute__((overloadable)) atom_sub(volatile __global long *p, long val);
-unsigned long __attribute__((overloadable)) atom_sub(volatile __global unsigned long *p, unsigned long val);
-long __attribute__((overloadable)) atom_sub(volatile __local long *p, long val);
-unsigned long __attribute__((overloadable)) atom_sub(volatile __local unsigned long *p, unsigned long val);
+long __overload atom_sub(volatile __global long *p, long val);
+unsigned long __overload atom_sub(volatile __global unsigned long *p, unsigned long val);
+long __overload atom_sub(volatile __local long *p, long val);
+unsigned long __overload atom_sub(volatile __local unsigned long *p, unsigned long val);
 #endif
 
 /**
@@ -14490,27 +14492,27 @@ unsigned long __attribute__((overloadable)) atom_sub(volatile __local unsigned l
  * with new value given by val. Returns old
  * value.
  */
-int __attribute__((overloadable)) atomic_xchg(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_xchg(volatile __global unsigned int *p, unsigned int val);
-int __attribute__((overloadable)) atomic_xchg(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_xchg(volatile __local unsigned int *p, unsigned int val);
-float __attribute__((overloadable)) atomic_xchg(volatile __global float *p, float val);
-float __attribute__((overloadable)) atomic_xchg(volatile __local float *p, float val);
+int __overload atomic_xchg(volatile __global int *p, int val);
+unsigned int __overload atomic_xchg(volatile __global unsigned int *p, unsigned int val);
+int __overload atomic_xchg(volatile __local int *p, int val);
+unsigned int __overload atomic_xchg(volatile __local unsigned int *p, unsigned int val);
+float __overload atomic_xchg(volatile __global float *p, float val);
+float __overload atomic_xchg(volatile __local float *p, float val);
 
 #if defined(cl_khr_global_int32_base_atomics)
-int __attribute__((overloadable)) atom_xchg(volatile __global int *p, int val);
-int __attribute__((overloadable)) atom_xchg(volatile __local int *p, int val);
+int __overload atom_xchg(volatile __global int *p, int val);
+int __overload atom_xchg(volatile __local int *p, int val);
 #endif
 #if defined(cl_khr_local_int32_base_atomics)
-unsigned int __attribute__((overloadable)) atom_xchg(volatile __global unsigned int *p, unsigned int val);
-unsigned int __attribute__((overloadable)) atom_xchg(volatile __local unsigned int *p, unsigned int val);
+unsigned int __overload atom_xchg(volatile __global unsigned int *p, unsigned int val);
+unsigned int __overload atom_xchg(volatile __local unsigned int *p, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_base_atomics)
-long __attribute__((overloadable)) atom_xchg(volatile __global long *p, long val);
-long __attribute__((overloadable)) atom_xchg(volatile __local long *p, long val);
-unsigned long __attribute__((overloadable)) atom_xchg(volatile __global unsigned long *p, unsigned long val);
-unsigned long __attribute__((overloadable)) atom_xchg(volatile __local unsigned long *p, unsigned long val);
+long __overload atom_xchg(volatile __global long *p, long val);
+long __overload atom_xchg(volatile __local long *p, long val);
+unsigned long __overload atom_xchg(volatile __global unsigned long *p, unsigned long val);
+unsigned long __overload atom_xchg(volatile __local unsigned long *p, unsigned long val);
 #endif
 
 /**
@@ -14519,25 +14521,25 @@ unsigned long __attribute__((overloadable)) atom_xchg(volatile __local unsigned 
  * (old + 1) and store result at location
  * pointed by p. The function returns old.
  */
-int __attribute__((overloadable)) atomic_inc(volatile __global int *p);
-unsigned int __attribute__((overloadable)) atomic_inc(volatile __global unsigned int *p);
-int __attribute__((overloadable)) atomic_inc(volatile __local int *p);
-unsigned int __attribute__((overloadable)) atomic_inc(volatile __local unsigned int *p);
+int __overload atomic_inc(volatile __global int *p);
+unsigned int __overload atomic_inc(volatile __global unsigned int *p);
+int __overload atomic_inc(volatile __local int *p);
+unsigned int __overload atomic_inc(volatile __local unsigned int *p);
 
 #if defined(cl_khr_global_int32_base_atomics)
-int __attribute__((overloadable)) atom_inc(volatile __global int *p);
-unsigned int __attribute__((overloadable)) atom_inc(volatile __global unsigned int *p);
+int __overload atom_inc(volatile __global int *p);
+unsigned int __overload atom_inc(volatile __global unsigned int *p);
 #endif
 #if defined(cl_khr_local_int32_base_atomics)
-int __attribute__((overloadable)) atom_inc(volatile __local int *p);
-unsigned int __attribute__((overloadable)) atom_inc(volatile __local unsigned int *p);
+int __overload atom_inc(volatile __local int *p);
+unsigned int __overload atom_inc(volatile __local unsigned int *p);
 #endif
 
 #if defined(cl_khr_int64_base_atomics)
-long __attribute__((overloadable)) atom_inc(volatile __global long *p);
-unsigned long __attribute__((overloadable)) atom_inc(volatile __global unsigned long *p);
-long __attribute__((overloadable)) atom_inc(volatile __local long *p);
-unsigned long __attribute__((overloadable)) atom_inc(volatile __local unsigned long *p);
+long __overload atom_inc(volatile __global long *p);
+unsigned long __overload atom_inc(volatile __global unsigned long *p);
+long __overload atom_inc(volatile __local long *p);
+unsigned long __overload atom_inc(volatile __local unsigned long *p);
 #endif
 
 /**
@@ -14546,25 +14548,25 @@ unsigned long __attribute__((overloadable)) atom_inc(volatile __local unsigned l
  * (old - 1) and store result at location
  * pointed by p. The function returns old.
  */
-int __attribute__((overloadable)) atomic_dec(volatile __global int *p);
-unsigned int __attribute__((overloadable)) atomic_dec(volatile __global unsigned int *p);
-int __attribute__((overloadable)) atomic_dec(volatile __local int *p);
-unsigned int __attribute__((overloadable)) atomic_dec(volatile __local unsigned int *p);
+int __overload atomic_dec(volatile __global int *p);
+unsigned int __overload atomic_dec(volatile __global unsigned int *p);
+int __overload atomic_dec(volatile __local int *p);
+unsigned int __overload atomic_dec(volatile __local unsigned int *p);
 
 #if defined(cl_khr_global_int32_base_atomics)
-int __attribute__((overloadable)) atom_dec(volatile __global int *p);
-unsigned int __attribute__((overloadable)) atom_dec(volatile __global unsigned int *p);
+int __overload atom_dec(volatile __global int *p);
+unsigned int __overload atom_dec(volatile __global unsigned int *p);
 #endif
 #if defined(cl_khr_local_int32_base_atomics)
-int __attribute__((overloadable)) atom_dec(volatile __local int *p);
-unsigned int __attribute__((overloadable)) atom_dec(volatile __local unsigned int *p);
+int __overload atom_dec(volatile __local int *p);
+unsigned int __overload atom_dec(volatile __local unsigned int *p);
 #endif
 
 #if defined(cl_khr_int64_base_atomics)
-long __attribute__((overloadable)) atom_dec(volatile __global long *p);
-unsigned long __attribute__((overloadable)) atom_dec(volatile __global unsigned long *p);
-long __attribute__((overloadable)) atom_dec(volatile __local long *p);
-unsigned long __attribute__((overloadable)) atom_dec(volatile __local unsigned long *p);
+long __overload atom_dec(volatile __global long *p);
+unsigned long __overload atom_dec(volatile __global unsigned long *p);
+long __overload atom_dec(volatile __local long *p);
+unsigned long __overload atom_dec(volatile __local unsigned long *p);
 #endif
 
 /**
@@ -14574,25 +14576,25 @@ unsigned long __attribute__((overloadable)) atom_dec(volatile __local unsigned l
  * location pointed by p. The function
  * returns old.
  */
-int __attribute__((overloadable)) atomic_cmpxchg(volatile __global int *p, int cmp, int val);
-unsigned int __attribute__((overloadable)) atomic_cmpxchg(volatile __global unsigned int *p, unsigned int cmp, unsigned int val);
-int __attribute__((overloadable)) atomic_cmpxchg(volatile __local int *p, int cmp, int val);
-unsigned int __attribute__((overloadable)) atomic_cmpxchg(volatile __local unsigned int *p, unsigned int cmp, unsigned int val);
+int __overload atomic_cmpxchg(volatile __global int *p, int cmp, int val);
+unsigned int __overload atomic_cmpxchg(volatile __global unsigned int *p, unsigned int cmp, unsigned int val);
+int __overload atomic_cmpxchg(volatile __local int *p, int cmp, int val);
+unsigned int __overload atomic_cmpxchg(volatile __local unsigned int *p, unsigned int cmp, unsigned int val);
 
 #if defined(cl_khr_global_int32_base_atomics)
-int __attribute__((overloadable)) atom_cmpxchg(volatile __global int *p, int cmp, int val);
-unsigned int __attribute__((overloadable)) atom_cmpxchg(volatile __global unsigned int *p, unsigned int cmp, unsigned int val);
+int __overload atom_cmpxchg(volatile __global int *p, int cmp, int val);
+unsigned int __overload atom_cmpxchg(volatile __global unsigned int *p, unsigned int cmp, unsigned int val);
 #endif
 #if defined(cl_khr_local_int32_base_atomics)
-int __attribute__((overloadable)) atom_cmpxchg(volatile __local int *p, int cmp, int val);
-unsigned int __attribute__((overloadable)) atom_cmpxchg(volatile __local unsigned int *p, unsigned int cmp, unsigned int val);
+int __overload atom_cmpxchg(volatile __local int *p, int cmp, int val);
+unsigned int __overload atom_cmpxchg(volatile __local unsigned int *p, unsigned int cmp, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_base_atomics)
-long __attribute__((overloadable)) atom_cmpxchg(volatile __global long *p, long cmp, long val);
-unsigned long __attribute__((overloadable)) atom_cmpxchg(volatile __global unsigned long *p, unsigned long cmp, unsigned long val);
-long __attribute__((overloadable)) atom_cmpxchg(volatile __local long *p, long cmp, long val);
-unsigned long __attribute__((overloadable)) atom_cmpxchg(volatile __local unsigned long *p, unsigned long cmp, unsigned long val);
+long __overload atom_cmpxchg(volatile __global long *p, long cmp, long val);
+unsigned long __overload atom_cmpxchg(volatile __global unsigned long *p, unsigned long cmp, unsigned long val);
+long __overload atom_cmpxchg(volatile __local long *p, long cmp, long val);
+unsigned long __overload atom_cmpxchg(volatile __local unsigned long *p, unsigned long cmp, unsigned long val);
 #endif
 
 /**
@@ -14602,27 +14604,27 @@ unsigned long __attribute__((overloadable)) atom_cmpxchg(volatile __local unsign
  * location pointed by p. The function
  * returns old.
  */
-int __attribute__((overloadable)) atomic_min(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_min(volatile __global unsigned int *p, unsigned int val);
-int __attribute__((overloadable)) atomic_min(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_min(volatile __local unsigned int *p, unsigned int val);
+int __overload atomic_min(volatile __global int *p, int val);
+unsigned int __overload atomic_min(volatile __global unsigned int *p, unsigned int val);
+int __overload atomic_min(volatile __local int *p, int val);
+unsigned int __overload atomic_min(volatile __local unsigned int *p, unsigned int val);
 
 #if defined(cl_khr_global_int32_extended_atomics)
-int __attribute__((overloadable)) atom_min(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atom_min(volatile __global unsigned int *p, unsigned int val);
+int __overload atom_min(volatile __global int *p, int val);
+unsigned int __overload atom_min(volatile __global unsigned int *p, unsigned int val);
 #endif
 #if defined(cl_khr_local_int32_extended_atomics)
-int __attribute__((overloadable)) atom_min(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atom_min(volatile __local unsigned int *p, unsigned int val);
+int __overload atom_min(volatile __local int *p, int val);
+unsigned int __overload atom_min(volatile __local unsigned int *p, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_extended_atomics)
-long __attribute__((overloadable)) atom_min(volatile __global long *p, long val);
-unsigned long __attribute__((overloadable)) atom_min(volatile __global unsigned long *p, unsigned long val);
+long __overload atom_min(volatile __global long *p, long val);
+unsigned long __overload atom_min(volatile __global unsigned long *p, unsigned long val);
 #endif
 #if defined(cl_khr_local_int32_extended_atomics)
-long __attribute__((overloadable)) atom_min(volatile __local long *p, long val);
-unsigned long __attribute__((overloadable)) atom_min(volatile __local unsigned long *p, unsigned long val);
+long __overload atom_min(volatile __local long *p, long val);
+unsigned long __overload atom_min(volatile __local unsigned long *p, unsigned long val);
 #endif
 
 /**
@@ -14632,25 +14634,25 @@ unsigned long __attribute__((overloadable)) atom_min(volatile __local unsigned l
  * location pointed by p. The function
  * returns old.
  */
-int __attribute__((overloadable)) atomic_max(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_max(volatile __global unsigned int *p, unsigned int val);
-int __attribute__((overloadable)) atomic_max(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_max(volatile __local unsigned int *p, unsigned int val);
+int __overload atomic_max(volatile __global int *p, int val);
+unsigned int __overload atomic_max(volatile __global unsigned int *p, unsigned int val);
+int __overload atomic_max(volatile __local int *p, int val);
+unsigned int __overload atomic_max(volatile __local unsigned int *p, unsigned int val);
 
 #if defined(cl_khr_global_int32_extended_atomics)
-int __attribute__((overloadable)) atom_max(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atom_max(volatile __global unsigned int *p, unsigned int val);
+int __overload atom_max(volatile __global int *p, int val);
+unsigned int __overload atom_max(volatile __global unsigned int *p, unsigned int val);
 #endif
 #if defined(cl_khr_local_int32_extended_atomics)
-int __attribute__((overloadable)) atom_max(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atom_max(volatile __local unsigned int *p, unsigned int val);
+int __overload atom_max(volatile __local int *p, int val);
+unsigned int __overload atom_max(volatile __local unsigned int *p, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_extended_atomics)
-long __attribute__((overloadable)) atom_max(volatile __global long *p, long val);
-unsigned long __attribute__((overloadable)) atom_max(volatile __global unsigned long *p, unsigned long val);
-long __attribute__((overloadable)) atom_max(volatile __local long *p, long val);
-unsigned long __attribute__((overloadable)) atom_max(volatile __local unsigned long *p, unsigned long val);
+long __overload atom_max(volatile __global long *p, long val);
+unsigned long __overload atom_max(volatile __global unsigned long *p, unsigned long val);
+long __overload atom_max(volatile __local long *p, long val);
+unsigned long __overload atom_max(volatile __local unsigned long *p, unsigned long val);
 #endif
 
 /**
@@ -14659,25 +14661,25 @@ unsigned long __attribute__((overloadable)) atom_max(volatile __local unsigned l
  * (old & val) and store result at location
  * pointed by p. The function returns old.
  */
-int __attribute__((overloadable)) atomic_and(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_and(volatile __global unsigned int *p, unsigned int val);
-int __attribute__((overloadable)) atomic_and(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_and(volatile __local unsigned int *p, unsigned int val);
+int __overload atomic_and(volatile __global int *p, int val);
+unsigned int __overload atomic_and(volatile __global unsigned int *p, unsigned int val);
+int __overload atomic_and(volatile __local int *p, int val);
+unsigned int __overload atomic_and(volatile __local unsigned int *p, unsigned int val);
 
 #if defined(cl_khr_global_int32_extended_atomics)
-int __attribute__((overloadable)) atom_and(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atom_and(volatile __global unsigned int *p, unsigned int val);
+int __overload atom_and(volatile __global int *p, int val);
+unsigned int __overload atom_and(volatile __global unsigned int *p, unsigned int val);
 #endif
 #if defined(cl_khr_local_int32_extended_atomics)
-int __attribute__((overloadable)) atom_and(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atom_and(volatile __local unsigned int *p, unsigned int val);
+int __overload atom_and(volatile __local int *p, int val);
+unsigned int __overload atom_and(volatile __local unsigned int *p, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_extended_atomics)
-long __attribute__((overloadable)) atom_and(volatile __global long *p, long val);
-unsigned long __attribute__((overloadable)) atom_and(volatile __global unsigned long *p, unsigned long val);
-long __attribute__((overloadable)) atom_and(volatile __local long *p, long val);
-unsigned long __attribute__((overloadable)) atom_and(volatile __local unsigned long *p, unsigned long val);
+long __overload atom_and(volatile __global long *p, long val);
+unsigned long __overload atom_and(volatile __global unsigned long *p, unsigned long val);
+long __overload atom_and(volatile __local long *p, long val);
+unsigned long __overload atom_and(volatile __local unsigned long *p, unsigned long val);
 #endif
 
 /**
@@ -14686,25 +14688,25 @@ unsigned long __attribute__((overloadable)) atom_and(volatile __local unsigned l
  * (old | val) and store result at location
  * pointed by p. The function returns old.
  */
-int __attribute__((overloadable)) atomic_or(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_or(volatile __global unsigned int *p, unsigned int val);
-int __attribute__((overloadable)) atomic_or(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_or(volatile __local unsigned int *p, unsigned int val);
+int __overload atomic_or(volatile __global int *p, int val);
+unsigned int __overload atomic_or(volatile __global unsigned int *p, unsigned int val);
+int __overload atomic_or(volatile __local int *p, int val);
+unsigned int __overload atomic_or(volatile __local unsigned int *p, unsigned int val);
 
 #if defined(cl_khr_global_int32_extended_atomics)
-int __attribute__((overloadable)) atom_or(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atom_or(volatile __global unsigned int *p, unsigned int val);
+int __overload atom_or(volatile __global int *p, int val);
+unsigned int __overload atom_or(volatile __global unsigned int *p, unsigned int val);
 #endif
 #if defined(cl_khr_local_int32_extended_atomics)
-int __attribute__((overloadable)) atom_or(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atom_or(volatile __local unsigned int *p, unsigned int val);
+int __overload atom_or(volatile __local int *p, int val);
+unsigned int __overload atom_or(volatile __local unsigned int *p, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_extended_atomics)
-long __attribute__((overloadable)) atom_or(volatile __global long *p, long val);
-unsigned long __attribute__((overloadable)) atom_or(volatile __global unsigned long *p, unsigned long val);
-long __attribute__((overloadable)) atom_or(volatile __local long *p, long val);
-unsigned long __attribute__((overloadable)) atom_or(volatile __local unsigned long *p, unsigned long val);
+long __overload atom_or(volatile __global long *p, long val);
+unsigned long __overload atom_or(volatile __global unsigned long *p, unsigned long val);
+long __overload atom_or(volatile __local long *p, long val);
+unsigned long __overload atom_or(volatile __local unsigned long *p, unsigned long val);
 #endif
 
 /**
@@ -14713,18 +14715,18 @@ unsigned long __attribute__((overloadable)) atom_or(volatile __local unsigned lo
  * (old ^ val) and store result at location
  * pointed by p. The function returns old.
  */
-int __attribute__((overloadable)) atomic_xor(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_xor(volatile __global unsigned int *p, unsigned int val);
-int __attribute__((overloadable)) atomic_xor(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atomic_xor(volatile __local unsigned int *p, unsigned int val);
+int __overload atomic_xor(volatile __global int *p, int val);
+unsigned int __overload atomic_xor(volatile __global unsigned int *p, unsigned int val);
+int __overload atomic_xor(volatile __local int *p, int val);
+unsigned int __overload atomic_xor(volatile __local unsigned int *p, unsigned int val);
 
 #if defined(cl_khr_global_int32_extended_atomics)
-int __attribute__((overloadable)) atom_xor(volatile __global int *p, int val);
-unsigned int __attribute__((overloadable)) atom_xor(volatile __global unsigned int *p, unsigned int val);
+int __overload atom_xor(volatile __global int *p, int val);
+unsigned int __overload atom_xor(volatile __global unsigned int *p, unsigned int val);
 #endif
 #if defined(cl_khr_local_int32_extended_atomics)
-int __attribute__((overloadable)) atom_xor(volatile __local int *p, int val);
-unsigned int __attribute__((overloadable)) atom_xor(volatile __local unsigned int *p, unsigned int val);
+int __overload atom_xor(volatile __local int *p, int val);
+unsigned int __overload atom_xor(volatile __local unsigned int *p, unsigned int val);
 #endif
 
 #if defined(cl_khr_int64_base_atomics) && defined(cl_khr_int64_extended_atomics)
@@ -14758,7 +14760,7 @@ typedef enum memory_order
 
 // atomic_init()
 #define ATOMIC_INIT_PROTOTYPE_ADDRSPACE(TYPE, ADDRSPACE) \
-void __attribute__((overloadable)) atomic_init(volatile ADDRSPACE atomic_##TYPE *object, TYPE value);
+void __overload atomic_init(volatile ADDRSPACE atomic_##TYPE *object, TYPE value);
 
 #define ATOMIC_INIT_PROTOTYPE(TYPE) \
 ATOMIC_INIT_PROTOTYPE_ADDRSPACE(TYPE, generic)
@@ -14775,13 +14777,13 @@ ATOMIC_INIT_PROTOTYPE(double)
 #endif
 
 // atomic_work_item_fence()
-void __attribute__((overloadable)) atomic_work_item_fence(cl_mem_fence_flags flags, memory_order order, memory_scope scope);
+void __overload atomic_work_item_fence(cl_mem_fence_flags flags, memory_order order, memory_scope scope);
 
 // atomic_fetch()
 #define ATOMIC_FETCH_PROTOTYPE_ADDRSPACE(KEY, TYPE, OPTYPE, ADDRSPACE) \
-TYPE __attribute__((overloadable)) atomic_fetch_##KEY(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand); \
-TYPE __attribute__((overloadable)) atomic_fetch_##KEY##_explicit(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand, memory_order order); \
-TYPE __attribute__((overloadable)) atomic_fetch_##KEY##_explicit(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand, memory_order order, memory_scope scope);
+TYPE __overload atomic_fetch_##KEY(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand); \
+TYPE __overload atomic_fetch_##KEY##_explicit(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand, memory_order order); \
+TYPE __overload atomic_fetch_##KEY##_explicit(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand, memory_order order, memory_scope scope);
 
 #define ATOMIC_FETCH_PROTOTYPE(KEY, TYPE, OPTYPE) \
 ATOMIC_FETCH_PROTOTYPE_ADDRSPACE(KEY, TYPE, OPTYPE, generic)
@@ -14816,9 +14818,9 @@ ATOMIC_FETCH_PROTOTYPE(and, intptr_t, uintptr_t)
 // atomic_fetch_min/max()
 
 #define ATOMIC_FETCH_MINMAX_PROTOTYPE_ADDRSPACE(KEY, TYPE, OPTYPE, ADDRSPACE) \
-TYPE __attribute__((overloadable)) atomic_fetch_##KEY(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand); \
-TYPE __attribute__((overloadable)) atomic_fetch_##KEY##_explicit(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand, memory_order order); \
-TYPE __attribute__((overloadable)) atomic_fetch_##KEY##_explicit(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand, memory_order order, memory_scope scope);
+TYPE __overload atomic_fetch_##KEY(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand); \
+TYPE __overload atomic_fetch_##KEY##_explicit(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand, memory_order order); \
+TYPE __overload atomic_fetch_##KEY##_explicit(volatile ADDRSPACE atomic_##TYPE *object, OPTYPE operand, memory_order order, memory_scope scope);
 
 #define ATOMIC_FETCH_MINMAX_PROTOTYPE(KEY, TYPE, OPTYPE) \
 ATOMIC_FETCH_MINMAX_PROTOTYPE_ADDRSPACE(KEY, TYPE, OPTYPE, generic)
@@ -14848,9 +14850,9 @@ ATOMIC_FETCH_MINMAX_SUPPORTED_PROTOTYPEs(max)
 // atomic_store()
 
 #define ATOMIC_STORE_PROTOTYPE_ADDRSPACE(TYPE, ADDRSPACE) \
-void __attribute__((overloadable)) atomic_store(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired); \
-void __attribute__((overloadable)) atomic_store_explicit(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired, memory_order order); \
-void __attribute__((overloadable)) atomic_store_explicit(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired, memory_order order, memory_scope scope);
+void __overload atomic_store(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired); \
+void __overload atomic_store_explicit(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired, memory_order order); \
+void __overload atomic_store_explicit(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired, memory_order order, memory_scope scope);
 
 #define ATOMIC_STORE_PROTOTYPE(TYPE) \
 ATOMIC_STORE_PROTOTYPE_ADDRSPACE(TYPE, generic)
@@ -14868,9 +14870,9 @@ ATOMIC_STORE_PROTOTYPE(ulong)
 // atomic_load()
 
 #define ATOMIC_LOAD_PROTOTYPE_ADDRSPACE(TYPE, ADDRSPACE) \
-TYPE __attribute__((overloadable)) atomic_load(volatile ADDRSPACE atomic_##TYPE *object); \
-TYPE __attribute__((overloadable)) atomic_load_explicit(volatile ADDRSPACE atomic_##TYPE *object, memory_order order); \
-TYPE __attribute__((overloadable)) atomic_load_explicit(volatile ADDRSPACE atomic_##TYPE *object, memory_order order, memory_scope scope);
+TYPE __overload atomic_load(volatile ADDRSPACE atomic_##TYPE *object); \
+TYPE __overload atomic_load_explicit(volatile ADDRSPACE atomic_##TYPE *object, memory_order order); \
+TYPE __overload atomic_load_explicit(volatile ADDRSPACE atomic_##TYPE *object, memory_order order, memory_scope scope);
 
 #define ATOMIC_LOAD_PROTOTYPE(TYPE) \
 ATOMIC_LOAD_PROTOTYPE_ADDRSPACE(TYPE, generic)
@@ -14889,9 +14891,9 @@ ATOMIC_LOAD_PROTOTYPE(ulong)
 // atomic_exchange()
 
 #define ATOMIC_EXCHANGE_PROTOTYPE_ADDRSPACE(TYPE, ADDRSPACE) \
-TYPE __attribute__((overloadable)) atomic_exchange(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired); \
-TYPE __attribute__((overloadable)) atomic_exchange_explicit(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired, memory_order order); \
-TYPE __attribute__((overloadable)) atomic_exchange_explicit(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired, memory_order order, memory_scope scope);
+TYPE __overload atomic_exchange(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired); \
+TYPE __overload atomic_exchange_explicit(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired, memory_order order); \
+TYPE __overload atomic_exchange_explicit(volatile ADDRSPACE atomic_##TYPE *object, TYPE desired, memory_order order, memory_scope scope);
 
 #define ATOMIC_EXCHANGE_PROTOTYPE(TYPE) \
 ATOMIC_EXCHANGE_PROTOTYPE_ADDRSPACE(TYPE, generic)
@@ -14910,10 +14912,10 @@ ATOMIC_EXCHANGE_PROTOTYPE(ulong)
 // atomic_compare_exchange_strong() and atomic_compare_exchange_weak()
 
 #define ATOMIC_COMPARE_EXCHANGE_STRENGTH_PROTOTYPE_ADDRSPACE(TYPE, ADDRSPACE, ADDRSPACE2, STRENGTH) \
-bool __attribute__((overloadable)) atomic_compare_exchange_##STRENGTH(volatile ADDRSPACE atomic_##TYPE *object, ADDRSPACE2 TYPE *expected, TYPE desired); \
-bool __attribute__((overloadable)) atomic_compare_exchange_##STRENGTH##_explicit(volatile ADDRSPACE atomic_##TYPE *object, ADDRSPACE2 TYPE *expected, \
+bool __overload atomic_compare_exchange_##STRENGTH(volatile ADDRSPACE atomic_##TYPE *object, ADDRSPACE2 TYPE *expected, TYPE desired); \
+bool __overload atomic_compare_exchange_##STRENGTH##_explicit(volatile ADDRSPACE atomic_##TYPE *object, ADDRSPACE2 TYPE *expected, \
                                                                                  TYPE desired, memory_order success, memory_order failure); \
-bool __attribute__((overloadable)) atomic_compare_exchange_##STRENGTH##_explicit(volatile ADDRSPACE atomic_##TYPE *object, ADDRSPACE2 TYPE *expected, \
+bool __overload atomic_compare_exchange_##STRENGTH##_explicit(volatile ADDRSPACE atomic_##TYPE *object, ADDRSPACE2 TYPE *expected, \
                                                                                  TYPE desired, memory_order success, memory_order failure, memory_scope scope);
 
 #define ATOMIC_COMPARE_EXCHANGE_STRENGTH_PROTOTYPE(TYPE, STRENGTH) \
@@ -14939,9 +14941,9 @@ ATOMIC_COMPARE_EXCHANGE_STRENGTH_PROTOTYPE(ulong, weak)
 // atomic_flag_test_and_set() and atomic_flag_clear()
 
 #define ATOMIC_FLAG_PROTOTYPE_ADDRSPACE(ADDRSPACE, FUNCTYPE, RET) \
-RET __attribute__((overloadable)) atomic_flag_##FUNCTYPE(volatile ADDRSPACE atomic_flag *object); \
-RET __attribute__((overloadable)) atomic_flag_##FUNCTYPE##_explicit(volatile ADDRSPACE atomic_flag *object, memory_order order); \
-RET __attribute__((overloadable)) atomic_flag_##FUNCTYPE##_explicit(volatile ADDRSPACE atomic_flag *object, memory_order order, memory_scope scope);
+RET __overload atomic_flag_##FUNCTYPE(volatile ADDRSPACE atomic_flag *object); \
+RET __overload atomic_flag_##FUNCTYPE##_explicit(volatile ADDRSPACE atomic_flag *object, memory_order order); \
+RET __overload atomic_flag_##FUNCTYPE##_explicit(volatile ADDRSPACE atomic_flag *object, memory_order order, memory_scope scope);
 
 #define ATOMIC_FLAG_PROTOTYPE(FUNCTYPE, RET) \
 ATOMIC_FLAG_PROTOTYPE_ADDRSPACE(generic, FUNCTYPE, RET)
@@ -15515,8 +15517,8 @@ int printf(__constant const char* st, ...);
  * in the description above are undefined.
  */
 
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_t image, sampler_t sampler, int2 coord);
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord);
+float4 __overload read_imagef(read_only image2d_t image, sampler_t sampler, int2 coord);
+float4 __overload read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord);
 
 /**
  * Use the coordinate (coord.xy) to do an element lookup in
@@ -15556,10 +15558,10 @@ float4 __attribute__((overloadable)) read_imagef(read_only image2d_t image, samp
  * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
  * otherwise the values returned are undefined.
  */
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_t image, sampler_t sampler, int2 coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_t image, sampler_t sampler, int2 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord);
+int4 __overload read_imagei(read_only image2d_t image, sampler_t sampler, int2 coord);
+int4 __overload read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord);
+uint4 __overload read_imageui(read_only image2d_t image, sampler_t sampler, int2 coord);
+uint4 __overload read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord);
 
 /**
  * Use the coordinate (coord.x, coord.y, coord.z) to do
@@ -15589,8 +15591,8 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image2d_t image, samp
  * with image_channel_data_type values not specified
  * in the description are undefined.
  */
-float4 __attribute__((overloadable)) read_imagef(read_only image3d_t image, sampler_t sampler, int4 coord);
-float4 __attribute__((overloadable)) read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord);
+float4 __overload read_imagef(read_only image3d_t image, sampler_t sampler, int4 coord);
+float4 __overload read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord);
 
 /**
  * Use the coordinate (coord.x, coord.y, coord.z) to do
@@ -15631,10 +15633,10 @@ float4 __attribute__((overloadable)) read_imagef(read_only image3d_t image, samp
  * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
  * otherwise the values returned are undefined.
  */
-int4 __attribute__((overloadable)) read_imagei(read_only image3d_t image, sampler_t sampler, int4 coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image3d_t image, sampler_t sampler, int4 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord);
+int4 __overload read_imagei(read_only image3d_t image, sampler_t sampler, int4 coord);
+int4 __overload read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord);
+uint4 __overload read_imageui(read_only image3d_t image, sampler_t sampler, int4 coord);
+uint4 __overload read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord);
 
 /**
  * Use the coordinate (coord.z) to index into the
@@ -15667,8 +15669,8 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image3d_t image, samp
  */
 
 // 2D image arrays
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
+float4 __overload read_imagef(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
+float4 __overload read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
 
 /**
  * Use the coordinate (coord.z) to index into the
@@ -15711,10 +15713,10 @@ float4 __attribute__((overloadable)) read_imagef(read_only image2d_array_t image
  */
 
 //2D image arrays
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
+int4 __overload read_imagei(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
+int4 __overload read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
+uint4 __overload read_imageui(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
+uint4 __overload read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
 
 /**
  * Use the coordinate (x) to do an element lookup in
@@ -15744,8 +15746,8 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image2d_array_t image
  * in the description above are undefined.
  */
 
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_t image, sampler_t sampler, int coord);
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_t image, sampler_t sampler, float coord);
+float4 __overload read_imagef(read_only image1d_t image, sampler_t sampler, int coord);
+float4 __overload read_imagef(read_only image1d_t image, sampler_t sampler, float coord);
 
 /**
  * Use the coordinate (x) to do an element lookup in
@@ -15786,10 +15788,10 @@ float4 __attribute__((overloadable)) read_imagef(read_only image1d_t image, samp
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_t image, sampler_t sampler, int coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_t image, sampler_t sampler, float coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_t image, sampler_t sampler, int coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_t image, sampler_t sampler, float coord);
+int4 __overload read_imagei(read_only image1d_t image, sampler_t sampler, int coord);
+int4 __overload read_imagei(read_only image1d_t image, sampler_t sampler, float coord);
+uint4 __overload read_imageui(read_only image1d_t image, sampler_t sampler, int coord);
+uint4 __overload read_imageui(read_only image1d_t image, sampler_t sampler, float coord);
 
 /**
  * Use the coordinate (coord.y) to index into the
@@ -15822,8 +15824,8 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image1d_t image, samp
  */
 
 // 1D image arrays
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
+float4 __overload read_imagef(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
+float4 __overload read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
 
 /**
  * Use the coordinate (coord.y) to index into the
@@ -15866,10 +15868,10 @@ float4 __attribute__((overloadable)) read_imagef(read_only image1d_array_t image
  */
 
 //1D image arrays
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
+int4 __overload read_imagei(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
+int4 __overload read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
+uint4 __overload read_imageui(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
+uint4 __overload read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
 
 /**
  * Use the coordinate (cood.xy) to do an element
@@ -15899,8 +15901,8 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image1d_array_t image
  * in the description above are undefined.
  */
 #ifdef cl_khr_depth_images
-float __attribute__((overloadable)) read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord);
-float __attribute__((overloadable)) read_imagef(read_only image2d_depth_t image, sampler_t sampler, int2 coord);
+float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord);
+float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, int2 coord);
 #endif //cl_khr_depth_images
 
 /**
@@ -15934,101 +15936,101 @@ float __attribute__((overloadable)) read_imagef(read_only image2d_depth_t image,
 
 // 2D depth image arrays
 #ifdef cl_khr_depth_images
-float __attribute__((overloadable)) read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord);
-float __attribute__((overloadable)) read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, int4 coord);
+float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord);
+float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, int4 coord);
 #endif //cl_khr_depth_images
 
 /**
 * Sampler-less Image Access
 */
 
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_t image, int coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_t image, int coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_t image, int coord);
+float4 __overload read_imagef(read_only image1d_t image, int coord);
+int4 __overload read_imagei(read_only image1d_t image, int coord);
+uint4 __overload read_imageui(read_only image1d_t image, int coord);
 
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_buffer_t image, int coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_buffer_t image, int coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_buffer_t image, int coord);
+float4 __overload read_imagef(read_only image1d_buffer_t image, int coord);
+int4 __overload read_imagei(read_only image1d_buffer_t image, int coord);
+uint4 __overload read_imageui(read_only image1d_buffer_t image, int coord);
 
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_array_t image, int2 coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_array_t image, int2 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_array_t image, int2 coord);
+float4 __overload read_imagef(read_only image1d_array_t image, int2 coord);
+int4 __overload read_imagei(read_only image1d_array_t image, int2 coord);
+uint4 __overload read_imageui(read_only image1d_array_t image, int2 coord);
 
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_t image, int2 coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_t image, int2 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_t image, int2 coord);
+float4 __overload read_imagef(read_only image2d_t image, int2 coord);
+int4 __overload read_imagei(read_only image2d_t image, int2 coord);
+uint4 __overload read_imageui(read_only image2d_t image, int2 coord);
 
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_array_t image, int4 coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_array_t image, int4 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_array_t image, int4 coord);
+float4 __overload read_imagef(read_only image2d_array_t image, int4 coord);
+int4 __overload read_imagei(read_only image2d_array_t image, int4 coord);
+uint4 __overload read_imageui(read_only image2d_array_t image, int4 coord);
 
 #ifdef cl_khr_depth_images
-float __attribute__((overloadable)) read_imagef(read_only image2d_depth_t image, int2 coord);
-float __attribute__((overloadable)) read_imagef(read_only image2d_array_depth_t image, int4 coord);
+float __overload read_imagef(read_only image2d_depth_t image, int2 coord);
+float __overload read_imagef(read_only image2d_array_depth_t image, int4 coord);
 #endif //cl_khr_depth_images
 
-float4 __attribute__((overloadable)) read_imagef(read_only image3d_t image, int4 coord);
-int4 __attribute__((overloadable)) read_imagei(read_only image3d_t image, int4 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_only image3d_t image, int4 coord);
+float4 __overload read_imagef(read_only image3d_t image, int4 coord);
+int4 __overload read_imagei(read_only image3d_t image, int4 coord);
+uint4 __overload read_imageui(read_only image3d_t image, int4 coord);
 
 // Image Read Functions Returning half4 Type
 #ifdef cl_khr_fp16
-half4 __attribute__((overloadable)) read_imageh(read_only image1d_t image, sampler_t sampler, int coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image1d_t image, sampler_t sampler, float coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image1d_array_t image, sampler_t sampler, int2 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image1d_array_t image, sampler_t sampler, float2 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image2d_t image, sampler_t sampler, int2 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image2d_t image, sampler_t sampler, float2 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image3d_t image, sampler_t sampler, int4 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image3d_t image, sampler_t sampler, float4 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image2d_array_t image, sampler_t sampler, int4 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image2d_array_t image, sampler_t sampler, float4 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image1d_t image, int coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image2d_t image, int2 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image3d_t image, int4 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image1d_array_t image, int2 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image2d_array_t image, int4 coord);
-half4 __attribute__((overloadable)) read_imageh(read_only image1d_buffer_t image, int coord);
+half4 __overload read_imageh(read_only image1d_t image, sampler_t sampler, int coord);
+half4 __overload read_imageh(read_only image1d_t image, sampler_t sampler, float coord);
+half4 __overload read_imageh(read_only image1d_array_t image, sampler_t sampler, int2 coord);
+half4 __overload read_imageh(read_only image1d_array_t image, sampler_t sampler, float2 coord);
+half4 __overload read_imageh(read_only image2d_t image, sampler_t sampler, int2 coord);
+half4 __overload read_imageh(read_only image2d_t image, sampler_t sampler, float2 coord);
+half4 __overload read_imageh(read_only image3d_t image, sampler_t sampler, int4 coord);
+half4 __overload read_imageh(read_only image3d_t image, sampler_t sampler, float4 coord);
+half4 __overload read_imageh(read_only image2d_array_t image, sampler_t sampler, int4 coord);
+half4 __overload read_imageh(read_only image2d_array_t image, sampler_t sampler, float4 coord);
+half4 __overload read_imageh(read_only image1d_t image, int coord);
+half4 __overload read_imageh(read_only image2d_t image, int2 coord);
+half4 __overload read_imageh(read_only image3d_t image, int4 coord);
+half4 __overload read_imageh(read_only image1d_array_t image, int2 coord);
+half4 __overload read_imageh(read_only image2d_array_t image, int4 coord);
+half4 __overload read_imageh(read_only image1d_buffer_t image, int coord);
 #endif //cl_khr_fp16
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float4 __attribute__((overloadable)) read_imagef(read_write image1d_t image, int coord);
-int4 __attribute__((overloadable)) read_imagei(read_write image1d_t image, int coord);
-uint4 __attribute__((overloadable)) read_imageui(read_write image1d_t image, int coord);
+float4 __overload read_imagef(read_write image1d_t image, int coord);
+int4 __overload read_imagei(read_write image1d_t image, int coord);
+uint4 __overload read_imageui(read_write image1d_t image, int coord);
 
-float4 __attribute__((overloadable)) read_imagef(read_write image1d_buffer_t image, int coord);
-int4 __attribute__((overloadable)) read_imagei(read_write image1d_buffer_t image, int coord);
-uint4 __attribute__((overloadable)) read_imageui(read_write image1d_buffer_t image, int coord);
+float4 __overload read_imagef(read_write image1d_buffer_t image, int coord);
+int4 __overload read_imagei(read_write image1d_buffer_t image, int coord);
+uint4 __overload read_imageui(read_write image1d_buffer_t image, int coord);
 
-float4 __attribute__((overloadable)) read_imagef(read_write image1d_array_t image, int2 coord);
-int4 __attribute__((overloadable)) read_imagei(read_write image1d_array_t image, int2 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_write image1d_array_t image, int2 coord);
+float4 __overload read_imagef(read_write image1d_array_t image, int2 coord);
+int4 __overload read_imagei(read_write image1d_array_t image, int2 coord);
+uint4 __overload read_imageui(read_write image1d_array_t image, int2 coord);
 
-float4 __attribute__((overloadable)) read_imagef(read_write image2d_t image, int2 coord);
-int4 __attribute__((overloadable)) read_imagei(read_write image2d_t image, int2 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_write image2d_t image, int2 coord);
+float4 __overload read_imagef(read_write image2d_t image, int2 coord);
+int4 __overload read_imagei(read_write image2d_t image, int2 coord);
+uint4 __overload read_imageui(read_write image2d_t image, int2 coord);
 
-float4 __attribute__((overloadable)) read_imagef(read_write image2d_array_t image, int4 coord);
-int4 __attribute__((overloadable)) read_imagei(read_write image2d_array_t image, int4 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_write image2d_array_t image, int4 coord);
+float4 __overload read_imagef(read_write image2d_array_t image, int4 coord);
+int4 __overload read_imagei(read_write image2d_array_t image, int4 coord);
+uint4 __overload read_imageui(read_write image2d_array_t image, int4 coord);
 
 #ifdef cl_khr_depth_images
-float __attribute__((overloadable)) read_imagef(read_write image2d_depth_t image, int2 coord);
-float __attribute__((overloadable)) read_imagef(read_write image2d_array_depth_t image, int4 coord);
+float __overload read_imagef(read_write image2d_depth_t image, int2 coord);
+float __overload read_imagef(read_write image2d_array_depth_t image, int4 coord);
 #endif //cl_khr_depth_images
 
-float4 __attribute__((overloadable)) read_imagef(read_write image3d_t image, int4 coord);
-int4 __attribute__((overloadable)) read_imagei(read_write image3d_t image, int4 coord);
-uint4 __attribute__((overloadable)) read_imageui(read_write image3d_t image, int4 coord);
+float4 __overload read_imagef(read_write image3d_t image, int4 coord);
+int4 __overload read_imagei(read_write image3d_t image, int4 coord);
+uint4 __overload read_imageui(read_write image3d_t image, int4 coord);
 
 // Image Read Functions Returning half4 Type
 #ifdef cl_khr_fp16
-half4 __attribute__((overloadable)) read_imageh(read_write image1d_t image, int coord);
-half4 __attribute__((overloadable)) read_imageh(read_write image2d_t image, int2 coord);
-half4 __attribute__((overloadable)) read_imageh(read_write image3d_t image, int4 coord);
-half4 __attribute__((overloadable)) read_imageh(read_write image1d_array_t image, int2 coord);
-half4 __attribute__((overloadable)) read_imageh(read_write image2d_array_t image, int4 coord);
-half4 __attribute__((overloadable)) read_imageh(read_write image1d_buffer_t image, int coord);
+half4 __overload read_imageh(read_write image1d_t image, int coord);
+half4 __overload read_imageh(read_write image2d_t image, int2 coord);
+half4 __overload read_imageh(read_write image3d_t image, int4 coord);
+half4 __overload read_imageh(read_write image1d_array_t image, int2 coord);
+half4 __overload read_imageh(read_write image2d_array_t image, int4 coord);
+half4 __overload read_imageh(read_write image1d_buffer_t image, int coord);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -16068,14 +16070,14 @@ half4 __attribute__((overloadable)) read_imageh(read_write image1d_buffer_t imag
  * values that are not in the range (0 ... image width -
  * 1, 0 ... image height - 1), respectively, is undefined.
  */
-void __attribute__((overloadable)) write_imagef(write_only image2d_t image, int2 coord, float4 color);
-void __attribute__((overloadable)) write_imagei(write_only image2d_t image, int2 coord, int4 color);
-void __attribute__((overloadable)) write_imageui(write_only image2d_t image, int2 coord, uint4 color);
+void __overload write_imagef(write_only image2d_t image, int2 coord, float4 color);
+void __overload write_imagei(write_only image2d_t image, int2 coord, int4 color);
+void __overload write_imageui(write_only image2d_t image, int2 coord, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) write_imagef(read_write image2d_t image, int2 coord, float4 color);
-void __attribute__((overloadable)) write_imagei(read_write image2d_t image, int2 coord, int4 color);
-void __attribute__((overloadable)) write_imageui(read_write image2d_t image, int2 coord, uint4 color);
+void __overload write_imagef(read_write image2d_t image, int2 coord, float4 color);
+void __overload write_imagei(read_write image2d_t image, int2 coord, int4 color);
+void __overload write_imageui(read_write image2d_t image, int2 coord, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16116,14 +16118,14 @@ void __attribute__((overloadable)) write_imageui(read_write image2d_t image, int
  */
 
 //2D image arrays
-void __attribute__((overloadable)) write_imagef(write_only image2d_array_t image_array, int4 coord, float4 color);
-void __attribute__((overloadable)) write_imagei(write_only image2d_array_t image_array, int4 coord, int4 color);
-void __attribute__((overloadable)) write_imageui(write_only image2d_array_t image_array, int4 coord, uint4 color);
+void __overload write_imagef(write_only image2d_array_t image_array, int4 coord, float4 color);
+void __overload write_imagei(write_only image2d_array_t image_array, int4 coord, int4 color);
+void __overload write_imageui(write_only image2d_array_t image_array, int4 coord, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) write_imagef(read_write image2d_array_t image_array, int4 coord, float4 color);
-void __attribute__((overloadable)) write_imagei(read_write image2d_array_t image_array, int4 coord, int4 color);
-void __attribute__((overloadable)) write_imageui(read_write image2d_array_t image_array, int4 coord, uint4 color);
+void __overload write_imagef(read_write image2d_array_t image_array, int4 coord, float4 color);
+void __overload write_imagei(read_write image2d_array_t image_array, int4 coord, int4 color);
+void __overload write_imageui(read_write image2d_array_t image_array, int4 coord, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16161,14 +16163,14 @@ void __attribute__((overloadable)) write_imageui(read_write image2d_array_t imag
  * values that are not in the range (0 ... image width -
  * 1), respectively, is undefined.
  */
-void __attribute__((overloadable)) write_imagef(write_only image1d_t image, int coord, float4 color);
-void __attribute__((overloadable)) write_imagei(write_only image1d_t image, int coord, int4 color);
-void __attribute__((overloadable)) write_imageui(write_only image1d_t image, int coord, uint4 color);
+void __overload write_imagef(write_only image1d_t image, int coord, float4 color);
+void __overload write_imagei(write_only image1d_t image, int coord, int4 color);
+void __overload write_imageui(write_only image1d_t image, int coord, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) write_imagef(read_write image1d_t image, int coord, float4 color);
-void __attribute__((overloadable)) write_imagei(read_write image1d_t image, int coord, int4 color);
-void __attribute__((overloadable)) write_imageui(read_write image1d_t image, int coord, uint4 color);
+void __overload write_imagef(read_write image1d_t image, int coord, float4 color);
+void __overload write_imagei(read_write image1d_t image, int coord, int4 color);
+void __overload write_imageui(read_write image1d_t image, int coord, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16206,14 +16208,14 @@ void __attribute__((overloadable)) write_imageui(read_write image1d_t image, int
  * values that are not in the range (0 ... image width -
  * 1), respectively, is undefined.
  */
-void __attribute__((overloadable)) write_imagef(write_only image1d_buffer_t image, int coord, float4 color);
-void __attribute__((overloadable)) write_imagei(write_only image1d_buffer_t image, int coord, int4 color);
-void __attribute__((overloadable)) write_imageui(write_only image1d_buffer_t image, int coord, uint4 color);
+void __overload write_imagef(write_only image1d_buffer_t image, int coord, float4 color);
+void __overload write_imagei(write_only image1d_buffer_t image, int coord, int4 color);
+void __overload write_imageui(write_only image1d_buffer_t image, int coord, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) write_imagef(read_write image1d_buffer_t image, int coord, float4 color);
-void __attribute__((overloadable)) write_imagei(read_write image1d_buffer_t image, int coord, int4 color);
-void __attribute__((overloadable)) write_imageui(read_write image1d_buffer_t image, int coord, uint4 color);
+void __overload write_imagef(read_write image1d_buffer_t image, int coord, float4 color);
+void __overload write_imagei(read_write image1d_buffer_t image, int coord, int4 color);
+void __overload write_imageui(read_write image1d_buffer_t image, int coord, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16254,14 +16256,14 @@ void __attribute__((overloadable)) write_imageui(read_write image1d_buffer_t ima
  */
 
 //1D image arrays
-void __attribute__((overloadable)) write_imagef(write_only image1d_array_t image_array, int2 coord, float4 color);
-void __attribute__((overloadable)) write_imagei(write_only image1d_array_t image_array, int2 coord, int4 color);
-void __attribute__((overloadable)) write_imageui(write_only image1d_array_t image_array, int2 coord, uint4 color);
+void __overload write_imagef(write_only image1d_array_t image_array, int2 coord, float4 color);
+void __overload write_imagei(write_only image1d_array_t image_array, int2 coord, int4 color);
+void __overload write_imageui(write_only image1d_array_t image_array, int2 coord, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) write_imagef(read_write image1d_array_t image_array, int2 coord, float4 color);
-void __attribute__((overloadable)) write_imagei(read_write image1d_array_t image_array, int2 coord, int4 color);
-void __attribute__((overloadable)) write_imageui(read_write image1d_array_t image_array, int2 coord, uint4 color);
+void __overload write_imagef(read_write image1d_array_t image_array, int2 coord, float4 color);
+void __overload write_imagei(read_write image1d_array_t image_array, int2 coord, int4 color);
+void __overload write_imageui(read_write image1d_array_t image_array, int2 coord, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16300,14 +16302,14 @@ void __attribute__((overloadable)) write_imageui(read_write image1d_array_t imag
  * values that are not in the range (0 ... image width -
  * 1, 0 ... image height - 1), respectively, is undefined.
  */
-void __attribute__((overloadable)) write_imagef(write_only image3d_t image, int4 coord, float4 color);
-void __attribute__((overloadable)) write_imagei(write_only image3d_t image, int4 coord, int4 color);
-void __attribute__((overloadable)) write_imageui(write_only image3d_t image, int4 coord, uint4 color);
+void __overload write_imagef(write_only image3d_t image, int4 coord, float4 color);
+void __overload write_imagei(write_only image3d_t image, int4 coord, int4 color);
+void __overload write_imageui(write_only image3d_t image, int4 coord, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable)) write_imagef(read_write image3d_t image, int4 coord, float4 color);
-void __attribute__((overloadable)) write_imagei(read_write image3d_t image, int4 coord, int4 color);
-void __attribute__((overloadable)) write_imageui(read_write image3d_t image, int4 coord, uint4 color);
+void __overload write_imagef(read_write image3d_t image, int4 coord, float4 color);
+void __overload write_imagei(read_write image3d_t image, int4 coord, int4 color);
+void __overload write_imageui(read_write image3d_t image, int4 coord, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16347,34 +16349,34 @@ void __attribute__((overloadable)) write_imageui(read_write image3d_t image, int
  * 1), respectively, is undefined.
  */
 #ifdef cl_khr_depth_images
-void __attribute__((overloadable)) write_imagef(write_only image2d_depth_t image, int2 coord, float color);
-void __attribute__((overloadable)) write_imagef(write_only image2d_array_depth_t image, int4 coord, float color);
+void __overload write_imagef(write_only image2d_depth_t image, int2 coord, float color);
+void __overload write_imagef(write_only image2d_array_depth_t image, int4 coord, float color);
 #endif //cl_khr_depth_images
 
 // Image Write Functions Returning half4 Type
 #ifdef cl_khr_fp16
-void __attribute__((overloadable)) write_imageh(write_only image1d_t image, int coord, half4 color);
-void __attribute__((overloadable)) write_imageh(write_only image2d_t image, int2 coord, half4 color);
-void __attribute__((overloadable)) write_imageh(write_only image3d_t image, int4 coord, half4 color);
-void __attribute__((overloadable)) write_imageh(write_only image1d_array_t image, int2 coord, half4 color);
-void __attribute__((overloadable)) write_imageh(write_only image2d_array_t image, int4 coord, half4 color);
-void __attribute__((overloadable)) write_imageh(write_only image1d_buffer_t image, int coord, half4 color);
+void __overload write_imageh(write_only image1d_t image, int coord, half4 color);
+void __overload write_imageh(write_only image2d_t image, int2 coord, half4 color);
+void __overload write_imageh(write_only image3d_t image, int4 coord, half4 color);
+void __overload write_imageh(write_only image1d_array_t image, int2 coord, half4 color);
+void __overload write_imageh(write_only image2d_array_t image, int4 coord, half4 color);
+void __overload write_imageh(write_only image1d_buffer_t image, int coord, half4 color);
 #endif //cl_khr_fp16
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #ifdef cl_khr_depth_images
-void __attribute__((overloadable)) write_imagef(read_write image2d_depth_t image, int2 coord, float color);
-void __attribute__((overloadable)) write_imagef(read_write image2d_array_depth_t image, int4 coord, float color);
+void __overload write_imagef(read_write image2d_depth_t image, int2 coord, float color);
+void __overload write_imagef(read_write image2d_array_depth_t image, int4 coord, float color);
 #endif //cl_khr_depth_images
 
 // Image Write Functions Returning half4 Type
 #ifdef cl_khr_fp16
-void __attribute__((overloadable)) write_imageh(read_write image1d_t image, int coord, half4 color);
-void __attribute__((overloadable)) write_imageh(read_write image2d_t image, int2 coord, half4 color);
-void __attribute__((overloadable)) write_imageh(read_write image3d_t image, int4 coord, half4 color);
-void __attribute__((overloadable)) write_imageh(read_write image1d_array_t image, int2 coord, half4 color);
-void __attribute__((overloadable)) write_imageh(read_write image2d_array_t image, int4 coord, half4 color);
-void __attribute__((overloadable)) write_imageh(read_write image1d_buffer_t image, int coord, half4 color);
+void __overload write_imageh(read_write image1d_t image, int coord, half4 color);
+void __overload write_imageh(read_write image2d_t image, int2 coord, half4 color);
+void __overload write_imageh(read_write image3d_t image, int4 coord, half4 color);
+void __overload write_imageh(read_write image1d_array_t image, int2 coord, half4 color);
+void __overload write_imageh(read_write image2d_array_t image, int4 coord, half4 color);
+void __overload write_imageh(read_write image1d_buffer_t image, int coord, half4 color);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -16407,14 +16409,14 @@ void __attribute__((overloadable)) write_imageh(read_write image1d_buffer_t imag
  * with image_channel_data_type values not specified
  * in the description above are undefined.
  */
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_msaa_t image, int2 coord, int sample);
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_msaa_t image, int2 coord, int sample);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_msaa_t image, int2 coord, int sample);
+float4 __overload read_imagef(read_only image2d_msaa_t image, int2 coord, int sample);
+int4 __overload read_imagei(read_only image2d_msaa_t image, int2 coord, int sample);
+uint4 __overload read_imageui(read_only image2d_msaa_t image, int2 coord, int sample);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float4 __attribute__((overloadable)) read_imagef(read_write image2d_msaa_t image, int2 coord, int sample);
-int4 __attribute__((overloadable)) read_imagei(read_write image2d_msaa_t image, int2 coord, int sample);
-uint4 __attribute__((overloadable)) read_imageui(read_write image2d_msaa_t image, int2 coord, int sample);
+float4 __overload read_imagef(read_write image2d_msaa_t image, int2 coord, int sample);
+int4 __overload read_imagei(read_write image2d_msaa_t image, int2 coord, int sample);
+uint4 __overload read_imageui(read_write image2d_msaa_t image, int2 coord, int sample);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16445,10 +16447,10 @@ uint4 __attribute__((overloadable)) read_imageui(read_write image2d_msaa_t image
  * with image_channel_data_type values not specified
  * in the description above are undefined.
  */
-float __attribute__((overloadable)) read_imagef(read_only image2d_msaa_depth_t image, int2 coord, int sample);
+float __overload read_imagef(read_only image2d_msaa_depth_t image, int2 coord, int sample);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) read_imagef(read_write image2d_msaa_depth_t image, int2 coord, int sample);
+float __overload read_imagef(read_write image2d_msaa_depth_t image, int2 coord, int sample);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16482,14 +16484,14 @@ float __attribute__((overloadable)) read_imagef(read_write image2d_msaa_depth_t 
  */
 
 // 2D multisample image arrays
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_array_msaa_t image, int4 coord, int sample);
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_array_msaa_t image, int4 coord, int sample);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_array_msaa_t image, int4 coord, int sample);
+float4 __overload read_imagef(read_only image2d_array_msaa_t image, int4 coord, int sample);
+int4 __overload read_imagei(read_only image2d_array_msaa_t image, int4 coord, int sample);
+uint4 __overload read_imageui(read_only image2d_array_msaa_t image, int4 coord, int sample);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float4 __attribute__((overloadable)) read_imagef(read_write image2d_array_msaa_t image, int4 coord, int sample);
-int4 __attribute__((overloadable)) read_imagei(read_write image2d_array_msaa_t image, int4 coord, int sample);
-uint4 __attribute__((overloadable)) read_imageui(read_write image2d_array_msaa_t image, int4 coord, int sample);
+float4 __overload read_imagef(read_write image2d_array_msaa_t image, int4 coord, int sample);
+int4 __overload read_imagei(read_write image2d_array_msaa_t image, int4 coord, int sample);
+uint4 __overload read_imageui(read_write image2d_array_msaa_t image, int4 coord, int sample);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
@@ -16521,10 +16523,10 @@ uint4 __attribute__((overloadable)) read_imageui(read_write image2d_array_msaa_t
  * with image_channel_data_type values not specified
  * in the description above are undefined.
  */
-float __attribute__((overloadable)) read_imagef(read_only image2d_array_msaa_depth_t image, int4 coord, int sample);
+float __overload read_imagef(read_only image2d_array_msaa_depth_t image, int4 coord, int sample);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __attribute__((overloadable)) read_imagef(read_write image2d_array_msaa_depth_t image, int4 coord, int sample);
+float __overload read_imagef(read_write image2d_array_msaa_depth_t image, int4 coord, int sample);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #endif
 
@@ -16930,39 +16932,39 @@ size_t __const_func get_image_array_size(read_write image2d_array_msaa_depth_t i
 * Return the number of samples associated with image
 */
 #if defined(cl_khr_gl_msaa_sharing)
-int __attribute__((overloadable)) get_image_num_samples(read_only image2d_msaa_t image);
-int __attribute__((overloadable)) get_image_num_samples(read_only image2d_msaa_depth_t image);
-int __attribute__((overloadable)) get_image_num_samples(read_only image2d_array_msaa_depth_t image);
-int __attribute__((overloadable)) get_image_num_samples(read_only image2d_array_msaa_t image);
-int __attribute__((overloadable)) get_image_num_samples(read_only image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(read_only image2d_msaa_t image);
+int __overload get_image_num_samples(read_only image2d_msaa_depth_t image);
+int __overload get_image_num_samples(read_only image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(read_only image2d_array_msaa_t image);
+int __overload get_image_num_samples(read_only image2d_array_msaa_depth_t image);
 
-int __attribute__((overloadable)) get_image_num_samples(write_only image2d_msaa_t image);
-int __attribute__((overloadable)) get_image_num_samples(write_only image2d_msaa_depth_t image);
-int __attribute__((overloadable)) get_image_num_samples(write_only image2d_array_msaa_depth_t image);
-int __attribute__((overloadable)) get_image_num_samples(write_only image2d_array_msaa_t image);
-int __attribute__((overloadable)) get_image_num_samples(write_only image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(write_only image2d_msaa_t image);
+int __overload get_image_num_samples(write_only image2d_msaa_depth_t image);
+int __overload get_image_num_samples(write_only image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(write_only image2d_array_msaa_t image);
+int __overload get_image_num_samples(write_only image2d_array_msaa_depth_t image);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __attribute__((overloadable)) get_image_num_samples(read_write image2d_msaa_t image);
-int __attribute__((overloadable)) get_image_num_samples(read_write image2d_msaa_depth_t image);
-int __attribute__((overloadable)) get_image_num_samples(read_write image2d_array_msaa_depth_t image);
-int __attribute__((overloadable)) get_image_num_samples(read_write image2d_array_msaa_t image);
-int __attribute__((overloadable)) get_image_num_samples(read_write image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(read_write image2d_msaa_t image);
+int __overload get_image_num_samples(read_write image2d_msaa_depth_t image);
+int __overload get_image_num_samples(read_write image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(read_write image2d_array_msaa_t image);
+int __overload get_image_num_samples(read_write image2d_array_msaa_depth_t image);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #endif
 
 // OpenCL v2.0 s6.13.15 - Work-group Functions
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __attribute__((overloadable)) work_group_all(int predicate);
-int __attribute__((overloadable)) work_group_any(int predicate);
+int __overload work_group_all(int predicate);
+int __overload work_group_any(int predicate);
 
 #define WG_BROADCAST_1D_DECL(type) \
-type __attribute__((overloadable)) work_group_broadcast(type a, size_t local_id);
+type __overload work_group_broadcast(type a, size_t local_id);
 #define WG_BROADCAST_2D_DECL(type) \
-type __attribute__((overloadable)) work_group_broadcast(type a, size_t x, size_t y);
+type __overload work_group_broadcast(type a, size_t x, size_t y);
 #define WG_BROADCAST_3D_DECL(type) \
-type __attribute__((overloadable)) work_group_broadcast(type a, size_t x, size_t y, size_t z);
+type __overload work_group_broadcast(type a, size_t x, size_t y, size_t z);
 
 #define WG_BROADCAST_ALL_DECL(type) \
 WG_BROADCAST_1D_DECL(type) \
@@ -16982,11 +16984,11 @@ WG_BROADCAST_ALL_DECL(double)
 #endif //cl_khr_fp64
 
 #define DECL_WORK_GROUP_REDUCE_OP(type, op_name) \
-type __attribute__((overloadable)) work_group_reduce_##op_name(type x);
+type __overload work_group_reduce_##op_name(type x);
 #define DECL_WORK_GROUP_SCAN_EXCLUSIVE_OP(type, op_name) \
-type __attribute__((overloadable)) work_group_scan_exclusive_##op_name(type x);
+type __overload work_group_scan_exclusive_##op_name(type x);
 #define DECL_WORK_GROUP_SCAN_INCLUSIVE_OP(type, op_name) \
-type __attribute__((overloadable)) work_group_scan_inclusive_##op_name(type x);
+type __overload work_group_scan_inclusive_##op_name(type x);
 
 #define DECL_WORK_GROUP_REDUCE_ALL(type) \
 DECL_WORK_GROUP_REDUCE_OP(type, add) \
@@ -17035,7 +17037,7 @@ DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(double)
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #define PIPE_RESERVE_ID_VALID_BIT (1U << 30)
 #define CLK_NULL_RESERVE_ID (__builtin_astype(((void*)(__SIZE_MAX__)), reserve_id_t))
-bool __attribute__((overloadable)) is_valid_reserve_id(reserve_id_t reserve_id);
+bool __overload is_valid_reserve_id(reserve_id_t reserve_id);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 
@@ -17084,35 +17086,35 @@ typedef struct {
 } ndrange_t;
 #endif
 
-ndrange_t __attribute__((overloadable)) ndrange_1D(size_t);
-ndrange_t __attribute__((overloadable)) ndrange_1D(size_t, size_t);
-ndrange_t __attribute__((overloadable)) ndrange_1D(size_t, size_t, size_t);
+ndrange_t __overload ndrange_1D(size_t);
+ndrange_t __overload ndrange_1D(size_t, size_t);
+ndrange_t __overload ndrange_1D(size_t, size_t, size_t);
 
-ndrange_t __attribute__((overloadable)) ndrange_2D(const size_t[2]);
-ndrange_t __attribute__((overloadable)) ndrange_2D(const size_t[2], const size_t[2]);
-ndrange_t __attribute__((overloadable)) ndrange_2D(const size_t[2], const size_t[2], const size_t[2]);
+ndrange_t __overload ndrange_2D(const size_t[2]);
+ndrange_t __overload ndrange_2D(const size_t[2], const size_t[2]);
+ndrange_t __overload ndrange_2D(const size_t[2], const size_t[2], const size_t[2]);
 
-ndrange_t __attribute__((overloadable)) ndrange_3D(const size_t[3]);
-ndrange_t __attribute__((overloadable)) ndrange_3D(const size_t[3], const size_t[3]);
-ndrange_t __attribute__((overloadable)) ndrange_3D(const size_t[3], const size_t[3], const size_t[3]);
+ndrange_t __overload ndrange_3D(const size_t[3]);
+ndrange_t __overload ndrange_3D(const size_t[3], const size_t[3]);
+ndrange_t __overload ndrange_3D(const size_t[3], const size_t[3], const size_t[3]);
 
 // ToDo: Add enqueue_kernel as a Clang builtin because it requires custom check of type of variadic 
 // arguments as well as block arguments.
-int __attribute__((overloadable))
+int __overload
 enqueue_kernel(queue_t queue, kernel_enqueue_flags_t, const ndrange_t,
                void (^block)(void));
 
-int __attribute__((overloadable))
+int __overload
 enqueue_kernel(queue_t queue, kernel_enqueue_flags_t, const ndrange_t, uint,
                const __private clk_event_t *, __private clk_event_t *,
                void (^block)(void));
 
-int __attribute__((overloadable))
+int __overload
 enqueue_kernel(queue_t queue, kernel_enqueue_flags_t flags,
                const ndrange_t ndrange, void (^block)(local void *, ...),
                uint size0, ...);
 
-int __attribute__((overloadable))
+int __overload
 enqueue_kernel(queue_t queue, kernel_enqueue_flags_t flags,
                const ndrange_t ndrange, uint num_events_in_wait_list,
                const __private clk_event_t *event_wait_list,
@@ -17120,127 +17122,127 @@ enqueue_kernel(queue_t queue, kernel_enqueue_flags_t flags,
                void (^block)(local void *, ...), uint size0, ...);
 
 // ToDo: Add these functions as Clang builtins since they eed a special check of parameters to block.
-uint __attribute__((overloadable)) get_kernel_work_group_size(void (^block)(void));
-uint __attribute__((overloadable)) get_kernel_work_group_size(void (^block)(local void *, ...));
-uint __attribute__((overloadable)) get_kernel_preferred_work_group_size_multiple(void (^block)(void));
-uint __attribute__((overloadable)) get_kernel_preferred_work_group_size_multiple(void (^block)(local void *, ...));
+uint __overload get_kernel_work_group_size(void (^block)(void));
+uint __overload get_kernel_work_group_size(void (^block)(local void *, ...));
+uint __overload get_kernel_preferred_work_group_size_multiple(void (^block)(void));
+uint __overload get_kernel_preferred_work_group_size_multiple(void (^block)(local void *, ...));
 
-int __attribute__((overloadable)) enqueue_marker(queue_t, uint, const __private clk_event_t*, __private clk_event_t*);
+int __overload enqueue_marker(queue_t, uint, const __private clk_event_t*, __private clk_event_t*);
 
-void __attribute__((overloadable)) retain_event(clk_event_t);
+void __overload retain_event(clk_event_t);
 
-void __attribute__((overloadable)) release_event(clk_event_t);
+void __overload release_event(clk_event_t);
 
 clk_event_t create_user_event(void);
 
-void __attribute__((overloadable)) set_user_event_status(clk_event_t e, int state);
+void __overload set_user_event_status(clk_event_t e, int state);
 
 bool is_valid_event (clk_event_t event);
 
-void __attribute__((overloadable)) capture_event_profiling_info(clk_event_t, clk_profiling_info, __global void* value);
+void __overload capture_event_profiling_info(clk_event_t, clk_profiling_info, __global void* value);
 
-queue_t __attribute__((overloadable)) get_default_queue(void);
+queue_t __overload get_default_queue(void);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 // OpenCL Extension v2.0 s9.17 - Sub-groups
 
 #if defined(cl_intel_subgroups) || defined(cl_khr_subgroups)
 // Shared Sub Group Functions
-uint    __attribute__((overloadable)) get_sub_group_size(void);
-uint    __attribute__((overloadable)) get_max_sub_group_size(void);
-uint    __attribute__((overloadable)) get_num_sub_groups(void);
+uint    __overload get_sub_group_size(void);
+uint    __overload get_max_sub_group_size(void);
+uint    __overload get_num_sub_groups(void);
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-uint    __attribute__((overloadable)) get_enqueued_num_sub_groups(void);
+uint    __overload get_enqueued_num_sub_groups(void);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-uint    __attribute__((overloadable)) get_sub_group_id(void);
-uint    __attribute__((overloadable)) get_sub_group_local_id(void);
+uint    __overload get_sub_group_id(void);
+uint    __overload get_sub_group_local_id(void);
 
-void    __attribute__((overloadable)) sub_group_barrier(cl_mem_fence_flags flags);
+void    __overload sub_group_barrier(cl_mem_fence_flags flags);
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void    __attribute__((overloadable)) sub_group_barrier(cl_mem_fence_flags flags, memory_scope scope);
+void    __overload sub_group_barrier(cl_mem_fence_flags flags, memory_scope scope);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-int     __attribute__((overloadable)) sub_group_all(int predicate);
-int     __attribute__((overloadable)) sub_group_any(int predicate);
+int     __overload sub_group_all(int predicate);
+int     __overload sub_group_any(int predicate);
 
-int     __attribute__((overloadable)) sub_group_broadcast(int   x, uint sub_group_local_id);
-uint    __attribute__((overloadable)) sub_group_broadcast(uint  x, uint sub_group_local_id);
-long    __attribute__((overloadable)) sub_group_broadcast(long  x, uint sub_group_local_id);
-ulong   __attribute__((overloadable)) sub_group_broadcast(ulong x, uint sub_group_local_id);
-float   __attribute__((overloadable)) sub_group_broadcast(float x, uint sub_group_local_id);
+int     __overload sub_group_broadcast(int   x, uint sub_group_local_id);
+uint    __overload sub_group_broadcast(uint  x, uint sub_group_local_id);
+long    __overload sub_group_broadcast(long  x, uint sub_group_local_id);
+ulong   __overload sub_group_broadcast(ulong x, uint sub_group_local_id);
+float   __overload sub_group_broadcast(float x, uint sub_group_local_id);
 
-int     __attribute__((overloadable)) sub_group_reduce_add(int   x);
-uint    __attribute__((overloadable)) sub_group_reduce_add(uint  x);
-long    __attribute__((overloadable)) sub_group_reduce_add(long  x);
-ulong   __attribute__((overloadable)) sub_group_reduce_add(ulong x);
-float   __attribute__((overloadable)) sub_group_reduce_add(float x);
-int     __attribute__((overloadable)) sub_group_reduce_min(int   x);
-uint    __attribute__((overloadable)) sub_group_reduce_min(uint  x);
-long    __attribute__((overloadable)) sub_group_reduce_min(long  x);
-ulong   __attribute__((overloadable)) sub_group_reduce_min(ulong x);
-float   __attribute__((overloadable)) sub_group_reduce_min(float x);
-int     __attribute__((overloadable)) sub_group_reduce_max(int   x);
-uint    __attribute__((overloadable)) sub_group_reduce_max(uint  x);
-long    __attribute__((overloadable)) sub_group_reduce_max(long  x);
-ulong   __attribute__((overloadable)) sub_group_reduce_max(ulong x);
-float   __attribute__((overloadable)) sub_group_reduce_max(float x);
+int     __overload sub_group_reduce_add(int   x);
+uint    __overload sub_group_reduce_add(uint  x);
+long    __overload sub_group_reduce_add(long  x);
+ulong   __overload sub_group_reduce_add(ulong x);
+float   __overload sub_group_reduce_add(float x);
+int     __overload sub_group_reduce_min(int   x);
+uint    __overload sub_group_reduce_min(uint  x);
+long    __overload sub_group_reduce_min(long  x);
+ulong   __overload sub_group_reduce_min(ulong x);
+float   __overload sub_group_reduce_min(float x);
+int     __overload sub_group_reduce_max(int   x);
+uint    __overload sub_group_reduce_max(uint  x);
+long    __overload sub_group_reduce_max(long  x);
+ulong   __overload sub_group_reduce_max(ulong x);
+float   __overload sub_group_reduce_max(float x);
 
-int     __attribute__((overloadable)) sub_group_scan_exclusive_add(int   x);
-uint    __attribute__((overloadable)) sub_group_scan_exclusive_add(uint  x);
-long    __attribute__((overloadable)) sub_group_scan_exclusive_add(long  x);
-ulong   __attribute__((overloadable)) sub_group_scan_exclusive_add(ulong x);
-float   __attribute__((overloadable)) sub_group_scan_exclusive_add(float x);
-int     __attribute__((overloadable)) sub_group_scan_exclusive_min(int   x);
-uint    __attribute__((overloadable)) sub_group_scan_exclusive_min(uint  x);
-long    __attribute__((overloadable)) sub_group_scan_exclusive_min(long  x);
-ulong   __attribute__((overloadable)) sub_group_scan_exclusive_min(ulong x);
-float   __attribute__((overloadable)) sub_group_scan_exclusive_min(float x);
-int     __attribute__((overloadable)) sub_group_scan_exclusive_max(int   x);
-uint    __attribute__((overloadable)) sub_group_scan_exclusive_max(uint  x);
-long    __attribute__((overloadable)) sub_group_scan_exclusive_max(long  x);
-ulong   __attribute__((overloadable)) sub_group_scan_exclusive_max(ulong x);
-float   __attribute__((overloadable)) sub_group_scan_exclusive_max(float x);
+int     __overload sub_group_scan_exclusive_add(int   x);
+uint    __overload sub_group_scan_exclusive_add(uint  x);
+long    __overload sub_group_scan_exclusive_add(long  x);
+ulong   __overload sub_group_scan_exclusive_add(ulong x);
+float   __overload sub_group_scan_exclusive_add(float x);
+int     __overload sub_group_scan_exclusive_min(int   x);
+uint    __overload sub_group_scan_exclusive_min(uint  x);
+long    __overload sub_group_scan_exclusive_min(long  x);
+ulong   __overload sub_group_scan_exclusive_min(ulong x);
+float   __overload sub_group_scan_exclusive_min(float x);
+int     __overload sub_group_scan_exclusive_max(int   x);
+uint    __overload sub_group_scan_exclusive_max(uint  x);
+long    __overload sub_group_scan_exclusive_max(long  x);
+ulong   __overload sub_group_scan_exclusive_max(ulong x);
+float   __overload sub_group_scan_exclusive_max(float x);
 
-int     __attribute__((overloadable)) sub_group_scan_inclusive_add(int   x);
-uint    __attribute__((overloadable)) sub_group_scan_inclusive_add(uint  x);
-long    __attribute__((overloadable)) sub_group_scan_inclusive_add(long  x);
-ulong   __attribute__((overloadable)) sub_group_scan_inclusive_add(ulong x);
-float   __attribute__((overloadable)) sub_group_scan_inclusive_add(float x);
-int     __attribute__((overloadable)) sub_group_scan_inclusive_min(int   x);
-uint    __attribute__((overloadable)) sub_group_scan_inclusive_min(uint  x);
-long    __attribute__((overloadable)) sub_group_scan_inclusive_min(long  x);
-ulong   __attribute__((overloadable)) sub_group_scan_inclusive_min(ulong x);
-float   __attribute__((overloadable)) sub_group_scan_inclusive_min(float x);
-int     __attribute__((overloadable)) sub_group_scan_inclusive_max(int   x);
-uint    __attribute__((overloadable)) sub_group_scan_inclusive_max(uint  x);
-long    __attribute__((overloadable)) sub_group_scan_inclusive_max(long  x);
-ulong   __attribute__((overloadable)) sub_group_scan_inclusive_max(ulong x);
-float   __attribute__((overloadable)) sub_group_scan_inclusive_max(float x);
+int     __overload sub_group_scan_inclusive_add(int   x);
+uint    __overload sub_group_scan_inclusive_add(uint  x);
+long    __overload sub_group_scan_inclusive_add(long  x);
+ulong   __overload sub_group_scan_inclusive_add(ulong x);
+float   __overload sub_group_scan_inclusive_add(float x);
+int     __overload sub_group_scan_inclusive_min(int   x);
+uint    __overload sub_group_scan_inclusive_min(uint  x);
+long    __overload sub_group_scan_inclusive_min(long  x);
+ulong   __overload sub_group_scan_inclusive_min(ulong x);
+float   __overload sub_group_scan_inclusive_min(float x);
+int     __overload sub_group_scan_inclusive_max(int   x);
+uint    __overload sub_group_scan_inclusive_max(uint  x);
+long    __overload sub_group_scan_inclusive_max(long  x);
+ulong   __overload sub_group_scan_inclusive_max(ulong x);
+float   __overload sub_group_scan_inclusive_max(float x);
 
 #ifdef cl_khr_fp16
-half    __attribute__((overloadable)) sub_group_broadcast(half x, uint sub_group_local_id);
-half    __attribute__((overloadable)) sub_group_reduce_add(half x);
-half    __attribute__((overloadable)) sub_group_reduce_min(half x);
-half    __attribute__((overloadable)) sub_group_reduce_max(half x);
-half    __attribute__((overloadable)) sub_group_scan_exclusive_add(half x);
-half    __attribute__((overloadable)) sub_group_scan_exclusive_min(half x);
-half    __attribute__((overloadable)) sub_group_scan_exclusive_max(half x);
-half    __attribute__((overloadable)) sub_group_scan_inclusive_add(half x);
-half    __attribute__((overloadable)) sub_group_scan_inclusive_min(half x);
-half    __attribute__((overloadable)) sub_group_scan_inclusive_max(half x);
+half    __overload sub_group_broadcast(half x, uint sub_group_local_id);
+half    __overload sub_group_reduce_add(half x);
+half    __overload sub_group_reduce_min(half x);
+half    __overload sub_group_reduce_max(half x);
+half    __overload sub_group_scan_exclusive_add(half x);
+half    __overload sub_group_scan_exclusive_min(half x);
+half    __overload sub_group_scan_exclusive_max(half x);
+half    __overload sub_group_scan_inclusive_add(half x);
+half    __overload sub_group_scan_inclusive_min(half x);
+half    __overload sub_group_scan_inclusive_max(half x);
 #endif //cl_khr_fp16
 
 #ifdef cl_khr_fp64
-double  __attribute__((overloadable)) sub_group_broadcast(double x, uint sub_group_local_id);
-double  __attribute__((overloadable)) sub_group_reduce_add(double x);
-double  __attribute__((overloadable)) sub_group_reduce_min(double x);
-double  __attribute__((overloadable)) sub_group_reduce_max(double x);
-double  __attribute__((overloadable)) sub_group_scan_exclusive_add(double x);
-double  __attribute__((overloadable)) sub_group_scan_exclusive_min(double x);
-double  __attribute__((overloadable)) sub_group_scan_exclusive_max(double x);
-double  __attribute__((overloadable)) sub_group_scan_inclusive_add(double x);
-double  __attribute__((overloadable)) sub_group_scan_inclusive_min(double x);
-double  __attribute__((overloadable)) sub_group_scan_inclusive_max(double x);
+double  __overload sub_group_broadcast(double x, uint sub_group_local_id);
+double  __overload sub_group_reduce_add(double x);
+double  __overload sub_group_reduce_min(double x);
+double  __overload sub_group_reduce_max(double x);
+double  __overload sub_group_scan_exclusive_add(double x);
+double  __overload sub_group_scan_exclusive_min(double x);
+double  __overload sub_group_scan_exclusive_max(double x);
+double  __overload sub_group_scan_inclusive_add(double x);
+double  __overload sub_group_scan_inclusive_min(double x);
+double  __overload sub_group_scan_inclusive_max(double x);
 #endif //cl_khr_fp64
 
 #endif //cl_khr_subgroups cl_intel_subgroups
@@ -17277,7 +17279,7 @@ double  __attribute__((overloadable)) sub_group_scan_inclusive_max(double x);
  * in the description above are undefined.
  */
 
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float lod);
+float4 __overload read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float lod);
 
 /**
  * Use the coordinate (x) to do an element lookup in
@@ -17319,8 +17321,8 @@ float4 __attribute__((overloadable)) read_imagef(read_only image1d_t image, samp
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float lod);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float lod);
+int4 __overload read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float lod);
+uint4 __overload read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float lod);
 
 /**
  * Use the coordinate (coord.y) to index into the
@@ -17354,7 +17356,7 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image1d_t image, samp
  */
 
 // 1D image arrays
-float4 __attribute__((overloadable)) read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+float4 __overload read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
 
 /**
  * Use the coordinate (coord.y) to index into the
@@ -17399,8 +17401,8 @@ float4 __attribute__((overloadable)) read_imagef(read_only image1d_array_t image
 
 //1D image arrays
 
-int4 __attribute__((overloadable)) read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
-uint4 __attribute__((overloadable)) read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+int4 __overload read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+uint4 __overload read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
 
 /**
  * Use the coordinate (coord.xy) to do an element lookup in
@@ -17431,7 +17433,7 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image1d_array_t image
  * in the description above are undefined.
  */
 
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
+float4 __overload read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
 
 /**
  * Use the coordinate (coord.xy) to do an element lookup in
@@ -17473,8 +17475,8 @@ float4 __attribute__((overloadable)) read_imagef(read_only image2d_t image, samp
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
+int4 __overload read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
+uint4 __overload read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
 
 /**
  * Use the coordinate (cood.xy) to do an element
@@ -17504,7 +17506,7 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image2d_t image, samp
  * with image_channel_data_type values not specified
  * in the description above are undefined.
  */
-float __attribute__((overloadable)) read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord, float lod);
+float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord, float lod);
 
 /**
  * Use the coordinate (coord.z) and the mip-level
@@ -17538,7 +17540,7 @@ float __attribute__((overloadable)) read_imagef(read_only image2d_depth_t image,
  */
 
 // 2D image arrays
-float4 __attribute__((overloadable)) read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+float4 __overload read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
 
 /**
  * Use the coordinate (coord.z) and the mip-level
@@ -17583,8 +17585,8 @@ float4 __attribute__((overloadable)) read_imagef(read_only image2d_array_t image
  */
 
 //2D image arrays
-int4 __attribute__((overloadable)) read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
-uint4 __attribute__((overloadable)) read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+int4 __overload read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+uint4 __overload read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
 
 /**
  * Use the coordinate (coord.z) and the mip-level
@@ -17618,7 +17620,7 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image2d_array_t image
  */
 
 // 2D depth image arrays
-float __attribute__((overloadable)) read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord, float lod);
+float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord, float lod);
 
 /**
  * Use the coordinate (coord.x, coord.y, coord.z) to do
@@ -17650,7 +17652,7 @@ float __attribute__((overloadable)) read_imagef(read_only image2d_array_depth_t 
  * in the description are undefined.
  */
 
-float4 __attribute__((overloadable)) read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
+float4 __overload read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
 
 /**
  * Use the coordinate (coord.x, coord.y, coord.z) to do
@@ -17693,8 +17695,8 @@ float4 __attribute__((overloadable)) read_imagef(read_only image3d_t image, samp
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable)) read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
-uint4 __attribute__((overloadable)) read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
+int4 __overload read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
+uint4 __overload read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
 
 /**
  * Read Image support for mipmaps using gradients for
@@ -17732,7 +17734,7 @@ uint4 __attribute__((overloadable)) read_imageui(read_only image3d_t image, samp
  * in the description above are undefined.
  */
 
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float gradientX,
             float gradientY);
 
@@ -17777,10 +17779,10 @@ read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float gra
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float gradientX,
             float gradientY);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float gradientX,
              float gradientY);
 
@@ -17817,7 +17819,7 @@ read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float gr
  */
 
 // 1D image arrays
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
             float gradientX, float gradientY);
 
@@ -17865,10 +17867,10 @@ read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coo
 
 // 1D image arrays
 
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
             float gradientX, float gradientY);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
              float gradientX, float gradientY);
 
@@ -17902,7 +17904,7 @@ read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 co
  * in the description above are undefined.
  */
 
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX,
             float2 gradientY);
 
@@ -17947,10 +17949,10 @@ read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float2 g
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX,
             float2 gradientY);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX,
              float2 gradientY);
 
@@ -17984,7 +17986,7 @@ read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float2 
  * in the description above are undefined.
  */
 
-float __attribute__((overloadable))
+float __overload
 read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord,
             float2 gradientX, float2 gradientY);
 
@@ -18021,7 +18023,7 @@ read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord,
   */
 
 // 2D image arrays
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
             float2 gradientX, float2 gradientY);
 
@@ -18069,10 +18071,10 @@ read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coo
  */
 
 // 2D image arrays
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
             float2 gradientX, float2 gradientY);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
              float2 gradientX, float2 gradientY);
 
@@ -18109,7 +18111,7 @@ read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 co
  */
 
 // 2D depth image arrays
-float __attribute__((overloadable))
+float __overload
 read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord,
             float2 gradientX, float2 gradientY);
 
@@ -18144,7 +18146,7 @@ read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coo
  * in the description are undefined.
  */
 
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX,
             float4 gradientY);
 
@@ -18190,10 +18192,10 @@ read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float4 g
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX,
             float4 gradientY);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX,
              float4 gradientY);
 
@@ -18230,7 +18232,7 @@ read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float4 
   * in the description above are undefined.
   */
 
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float lod);
 
 /**
@@ -18273,9 +18275,9 @@ read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float lod
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float lod);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float lod);
 
 /**
@@ -18310,7 +18312,7 @@ read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float lo
  */
 
 // 1D image arrays
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
             float lod);
 
@@ -18357,10 +18359,10 @@ read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coo
 
 // 1D image arrays
 
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
             float lod);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
              float lod);
 
@@ -18393,7 +18395,7 @@ read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 co
  * in the description above are undefined.
  */
 
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
 
 /**
@@ -18436,9 +18438,9 @@ read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float lo
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
 
 /**
@@ -18470,7 +18472,7 @@ read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float l
  * in the description above are undefined.
  */
 
-float __attribute__((overloadable))
+float __overload
 read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord, float lod);
 
 /**
@@ -18505,7 +18507,7 @@ read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord, fl
   */
 
 // 2D image arrays
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
             float lod);
 
@@ -18552,10 +18554,10 @@ read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coo
  */
 
 // 2D image arrays
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
             float lod);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
              float lod);
 
@@ -18592,7 +18594,7 @@ read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 co
  */
 
 // 2D depth image arrays
-float __attribute__((overloadable))
+float __overload
 read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord,
             float lod);
 
@@ -18627,7 +18629,7 @@ read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coo
  * in the description are undefined.
  */
 
-float4 __attribute__((overloadable))
+float4 __overload
 read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
 
 /**
@@ -18672,9 +18674,9 @@ read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float lo
  * otherwise the values returned are undefined.
  */
 
-int4 __attribute__((overloadable))
+int4 __overload
 read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
-uint4 __attribute__((overloadable))
+uint4 __overload
 read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
 
 // Write Image Funtions
@@ -18718,19 +18720,19 @@ read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float l
  * values that are not in the range (0 ... image width -
  * 1), respectively, is undefined.
  */
-void __attribute__((overloadable))
+void __overload
 write_imagef(write_only image1d_t image, int coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(write_only image1d_t image, int coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(write_only image1d_t image, int coord, int lod, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable))
+void __overload
 write_imagef(read_write image1d_t image, int coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(read_write image1d_t image, int coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(read_write image1d_t image, int coord, int lod, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -18774,19 +18776,19 @@ write_imageui(read_write image1d_t image, int coord, int lod, uint4 color);
  */
 
 // 1D image arrays writes with mipmap support
-void __attribute__((overloadable))
+void __overload
 write_imagef(write_only image1d_array_t image_array, int2 coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(write_only image1d_array_t image_array, int2 coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(write_only image1d_array_t image_array, int2 coord, int lod, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable))
+void __overload
 write_imagef(read_write image1d_array_t image_array, int2 coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(read_write image1d_array_t image_array, int2 coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(read_write image1d_array_t image_array, int2 coord, int lod, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -18829,19 +18831,19 @@ write_imageui(read_write image1d_array_t image_array, int2 coord, int lod, uint4
  * values that are not in the range (0 ... image width -
  * 1, 0 ... image height - 1), respectively, is undefined.
  */
-void __attribute__((overloadable))
+void __overload
 write_imagef(write_only image2d_t image, int2 coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(write_only image2d_t image, int2 coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(write_only image2d_t image, int2 coord, int lod, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable))
+void __overload
 write_imagef(read_write image2d_t image, int2 coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(read_write image2d_t image, int2 coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(read_write image2d_t image, int2 coord, int lod, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -18885,19 +18887,19 @@ write_imageui(read_write image2d_t image, int2 coord, int lod, uint4 color);
  */
 
 // 2D image arrays
-void __attribute__((overloadable))
+void __overload
 write_imagef(write_only image2d_array_t image_array, int4 coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(write_only image2d_array_t image_array, int4 coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(write_only image2d_array_t image_array, int4 coord, int lod, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable))
+void __overload
 write_imagef(read_write image2d_array_t image_array, int4 coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(read_write image2d_array_t image_array, int4 coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(read_write image2d_array_t image_array, int4 coord, int lod, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -18939,15 +18941,15 @@ write_imageui(read_write image2d_array_t image_array, int4 coord, int lod, uint4
  * values that are not in the range (0 ... image width -
  * 1), respectively, is undefined.
  */
-void __attribute__((overloadable))
+void __overload
 write_imagef(write_only image2d_depth_t image, int2 coord, int lod, float color);
-void __attribute__((overloadable))
+void __overload
 write_imagef(write_only image2d_array_depth_t image, int4 coord, int lod, float color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable))
+void __overload
 write_imagef(read_write image2d_depth_t image, int2 coord, int lod, float color);
-void __attribute__((overloadable))
+void __overload
 write_imagef(read_write image2d_array_depth_t image, int4 coord, int lod, float color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -18990,19 +18992,19 @@ write_imagef(read_write image2d_array_depth_t image, int4 coord, int lod, float 
  * values that are not in the range (0 ... image width -
  * 1, 0 ... image height - 1), respectively, is undefined.
  */
-void __attribute__((overloadable))
+void __overload
 write_imagef(write_only image3d_t image, int4 coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(write_only image3d_t image, int4 coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(write_only image3d_t image, int4 coord, int lod, uint4 color);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __attribute__((overloadable))
+void __overload
 write_imagef(read_write image3d_t image, int4 coord, int lod, float4 color);
-void __attribute__((overloadable))
+void __overload
 write_imagei(read_write image3d_t image, int4 coord, int lod, int4 color);
-void __attribute__((overloadable))
+void __overload
 write_imageui(read_write image3d_t image, int4 coord, int lod, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
@@ -19010,27 +19012,27 @@ write_imageui(read_write image3d_t image, int4 coord, int lod, uint4 color);
  * Return the image miplevels.
  */
 
-int __attribute__((overloadable)) get_image_num_mip_levels(read_only image1d_t image);
-int __attribute__((overloadable)) get_image_num_mip_levels(read_only image2d_t image);
-int __attribute__((overloadable)) get_image_num_mip_levels(read_only image3d_t image);
+int __overload get_image_num_mip_levels(read_only image1d_t image);
+int __overload get_image_num_mip_levels(read_only image2d_t image);
+int __overload get_image_num_mip_levels(read_only image3d_t image);
 
-int __attribute__((overloadable)) get_image_num_mip_levels(write_only image1d_t image);
-int __attribute__((overloadable)) get_image_num_mip_levels(write_only image2d_t image);
-int __attribute__((overloadable)) get_image_num_mip_levels(write_only image3d_t image);
+int __overload get_image_num_mip_levels(write_only image1d_t image);
+int __overload get_image_num_mip_levels(write_only image2d_t image);
+int __overload get_image_num_mip_levels(write_only image3d_t image);
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __attribute__((overloadable)) get_image_num_mip_levels(read_write image1d_t image);
-int __attribute__((overloadable)) get_image_num_mip_levels(read_write image2d_t image);
-int __attribute__((overloadable)) get_image_num_mip_levels(read_write image3d_t image);
+int __overload get_image_num_mip_levels(read_write image1d_t image);
+int __overload get_image_num_mip_levels(read_write image2d_t image);
+int __overload get_image_num_mip_levels(read_write image3d_t image);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-int __attribute__((overloadable))
+int __overload
 get_image_num_mip_levels(image1d_array_t image);
-int __attribute__((overloadable))
+int __overload
 get_image_num_mip_levels(image2d_array_t image);
-int __attribute__((overloadable))
+int __overload
 get_image_num_mip_levels(image2d_array_depth_t image);
-int __attribute__((overloadable))
+int __overload
 get_image_num_mip_levels(image2d_depth_t image);
 #endif //cl_khr_mipmap_image
 
