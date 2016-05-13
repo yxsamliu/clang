@@ -2087,7 +2087,7 @@ public:
     return true;
   }
 
-   void setSupportedOpenCLOpts() {
+   void setSupportedOpenCLOpts() override {
      auto &Opts = getSupportedOpenCLOpts();
      Opts.cl_clang_storage_class_specifiers = 1;
      Opts.cl_khr_gl_sharing = 1;
@@ -2731,7 +2731,7 @@ public:
     return true;
   }
 
-  void setSupportedOpenCLOpts() {
+  void setSupportedOpenCLOpts() override {
     getSupportedOpenCLOpts().setAll();
   }
 };
@@ -7877,7 +7877,7 @@ public:
     return CC_SpirFunction;
   }
 
-  void setSupportedOpenCLOpts() {
+  void setSupportedOpenCLOpts() override {
     // Assume all OpenCL extensions and optional core features are supported
     // for SPIR since it is a generic target.
     getSupportedOpenCLOpts().setAll();
