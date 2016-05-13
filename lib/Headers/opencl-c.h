@@ -270,7 +270,7 @@ typedef double double16 __attribute__((ext_vector_type(16)));
 #define LONG_MAX  0x7fffffffffffffffL
 #define LONG_MIN  (-0x7fffffffffffffffL-1)
 
-// Explicit conversions
+// OpenCL v1.1/1.2/2.0 s6.2.3 - Explicit conversions
 
 char __const_func convert_char_rte(char);
 char __const_func convert_char_sat_rte(char);
@@ -6572,7 +6572,7 @@ half16 __const_func convert_half16_rtz(double16);
 #endif // cl_khr_fp16
 
 /**
- * OpenCL as_type operators
+ * OpenCL v1.1/1.2/2.0 s6.2.4.2 - as_type operators
  * Reinterprets a data type as another data type of the same size
  */
 char __const_func as_char(char);
@@ -7348,7 +7348,7 @@ double4 __const_func as_double4(half16);
 #endif //cl_khr_fp64
 #endif //cl_khr_fp16
 
-// Function qualifiers (section 6.7)
+// OpenCL v1.1 s6.9, v1.2/2.0 s6.10 - Function qualifiers
 
 #define __kernel_exec(X, typen) __kernel \
 	__attribute__((work_group_size_hint(X, 1, 1))) \
@@ -7358,7 +7358,7 @@ double4 __const_func as_double4(half16);
 	__attribute__((work_group_size_hint(X, 1, 1))) \
 	__attribute__((vec_type_hint(typen)))
 
-// OpenCL v1.2 s6.12.1, v2.0 s6.13.1 - Work-item Functions
+// OpenCL v1.1 s6.11.1, v1.2 s6.12.1, v2.0 s6.13.1 - Work-item Functions
 
 /**
  * Returns the number of dimensions in use. This is the
@@ -7449,7 +7449,7 @@ size_t __attribute__((overloadable)) get_global_linear_id(void);
 size_t __attribute__((overloadable)) get_local_linear_id(void);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-// OpenCL v1.2 s6.12.2, v2.0 s6.13.2 - Math functions
+// OpenCL v1.1 s6.11.2, v1.2 s6.12.2, v2.0 s6.13.2 - Math functions
 
 /**
  * Arc cosine function.
@@ -7764,7 +7764,7 @@ half16 __const_func cbrt(half16);
 #endif //cl_khr_fp16
 
 /**
- * Round to integral value using the round to +ve
+ * Round to integral value using the round to positive
  * infinity rounding mode.
  */
 float __const_func ceil(float);
@@ -7791,8 +7791,7 @@ half16 __const_func ceil(half16);
 #endif //cl_khr_fp16
 
 /**
- * Returns x with its sign changed to match the sign of
- * y.
+ * Returns x with its sign changed to match the sign of y.
  */
 float __const_func copysign(float x, float y);
 float2 __const_func copysign(float2 x, float2 y);
@@ -7949,7 +7948,7 @@ half16 __const_func erf(half16);
 #endif //cl_khr_fp16
 
 /**
- * Compute the base- e exponential of x.
+ * Compute the base e exponential of x.
  */
 float __const_func exp(float x);
 float2 __const_func exp(float2 x);
@@ -10070,7 +10069,7 @@ double8 __const_func native_tan(double8 x);
 double16 __const_func native_tan(double16 x);
 #endif //cl_khr_fp64
 
-// OpenCL v1.2 s6.12.3, v2.0 s6.13.3 - Integer Functions
+// OpenCL v1.1 s6.11.3, v1.2 s6.12.3, v2.0 s6.13.3 - Integer Functions
 
 /**
  * Returns | x |.
@@ -11154,7 +11153,7 @@ uint8 __const_func mul24(uint8 x, uint8 y);
 int16 __const_func mul24(int16 x, int16 y);
 uint16 __const_func mul24(uint16 x, uint16 y);
 
-// OpenCL v1.2 s6.12.4, v2.0 s6.13.4 - Common Functions
+// OpenCL v1.1 s6.11.4, v1.2 s6.12.4, v2.0 s6.13.4 - Common Functions
 
 /**
  * Returns fmin(fmax(x, minval), maxval).
@@ -11502,7 +11501,7 @@ half8 __const_func sign(half8 x);
 half16 __const_func sign(half16 x);
 #endif //cl_khr_fp16
 
-// OpenCL v1.2 s6.12.5, v2.0 s6.13.5 - Geometric Functions
+// OpenCL v1.1 s6.11.5, v1.2 s6.12.5, v2.0 s6.13.5 - Geometric Functions
 
 /**
  * Returns the cross product of p0.xyz and p1.xyz. The
@@ -11663,7 +11662,7 @@ half3 __const_func fast_normalize(half3 p);
 half4 __const_func fast_normalize(half4 p);
 #endif //cl_khr_fp16
 
-// OpenCL v1.2 s6.12.6, v2.0 s6.13.6 - Relational Functions
+// OpenCL v1.1 s6.11.6, v1.2 s6.12.6, v2.0 s6.13.6 - Relational Functions
 
 /**
  * intn isequal (floatn x, floatn y)
@@ -12639,7 +12638,7 @@ half8 __const_func select(half8 a, half8 b, ushort8 c);
 half16 __const_func select(half16 a, half16 b, ushort16 c);
 #endif //cl_khr_fp16
 
-// OpenCL v1.2 s6.12.7, v2.0 s6.13.7 - Vector Data Load and Store Functions
+// OpenCL v1.1 s6.11.7, v1.2 s6.12.7, v2.0 s6.13.7 - Vector Data Load and Store Functions
 
 /**
  * Return sizeof (gentypen) bytes of data read
@@ -13880,7 +13879,7 @@ void __attribute__((overloadable)) vstorea_half16_rtn(double16 data,size_t offse
 #endif //cl_khr_fp64
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-// OpenCL v1.2 s6.12.8, v2.0 s6.13.8 - Synchronization Functions
+// OpenCL v1.1 s6.11.8, v1.2 s6.12.8, v2.0 s6.13.8 - Synchronization Functions
 
 // Flag type and values for barrier, mem_fence, read_mem_fence, write_mem_fence
 typedef uint cl_mem_fence_flags;
@@ -13953,7 +13952,7 @@ void __attribute__((overloadable)) work_group_barrier(cl_mem_fence_flags flags, 
 void __attribute__((overloadable)) work_group_barrier(cl_mem_fence_flags flags);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-// OpenCL v1.2 s6.12.9 - Explicit Memory Fence Functions
+// OpenCL v1.1 s6.11.9, v1.2 s6.12.9 - Explicit Memory Fence Functions
 
 /**
  * Orders loads and stores of a work-item
@@ -14007,7 +14006,7 @@ cl_mem_fence_flags __attribute__((overloadable)) get_fence(void *ptr);
 
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-// OpenCL v1.2 s6.12.10, v2.0 s6.13.10 - Async Copies from Global to Local Memory, Local to Global Memory, and Prefetch
+// OpenCL v1.1 s6.11.10, v1.2 s6.12.10, v2.0 s6.13.10 - Async Copies from Global to Local Memory, Local to Global Memory, and Prefetch
 
 /**
  * event_t async_work_group_copy (
@@ -14427,7 +14426,7 @@ void __attribute__((overloadable)) prefetch(const __global half8 *p, size_t num_
 void __attribute__((overloadable)) prefetch(const __global half16 *p, size_t num_elements);
 #endif // cl_khr_fp16
 
-// OpenCL v1.2 s6.12.11 - Atomic Functions
+// OpenCL v1.1 s6.11.1, v1.2 s6.12.11 - Atomic Functions
 
 #if defined(cl_khr_int64_base_atomics) && defined(cl_khr_int64_extended_atomics)
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
@@ -14736,8 +14735,9 @@ unsigned int __attribute__((overloadable)) atom_xor(volatile __local unsigned in
 // OpenCL v2.0 s6.13.11 - Atomics Functions
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+#ifndef ATOMIC_VAR_INIT
 #define ATOMIC_VAR_INIT(x) (x)
-
+#endif //ATOMIC_VAR_INIT
 #define ATOMIC_FLAG_INIT 0
 
 // enum values aligned with what clang uses in EmitAtomicExpr()
@@ -14967,7 +14967,7 @@ ATOMIC_FLAG_PROTOTYPE(clear, void)
 
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-// OpenCL v1.2 s6.12.12, v2.0 s6.13.12 - Miscellaneous Vector Functions
+// OpenCL v1.1 s6.11.12, v1.2 s6.12.12, v2.0 s6.13.12 - Miscellaneous Vector Functions
 
 /**
  * The shuffle and shuffle2 built-in functions construct
@@ -15463,7 +15463,7 @@ half16 __const_func shuffle2(half16 x, half16 y, ushort16 mask);
 
 int printf(__constant const char* st, ...);
 
-// OpenCL v1.2 s6.12.14, v2.0 s6.13.14 - Image Read and Write Functions
+// OpenCL v1.1 s6.11.3, v1.2 s6.12.14, v2.0 s6.13.14 - Image Read and Write Functions
 
 // These values need to match the runtime equivalent
 //
