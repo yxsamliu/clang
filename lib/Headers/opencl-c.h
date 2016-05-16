@@ -15943,481 +15943,6 @@ float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler,
 float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, int2 coord);
 #endif //cl_khr_depth_images
 
-/**
- * Use coord.xy to do an element lookup in the
- * 2D depth image identified by index coord.z in the 2D
- * image array specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 2D depth image arrays
-#ifdef cl_khr_depth_images
-float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord);
-float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, int4 coord);
-#endif //cl_khr_depth_images
-
-/**
-* Sampler-less Image Access
-*/
-
-float4 __overload read_imagef(read_only image1d_t image, int coord);
-int4 __overload read_imagei(read_only image1d_t image, int coord);
-uint4 __overload read_imageui(read_only image1d_t image, int coord);
-
-float4 __overload read_imagef(read_only image1d_buffer_t image, int coord);
-int4 __overload read_imagei(read_only image1d_buffer_t image, int coord);
-uint4 __overload read_imageui(read_only image1d_buffer_t image, int coord);
-
-float4 __overload read_imagef(read_only image1d_array_t image, int2 coord);
-int4 __overload read_imagei(read_only image1d_array_t image, int2 coord);
-uint4 __overload read_imageui(read_only image1d_array_t image, int2 coord);
-
-float4 __overload read_imagef(read_only image2d_t image, int2 coord);
-int4 __overload read_imagei(read_only image2d_t image, int2 coord);
-uint4 __overload read_imageui(read_only image2d_t image, int2 coord);
-
-float4 __overload read_imagef(read_only image2d_array_t image, int4 coord);
-int4 __overload read_imagei(read_only image2d_array_t image, int4 coord);
-uint4 __overload read_imageui(read_only image2d_array_t image, int4 coord);
-
-#ifdef cl_khr_depth_images
-float __overload read_imagef(read_only image2d_depth_t image, int2 coord);
-float __overload read_imagef(read_only image2d_array_depth_t image, int4 coord);
-#endif //cl_khr_depth_images
-
-float4 __overload read_imagef(read_only image3d_t image, int4 coord);
-int4 __overload read_imagei(read_only image3d_t image, int4 coord);
-uint4 __overload read_imageui(read_only image3d_t image, int4 coord);
-
-// Image Read Functions Returning half4 Type
-#ifdef cl_khr_fp16
-half4 __overload read_imageh(read_only image1d_t image, sampler_t sampler, int coord);
-half4 __overload read_imageh(read_only image1d_t image, sampler_t sampler, float coord);
-half4 __overload read_imageh(read_only image1d_array_t image, sampler_t sampler, int2 coord);
-half4 __overload read_imageh(read_only image1d_array_t image, sampler_t sampler, float2 coord);
-half4 __overload read_imageh(read_only image2d_t image, sampler_t sampler, int2 coord);
-half4 __overload read_imageh(read_only image2d_t image, sampler_t sampler, float2 coord);
-half4 __overload read_imageh(read_only image3d_t image, sampler_t sampler, int4 coord);
-half4 __overload read_imageh(read_only image3d_t image, sampler_t sampler, float4 coord);
-half4 __overload read_imageh(read_only image2d_array_t image, sampler_t sampler, int4 coord);
-half4 __overload read_imageh(read_only image2d_array_t image, sampler_t sampler, float4 coord);
-half4 __overload read_imageh(read_only image1d_t image, int coord);
-half4 __overload read_imageh(read_only image2d_t image, int2 coord);
-half4 __overload read_imageh(read_only image3d_t image, int4 coord);
-half4 __overload read_imageh(read_only image1d_array_t image, int2 coord);
-half4 __overload read_imageh(read_only image2d_array_t image, int4 coord);
-half4 __overload read_imageh(read_only image1d_buffer_t image, int coord);
-#endif //cl_khr_fp16
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float4 __overload read_imagef(read_write image1d_t image, int coord);
-int4 __overload read_imagei(read_write image1d_t image, int coord);
-uint4 __overload read_imageui(read_write image1d_t image, int coord);
-
-float4 __overload read_imagef(read_write image1d_buffer_t image, int coord);
-int4 __overload read_imagei(read_write image1d_buffer_t image, int coord);
-uint4 __overload read_imageui(read_write image1d_buffer_t image, int coord);
-
-float4 __overload read_imagef(read_write image1d_array_t image, int2 coord);
-int4 __overload read_imagei(read_write image1d_array_t image, int2 coord);
-uint4 __overload read_imageui(read_write image1d_array_t image, int2 coord);
-
-float4 __overload read_imagef(read_write image2d_t image, int2 coord);
-int4 __overload read_imagei(read_write image2d_t image, int2 coord);
-uint4 __overload read_imageui(read_write image2d_t image, int2 coord);
-
-float4 __overload read_imagef(read_write image2d_array_t image, int4 coord);
-int4 __overload read_imagei(read_write image2d_array_t image, int4 coord);
-uint4 __overload read_imageui(read_write image2d_array_t image, int4 coord);
-
-#ifdef cl_khr_depth_images
-float __overload read_imagef(read_write image2d_depth_t image, int2 coord);
-float __overload read_imagef(read_write image2d_array_depth_t image, int4 coord);
-#endif //cl_khr_depth_images
-
-float4 __overload read_imagef(read_write image3d_t image, int4 coord);
-int4 __overload read_imagei(read_write image3d_t image, int4 coord);
-uint4 __overload read_imageui(read_write image3d_t image, int4 coord);
-
-// Image Read Functions Returning half4 Type
-#ifdef cl_khr_fp16
-half4 __overload read_imageh(read_write image1d_t image, int coord);
-half4 __overload read_imageh(read_write image2d_t image, int2 coord);
-half4 __overload read_imageh(read_write image3d_t image, int4 coord);
-half4 __overload read_imageh(read_write image1d_array_t image, int2 coord);
-half4 __overload read_imageh(read_write image2d_array_t image, int4 coord);
-half4 __overload read_imageh(read_write image1d_buffer_t image, int coord);
-#endif //cl_khr_fp16
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x, y) in the 2D image object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
- * and must be in the range 0 ... image width - 1, and 0
- * ... image height - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x, y) coordinate
- * values that are not in the range (0 ... image width -
- * 1, 0 ... image height - 1), respectively, is undefined.
- */
-void __overload write_imagef(write_only image2d_t image, int2 coord, float4 color);
-void __overload write_imagei(write_only image2d_t image, int2 coord, int4 color);
-void __overload write_imageui(write_only image2d_t image, int2 coord, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image2d_t image, int2 coord, float4 color);
-void __overload write_imagei(read_write image2d_t image, int2 coord, int4 color);
-void __overload write_imageui(read_write image2d_t image, int2 coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (coord.x, coord.y) in the 2D image object specified by index
- * (coord.z) of the 2D image array object image_array.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * (coord.x, coord.y) are considered to be unnormalized
- * coordinates and must be in the range 0 ... image width
- * - 1. write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-
-//2D image arrays
-void __overload write_imagef(write_only image2d_array_t image_array, int4 coord, float4 color);
-void __overload write_imagei(write_only image2d_array_t image_array, int4 coord, int4 color);
-void __overload write_imageui(write_only image2d_array_t image_array, int4 coord, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image2d_array_t image_array, int4 coord, float4 color);
-void __overload write_imagei(read_write image2d_array_t image_array, int4 coord, int4 color);
-void __overload write_imageui(read_write image2d_array_t image_array, int4 coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x) in the 1D image object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x is considered to be unnormalized coordinates
- * and must be in the range 0 ... image width - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-void __overload write_imagef(write_only image1d_t image, int coord, float4 color);
-void __overload write_imagei(write_only image1d_t image, int coord, int4 color);
-void __overload write_imageui(write_only image1d_t image, int coord, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image1d_t image, int coord, float4 color);
-void __overload write_imagei(read_write image1d_t image, int coord, int4 color);
-void __overload write_imageui(read_write image1d_t image, int coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x) in the 1D image buffer object specified by image
- * buffer. Appropriate data format conversion to the
- * specified image buffer format is done before writing
- * the color value.x is considered to be unnormalized
- * coordinates and must be in the range 0 ... image width - 1.
- * write_imagef can only be used with image buffer objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image buffer objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image buffer objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image buffer objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-void __overload write_imagef(write_only image1d_buffer_t image, int coord, float4 color);
-void __overload write_imagei(write_only image1d_buffer_t image, int coord, int4 color);
-void __overload write_imageui(write_only image1d_buffer_t image, int coord, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image1d_buffer_t image, int coord, float4 color);
-void __overload write_imagei(read_write image1d_buffer_t image, int coord, int4 color);
-void __overload write_imageui(read_write image1d_buffer_t image, int coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (coord.x) in the 1D image object specified by index
- * (coord.y) of the 1D image array object image_array.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x is considered to be unnormalized coordinates
- * and must be in the range 0 ... image width - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-
-//1D image arrays
-void __overload write_imagef(write_only image1d_array_t image_array, int2 coord, float4 color);
-void __overload write_imagei(write_only image1d_array_t image_array, int2 coord, int4 color);
-void __overload write_imageui(write_only image1d_array_t image_array, int2 coord, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image1d_array_t image_array, int2 coord, float4 color);
-void __overload write_imagei(read_write image1d_array_t image_array, int2 coord, int4 color);
-void __overload write_imageui(read_write image1d_array_t image_array, int2 coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x, y, z) in the 3D image object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
- * and must be in the range 0 ... image width - 1, and 0
- * ... image height - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x, y) coordinate
- * values that are not in the range (0 ... image width -
- * 1, 0 ... image height - 1), respectively, is undefined.
- */
-void __overload write_imagef(write_only image3d_t image, int4 coord, float4 color);
-void __overload write_imagei(write_only image3d_t image, int4 coord, int4 color);
-void __overload write_imageui(write_only image3d_t image, int4 coord, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image3d_t image, int4 coord, float4 color);
-void __overload write_imagei(read_write image3d_t image, int4 coord, int4 color);
-void __overload write_imageui(read_write image3d_t image, int4 coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (coord.x, coord.y) in the 2D image object specified by
- * image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * (coord.x, coord.y) are considered to be unnormalized
- * coordinates and must be in the range 0 ... image width
- * - 1. write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-#ifdef cl_khr_depth_images
-void __overload write_imagef(write_only image2d_depth_t image, int2 coord, float color);
-void __overload write_imagef(write_only image2d_array_depth_t image, int4 coord, float color);
-#endif //cl_khr_depth_images
-
-// Image Write Functions Returning half4 Type
-#ifdef cl_khr_fp16
-void __overload write_imageh(write_only image1d_t image, int coord, half4 color);
-void __overload write_imageh(write_only image2d_t image, int2 coord, half4 color);
-void __overload write_imageh(write_only image3d_t image, int4 coord, half4 color);
-void __overload write_imageh(write_only image1d_array_t image, int2 coord, half4 color);
-void __overload write_imageh(write_only image2d_array_t image, int4 coord, half4 color);
-void __overload write_imageh(write_only image1d_buffer_t image, int coord, half4 color);
-#endif //cl_khr_fp16
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-#ifdef cl_khr_depth_images
-void __overload write_imagef(read_write image2d_depth_t image, int2 coord, float color);
-void __overload write_imagef(read_write image2d_array_depth_t image, int4 coord, float color);
-#endif //cl_khr_depth_images
-
-// Image Write Functions Returning half4 Type
-#ifdef cl_khr_fp16
-void __overload write_imageh(read_write image1d_t image, int coord, half4 color);
-void __overload write_imageh(read_write image2d_t image, int2 coord, half4 color);
-void __overload write_imageh(read_write image3d_t image, int4 coord, half4 color);
-void __overload write_imageh(read_write image1d_array_t image, int2 coord, half4 color);
-void __overload write_imageh(read_write image2d_array_t image, int4 coord, half4 color);
-void __overload write_imageh(read_write image1d_buffer_t image, int coord, half4 color);
-#endif //cl_khr_fp16
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
 #if defined(cl_khr_gl_msaa_sharing)
 /**
  * Use the coordinate (cood.xy) and sample to do an
@@ -16568,724 +16093,42 @@ float __overload read_imagef(read_write image2d_array_msaa_depth_t image, int4 c
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 #endif
 
-// Note: In OpenCL v1.0/1.1/1.2, image argument of image query builtin functions does not have
-// access qualifier, which by default assume read_only access qualifier. Image query builtin
-// functions with write_only image argument should also be declared.
-
 /**
- * Return the image width in pixels.
- *
-  */
-int __const_func get_image_width(read_only image1d_t image);
-int __const_func get_image_width(read_only image1d_buffer_t image);
-int __const_func get_image_width(read_only image2d_t image);
-int __const_func get_image_width(read_only image3d_t image);
-int __const_func get_image_width(read_only image1d_array_t image);
-int __const_func get_image_width(read_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_width(read_only image2d_depth_t image);
-int __const_func get_image_width(read_only image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_width(read_only image2d_msaa_t image);
-int __const_func get_image_width(read_only image2d_msaa_depth_t image);
-int __const_func get_image_width(read_only image2d_array_msaa_t image);
-int __const_func get_image_width(read_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-int __const_func get_image_width(write_only image1d_t image);
-int __const_func get_image_width(write_only image1d_buffer_t image);
-int __const_func get_image_width(write_only image2d_t image);
-int __const_func get_image_width(write_only image3d_t image);
-int __const_func get_image_width(write_only image1d_array_t image);
-int __const_func get_image_width(write_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_width(write_only image2d_depth_t image);
-int __const_func get_image_width(write_only image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_width(write_only image2d_msaa_t image);
-int __const_func get_image_width(write_only image2d_msaa_depth_t image);
-int __const_func get_image_width(write_only image2d_array_msaa_t image);
-int __const_func get_image_width(write_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __const_func get_image_width(read_write image1d_t image);
-int __const_func get_image_width(read_write image1d_buffer_t image);
-int __const_func get_image_width(read_write image2d_t image);
-int __const_func get_image_width(read_write image3d_t image);
-int __const_func get_image_width(read_write image1d_array_t image);
-int __const_func get_image_width(read_write image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_width(read_write image2d_depth_t image);
-int __const_func get_image_width(read_write image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_width(read_write image2d_msaa_t image);
-int __const_func get_image_width(read_write image2d_msaa_depth_t image);
-int __const_func get_image_width(read_write image2d_array_msaa_t image);
-int __const_func get_image_width(read_write image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Return the image height in pixels.
- */
-int __const_func get_image_height(read_only image2d_t image);
-int __const_func get_image_height(read_only image3d_t image);
-int __const_func get_image_height(read_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_height(read_only image2d_depth_t image);
-int __const_func get_image_height(read_only image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_height(read_only image2d_msaa_t image);
-int __const_func get_image_height(read_only image2d_msaa_depth_t image);
-int __const_func get_image_height(read_only image2d_array_msaa_t image);
-int __const_func get_image_height(read_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-int __const_func get_image_height(write_only image2d_t image);
-int __const_func get_image_height(write_only image3d_t image);
-int __const_func get_image_height(write_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_height(write_only image2d_depth_t image);
-int __const_func get_image_height(write_only image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_height(write_only image2d_msaa_t image);
-int __const_func get_image_height(write_only image2d_msaa_depth_t image);
-int __const_func get_image_height(write_only image2d_array_msaa_t image);
-int __const_func get_image_height(write_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __const_func get_image_height(read_write image2d_t image);
-int __const_func get_image_height(read_write image3d_t image);
-int __const_func get_image_height(read_write image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_height(read_write image2d_depth_t image);
-int __const_func get_image_height(read_write image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_height(read_write image2d_msaa_t image);
-int __const_func get_image_height(read_write image2d_msaa_depth_t image);
-int __const_func get_image_height(read_write image2d_array_msaa_t image);
-int __const_func get_image_height(read_write image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Return the image depth in pixels.
- */
-int __const_func get_image_depth(read_only image3d_t image);
-
-int __const_func get_image_depth(write_only image3d_t image);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __const_func get_image_depth(read_write image3d_t image);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Return the channel data type. Valid values are:
- * CLK_SNORM_INT8
- * CLK_SNORM_INT16
- * CLK_UNORM_INT8
- * CLK_UNORM_INT16
- * CLK_UNORM_SHORT_565
- * CLK_UNORM_SHORT_555
- * CLK_UNORM_SHORT_101010
- * CLK_SIGNED_INT8
- * CLK_SIGNED_INT16
- * CLK_SIGNED_INT32
- * CLK_UNSIGNED_INT8
- * CLK_UNSIGNED_INT16
- * CLK_UNSIGNED_INT32
- * CLK_HALF_FLOAT
- * CLK_FLOAT
+ * Use coord.xy to do an element lookup in the
+ * 2D depth image identified by index coord.z in the 2D
+ * image array specified by image.
+ * read_imagef returns floating-point values in the
+ * range [0.0 ... 1.0] for image objects created with
+ * image_channel_data_type set to one of the predefined
+ * packed formats or CL_UNORM_INT8, or
+ * CL_UNORM_INT16.
+ * read_imagef returns floating-point values in the
+ * range [-1.0 ... 1.0] for image objects created with
+ * image_channel_data_type set to CL_SNORM_INT8,
+ * or CL_SNORM_INT16.
+ * read_imagef returns floating-point values for image
+ * objects created with image_channel_data_type set to
+ * CL_HALF_FLOAT or CL_FLOAT.
+ * The read_imagef calls that take integer coordinates
+ * must use a sampler with filter mode set to
+ * CLK_FILTER_NEAREST, normalized coordinates set
+ * to CLK_NORMALIZED_COORDS_FALSE and
+ * addressing mode set to
+ * CLK_ADDRESS_CLAMP_TO_EDGE,
+ * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
+ * otherwise the values returned are undefined.
+ * Values returned by read_imagef for image objects
+ * with image_channel_data_type values not specified
+ * in the description above are undefined.
  */
 
-//
-// Channel Datatype.
-//
-#define CLK_SNORM_INT8        0x10D0
-#define CLK_SNORM_INT16       0x10D1
-#define CLK_UNORM_INT8        0x10D2
-#define CLK_UNORM_INT16       0x10D3
-#define CLK_UNORM_SHORT_565   0x10D4
-#define CLK_UNORM_SHORT_555   0x10D5
-#define CLK_UNORM_INT_101010  0x10D6
-#define CLK_SIGNED_INT8       0x10D7
-#define CLK_SIGNED_INT16      0x10D8
-#define CLK_SIGNED_INT32      0x10D9
-#define CLK_UNSIGNED_INT8     0x10DA
-#define CLK_UNSIGNED_INT16    0x10DB
-#define CLK_UNSIGNED_INT32    0x10DC
-#define CLK_HALF_FLOAT        0x10DD
-#define CLK_FLOAT             0x10DE
-#define CLK_UNORM_INT24       0x10DF
-
-int __const_func get_image_channel_data_type(read_only image1d_t image);
-int __const_func get_image_channel_data_type(read_only image1d_buffer_t image);
-int __const_func get_image_channel_data_type(read_only image2d_t image);
-int __const_func get_image_channel_data_type(read_only image3d_t image);
-int __const_func get_image_channel_data_type(read_only image1d_array_t image);
-int __const_func get_image_channel_data_type(read_only image2d_array_t image);
+// 2D depth image arrays
 #ifdef cl_khr_depth_images
-int __const_func get_image_channel_data_type(read_only image2d_depth_t image);
-int __const_func get_image_channel_data_type(read_only image2d_array_depth_t image);
+float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord);
+float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, int4 coord);
 #endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_channel_data_type(read_only image2d_msaa_t image);
-int __const_func get_image_channel_data_type(read_only image2d_msaa_depth_t image);
-int __const_func get_image_channel_data_type(read_only image2d_array_msaa_t image);
-int __const_func get_image_channel_data_type(read_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-int __const_func get_image_channel_data_type(write_only image1d_t image);
-int __const_func get_image_channel_data_type(write_only image1d_buffer_t image);
-int __const_func get_image_channel_data_type(write_only image2d_t image);
-int __const_func get_image_channel_data_type(write_only image3d_t image);
-int __const_func get_image_channel_data_type(write_only image1d_array_t image);
-int __const_func get_image_channel_data_type(write_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_channel_data_type(write_only image2d_depth_t image);
-int __const_func get_image_channel_data_type(write_only image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_channel_data_type(write_only image2d_msaa_t image);
-int __const_func get_image_channel_data_type(write_only image2d_msaa_depth_t image);
-int __const_func get_image_channel_data_type(write_only image2d_array_msaa_t image);
-int __const_func get_image_channel_data_type(write_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __const_func get_image_channel_data_type(read_write image1d_t image);
-int __const_func get_image_channel_data_type(read_write image1d_buffer_t image);
-int __const_func get_image_channel_data_type(read_write image2d_t image);
-int __const_func get_image_channel_data_type(read_write image3d_t image);
-int __const_func get_image_channel_data_type(read_write image1d_array_t image);
-int __const_func get_image_channel_data_type(read_write image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_channel_data_type(read_write image2d_depth_t image);
-int __const_func get_image_channel_data_type(read_write image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_channel_data_type(read_write image2d_msaa_t image);
-int __const_func get_image_channel_data_type(read_write image2d_msaa_depth_t image);
-int __const_func get_image_channel_data_type(read_write image2d_array_msaa_t image);
-int __const_func get_image_channel_data_type(read_write image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Return the image channel order. Valid values are:
- * CLK_A
- * CLK_R
- * CLK_Rx
- * CLK_RG
- * CLK_RGx
- * CLK_RA
- * CLK_RGB
- * CLK_RGBx
- * CLK_RGBA
- * CLK_ARGB
- * CLK_BGRA
- * CLK_INTENSITY
- * CLK_LUMINANCE
- */
-// Channel order, numbering must be aligned with cl_channel_order in cl.h
-//
-#define CLK_R         0x10B0
-#define CLK_A         0x10B1
-#define CLK_RG        0x10B2
-#define CLK_RA        0x10B3
-#define CLK_RGB       0x10B4
-#define CLK_RGBA      0x10B5
-#define CLK_BGRA      0x10B6
-#define CLK_ARGB      0x10B7
-#define CLK_INTENSITY 0x10B8
-#define CLK_LUMINANCE 0x10B9
-#define CLK_Rx                0x10BA
-#define CLK_RGx               0x10BB
-#define CLK_RGBx              0x10BC
-#define CLK_DEPTH             0x10BD
-#define CLK_DEPTH_STENCIL     0x10BE
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-#define CLK_sRGB              0x10BF
-#define CLK_sRGBA             0x10C1
-#define CLK_sRGBx             0x10C0
-#define CLK_sBGRA             0x10C2
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-int __const_func get_image_channel_order(read_only image1d_t image);
-int __const_func get_image_channel_order(read_only image1d_buffer_t image);
-int __const_func get_image_channel_order(read_only image2d_t image);
-int __const_func get_image_channel_order(read_only image3d_t image);
-int __const_func get_image_channel_order(read_only image1d_array_t image);
-int __const_func get_image_channel_order(read_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_channel_order(read_only image2d_depth_t image);
-int __const_func get_image_channel_order(read_only image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_channel_order(read_only image2d_msaa_t image);
-int __const_func get_image_channel_order(read_only image2d_msaa_depth_t image);
-int __const_func get_image_channel_order(read_only image2d_array_msaa_t image);
-int __const_func get_image_channel_order(read_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-int __const_func get_image_channel_order(write_only image1d_t image);
-int __const_func get_image_channel_order(write_only image1d_buffer_t image);
-int __const_func get_image_channel_order(write_only image2d_t image);
-int __const_func get_image_channel_order(write_only image3d_t image);
-int __const_func get_image_channel_order(write_only image1d_array_t image);
-int __const_func get_image_channel_order(write_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_channel_order(write_only image2d_depth_t image);
-int __const_func get_image_channel_order(write_only image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_channel_order(write_only image2d_msaa_t image);
-int __const_func get_image_channel_order(write_only image2d_msaa_depth_t image);
-int __const_func get_image_channel_order(write_only image2d_array_msaa_t image);
-int __const_func get_image_channel_order(write_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __const_func get_image_channel_order(read_write image1d_t image);
-int __const_func get_image_channel_order(read_write image1d_buffer_t image);
-int __const_func get_image_channel_order(read_write image2d_t image);
-int __const_func get_image_channel_order(read_write image3d_t image);
-int __const_func get_image_channel_order(read_write image1d_array_t image);
-int __const_func get_image_channel_order(read_write image2d_array_t image);
-#ifdef cl_khr_depth_images
-int __const_func get_image_channel_order(read_write image2d_depth_t image);
-int __const_func get_image_channel_order(read_write image2d_array_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int __const_func get_image_channel_order(read_write image2d_msaa_t image);
-int __const_func get_image_channel_order(read_write image2d_msaa_depth_t image);
-int __const_func get_image_channel_order(read_write image2d_array_msaa_t image);
-int __const_func get_image_channel_order(read_write image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Return the 2D image width and height as an int2
- * type. The width is returned in the x component, and
- * the height in the y component.
- */
-int2 __const_func get_image_dim(read_only image2d_t image);
-int2 __const_func get_image_dim(read_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int2 __const_func get_image_dim(read_only image2d_array_depth_t image);
-int2 __const_func get_image_dim(read_only image2d_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int2 __const_func get_image_dim(read_only image2d_msaa_t image);
-int2 __const_func get_image_dim(read_only image2d_msaa_depth_t image);
-int2 __const_func get_image_dim(read_only image2d_array_msaa_t image);
-int2 __const_func get_image_dim(read_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-int2 __const_func get_image_dim(write_only image2d_t image);
-int2 __const_func get_image_dim(write_only image2d_array_t image);
-#ifdef cl_khr_depth_images
-int2 __const_func get_image_dim(write_only image2d_array_depth_t image);
-int2 __const_func get_image_dim(write_only image2d_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int2 __const_func get_image_dim(write_only image2d_msaa_t image);
-int2 __const_func get_image_dim(write_only image2d_msaa_depth_t image);
-int2 __const_func get_image_dim(write_only image2d_array_msaa_t image);
-int2 __const_func get_image_dim(write_only image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int2 __const_func get_image_dim(read_write image2d_t image);
-int2 __const_func get_image_dim(read_write image2d_array_t image);
-#ifdef cl_khr_depth_images
-int2 __const_func get_image_dim(read_write image2d_array_depth_t image);
-int2 __const_func get_image_dim(read_write image2d_depth_t image);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-int2 __const_func get_image_dim(read_write image2d_msaa_t image);
-int2 __const_func get_image_dim(read_write image2d_msaa_depth_t image);
-int2 __const_func get_image_dim(read_write image2d_array_msaa_t image);
-int2 __const_func get_image_dim(read_write image2d_array_msaa_depth_t image);
-#endif //cl_khr_gl_msaa_sharing
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Return the 3D image width, height, and depth as an
- * int4 type. The width is returned in the x
- * component, height in the y component, depth in the z
- * component and the w component is 0.
- */
-int4 __const_func get_image_dim(read_only image3d_t image);
-int4 __const_func get_image_dim(write_only image3d_t image);
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int4 __const_func get_image_dim(read_write image3d_t image);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Return the image array size.
- */
-
-size_t __const_func get_image_array_size(read_only image1d_array_t image_array);
-size_t __const_func get_image_array_size(read_only image2d_array_t image_array);
-#ifdef cl_khr_depth_images
-size_t __const_func get_image_array_size(read_only image2d_array_depth_t image_array);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-size_t __const_func get_image_array_size(read_only image2d_array_msaa_t image_array);
-size_t __const_func get_image_array_size(read_only image2d_array_msaa_depth_t image_array);
-#endif //cl_khr_gl_msaa_sharing
-
-size_t __const_func get_image_array_size(write_only image1d_array_t image_array);
-size_t __const_func get_image_array_size(write_only image2d_array_t image_array);
-#ifdef cl_khr_depth_images
-size_t __const_func get_image_array_size(write_only image2d_array_depth_t image_array);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-size_t __const_func get_image_array_size(write_only image2d_array_msaa_t image_array);
-size_t __const_func get_image_array_size(write_only image2d_array_msaa_depth_t image_array);
-#endif //cl_khr_gl_msaa_sharing
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-size_t __const_func get_image_array_size(read_write image1d_array_t image_array);
-size_t __const_func get_image_array_size(read_write image2d_array_t image_array);
-#ifdef cl_khr_depth_images
-size_t __const_func get_image_array_size(read_write image2d_array_depth_t image_array);
-#endif //cl_khr_depth_images
-#if defined(cl_khr_gl_msaa_sharing)
-size_t __const_func get_image_array_size(read_write image2d_array_msaa_t image_array);
-size_t __const_func get_image_array_size(read_write image2d_array_msaa_depth_t image_array);
-#endif //cl_khr_gl_msaa_sharing
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
-* Return the number of samples associated with image
-*/
-#if defined(cl_khr_gl_msaa_sharing)
-int __overload get_image_num_samples(read_only image2d_msaa_t image);
-int __overload get_image_num_samples(read_only image2d_msaa_depth_t image);
-int __overload get_image_num_samples(read_only image2d_array_msaa_depth_t image);
-int __overload get_image_num_samples(read_only image2d_array_msaa_t image);
-int __overload get_image_num_samples(read_only image2d_array_msaa_depth_t image);
-
-int __overload get_image_num_samples(write_only image2d_msaa_t image);
-int __overload get_image_num_samples(write_only image2d_msaa_depth_t image);
-int __overload get_image_num_samples(write_only image2d_array_msaa_depth_t image);
-int __overload get_image_num_samples(write_only image2d_array_msaa_t image);
-int __overload get_image_num_samples(write_only image2d_array_msaa_depth_t image);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __overload get_image_num_samples(read_write image2d_msaa_t image);
-int __overload get_image_num_samples(read_write image2d_msaa_depth_t image);
-int __overload get_image_num_samples(read_write image2d_array_msaa_depth_t image);
-int __overload get_image_num_samples(read_write image2d_array_msaa_t image);
-int __overload get_image_num_samples(read_write image2d_array_msaa_depth_t image);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-#endif
-
-// OpenCL v2.0 s6.13.15 - Work-group Functions
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-int __overload work_group_all(int predicate);
-int __overload work_group_any(int predicate);
-
-#ifdef cl_khr_fp16
-half __overload work_group_broadcast(half a, size_t local_id);
-half __overload work_group_broadcast(half a, size_t x, size_t y);
-half __overload work_group_broadcast(half a, size_t x, size_t y, size_t z);
-#endif
-int __overload work_group_broadcast(int a, size_t local_id);
-int __overload work_group_broadcast(int a, size_t x, size_t y);
-int __overload work_group_broadcast(int a, size_t x, size_t y, size_t z);
-uint __overload work_group_broadcast(uint a, size_t local_id);
-uint __overload work_group_broadcast(uint a, size_t x, size_t y);
-uint __overload work_group_broadcast(uint a, size_t x, size_t y, size_t z);
-long __overload work_group_broadcast(long a, size_t local_id);
-long __overload work_group_broadcast(long a, size_t x, size_t y);
-long __overload work_group_broadcast(long a, size_t x, size_t y, size_t z);
-ulong __overload work_group_broadcast(ulong a, size_t local_id);
-ulong __overload work_group_broadcast(ulong a, size_t x, size_t y);
-ulong __overload work_group_broadcast(ulong a, size_t x, size_t y, size_t z);
-float __overload work_group_broadcast(float a, size_t local_id);
-float __overload work_group_broadcast(float a, size_t x, size_t y);
-float __overload work_group_broadcast(float a, size_t x, size_t y, size_t z);
-#ifdef cl_khr_fp64
-double __overload work_group_broadcast(double a, size_t local_id);
-double __overload work_group_broadcast(double a, size_t x, size_t y);
-double __overload work_group_broadcast(double a, size_t x, size_t y, size_t z);
-#endif //cl_khr_fp64
-
-#ifdef cl_khr_fp16
-half __overload work_group_reduce_add(half x);
-half __overload work_group_reduce_min(half x);
-half __overload work_group_reduce_max(half x);
-half __overload work_group_scan_exclusive_add(half x);
-half __overload work_group_scan_exclusive_min(half x);
-half __overload work_group_scan_exclusive_max(half x);
-half __overload work_group_scan_inclusive_add(half x);
-half __overload work_group_scan_inclusive_min(half x);
-half __overload work_group_scan_inclusive_max(half x);
-#endif
-int __overload work_group_reduce_add(int x);
-int __overload work_group_reduce_min(int x);
-int __overload work_group_reduce_max(int x);
-int __overload work_group_scan_exclusive_add(int x);
-int __overload work_group_scan_exclusive_min(int x);
-int __overload work_group_scan_exclusive_max(int x);
-int __overload work_group_scan_inclusive_add(int x);
-int __overload work_group_scan_inclusive_min(int x);
-int __overload work_group_scan_inclusive_max(int x);
-uint __overload work_group_reduce_add(uint x);
-uint __overload work_group_reduce_min(uint x);
-uint __overload work_group_reduce_max(uint x);
-uint __overload work_group_scan_exclusive_add(uint x);
-uint __overload work_group_scan_exclusive_min(uint x);
-uint __overload work_group_scan_exclusive_max(uint x);
-uint __overload work_group_scan_inclusive_add(uint x);
-uint __overload work_group_scan_inclusive_min(uint x);
-uint __overload work_group_scan_inclusive_max(uint x);
-long __overload work_group_reduce_add(long x);
-long __overload work_group_reduce_min(long x);
-long __overload work_group_reduce_max(long x);
-long __overload work_group_scan_exclusive_add(long x);
-long __overload work_group_scan_exclusive_min(long x);
-long __overload work_group_scan_exclusive_max(long x);
-long __overload work_group_scan_inclusive_add(long x);
-long __overload work_group_scan_inclusive_min(long x);
-long __overload work_group_scan_inclusive_max(long x);
-ulong __overload work_group_reduce_add(ulong x);
-ulong __overload work_group_reduce_min(ulong x);
-ulong __overload work_group_reduce_max(ulong x);
-ulong __overload work_group_scan_exclusive_add(ulong x);
-ulong __overload work_group_scan_exclusive_min(ulong x);
-ulong __overload work_group_scan_exclusive_max(ulong x);
-ulong __overload work_group_scan_inclusive_add(ulong x);
-ulong __overload work_group_scan_inclusive_min(ulong x);
-ulong __overload work_group_scan_inclusive_max(ulong x);
-float __overload work_group_reduce_add(float x);
-float __overload work_group_reduce_min(float x);
-float __overload work_group_reduce_max(float x);
-float __overload work_group_scan_exclusive_add(float x);
-float __overload work_group_scan_exclusive_min(float x);
-float __overload work_group_scan_exclusive_max(float x);
-float __overload work_group_scan_inclusive_add(float x);
-float __overload work_group_scan_inclusive_min(float x);
-float __overload work_group_scan_inclusive_max(float x);
-#ifdef cl_khr_fp64
-double __overload work_group_reduce_add(double x);
-double __overload work_group_reduce_min(double x);
-double __overload work_group_reduce_max(double x);
-double __overload work_group_scan_exclusive_add(double x);
-double __overload work_group_scan_exclusive_min(double x);
-double __overload work_group_scan_exclusive_max(double x);
-double __overload work_group_scan_inclusive_add(double x);
-double __overload work_group_scan_inclusive_min(double x);
-double __overload work_group_scan_inclusive_max(double x);
-#endif //cl_khr_fp64
-
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-// OpenCL v2.0 s6.13.16 - Pipe Functions
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-#define PIPE_RESERVE_ID_VALID_BIT (1U << 30)
-#define CLK_NULL_RESERVE_ID (__builtin_astype(((void*)(__SIZE_MAX__)), reserve_id_t))
-bool __overload is_valid_reserve_id(reserve_id_t reserve_id);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-
-// OpenCL v2.0 s6.13.17 - Enqueue Kernels
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-#define CL_COMPLETE                                 0x0
-#define CL_RUNNING                                  0x1
-#define CL_SUBMITTED                                0x2
-#define CL_QUEUED                                   0x3
-
-#define CLK_SUCCESS                                 0
-#define CLK_ENQUEUE_FAILURE                         -101
-#define CLK_INVALID_QUEUE                           -102
-#define CLK_INVALID_NDRANGE                         -160
-#define CLK_INVALID_EVENT_WAIT_LIST                 -57
-#define CLK_DEVICE_QUEUE_FULL                       -161
-#define CLK_INVALID_ARG_SIZE                        -51
-#define CLK_EVENT_ALLOCATION_FAILURE                -100
-#define CLK_OUT_OF_RESOURCES                        -5
-
-#define CLK_NULL_QUEUE                              0
-#define CLK_NULL_EVENT (__builtin_astype(((void*)(__SIZE_MAX__)), clk_event_t))
-
-// execution model related definitions
-#define CLK_ENQUEUE_FLAGS_NO_WAIT                   0x0
-#define CLK_ENQUEUE_FLAGS_WAIT_KERNEL               0x1
-#define CLK_ENQUEUE_FLAGS_WAIT_WORK_GROUP           0x2
-
-typedef int kernel_enqueue_flags_t;
-typedef int clk_profiling_info;
-
-// Profiling info name (see capture_event_profiling_info)
-#define CLK_PROFILING_COMMAND_EXEC_TIME 0x1
-
-#define MAX_WORK_DIM        3
-
-// ToDo: Remove definition of ndrange_t in Clang as an opaque type and add back
-// the following ndrange_t definition.
-#if 0
-typedef struct {
-    unsigned int workDimension;
-    size_t globalWorkOffset[MAX_WORK_DIM];
-    size_t globalWorkSize[MAX_WORK_DIM];
-    size_t localWorkSize[MAX_WORK_DIM];
-} ndrange_t;
-#endif
-
-ndrange_t __overload ndrange_1D(size_t);
-ndrange_t __overload ndrange_1D(size_t, size_t);
-ndrange_t __overload ndrange_1D(size_t, size_t, size_t);
-
-ndrange_t __overload ndrange_2D(const size_t[2]);
-ndrange_t __overload ndrange_2D(const size_t[2], const size_t[2]);
-ndrange_t __overload ndrange_2D(const size_t[2], const size_t[2], const size_t[2]);
-
-ndrange_t __overload ndrange_3D(const size_t[3]);
-ndrange_t __overload ndrange_3D(const size_t[3], const size_t[3]);
-ndrange_t __overload ndrange_3D(const size_t[3], const size_t[3], const size_t[3]);
-
-// ToDo: Add these functions as Clang builtins since they eed a special check of parameters to block.
-uint __overload get_kernel_work_group_size(void (^block)(void));
-uint __overload get_kernel_work_group_size(void (^block)(local void *, ...));
-uint __overload get_kernel_preferred_work_group_size_multiple(void (^block)(void));
-uint __overload get_kernel_preferred_work_group_size_multiple(void (^block)(local void *, ...));
-
-int __overload enqueue_marker(queue_t, uint, const __private clk_event_t*, __private clk_event_t*);
-
-void __overload retain_event(clk_event_t);
-
-void __overload release_event(clk_event_t);
-
-clk_event_t create_user_event(void);
-
-void __overload set_user_event_status(clk_event_t e, int state);
-
-bool is_valid_event (clk_event_t event);
-
-void __overload capture_event_profiling_info(clk_event_t, clk_profiling_info, __global void* value);
-
-queue_t __overload get_default_queue(void);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-// OpenCL Extension v2.0 s9.17 - Sub-groups
-
-#if defined(cl_intel_subgroups) || defined(cl_khr_subgroups)
-// Shared Sub Group Functions
-uint    __overload get_sub_group_size(void);
-uint    __overload get_max_sub_group_size(void);
-uint    __overload get_num_sub_groups(void);
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-uint    __overload get_enqueued_num_sub_groups(void);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-uint    __overload get_sub_group_id(void);
-uint    __overload get_sub_group_local_id(void);
-
-void    __overload sub_group_barrier(cl_mem_fence_flags flags);
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void    __overload sub_group_barrier(cl_mem_fence_flags flags, memory_scope scope);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-int     __overload sub_group_all(int predicate);
-int     __overload sub_group_any(int predicate);
-
-int     __overload sub_group_broadcast(int   x, uint sub_group_local_id);
-uint    __overload sub_group_broadcast(uint  x, uint sub_group_local_id);
-long    __overload sub_group_broadcast(long  x, uint sub_group_local_id);
-ulong   __overload sub_group_broadcast(ulong x, uint sub_group_local_id);
-float   __overload sub_group_broadcast(float x, uint sub_group_local_id);
-
-int     __overload sub_group_reduce_add(int   x);
-uint    __overload sub_group_reduce_add(uint  x);
-long    __overload sub_group_reduce_add(long  x);
-ulong   __overload sub_group_reduce_add(ulong x);
-float   __overload sub_group_reduce_add(float x);
-int     __overload sub_group_reduce_min(int   x);
-uint    __overload sub_group_reduce_min(uint  x);
-long    __overload sub_group_reduce_min(long  x);
-ulong   __overload sub_group_reduce_min(ulong x);
-float   __overload sub_group_reduce_min(float x);
-int     __overload sub_group_reduce_max(int   x);
-uint    __overload sub_group_reduce_max(uint  x);
-long    __overload sub_group_reduce_max(long  x);
-ulong   __overload sub_group_reduce_max(ulong x);
-float   __overload sub_group_reduce_max(float x);
-
-int     __overload sub_group_scan_exclusive_add(int   x);
-uint    __overload sub_group_scan_exclusive_add(uint  x);
-long    __overload sub_group_scan_exclusive_add(long  x);
-ulong   __overload sub_group_scan_exclusive_add(ulong x);
-float   __overload sub_group_scan_exclusive_add(float x);
-int     __overload sub_group_scan_exclusive_min(int   x);
-uint    __overload sub_group_scan_exclusive_min(uint  x);
-long    __overload sub_group_scan_exclusive_min(long  x);
-ulong   __overload sub_group_scan_exclusive_min(ulong x);
-float   __overload sub_group_scan_exclusive_min(float x);
-int     __overload sub_group_scan_exclusive_max(int   x);
-uint    __overload sub_group_scan_exclusive_max(uint  x);
-long    __overload sub_group_scan_exclusive_max(long  x);
-ulong   __overload sub_group_scan_exclusive_max(ulong x);
-float   __overload sub_group_scan_exclusive_max(float x);
-
-int     __overload sub_group_scan_inclusive_add(int   x);
-uint    __overload sub_group_scan_inclusive_add(uint  x);
-long    __overload sub_group_scan_inclusive_add(long  x);
-ulong   __overload sub_group_scan_inclusive_add(ulong x);
-float   __overload sub_group_scan_inclusive_add(float x);
-int     __overload sub_group_scan_inclusive_min(int   x);
-uint    __overload sub_group_scan_inclusive_min(uint  x);
-long    __overload sub_group_scan_inclusive_min(long  x);
-ulong   __overload sub_group_scan_inclusive_min(ulong x);
-float   __overload sub_group_scan_inclusive_min(float x);
-int     __overload sub_group_scan_inclusive_max(int   x);
-uint    __overload sub_group_scan_inclusive_max(uint  x);
-long    __overload sub_group_scan_inclusive_max(long  x);
-ulong   __overload sub_group_scan_inclusive_max(ulong x);
-float   __overload sub_group_scan_inclusive_max(float x);
-
-#ifdef cl_khr_fp16
-half    __overload sub_group_broadcast(half x, uint sub_group_local_id);
-half    __overload sub_group_reduce_add(half x);
-half    __overload sub_group_reduce_min(half x);
-half    __overload sub_group_reduce_max(half x);
-half    __overload sub_group_scan_exclusive_add(half x);
-half    __overload sub_group_scan_exclusive_min(half x);
-half    __overload sub_group_scan_exclusive_max(half x);
-half    __overload sub_group_scan_inclusive_add(half x);
-half    __overload sub_group_scan_inclusive_min(half x);
-half    __overload sub_group_scan_inclusive_max(half x);
-#endif //cl_khr_fp16
-
-#ifdef cl_khr_fp64
-double  __overload sub_group_broadcast(double x, uint sub_group_local_id);
-double  __overload sub_group_reduce_add(double x);
-double  __overload sub_group_reduce_min(double x);
-double  __overload sub_group_reduce_max(double x);
-double  __overload sub_group_scan_exclusive_add(double x);
-double  __overload sub_group_scan_exclusive_min(double x);
-double  __overload sub_group_scan_exclusive_max(double x);
-double  __overload sub_group_scan_inclusive_add(double x);
-double  __overload sub_group_scan_inclusive_min(double x);
-double  __overload sub_group_scan_inclusive_max(double x);
-#endif //cl_khr_fp64
-
-#endif //cl_khr_subgroups cl_intel_subgroups
 
 // OpenCL Extension v2.0 s9.18 - Mipmaps
-
 #ifdef cl_khr_mipmap_image
 /**
  * Use the coordinate (x) to do an element lookup in
@@ -18716,8 +17559,424 @@ read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float lo
 uint4 __overload
 read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
 
-// Write Image Funtions
+#endif //cl_khr_mipmap_image
 
+
+/**
+* Sampler-less Image Access
+*/
+
+float4 __overload read_imagef(read_only image1d_t image, int coord);
+int4 __overload read_imagei(read_only image1d_t image, int coord);
+uint4 __overload read_imageui(read_only image1d_t image, int coord);
+
+float4 __overload read_imagef(read_only image1d_buffer_t image, int coord);
+int4 __overload read_imagei(read_only image1d_buffer_t image, int coord);
+uint4 __overload read_imageui(read_only image1d_buffer_t image, int coord);
+
+float4 __overload read_imagef(read_only image1d_array_t image, int2 coord);
+int4 __overload read_imagei(read_only image1d_array_t image, int2 coord);
+uint4 __overload read_imageui(read_only image1d_array_t image, int2 coord);
+
+float4 __overload read_imagef(read_only image2d_t image, int2 coord);
+int4 __overload read_imagei(read_only image2d_t image, int2 coord);
+uint4 __overload read_imageui(read_only image2d_t image, int2 coord);
+
+float4 __overload read_imagef(read_only image2d_array_t image, int4 coord);
+int4 __overload read_imagei(read_only image2d_array_t image, int4 coord);
+uint4 __overload read_imageui(read_only image2d_array_t image, int4 coord);
+
+#ifdef cl_khr_depth_images
+float __overload read_imagef(read_only image2d_depth_t image, int2 coord);
+float __overload read_imagef(read_only image2d_array_depth_t image, int4 coord);
+#endif //cl_khr_depth_images
+
+float4 __overload read_imagef(read_only image3d_t image, int4 coord);
+int4 __overload read_imagei(read_only image3d_t image, int4 coord);
+uint4 __overload read_imageui(read_only image3d_t image, int4 coord);
+
+// Image Read Functions Returning half4 Type
+#ifdef cl_khr_fp16
+half4 __overload read_imageh(read_only image1d_t image, sampler_t sampler, int coord);
+half4 __overload read_imageh(read_only image1d_t image, sampler_t sampler, float coord);
+half4 __overload read_imageh(read_only image1d_array_t image, sampler_t sampler, int2 coord);
+half4 __overload read_imageh(read_only image1d_array_t image, sampler_t sampler, float2 coord);
+half4 __overload read_imageh(read_only image2d_t image, sampler_t sampler, int2 coord);
+half4 __overload read_imageh(read_only image2d_t image, sampler_t sampler, float2 coord);
+half4 __overload read_imageh(read_only image3d_t image, sampler_t sampler, int4 coord);
+half4 __overload read_imageh(read_only image3d_t image, sampler_t sampler, float4 coord);
+half4 __overload read_imageh(read_only image2d_array_t image, sampler_t sampler, int4 coord);
+half4 __overload read_imageh(read_only image2d_array_t image, sampler_t sampler, float4 coord);
+half4 __overload read_imageh(read_only image1d_t image, int coord);
+half4 __overload read_imageh(read_only image2d_t image, int2 coord);
+half4 __overload read_imageh(read_only image3d_t image, int4 coord);
+half4 __overload read_imageh(read_only image1d_array_t image, int2 coord);
+half4 __overload read_imageh(read_only image2d_array_t image, int4 coord);
+half4 __overload read_imageh(read_only image1d_buffer_t image, int coord);
+#endif //cl_khr_fp16
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+float4 __overload read_imagef(read_write image1d_t image, int coord);
+int4 __overload read_imagei(read_write image1d_t image, int coord);
+uint4 __overload read_imageui(read_write image1d_t image, int coord);
+
+float4 __overload read_imagef(read_write image1d_buffer_t image, int coord);
+int4 __overload read_imagei(read_write image1d_buffer_t image, int coord);
+uint4 __overload read_imageui(read_write image1d_buffer_t image, int coord);
+
+float4 __overload read_imagef(read_write image1d_array_t image, int2 coord);
+int4 __overload read_imagei(read_write image1d_array_t image, int2 coord);
+uint4 __overload read_imageui(read_write image1d_array_t image, int2 coord);
+
+float4 __overload read_imagef(read_write image2d_t image, int2 coord);
+int4 __overload read_imagei(read_write image2d_t image, int2 coord);
+uint4 __overload read_imageui(read_write image2d_t image, int2 coord);
+
+float4 __overload read_imagef(read_write image2d_array_t image, int4 coord);
+int4 __overload read_imagei(read_write image2d_array_t image, int4 coord);
+uint4 __overload read_imageui(read_write image2d_array_t image, int4 coord);
+
+#ifdef cl_khr_depth_images
+float __overload read_imagef(read_write image2d_depth_t image, int2 coord);
+float __overload read_imagef(read_write image2d_array_depth_t image, int4 coord);
+#endif //cl_khr_depth_images
+
+float4 __overload read_imagef(read_write image3d_t image, int4 coord);
+int4 __overload read_imagei(read_write image3d_t image, int4 coord);
+uint4 __overload read_imageui(read_write image3d_t image, int4 coord);
+
+// Image Read Functions Returning half4 Type
+#ifdef cl_khr_fp16
+half4 __overload read_imageh(read_write image1d_t image, int coord);
+half4 __overload read_imageh(read_write image2d_t image, int2 coord);
+half4 __overload read_imageh(read_write image3d_t image, int4 coord);
+half4 __overload read_imageh(read_write image1d_array_t image, int2 coord);
+half4 __overload read_imageh(read_write image2d_array_t image, int4 coord);
+half4 __overload read_imageh(read_write image1d_buffer_t image, int coord);
+#endif //cl_khr_fp16
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Write color value to location specified by coordinate
+ * (x, y) in the 2D image object specified by image.
+ * Appropriate data format conversion to the specified
+ * image format is done before writing the color value.
+ * x & y are considered to be unnormalized coordinates
+ * and must be in the range 0 ... image width - 1, and 0
+ * ... image height - 1.
+ * write_imagef can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the pre-defined packed formats or set to
+ * CL_SNORM_INT8, CL_UNORM_INT8,
+ * CL_SNORM_INT16, CL_UNORM_INT16,
+ * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
+ * format conversion will be done to convert channel
+ * data from a floating-point value to actual data format
+ * in which the channels are stored.
+ * write_imagei can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_SIGNED_INT8,
+ * CL_SIGNED_INT16 and
+ * CL_SIGNED_INT32.
+ * write_imageui can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_UNSIGNED_INT8,
+ * CL_UNSIGNED_INT16 and
+ * CL_UNSIGNED_INT32.
+ * The behavior of write_imagef, write_imagei and
+ * write_imageui for image objects created with
+ * image_channel_data_type values not specified in
+ * the description above or with (x, y) coordinate
+ * values that are not in the range (0 ... image width -
+ * 1, 0 ... image height - 1), respectively, is undefined.
+ */
+void __overload write_imagef(write_only image2d_t image, int2 coord, float4 color);
+void __overload write_imagei(write_only image2d_t image, int2 coord, int4 color);
+void __overload write_imageui(write_only image2d_t image, int2 coord, uint4 color);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(read_write image2d_t image, int2 coord, float4 color);
+void __overload write_imagei(read_write image2d_t image, int2 coord, int4 color);
+void __overload write_imageui(read_write image2d_t image, int2 coord, uint4 color);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Write color value to location specified by coordinate
+ * (coord.x, coord.y) in the 2D image object specified by index
+ * (coord.z) of the 2D image array object image_array.
+ * Appropriate data format conversion to the specified
+ * image format is done before writing the color value.
+ * (coord.x, coord.y) are considered to be unnormalized
+ * coordinates and must be in the range 0 ... image width
+ * - 1. write_imagef can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the pre-defined packed formats or set to
+ * CL_SNORM_INT8, CL_UNORM_INT8,
+ * CL_SNORM_INT16, CL_UNORM_INT16,
+ * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
+ * format conversion will be done to convert channel
+ * data from a floating-point value to actual data format
+ * in which the channels are stored.
+ * write_imagei can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_SIGNED_INT8,
+ * CL_SIGNED_INT16 and
+ * CL_SIGNED_INT32.
+ * write_imageui can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_UNSIGNED_INT8,
+ * CL_UNSIGNED_INT16 and
+ * CL_UNSIGNED_INT32.
+ * The behavior of write_imagef, write_imagei and
+ * write_imageui for image objects created with
+ * image_channel_data_type values not specified in
+ * the description above or with (x) coordinate
+ * values that are not in the range (0 ... image width -
+ * 1), respectively, is undefined.
+ */
+
+//2D image arrays
+void __overload write_imagef(write_only image2d_array_t image_array, int4 coord, float4 color);
+void __overload write_imagei(write_only image2d_array_t image_array, int4 coord, int4 color);
+void __overload write_imageui(write_only image2d_array_t image_array, int4 coord, uint4 color);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(read_write image2d_array_t image_array, int4 coord, float4 color);
+void __overload write_imagei(read_write image2d_array_t image_array, int4 coord, int4 color);
+void __overload write_imageui(read_write image2d_array_t image_array, int4 coord, uint4 color);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Write color value to location specified by coordinate
+ * (x) in the 1D image object specified by image.
+ * Appropriate data format conversion to the specified
+ * image format is done before writing the color value.
+ * x is considered to be unnormalized coordinates
+ * and must be in the range 0 ... image width - 1.
+ * write_imagef can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the pre-defined packed formats or set to
+ * CL_SNORM_INT8, CL_UNORM_INT8,
+ * CL_SNORM_INT16, CL_UNORM_INT16,
+ * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
+ * format conversion will be done to convert channel
+ * data from a floating-point value to actual data format
+ * in which the channels are stored.
+ * write_imagei can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_SIGNED_INT8,
+ * CL_SIGNED_INT16 and
+ * CL_SIGNED_INT32.
+ * write_imageui can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_UNSIGNED_INT8,
+ * CL_UNSIGNED_INT16 and
+ * CL_UNSIGNED_INT32.
+ * The behavior of write_imagef, write_imagei and
+ * write_imageui for image objects created with
+ * image_channel_data_type values not specified in
+ * the description above or with (x) coordinate
+ * values that are not in the range (0 ... image width -
+ * 1), respectively, is undefined.
+ */
+void __overload write_imagef(write_only image1d_t image, int coord, float4 color);
+void __overload write_imagei(write_only image1d_t image, int coord, int4 color);
+void __overload write_imageui(write_only image1d_t image, int coord, uint4 color);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(read_write image1d_t image, int coord, float4 color);
+void __overload write_imagei(read_write image1d_t image, int coord, int4 color);
+void __overload write_imageui(read_write image1d_t image, int coord, uint4 color);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Write color value to location specified by coordinate
+ * (x) in the 1D image buffer object specified by image
+ * buffer. Appropriate data format conversion to the
+ * specified image buffer format is done before writing
+ * the color value.x is considered to be unnormalized
+ * coordinates and must be in the range 0 ... image width - 1.
+ * write_imagef can only be used with image buffer objects
+ * created with image_channel_data_type set to one of
+ * the pre-defined packed formats or set to
+ * CL_SNORM_INT8, CL_UNORM_INT8,
+ * CL_SNORM_INT16, CL_UNORM_INT16,
+ * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
+ * format conversion will be done to convert channel
+ * data from a floating-point value to actual data format
+ * in which the channels are stored.
+ * write_imagei can only be used with image buffer objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_SIGNED_INT8,
+ * CL_SIGNED_INT16 and
+ * CL_SIGNED_INT32.
+ * write_imageui can only be used with image buffer objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_UNSIGNED_INT8,
+ * CL_UNSIGNED_INT16 and
+ * CL_UNSIGNED_INT32.
+ * The behavior of write_imagef, write_imagei and
+ * write_imageui for image buffer objects created with
+ * image_channel_data_type values not specified in
+ * the description above or with (x) coordinate
+ * values that are not in the range (0 ... image width -
+ * 1), respectively, is undefined.
+ */
+void __overload write_imagef(write_only image1d_buffer_t image, int coord, float4 color);
+void __overload write_imagei(write_only image1d_buffer_t image, int coord, int4 color);
+void __overload write_imageui(write_only image1d_buffer_t image, int coord, uint4 color);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(read_write image1d_buffer_t image, int coord, float4 color);
+void __overload write_imagei(read_write image1d_buffer_t image, int coord, int4 color);
+void __overload write_imageui(read_write image1d_buffer_t image, int coord, uint4 color);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Write color value to location specified by coordinate
+ * (coord.x) in the 1D image object specified by index
+ * (coord.y) of the 1D image array object image_array.
+ * Appropriate data format conversion to the specified
+ * image format is done before writing the color value.
+ * x is considered to be unnormalized coordinates
+ * and must be in the range 0 ... image width - 1.
+ * write_imagef can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the pre-defined packed formats or set to
+ * CL_SNORM_INT8, CL_UNORM_INT8,
+ * CL_SNORM_INT16, CL_UNORM_INT16,
+ * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
+ * format conversion will be done to convert channel
+ * data from a floating-point value to actual data format
+ * in which the channels are stored.
+ * write_imagei can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_SIGNED_INT8,
+ * CL_SIGNED_INT16 and
+ * CL_SIGNED_INT32.
+ * write_imageui can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_UNSIGNED_INT8,
+ * CL_UNSIGNED_INT16 and
+ * CL_UNSIGNED_INT32.
+ * The behavior of write_imagef, write_imagei and
+ * write_imageui for image objects created with
+ * image_channel_data_type values not specified in
+ * the description above or with (x) coordinate
+ * values that are not in the range (0 ... image width -
+ * 1), respectively, is undefined.
+ */
+
+//1D image arrays
+void __overload write_imagef(write_only image1d_array_t image_array, int2 coord, float4 color);
+void __overload write_imagei(write_only image1d_array_t image_array, int2 coord, int4 color);
+void __overload write_imageui(write_only image1d_array_t image_array, int2 coord, uint4 color);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(read_write image1d_array_t image_array, int2 coord, float4 color);
+void __overload write_imagei(read_write image1d_array_t image_array, int2 coord, int4 color);
+void __overload write_imageui(read_write image1d_array_t image_array, int2 coord, uint4 color);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Write color value to location specified by coordinate
+ * (x, y, z) in the 3D image object specified by image.
+ * Appropriate data format conversion to the specified
+ * image format is done before writing the color value.
+ * x & y are considered to be unnormalized coordinates
+ * and must be in the range 0 ... image width - 1, and 0
+ * ... image height - 1.
+ * write_imagef can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the pre-defined packed formats or set to
+ * CL_SNORM_INT8, CL_UNORM_INT8,
+ * CL_SNORM_INT16, CL_UNORM_INT16,
+ * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
+ * format conversion will be done to convert channel
+ * data from a floating-point value to actual data format
+ * in which the channels are stored.
+ * write_imagei can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_SIGNED_INT8,
+ * CL_SIGNED_INT16 and
+ * CL_SIGNED_INT32.
+ * write_imageui can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_UNSIGNED_INT8,
+ * CL_UNSIGNED_INT16 and
+ * CL_UNSIGNED_INT32.
+ * The behavior of write_imagef, write_imagei and
+ * write_imageui for image objects created with
+ * image_channel_data_type values not specified in
+ * the description above or with (x, y) coordinate
+ * values that are not in the range (0 ... image width -
+ * 1, 0 ... image height - 1), respectively, is undefined.
+ */
+void __overload write_imagef(write_only image3d_t image, int4 coord, float4 color);
+void __overload write_imagei(write_only image3d_t image, int4 coord, int4 color);
+void __overload write_imageui(write_only image3d_t image, int4 coord, uint4 color);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(read_write image3d_t image, int4 coord, float4 color);
+void __overload write_imagei(read_write image3d_t image, int4 coord, int4 color);
+void __overload write_imageui(read_write image3d_t image, int4 coord, uint4 color);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Write color value to location specified by coordinate
+ * (coord.x, coord.y) in the 2D image object specified by
+ * image.
+ * Appropriate data format conversion to the specified
+ * image format is done before writing the color value.
+ * (coord.x, coord.y) are considered to be unnormalized
+ * coordinates and must be in the range 0 ... image width
+ * - 1. write_imagef can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the pre-defined packed formats or set to
+ * CL_SNORM_INT8, CL_UNORM_INT8,
+ * CL_SNORM_INT16, CL_UNORM_INT16,
+ * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
+ * format conversion will be done to convert channel
+ * data from a floating-point value to actual data format
+ * in which the channels are stored.
+ * write_imagei can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_SIGNED_INT8,
+ * CL_SIGNED_INT16 and
+ * CL_SIGNED_INT32.
+ * write_imageui can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_UNSIGNED_INT8,
+ * CL_UNSIGNED_INT16 and
+ * CL_UNSIGNED_INT32.
+ * The behavior of write_imagef, write_imagei and
+ * write_imageui for image objects created with
+ * image_channel_data_type values not specified in
+ * the description above or with (x) coordinate
+ * values that are not in the range (0 ... image width -
+ * 1), respectively, is undefined.
+ */
+#ifdef cl_khr_depth_images
+void __overload write_imagef(write_only image2d_depth_t image, int2 coord, float color);
+void __overload write_imagef(write_only image2d_array_depth_t image, int4 coord, float color);
+#endif //cl_khr_depth_images
+
+// OpenCL Extension v2.0 s9.18 - Mipmaps
+#ifdef cl_khr_mipmap_image
 // 1D writes with mipmap support
 /**
  * Write color value to location specified by coordinate
@@ -19045,6 +18304,156 @@ void __overload
 write_imageui(read_write image3d_t image, int4 coord, int lod, uint4 color);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
+#endif //cl_khr_mipmap_image
+
+// Image Write Functions Returning half4 Type
+#ifdef cl_khr_fp16
+void __overload write_imageh(write_only image1d_t image, int coord, half4 color);
+void __overload write_imageh(write_only image2d_t image, int2 coord, half4 color);
+void __overload write_imageh(write_only image3d_t image, int4 coord, half4 color);
+void __overload write_imageh(write_only image1d_array_t image, int2 coord, half4 color);
+void __overload write_imageh(write_only image2d_array_t image, int4 coord, half4 color);
+void __overload write_imageh(write_only image1d_buffer_t image, int coord, half4 color);
+#endif //cl_khr_fp16
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+#ifdef cl_khr_depth_images
+void __overload write_imagef(read_write image2d_depth_t image, int2 coord, float color);
+void __overload write_imagef(read_write image2d_array_depth_t image, int4 coord, float color);
+#endif //cl_khr_depth_images
+
+// Image Write Functions Returning half4 Type
+#ifdef cl_khr_fp16
+void __overload write_imageh(read_write image1d_t image, int coord, half4 color);
+void __overload write_imageh(read_write image2d_t image, int2 coord, half4 color);
+void __overload write_imageh(read_write image3d_t image, int4 coord, half4 color);
+void __overload write_imageh(read_write image1d_array_t image, int2 coord, half4 color);
+void __overload write_imageh(read_write image2d_array_t image, int4 coord, half4 color);
+void __overload write_imageh(read_write image1d_buffer_t image, int coord, half4 color);
+#endif //cl_khr_fp16
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+// Note: In OpenCL v1.0/1.1/1.2, image argument of image query builtin functions does not have
+// access qualifier, which by default assume read_only access qualifier. Image query builtin
+// functions with write_only image argument should also be declared.
+
+/**
+ * Return the image width in pixels.
+ *
+  */
+int __const_func get_image_width(read_only image1d_t image);
+int __const_func get_image_width(read_only image1d_buffer_t image);
+int __const_func get_image_width(read_only image2d_t image);
+int __const_func get_image_width(read_only image3d_t image);
+int __const_func get_image_width(read_only image1d_array_t image);
+int __const_func get_image_width(read_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_width(read_only image2d_depth_t image);
+int __const_func get_image_width(read_only image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_width(read_only image2d_msaa_t image);
+int __const_func get_image_width(read_only image2d_msaa_depth_t image);
+int __const_func get_image_width(read_only image2d_array_msaa_t image);
+int __const_func get_image_width(read_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+int __const_func get_image_width(write_only image1d_t image);
+int __const_func get_image_width(write_only image1d_buffer_t image);
+int __const_func get_image_width(write_only image2d_t image);
+int __const_func get_image_width(write_only image3d_t image);
+int __const_func get_image_width(write_only image1d_array_t image);
+int __const_func get_image_width(write_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_width(write_only image2d_depth_t image);
+int __const_func get_image_width(write_only image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_width(write_only image2d_msaa_t image);
+int __const_func get_image_width(write_only image2d_msaa_depth_t image);
+int __const_func get_image_width(write_only image2d_array_msaa_t image);
+int __const_func get_image_width(write_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int __const_func get_image_width(read_write image1d_t image);
+int __const_func get_image_width(read_write image1d_buffer_t image);
+int __const_func get_image_width(read_write image2d_t image);
+int __const_func get_image_width(read_write image3d_t image);
+int __const_func get_image_width(read_write image1d_array_t image);
+int __const_func get_image_width(read_write image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_width(read_write image2d_depth_t image);
+int __const_func get_image_width(read_write image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_width(read_write image2d_msaa_t image);
+int __const_func get_image_width(read_write image2d_msaa_depth_t image);
+int __const_func get_image_width(read_write image2d_array_msaa_t image);
+int __const_func get_image_width(read_write image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Return the image height in pixels.
+ */
+int __const_func get_image_height(read_only image2d_t image);
+int __const_func get_image_height(read_only image3d_t image);
+int __const_func get_image_height(read_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_height(read_only image2d_depth_t image);
+int __const_func get_image_height(read_only image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_height(read_only image2d_msaa_t image);
+int __const_func get_image_height(read_only image2d_msaa_depth_t image);
+int __const_func get_image_height(read_only image2d_array_msaa_t image);
+int __const_func get_image_height(read_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+int __const_func get_image_height(write_only image2d_t image);
+int __const_func get_image_height(write_only image3d_t image);
+int __const_func get_image_height(write_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_height(write_only image2d_depth_t image);
+int __const_func get_image_height(write_only image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_height(write_only image2d_msaa_t image);
+int __const_func get_image_height(write_only image2d_msaa_depth_t image);
+int __const_func get_image_height(write_only image2d_array_msaa_t image);
+int __const_func get_image_height(write_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int __const_func get_image_height(read_write image2d_t image);
+int __const_func get_image_height(read_write image3d_t image);
+int __const_func get_image_height(read_write image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_height(read_write image2d_depth_t image);
+int __const_func get_image_height(read_write image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_height(read_write image2d_msaa_t image);
+int __const_func get_image_height(read_write image2d_msaa_depth_t image);
+int __const_func get_image_height(read_write image2d_array_msaa_t image);
+int __const_func get_image_height(read_write image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Return the image depth in pixels.
+ */
+int __const_func get_image_depth(read_only image3d_t image);
+
+int __const_func get_image_depth(write_only image3d_t image);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int __const_func get_image_depth(read_write image3d_t image);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+// OpenCL Extension v2.0 s9.18 - Mipmaps
+#ifdef cl_khr_mipmap_image
 /**
  * Return the image miplevels.
  */
@@ -19063,17 +18472,623 @@ int __overload get_image_num_mip_levels(read_write image2d_t image);
 int __overload get_image_num_mip_levels(read_write image3d_t image);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-int __overload
-get_image_num_mip_levels(image1d_array_t image);
-int __overload
-get_image_num_mip_levels(image2d_array_t image);
-int __overload
-get_image_num_mip_levels(image2d_array_depth_t image);
-int __overload
-get_image_num_mip_levels(image2d_depth_t image);
+int __overload get_image_num_mip_levels(read_only image1d_array_t image);
+int __overload get_image_num_mip_levels(read_only image2d_array_t image);
+int __overload get_image_num_mip_levels(read_only image2d_array_depth_t image);
+int __overload get_image_num_mip_levels(read_only image2d_depth_t image);
+
+int __overload get_image_num_mip_levels(write_only image1d_array_t image);
+int __overload get_image_num_mip_levels(write_only image2d_array_t image);
+int __overload get_image_num_mip_levels(write_only image2d_array_depth_t image);
+int __overload get_image_num_mip_levels(write_only image2d_depth_t image);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int __overload get_image_num_mip_levels(read_write image1d_array_t image);
+int __overload get_image_num_mip_levels(read_write image2d_array_t image);
+int __overload get_image_num_mip_levels(read_write image2d_array_depth_t image);
+int __overload get_image_num_mip_levels(read_write image2d_depth_t image);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
 #endif //cl_khr_mipmap_image
+
+/**
+ * Return the channel data type. Valid values are:
+ * CLK_SNORM_INT8
+ * CLK_SNORM_INT16
+ * CLK_UNORM_INT8
+ * CLK_UNORM_INT16
+ * CLK_UNORM_SHORT_565
+ * CLK_UNORM_SHORT_555
+ * CLK_UNORM_SHORT_101010
+ * CLK_SIGNED_INT8
+ * CLK_SIGNED_INT16
+ * CLK_SIGNED_INT32
+ * CLK_UNSIGNED_INT8
+ * CLK_UNSIGNED_INT16
+ * CLK_UNSIGNED_INT32
+ * CLK_HALF_FLOAT
+ * CLK_FLOAT
+ */
+
+//
+// Channel Datatype.
+//
+#define CLK_SNORM_INT8        0x10D0
+#define CLK_SNORM_INT16       0x10D1
+#define CLK_UNORM_INT8        0x10D2
+#define CLK_UNORM_INT16       0x10D3
+#define CLK_UNORM_SHORT_565   0x10D4
+#define CLK_UNORM_SHORT_555   0x10D5
+#define CLK_UNORM_INT_101010  0x10D6
+#define CLK_SIGNED_INT8       0x10D7
+#define CLK_SIGNED_INT16      0x10D8
+#define CLK_SIGNED_INT32      0x10D9
+#define CLK_UNSIGNED_INT8     0x10DA
+#define CLK_UNSIGNED_INT16    0x10DB
+#define CLK_UNSIGNED_INT32    0x10DC
+#define CLK_HALF_FLOAT        0x10DD
+#define CLK_FLOAT             0x10DE
+#define CLK_UNORM_INT24       0x10DF
+
+int __const_func get_image_channel_data_type(read_only image1d_t image);
+int __const_func get_image_channel_data_type(read_only image1d_buffer_t image);
+int __const_func get_image_channel_data_type(read_only image2d_t image);
+int __const_func get_image_channel_data_type(read_only image3d_t image);
+int __const_func get_image_channel_data_type(read_only image1d_array_t image);
+int __const_func get_image_channel_data_type(read_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_channel_data_type(read_only image2d_depth_t image);
+int __const_func get_image_channel_data_type(read_only image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_channel_data_type(read_only image2d_msaa_t image);
+int __const_func get_image_channel_data_type(read_only image2d_msaa_depth_t image);
+int __const_func get_image_channel_data_type(read_only image2d_array_msaa_t image);
+int __const_func get_image_channel_data_type(read_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+int __const_func get_image_channel_data_type(write_only image1d_t image);
+int __const_func get_image_channel_data_type(write_only image1d_buffer_t image);
+int __const_func get_image_channel_data_type(write_only image2d_t image);
+int __const_func get_image_channel_data_type(write_only image3d_t image);
+int __const_func get_image_channel_data_type(write_only image1d_array_t image);
+int __const_func get_image_channel_data_type(write_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_channel_data_type(write_only image2d_depth_t image);
+int __const_func get_image_channel_data_type(write_only image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_channel_data_type(write_only image2d_msaa_t image);
+int __const_func get_image_channel_data_type(write_only image2d_msaa_depth_t image);
+int __const_func get_image_channel_data_type(write_only image2d_array_msaa_t image);
+int __const_func get_image_channel_data_type(write_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int __const_func get_image_channel_data_type(read_write image1d_t image);
+int __const_func get_image_channel_data_type(read_write image1d_buffer_t image);
+int __const_func get_image_channel_data_type(read_write image2d_t image);
+int __const_func get_image_channel_data_type(read_write image3d_t image);
+int __const_func get_image_channel_data_type(read_write image1d_array_t image);
+int __const_func get_image_channel_data_type(read_write image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_channel_data_type(read_write image2d_depth_t image);
+int __const_func get_image_channel_data_type(read_write image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_channel_data_type(read_write image2d_msaa_t image);
+int __const_func get_image_channel_data_type(read_write image2d_msaa_depth_t image);
+int __const_func get_image_channel_data_type(read_write image2d_array_msaa_t image);
+int __const_func get_image_channel_data_type(read_write image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Return the image channel order. Valid values are:
+ * CLK_A
+ * CLK_R
+ * CLK_Rx
+ * CLK_RG
+ * CLK_RGx
+ * CLK_RA
+ * CLK_RGB
+ * CLK_RGBx
+ * CLK_RGBA
+ * CLK_ARGB
+ * CLK_BGRA
+ * CLK_INTENSITY
+ * CLK_LUMINANCE
+ */
+// Channel order, numbering must be aligned with cl_channel_order in cl.h
+//
+#define CLK_R         0x10B0
+#define CLK_A         0x10B1
+#define CLK_RG        0x10B2
+#define CLK_RA        0x10B3
+#define CLK_RGB       0x10B4
+#define CLK_RGBA      0x10B5
+#define CLK_BGRA      0x10B6
+#define CLK_ARGB      0x10B7
+#define CLK_INTENSITY 0x10B8
+#define CLK_LUMINANCE 0x10B9
+#define CLK_Rx                0x10BA
+#define CLK_RGx               0x10BB
+#define CLK_RGBx              0x10BC
+#define CLK_DEPTH             0x10BD
+#define CLK_DEPTH_STENCIL     0x10BE
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+#define CLK_sRGB              0x10BF
+#define CLK_sRGBA             0x10C1
+#define CLK_sRGBx             0x10C0
+#define CLK_sBGRA             0x10C2
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+int __const_func get_image_channel_order(read_only image1d_t image);
+int __const_func get_image_channel_order(read_only image1d_buffer_t image);
+int __const_func get_image_channel_order(read_only image2d_t image);
+int __const_func get_image_channel_order(read_only image3d_t image);
+int __const_func get_image_channel_order(read_only image1d_array_t image);
+int __const_func get_image_channel_order(read_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_channel_order(read_only image2d_depth_t image);
+int __const_func get_image_channel_order(read_only image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_channel_order(read_only image2d_msaa_t image);
+int __const_func get_image_channel_order(read_only image2d_msaa_depth_t image);
+int __const_func get_image_channel_order(read_only image2d_array_msaa_t image);
+int __const_func get_image_channel_order(read_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+int __const_func get_image_channel_order(write_only image1d_t image);
+int __const_func get_image_channel_order(write_only image1d_buffer_t image);
+int __const_func get_image_channel_order(write_only image2d_t image);
+int __const_func get_image_channel_order(write_only image3d_t image);
+int __const_func get_image_channel_order(write_only image1d_array_t image);
+int __const_func get_image_channel_order(write_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_channel_order(write_only image2d_depth_t image);
+int __const_func get_image_channel_order(write_only image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_channel_order(write_only image2d_msaa_t image);
+int __const_func get_image_channel_order(write_only image2d_msaa_depth_t image);
+int __const_func get_image_channel_order(write_only image2d_array_msaa_t image);
+int __const_func get_image_channel_order(write_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int __const_func get_image_channel_order(read_write image1d_t image);
+int __const_func get_image_channel_order(read_write image1d_buffer_t image);
+int __const_func get_image_channel_order(read_write image2d_t image);
+int __const_func get_image_channel_order(read_write image3d_t image);
+int __const_func get_image_channel_order(read_write image1d_array_t image);
+int __const_func get_image_channel_order(read_write image2d_array_t image);
+#ifdef cl_khr_depth_images
+int __const_func get_image_channel_order(read_write image2d_depth_t image);
+int __const_func get_image_channel_order(read_write image2d_array_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int __const_func get_image_channel_order(read_write image2d_msaa_t image);
+int __const_func get_image_channel_order(read_write image2d_msaa_depth_t image);
+int __const_func get_image_channel_order(read_write image2d_array_msaa_t image);
+int __const_func get_image_channel_order(read_write image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Return the 2D image width and height as an int2
+ * type. The width is returned in the x component, and
+ * the height in the y component.
+ */
+int2 __const_func get_image_dim(read_only image2d_t image);
+int2 __const_func get_image_dim(read_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int2 __const_func get_image_dim(read_only image2d_array_depth_t image);
+int2 __const_func get_image_dim(read_only image2d_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int2 __const_func get_image_dim(read_only image2d_msaa_t image);
+int2 __const_func get_image_dim(read_only image2d_msaa_depth_t image);
+int2 __const_func get_image_dim(read_only image2d_array_msaa_t image);
+int2 __const_func get_image_dim(read_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+int2 __const_func get_image_dim(write_only image2d_t image);
+int2 __const_func get_image_dim(write_only image2d_array_t image);
+#ifdef cl_khr_depth_images
+int2 __const_func get_image_dim(write_only image2d_array_depth_t image);
+int2 __const_func get_image_dim(write_only image2d_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int2 __const_func get_image_dim(write_only image2d_msaa_t image);
+int2 __const_func get_image_dim(write_only image2d_msaa_depth_t image);
+int2 __const_func get_image_dim(write_only image2d_array_msaa_t image);
+int2 __const_func get_image_dim(write_only image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int2 __const_func get_image_dim(read_write image2d_t image);
+int2 __const_func get_image_dim(read_write image2d_array_t image);
+#ifdef cl_khr_depth_images
+int2 __const_func get_image_dim(read_write image2d_array_depth_t image);
+int2 __const_func get_image_dim(read_write image2d_depth_t image);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+int2 __const_func get_image_dim(read_write image2d_msaa_t image);
+int2 __const_func get_image_dim(read_write image2d_msaa_depth_t image);
+int2 __const_func get_image_dim(read_write image2d_array_msaa_t image);
+int2 __const_func get_image_dim(read_write image2d_array_msaa_depth_t image);
+#endif //cl_khr_gl_msaa_sharing
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Return the 3D image width, height, and depth as an
+ * int4 type. The width is returned in the x
+ * component, height in the y component, depth in the z
+ * component and the w component is 0.
+ */
+int4 __const_func get_image_dim(read_only image3d_t image);
+int4 __const_func get_image_dim(write_only image3d_t image);
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int4 __const_func get_image_dim(read_write image3d_t image);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+ * Return the image array size.
+ */
+
+size_t __const_func get_image_array_size(read_only image1d_array_t image_array);
+size_t __const_func get_image_array_size(read_only image2d_array_t image_array);
+#ifdef cl_khr_depth_images
+size_t __const_func get_image_array_size(read_only image2d_array_depth_t image_array);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+size_t __const_func get_image_array_size(read_only image2d_array_msaa_t image_array);
+size_t __const_func get_image_array_size(read_only image2d_array_msaa_depth_t image_array);
+#endif //cl_khr_gl_msaa_sharing
+
+size_t __const_func get_image_array_size(write_only image1d_array_t image_array);
+size_t __const_func get_image_array_size(write_only image2d_array_t image_array);
+#ifdef cl_khr_depth_images
+size_t __const_func get_image_array_size(write_only image2d_array_depth_t image_array);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+size_t __const_func get_image_array_size(write_only image2d_array_msaa_t image_array);
+size_t __const_func get_image_array_size(write_only image2d_array_msaa_depth_t image_array);
+#endif //cl_khr_gl_msaa_sharing
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+size_t __const_func get_image_array_size(read_write image1d_array_t image_array);
+size_t __const_func get_image_array_size(read_write image2d_array_t image_array);
+#ifdef cl_khr_depth_images
+size_t __const_func get_image_array_size(read_write image2d_array_depth_t image_array);
+#endif //cl_khr_depth_images
+#if defined(cl_khr_gl_msaa_sharing)
+size_t __const_func get_image_array_size(read_write image2d_array_msaa_t image_array);
+size_t __const_func get_image_array_size(read_write image2d_array_msaa_depth_t image_array);
+#endif //cl_khr_gl_msaa_sharing
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+/**
+* Return the number of samples associated with image
+*/
+#if defined(cl_khr_gl_msaa_sharing)
+int __overload get_image_num_samples(read_only image2d_msaa_t image);
+int __overload get_image_num_samples(read_only image2d_msaa_depth_t image);
+int __overload get_image_num_samples(read_only image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(read_only image2d_array_msaa_t image);
+int __overload get_image_num_samples(read_only image2d_array_msaa_depth_t image);
+
+int __overload get_image_num_samples(write_only image2d_msaa_t image);
+int __overload get_image_num_samples(write_only image2d_msaa_depth_t image);
+int __overload get_image_num_samples(write_only image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(write_only image2d_array_msaa_t image);
+int __overload get_image_num_samples(write_only image2d_array_msaa_depth_t image);
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int __overload get_image_num_samples(read_write image2d_msaa_t image);
+int __overload get_image_num_samples(read_write image2d_msaa_depth_t image);
+int __overload get_image_num_samples(read_write image2d_array_msaa_depth_t image);
+int __overload get_image_num_samples(read_write image2d_array_msaa_t image);
+int __overload get_image_num_samples(read_write image2d_array_msaa_depth_t image);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+#endif
+
+// OpenCL v2.0 s6.13.15 - Work-group Functions
+
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+int __overload work_group_all(int predicate);
+int __overload work_group_any(int predicate);
+
+#ifdef cl_khr_fp16
+half __overload work_group_broadcast(half a, size_t local_id);
+half __overload work_group_broadcast(half a, size_t x, size_t y);
+half __overload work_group_broadcast(half a, size_t x, size_t y, size_t z);
+#endif
+int __overload work_group_broadcast(int a, size_t local_id);
+int __overload work_group_broadcast(int a, size_t x, size_t y);
+int __overload work_group_broadcast(int a, size_t x, size_t y, size_t z);
+uint __overload work_group_broadcast(uint a, size_t local_id);
+uint __overload work_group_broadcast(uint a, size_t x, size_t y);
+uint __overload work_group_broadcast(uint a, size_t x, size_t y, size_t z);
+long __overload work_group_broadcast(long a, size_t local_id);
+long __overload work_group_broadcast(long a, size_t x, size_t y);
+long __overload work_group_broadcast(long a, size_t x, size_t y, size_t z);
+ulong __overload work_group_broadcast(ulong a, size_t local_id);
+ulong __overload work_group_broadcast(ulong a, size_t x, size_t y);
+ulong __overload work_group_broadcast(ulong a, size_t x, size_t y, size_t z);
+float __overload work_group_broadcast(float a, size_t local_id);
+float __overload work_group_broadcast(float a, size_t x, size_t y);
+float __overload work_group_broadcast(float a, size_t x, size_t y, size_t z);
+#ifdef cl_khr_fp64
+double __overload work_group_broadcast(double a, size_t local_id);
+double __overload work_group_broadcast(double a, size_t x, size_t y);
+double __overload work_group_broadcast(double a, size_t x, size_t y, size_t z);
+#endif //cl_khr_fp64
+
+#ifdef cl_khr_fp16
+half __overload work_group_reduce_add(half x);
+half __overload work_group_reduce_min(half x);
+half __overload work_group_reduce_max(half x);
+half __overload work_group_scan_exclusive_add(half x);
+half __overload work_group_scan_exclusive_min(half x);
+half __overload work_group_scan_exclusive_max(half x);
+half __overload work_group_scan_inclusive_add(half x);
+half __overload work_group_scan_inclusive_min(half x);
+half __overload work_group_scan_inclusive_max(half x);
+#endif
+int __overload work_group_reduce_add(int x);
+int __overload work_group_reduce_min(int x);
+int __overload work_group_reduce_max(int x);
+int __overload work_group_scan_exclusive_add(int x);
+int __overload work_group_scan_exclusive_min(int x);
+int __overload work_group_scan_exclusive_max(int x);
+int __overload work_group_scan_inclusive_add(int x);
+int __overload work_group_scan_inclusive_min(int x);
+int __overload work_group_scan_inclusive_max(int x);
+uint __overload work_group_reduce_add(uint x);
+uint __overload work_group_reduce_min(uint x);
+uint __overload work_group_reduce_max(uint x);
+uint __overload work_group_scan_exclusive_add(uint x);
+uint __overload work_group_scan_exclusive_min(uint x);
+uint __overload work_group_scan_exclusive_max(uint x);
+uint __overload work_group_scan_inclusive_add(uint x);
+uint __overload work_group_scan_inclusive_min(uint x);
+uint __overload work_group_scan_inclusive_max(uint x);
+long __overload work_group_reduce_add(long x);
+long __overload work_group_reduce_min(long x);
+long __overload work_group_reduce_max(long x);
+long __overload work_group_scan_exclusive_add(long x);
+long __overload work_group_scan_exclusive_min(long x);
+long __overload work_group_scan_exclusive_max(long x);
+long __overload work_group_scan_inclusive_add(long x);
+long __overload work_group_scan_inclusive_min(long x);
+long __overload work_group_scan_inclusive_max(long x);
+ulong __overload work_group_reduce_add(ulong x);
+ulong __overload work_group_reduce_min(ulong x);
+ulong __overload work_group_reduce_max(ulong x);
+ulong __overload work_group_scan_exclusive_add(ulong x);
+ulong __overload work_group_scan_exclusive_min(ulong x);
+ulong __overload work_group_scan_exclusive_max(ulong x);
+ulong __overload work_group_scan_inclusive_add(ulong x);
+ulong __overload work_group_scan_inclusive_min(ulong x);
+ulong __overload work_group_scan_inclusive_max(ulong x);
+float __overload work_group_reduce_add(float x);
+float __overload work_group_reduce_min(float x);
+float __overload work_group_reduce_max(float x);
+float __overload work_group_scan_exclusive_add(float x);
+float __overload work_group_scan_exclusive_min(float x);
+float __overload work_group_scan_exclusive_max(float x);
+float __overload work_group_scan_inclusive_add(float x);
+float __overload work_group_scan_inclusive_min(float x);
+float __overload work_group_scan_inclusive_max(float x);
+#ifdef cl_khr_fp64
+double __overload work_group_reduce_add(double x);
+double __overload work_group_reduce_min(double x);
+double __overload work_group_reduce_max(double x);
+double __overload work_group_scan_exclusive_add(double x);
+double __overload work_group_scan_exclusive_min(double x);
+double __overload work_group_scan_exclusive_max(double x);
+double __overload work_group_scan_inclusive_add(double x);
+double __overload work_group_scan_inclusive_min(double x);
+double __overload work_group_scan_inclusive_max(double x);
+#endif //cl_khr_fp64
+
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+// OpenCL v2.0 s6.13.16 - Pipe Functions
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+#define PIPE_RESERVE_ID_VALID_BIT (1U << 30)
+#define CLK_NULL_RESERVE_ID (__builtin_astype(((void*)(__SIZE_MAX__)), reserve_id_t))
+bool __overload is_valid_reserve_id(reserve_id_t reserve_id);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+
+// OpenCL v2.0 s6.13.17 - Enqueue Kernels
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+#define CL_COMPLETE                                 0x0
+#define CL_RUNNING                                  0x1
+#define CL_SUBMITTED                                0x2
+#define CL_QUEUED                                   0x3
+
+#define CLK_SUCCESS                                 0
+#define CLK_ENQUEUE_FAILURE                         -101
+#define CLK_INVALID_QUEUE                           -102
+#define CLK_INVALID_NDRANGE                         -160
+#define CLK_INVALID_EVENT_WAIT_LIST                 -57
+#define CLK_DEVICE_QUEUE_FULL                       -161
+#define CLK_INVALID_ARG_SIZE                        -51
+#define CLK_EVENT_ALLOCATION_FAILURE                -100
+#define CLK_OUT_OF_RESOURCES                        -5
+
+#define CLK_NULL_QUEUE                              0
+#define CLK_NULL_EVENT (__builtin_astype(((void*)(__SIZE_MAX__)), clk_event_t))
+
+// execution model related definitions
+#define CLK_ENQUEUE_FLAGS_NO_WAIT                   0x0
+#define CLK_ENQUEUE_FLAGS_WAIT_KERNEL               0x1
+#define CLK_ENQUEUE_FLAGS_WAIT_WORK_GROUP           0x2
+
+typedef int kernel_enqueue_flags_t;
+typedef int clk_profiling_info;
+
+// Profiling info name (see capture_event_profiling_info)
+#define CLK_PROFILING_COMMAND_EXEC_TIME 0x1
+
+#define MAX_WORK_DIM        3
+
+// ToDo: Remove definition of ndrange_t in Clang as an opaque type and add back
+// the following ndrange_t definition.
+#if 0
+typedef struct {
+    unsigned int workDimension;
+    size_t globalWorkOffset[MAX_WORK_DIM];
+    size_t globalWorkSize[MAX_WORK_DIM];
+    size_t localWorkSize[MAX_WORK_DIM];
+} ndrange_t;
+#endif
+
+ndrange_t __overload ndrange_1D(size_t);
+ndrange_t __overload ndrange_1D(size_t, size_t);
+ndrange_t __overload ndrange_1D(size_t, size_t, size_t);
+
+ndrange_t __overload ndrange_2D(const size_t[2]);
+ndrange_t __overload ndrange_2D(const size_t[2], const size_t[2]);
+ndrange_t __overload ndrange_2D(const size_t[2], const size_t[2], const size_t[2]);
+
+ndrange_t __overload ndrange_3D(const size_t[3]);
+ndrange_t __overload ndrange_3D(const size_t[3], const size_t[3]);
+ndrange_t __overload ndrange_3D(const size_t[3], const size_t[3], const size_t[3]);
+
+// ToDo: Add these functions as Clang builtins since they eed a special check of parameters to block.
+uint __overload get_kernel_work_group_size(void (^block)(void));
+uint __overload get_kernel_work_group_size(void (^block)(local void *, ...));
+uint __overload get_kernel_preferred_work_group_size_multiple(void (^block)(void));
+uint __overload get_kernel_preferred_work_group_size_multiple(void (^block)(local void *, ...));
+
+int __overload enqueue_marker(queue_t, uint, const __private clk_event_t*, __private clk_event_t*);
+
+void __overload retain_event(clk_event_t);
+
+void __overload release_event(clk_event_t);
+
+clk_event_t create_user_event(void);
+
+void __overload set_user_event_status(clk_event_t e, int state);
+
+bool is_valid_event (clk_event_t event);
+
+void __overload capture_event_profiling_info(clk_event_t, clk_profiling_info, __global void* value);
+
+queue_t __overload get_default_queue(void);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+// OpenCL Extension v2.0 s9.17 - Sub-groups
+
+#if defined(cl_intel_subgroups) || defined(cl_khr_subgroups)
+// Shared Sub Group Functions
+uint    __overload get_sub_group_size(void);
+uint    __overload get_max_sub_group_size(void);
+uint    __overload get_num_sub_groups(void);
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+uint    __overload get_enqueued_num_sub_groups(void);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+uint    __overload get_sub_group_id(void);
+uint    __overload get_sub_group_local_id(void);
+
+void    __overload sub_group_barrier(cl_mem_fence_flags flags);
+#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void    __overload sub_group_barrier(cl_mem_fence_flags flags, memory_scope scope);
+#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+
+int     __overload sub_group_all(int predicate);
+int     __overload sub_group_any(int predicate);
+
+int     __overload sub_group_broadcast(int   x, uint sub_group_local_id);
+uint    __overload sub_group_broadcast(uint  x, uint sub_group_local_id);
+long    __overload sub_group_broadcast(long  x, uint sub_group_local_id);
+ulong   __overload sub_group_broadcast(ulong x, uint sub_group_local_id);
+float   __overload sub_group_broadcast(float x, uint sub_group_local_id);
+
+int     __overload sub_group_reduce_add(int   x);
+uint    __overload sub_group_reduce_add(uint  x);
+long    __overload sub_group_reduce_add(long  x);
+ulong   __overload sub_group_reduce_add(ulong x);
+float   __overload sub_group_reduce_add(float x);
+int     __overload sub_group_reduce_min(int   x);
+uint    __overload sub_group_reduce_min(uint  x);
+long    __overload sub_group_reduce_min(long  x);
+ulong   __overload sub_group_reduce_min(ulong x);
+float   __overload sub_group_reduce_min(float x);
+int     __overload sub_group_reduce_max(int   x);
+uint    __overload sub_group_reduce_max(uint  x);
+long    __overload sub_group_reduce_max(long  x);
+ulong   __overload sub_group_reduce_max(ulong x);
+float   __overload sub_group_reduce_max(float x);
+
+int     __overload sub_group_scan_exclusive_add(int   x);
+uint    __overload sub_group_scan_exclusive_add(uint  x);
+long    __overload sub_group_scan_exclusive_add(long  x);
+ulong   __overload sub_group_scan_exclusive_add(ulong x);
+float   __overload sub_group_scan_exclusive_add(float x);
+int     __overload sub_group_scan_exclusive_min(int   x);
+uint    __overload sub_group_scan_exclusive_min(uint  x);
+long    __overload sub_group_scan_exclusive_min(long  x);
+ulong   __overload sub_group_scan_exclusive_min(ulong x);
+float   __overload sub_group_scan_exclusive_min(float x);
+int     __overload sub_group_scan_exclusive_max(int   x);
+uint    __overload sub_group_scan_exclusive_max(uint  x);
+long    __overload sub_group_scan_exclusive_max(long  x);
+ulong   __overload sub_group_scan_exclusive_max(ulong x);
+float   __overload sub_group_scan_exclusive_max(float x);
+
+int     __overload sub_group_scan_inclusive_add(int   x);
+uint    __overload sub_group_scan_inclusive_add(uint  x);
+long    __overload sub_group_scan_inclusive_add(long  x);
+ulong   __overload sub_group_scan_inclusive_add(ulong x);
+float   __overload sub_group_scan_inclusive_add(float x);
+int     __overload sub_group_scan_inclusive_min(int   x);
+uint    __overload sub_group_scan_inclusive_min(uint  x);
+long    __overload sub_group_scan_inclusive_min(long  x);
+ulong   __overload sub_group_scan_inclusive_min(ulong x);
+float   __overload sub_group_scan_inclusive_min(float x);
+int     __overload sub_group_scan_inclusive_max(int   x);
+uint    __overload sub_group_scan_inclusive_max(uint  x);
+long    __overload sub_group_scan_inclusive_max(long  x);
+ulong   __overload sub_group_scan_inclusive_max(ulong x);
+float   __overload sub_group_scan_inclusive_max(float x);
+
+#ifdef cl_khr_fp16
+half    __overload sub_group_broadcast(half x, uint sub_group_local_id);
+half    __overload sub_group_reduce_add(half x);
+half    __overload sub_group_reduce_min(half x);
+half    __overload sub_group_reduce_max(half x);
+half    __overload sub_group_scan_exclusive_add(half x);
+half    __overload sub_group_scan_exclusive_min(half x);
+half    __overload sub_group_scan_exclusive_max(half x);
+half    __overload sub_group_scan_inclusive_add(half x);
+half    __overload sub_group_scan_inclusive_min(half x);
+half    __overload sub_group_scan_inclusive_max(half x);
+#endif //cl_khr_fp16
+
+#ifdef cl_khr_fp64
+double  __overload sub_group_broadcast(double x, uint sub_group_local_id);
+double  __overload sub_group_reduce_add(double x);
+double  __overload sub_group_reduce_min(double x);
+double  __overload sub_group_reduce_max(double x);
+double  __overload sub_group_scan_exclusive_add(double x);
+double  __overload sub_group_scan_exclusive_min(double x);
+double  __overload sub_group_scan_exclusive_max(double x);
+double  __overload sub_group_scan_inclusive_add(double x);
+double  __overload sub_group_scan_inclusive_min(double x);
+double  __overload sub_group_scan_inclusive_max(double x);
+#endif //cl_khr_fp64
+
+#endif //cl_khr_subgroups cl_intel_subgroups
 
 // Disable any extensions we may have enabled previously.
 #pragma OPENCL EXTENSION all : disable
 
-#endif
+#endif //_OPENCL_H_
