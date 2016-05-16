@@ -8,7 +8,7 @@ void test(void) {
 
   glob = to_global(glob, loc);
 #if __OPENCL_C_VERSION__ < CL_VERSION_2_0
-  // expected-error@-2{{'to_global' needs OpenCL version 2.0 or above}}
+  // expected-error@-2{{'to_global' requires OpenCL version 2.0 or above}}
 #else
   // expected-error@-4{{invalid number of arguments to function: 'to_global'}}
 #endif
@@ -16,28 +16,28 @@ void test(void) {
   int x;
   glob = to_global(x);
 #if __OPENCL_C_VERSION__ < CL_VERSION_2_0
-  // expected-error@-2{{'to_global' needs OpenCL version 2.0 or above}}
+  // expected-error@-2{{'to_global' requires OpenCL version 2.0 or above}}
 #else
   // expected-error@-4{{invalid argument x to function: 'to_global', expecting a generic pointer argument}}
 #endif
 
   glob = to_global(con);
 #if __OPENCL_C_VERSION__ < CL_VERSION_2_0
-  // expected-error@-2{{'to_global' needs OpenCL version 2.0 or above}}
+  // expected-error@-2{{'to_global' requires OpenCL version 2.0 or above}}
 #else
   // expected-error@-4{{invalid argument con to function: 'to_global', expecting a generic pointer argument}}
 #endif
 
   loc = to_global(glob);
 #if __OPENCL_C_VERSION__ < CL_VERSION_2_0
-  // expected-error@-2{{'to_global' needs OpenCL version 2.0 or above}}
+  // expected-error@-2{{'to_global' requires OpenCL version 2.0 or above}}
 #else
   // expected-error@-4{{assigning '__global int *' to '__local int *' changes address space of pointer}}
 #endif
 
   global char *glob_c = to_global(loc);
 #if __OPENCL_C_VERSION__ < CL_VERSION_2_0
-  // expected-error@-2{{'to_global' needs OpenCL version 2.0 or above}}
+  // expected-error@-2{{'to_global' requires OpenCL version 2.0 or above}}
 #else
   // expected-warning@-4{{incompatible pointer types initializing '__global char *' with an expression of type '__global int *'}}
 #endif
