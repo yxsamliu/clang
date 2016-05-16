@@ -16997,76 +16997,98 @@ int __overload get_image_num_samples(read_write image2d_array_msaa_depth_t image
 int __overload work_group_all(int predicate);
 int __overload work_group_any(int predicate);
 
-#define WG_BROADCAST_1D_DECL(type) \
-type __overload work_group_broadcast(type a, size_t local_id);
-#define WG_BROADCAST_2D_DECL(type) \
-type __overload work_group_broadcast(type a, size_t x, size_t y);
-#define WG_BROADCAST_3D_DECL(type) \
-type __overload work_group_broadcast(type a, size_t x, size_t y, size_t z);
-
-#define WG_BROADCAST_ALL_DECL(type) \
-WG_BROADCAST_1D_DECL(type) \
-WG_BROADCAST_2D_DECL(type) \
-WG_BROADCAST_3D_DECL(type)
-
+int __overload work_group_broadcast(int a, size_t local_id);
+int __overload work_group_broadcast(int a, size_t x, size_t y);
+int __overload work_group_broadcast(int a, size_t x, size_t y, size_t z);
+uint __overload work_group_broadcast(uint a, size_t local_id);
+uint __overload work_group_broadcast(uint a, size_t x, size_t y);
+uint __overload work_group_broadcast(uint a, size_t x, size_t y, size_t z);
+long __overload work_group_broadcast(long a, size_t local_id);
+long __overload work_group_broadcast(long a, size_t x, size_t y);
+long __overload work_group_broadcast(long a, size_t x, size_t y, size_t z);
+ulong __overload work_group_broadcast(ulong a, size_t local_id);
+ulong __overload work_group_broadcast(ulong a, size_t x, size_t y);
+ulong __overload work_group_broadcast(ulong a, size_t x, size_t y, size_t z);
+float __overload work_group_broadcast(float a, size_t local_id);
+float __overload work_group_broadcast(float a, size_t x, size_t y);
+float __overload work_group_broadcast(float a, size_t x, size_t y, size_t z);
 #ifdef cl_khr_fp16
-WG_BROADCAST_ALL_DECL(half)
+half __overload work_group_broadcast(half a, size_t local_id);
+half __overload work_group_broadcast(half a, size_t x, size_t y);
+half __overload work_group_broadcast(half a, size_t x, size_t y, size_t z);
 #endif
-WG_BROADCAST_ALL_DECL(int)
-WG_BROADCAST_ALL_DECL(uint)
-WG_BROADCAST_ALL_DECL(long)
-WG_BROADCAST_ALL_DECL(ulong)
-WG_BROADCAST_ALL_DECL(float)
 #ifdef cl_khr_fp64
-WG_BROADCAST_ALL_DECL(double)
+double __overload work_group_broadcast(double a, size_t local_id);
+double __overload work_group_broadcast(double a, size_t x, size_t y);
+double __overload work_group_broadcast(double a, size_t x, size_t y, size_t z);
 #endif //cl_khr_fp64
 
-#define DECL_WORK_GROUP_REDUCE_OP(type, op_name) \
-type __overload work_group_reduce_##op_name(type x);
-#define DECL_WORK_GROUP_SCAN_EXCLUSIVE_OP(type, op_name) \
-type __overload work_group_scan_exclusive_##op_name(type x);
-#define DECL_WORK_GROUP_SCAN_INCLUSIVE_OP(type, op_name) \
-type __overload work_group_scan_inclusive_##op_name(type x);
-
-#define DECL_WORK_GROUP_REDUCE_ALL(type) \
-DECL_WORK_GROUP_REDUCE_OP(type, add) \
-DECL_WORK_GROUP_REDUCE_OP(type, min) \
-DECL_WORK_GROUP_REDUCE_OP(type, max)
-
-#define DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(type) \
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_OP(type, add) \
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_OP(type, min) \
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_OP(type, max)
-
-#define DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(type) \
-DECL_WORK_GROUP_SCAN_INCLUSIVE_OP(type, add) \
-DECL_WORK_GROUP_SCAN_INCLUSIVE_OP(type, min) \
-DECL_WORK_GROUP_SCAN_INCLUSIVE_OP(type, max)
-
+int __overload work_group_reduce_add(int x);
+int __overload work_group_reduce_min(int x);
+int __overload work_group_reduce_max(int x);
+int __overload work_group_scan_exclusive_add(int x);
+int __overload work_group_scan_exclusive_min(int x);
+int __overload work_group_scan_exclusive_max(int x);
+int __overload work_group_scan_inclusive_add(int x);
+int __overload work_group_scan_inclusive_min(int x);
+int __overload work_group_scan_inclusive_max(int x);
+uint __overload work_group_reduce_add(uint x);
+uint __overload work_group_reduce_min(uint x);
+uint __overload work_group_reduce_max(uint x);
+uint __overload work_group_scan_exclusive_add(uint x);
+uint __overload work_group_scan_exclusive_min(uint x);
+uint __overload work_group_scan_exclusive_max(uint x);
+uint __overload work_group_scan_inclusive_add(uint x);
+uint __overload work_group_scan_inclusive_min(uint x);
+uint __overload work_group_scan_inclusive_max(uint x);
+long __overload work_group_reduce_add(long x);
+long __overload work_group_reduce_min(long x);
+long __overload work_group_reduce_max(long x);
+long __overload work_group_scan_exclusive_add(long x);
+long __overload work_group_scan_exclusive_min(long x);
+long __overload work_group_scan_exclusive_max(long x);
+long __overload work_group_scan_inclusive_add(long x);
+long __overload work_group_scan_inclusive_min(long x);
+long __overload work_group_scan_inclusive_max(long x);
+ulong __overload work_group_reduce_add(ulong x);
+ulong __overload work_group_reduce_min(ulong x);
+ulong __overload work_group_reduce_max(ulong x);
+ulong __overload work_group_scan_exclusive_add(ulong x);
+ulong __overload work_group_scan_exclusive_min(ulong x);
+ulong __overload work_group_scan_exclusive_max(ulong x);
+ulong __overload work_group_scan_inclusive_add(ulong x);
+ulong __overload work_group_scan_inclusive_min(ulong x);
+ulong __overload work_group_scan_inclusive_max(ulong x);
+float __overload work_group_reduce_add(float x);
+float __overload work_group_reduce_min(float x);
+float __overload work_group_reduce_max(float x);
+float __overload work_group_scan_exclusive_add(float x);
+float __overload work_group_scan_exclusive_min(float x);
+float __overload work_group_scan_exclusive_max(float x);
+float __overload work_group_scan_inclusive_add(float x);
+float __overload work_group_scan_inclusive_min(float x);
+float __overload work_group_scan_inclusive_max(float x);
 #ifdef cl_khr_fp16
-DECL_WORK_GROUP_REDUCE_ALL(half)
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(half)
-DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(half)
+half __overload work_group_reduce_add(half x);
+half __overload work_group_reduce_min(half x);
+half __overload work_group_reduce_max(half x);
+half __overload work_group_scan_exclusive_add(half x);
+half __overload work_group_scan_exclusive_min(half x);
+half __overload work_group_scan_exclusive_max(half x);
+half __overload work_group_scan_inclusive_add(half x);
+half __overload work_group_scan_inclusive_min(half x);
+half __overload work_group_scan_inclusive_max(half x);
 #endif
-DECL_WORK_GROUP_REDUCE_ALL(int)
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(int)
-DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(int)
-DECL_WORK_GROUP_REDUCE_ALL(uint)
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(uint)
-DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(uint)
-DECL_WORK_GROUP_REDUCE_ALL(long)
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(long)
-DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(long)
-DECL_WORK_GROUP_REDUCE_ALL(ulong)
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(ulong)
-DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(ulong)
-DECL_WORK_GROUP_REDUCE_ALL(float)
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(float)
-DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(float)
 #ifdef cl_khr_fp64
-DECL_WORK_GROUP_REDUCE_ALL(double)
-DECL_WORK_GROUP_SCAN_EXCLUSIVE_ALL(double)
-DECL_WORK_GROUP_SCAN_INCLUSIVE_ALL(double)
+double __overload work_group_reduce_add(double x);
+double __overload work_group_reduce_min(double x);
+double __overload work_group_reduce_max(double x);
+double __overload work_group_scan_exclusive_add(double x);
+double __overload work_group_scan_exclusive_min(double x);
+double __overload work_group_scan_exclusive_max(double x);
+double __overload work_group_scan_inclusive_add(double x);
+double __overload work_group_scan_inclusive_min(double x);
+double __overload work_group_scan_inclusive_max(double x);
 #endif //cl_khr_fp64
 
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
