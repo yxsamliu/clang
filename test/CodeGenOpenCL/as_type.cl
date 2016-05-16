@@ -2,6 +2,8 @@
 
 typedef __attribute__(( ext_vector_type(3) )) char char3;
 typedef __attribute__(( ext_vector_type(4) )) char char4;
+typedef __attribute__(( ext_vector_type(16) )) char char16;
+typedef __attribute__(( ext_vector_type(3) )) int int3;
 
 //CHECK: define spir_func <3 x i8> @f1(<4 x i8> %[[x:.*]])
 //CHECK: %[[astype:.*]] = shufflevector <4 x i8> %[[x]], <4 x i8> undef, <3 x i32> <i32 0, i32 1, i32 2>
@@ -53,11 +55,10 @@ char3 f7(char3 x) {
   return __builtin_astype(x, char3);
 }
 
-//CHECK: define spir_func <3 x i32> @f3(<16 x i8> %[[x:.*]])
+//CHECK: define spir_func <3 x i32> @f8(<16 x i8> %[[x:.*]])
 //CHECK: %[[cast:.*]] = bitcast <16 x i8> %[[x]] to <4 x i32>
 //CHECK: %[[astype:.*]] = shufflevector <4 x i32> %[[cast]], <4 x i32> undef, <3 x i32> <i32 0, i32 1, i32 2>
 //CHECK: ret <3 x i32> %[[astype]]
 int3 f8(char16 x) {
   return __builtin_astype(x, int3);
-}
 }
