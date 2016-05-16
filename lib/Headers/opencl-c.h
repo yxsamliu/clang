@@ -15530,26 +15530,91 @@ int printf(__constant const char* st, ...);
 /**
  * Use the coordinate (coord.xy) to do an element lookup in
  * the 2D image object specified by image.
+ *
+ * Use the coordinate (coord.x, coord.y, coord.z) to do
+ * an element lookup in the 3D image object specified
+ * by image. coord.w is ignored.
+ *
+ * Use the coordinate (coord.z) to index into the
+ * 2D image array object specified by image_array
+ * and (coord.x, coord.y) to do an element lookup in
+ * the 2D image object specified by image.
+ *
+ * Use the coordinate (x) to do an element lookup in
+ * the 1D image object specified by image.
+ *
+ * Use the coordinate (coord.y) to index into the
+ * 1D image array object specified by image_array
+ * and (coord.x) to do an element lookup in
+ * the 1D image object specified by image.
+ *
+ * Use the coordinate (cood.xy) and sample to do an
+ * element lookup in the 2D multi-sample image specified
+ * by image.
+ *
+ * Use coord.xy and sample to do an element
+ * lookup in the 2D multi-sample image layer
+ * identified by index coord.z in the 2D multi-sample
+ * image array specified by image.
+ *
+ * For mipmap images, use the mip-level specified by
+ * the Level-of-Detail (lod) or use gradients for LOD
+ * computation.
+ *
  * read_imagef returns floating-point values in the
  * range [0.0 ... 1.0] for image objects created with
  * image_channel_data_type set to one of the predefined
  * packed formats or CL_UNORM_INT8, or
  * CL_UNORM_INT16.
+ *
  * read_imagef returns floating-point values in the
  * range [-1.0 ... 1.0] for image objects created with
  * image_channel_data_type set to CL_SNORM_INT8,
  * or CL_SNORM_INT16.
+ *
  * read_imagef returns floating-point values for image
  * objects created with image_channel_data_type set to
  * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
+ *
+ * read_imagei and read_imageui return
+ * unnormalized signed integer and unsigned integer
+ * values respectively. Each channel will be stored in a
+ * 32-bit integer.
+ *
+ * read_imagei can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_SIGNED_INT8,
+ * CL_SIGNED_INT16 and
+ * CL_SIGNED_INT32.
+ * If the image_channel_data_type is not one of the
+ * above values, the values returned by read_imagei
+ * are undefined.
+ *
+ * read_imageui can only be used with image objects
+ * created with image_channel_data_type set to one of
+ * the following values:
+ * CL_UNSIGNED_INT8,
+ * CL_UNSIGNED_INT16 and
+ * CL_UNSIGNED_INT32.
+ * If the image_channel_data_type is not one of the
+ * above values, the values returned by read_imageui
+ * are undefined.
+ *
+ * The read_image{i|ui} calls support a nearest filter
+ * only. The filter_mode specified in sampler
+ * must be set to CLK_FILTER_NEAREST; otherwise
+ * the values returned are undefined.
+ 
+ * The read_image{f|i|ui} calls that take
+ * integer coordinates must use a sampler with
+ * normalized coordinates set to
+ * CLK_NORMALIZED_COORDS_FALSE and
  * addressing mode set to
  * CLK_ADDRESS_CLAMP_TO_EDGE,
  * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
  * otherwise the values returned are undefined.
+ *
  * Values returned by read_imagef for image objects
  * with image_channel_data_type values not specified
  * in the description above are undefined.
@@ -15558,2009 +15623,141 @@ int printf(__constant const char* st, ...);
 float4 __overload read_imagef(read_only image2d_t image, sampler_t sampler, int2 coord);
 float4 __overload read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord);
 
-/**
- * Use the coordinate (coord.xy) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
 int4 __overload read_imagei(read_only image2d_t image, sampler_t sampler, int2 coord);
 int4 __overload read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord);
 uint4 __overload read_imageui(read_only image2d_t image, sampler_t sampler, int2 coord);
 uint4 __overload read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord);
 
-/**
- * Use the coordinate (coord.x, coord.y, coord.z) to do
- * an element lookup in the 3D image object specified
- * by image. coord.w is ignored.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description are undefined.
- */
 float4 __overload read_imagef(read_only image3d_t image, sampler_t sampler, int4 coord);
 float4 __overload read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord);
 
-/**
- * Use the coordinate (coord.x, coord.y, coord.z) to do
- * an element lookup in the 3D image object specified
- * by image. coord.w is ignored.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
 int4 __overload read_imagei(read_only image3d_t image, sampler_t sampler, int4 coord);
 int4 __overload read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord);
 uint4 __overload read_imageui(read_only image3d_t image, sampler_t sampler, int4 coord);
 uint4 __overload read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord);
 
-/**
- * Use the coordinate (coord.z) to index into the
- * 2D image array object specified by image_array
- * and (coord.x, coord.y) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 2D image arrays
 float4 __overload read_imagef(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
 float4 __overload read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
 
-/**
- * Use the coordinate (coord.z) to index into the
- * 2D image array object and (coord.x, coord.y) to do an
- * element lookup in the 2D image object specified.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-//2D image arrays
 int4 __overload read_imagei(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
 int4 __overload read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
 uint4 __overload read_imageui(read_only image2d_array_t image_array, sampler_t sampler, int4 coord);
 uint4 __overload read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord);
 
-/**
- * Use the coordinate (x) to do an element lookup in
- * the 1D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
 float4 __overload read_imagef(read_only image1d_t image, sampler_t sampler, int coord);
 float4 __overload read_imagef(read_only image1d_t image, sampler_t sampler, float coord);
-
-/**
- * Use the coordinate (x) to do an element lookup in
- * the 1D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
 
 int4 __overload read_imagei(read_only image1d_t image, sampler_t sampler, int coord);
 int4 __overload read_imagei(read_only image1d_t image, sampler_t sampler, float coord);
 uint4 __overload read_imageui(read_only image1d_t image, sampler_t sampler, int coord);
 uint4 __overload read_imageui(read_only image1d_t image, sampler_t sampler, float coord);
 
-/**
- * Use the coordinate (coord.y) to index into the
- * 1D image array object specified by image_array
- * and (coord.x) to do an element lookup in
- * the 1D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 1D image arrays
 float4 __overload read_imagef(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
 float4 __overload read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
 
-/**
- * Use the coordinate (coord.y) to index into the
- * 1D image array object and (coord.x) to do an
- * element lookup in the 1D image object specified.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-//1D image arrays
 int4 __overload read_imagei(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
 int4 __overload read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
 uint4 __overload read_imageui(read_only image1d_array_t image_array, sampler_t sampler, int2 coord);
 uint4 __overload read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord);
 
-/**
- * Use the coordinate (cood.xy) to do an element
- * lookup in the 2D depth image specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
 #ifdef cl_khr_depth_images
 float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord);
 float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, int2 coord);
-#endif //cl_khr_depth_images
 
-#if defined(cl_khr_gl_msaa_sharing)
-/**
- * Use the coordinate (cood.xy) and sample to do an
- * element lookup in the 2D multi-sample image specified
- * by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-float4 __overload read_imagef(read_only image2d_msaa_t image, int2 coord, int sample);
-int4 __overload read_imagei(read_only image2d_msaa_t image, int2 coord, int sample);
-uint4 __overload read_imageui(read_only image2d_msaa_t image, int2 coord, int sample);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float4 __overload read_imagef(read_write image2d_msaa_t image, int2 coord, int sample);
-int4 __overload read_imagei(read_write image2d_msaa_t image, int2 coord, int sample);
-uint4 __overload read_imageui(read_write image2d_msaa_t image, int2 coord, int sample);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Use the coordinate (cood.xy) and sample to do an
- * element lookup in the 2D multi-sample image specified
- * by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-float __overload read_imagef(read_only image2d_msaa_depth_t image, int2 coord, int sample);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __overload read_imagef(read_write image2d_msaa_depth_t image, int2 coord, int sample);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Use coord.xy and sample to do an element
- * lookup in the 2D multi-sample image layer
- * identified by index coord.z in the 2D multi-sample
- * image array specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 2D multisample image arrays
-float4 __overload read_imagef(read_only image2d_array_msaa_t image, int4 coord, int sample);
-int4 __overload read_imagei(read_only image2d_array_msaa_t image, int4 coord, int sample);
-uint4 __overload read_imageui(read_only image2d_array_msaa_t image, int4 coord, int sample);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float4 __overload read_imagef(read_write image2d_array_msaa_t image, int4 coord, int sample);
-int4 __overload read_imagei(read_write image2d_array_msaa_t image, int4 coord, int sample);
-uint4 __overload read_imageui(read_write image2d_array_msaa_t image, int4 coord, int sample);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Use coord.xy and sample to do an element
- * lookup in the 2D multi-sample image layer
- * identified by index coord.z in the 2D multi-sample
- * image array specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-float __overload read_imagef(read_only image2d_array_msaa_depth_t image, int4 coord, int sample);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-float __overload read_imagef(read_write image2d_array_msaa_depth_t image, int4 coord, int sample);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-#endif
-
-/**
- * Use coord.xy to do an element lookup in the
- * 2D depth image identified by index coord.z in the 2D
- * image array specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 2D depth image arrays
-#ifdef cl_khr_depth_images
 float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord);
 float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, int4 coord);
 #endif //cl_khr_depth_images
 
+#if defined(cl_khr_gl_msaa_sharing)
+float4 __overload read_imagef(read_only image2d_msaa_t image, int2 coord, int sample);
+int4 __overload read_imagei(read_only image2d_msaa_t image, int2 coord, int sample);
+uint4 __overload read_imageui(read_only image2d_msaa_t image, int2 coord, int sample);
+
+float __overload read_imagef(read_only image2d_msaa_depth_t image, int2 coord, int sample);
+
+float4 __overload read_imagef(read_only image2d_array_msaa_t image, int4 coord, int sample);
+int4 __overload read_imagei(read_only image2d_array_msaa_t image, int4 coord, int sample);
+uint4 __overload read_imageui(read_only image2d_array_msaa_t image, int4 coord, int sample);
+
+float __overload read_imagef(read_only image2d_array_msaa_depth_t image, int4 coord, int sample);
+#endif //cl_khr_gl_msaa_sharing
+
 // OpenCL Extension v2.0 s9.18 - Mipmaps
 #ifdef cl_khr_mipmap_image
-/**
- * Use the coordinate (x) to do an element lookup in
- * the mip-level specified by the Level-of-Detail (lod)
- * in the 1D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
 
 float4 __overload read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float lod);
-
-/**
- * Use the coordinate (x) to do an element lookup in
- * the mip-level specified by the Level-of-Detail (lod)
- * in the 1D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
 int4 __overload read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float lod);
 uint4 __overload read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float lod);
 
-/**
- * Use the coordinate (coord.y) to index into the
- * 1D image array object specified by image_array
- * and (coord.x) and mip-level specified by lod
- * to do an element lookup in the 1D image array
- * specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 1D image arrays
 float4 __overload read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
-
-/**
- * Use the coordinate (coord.y) to index into the
- * 1D image array object and (coord.x) and mip-level
- * specified by lod to do an element lookup in the
- * 1D image array specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-//1D image arrays
-
 int4 __overload read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
 uint4 __overload read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
 
-/**
- * Use the coordinate (coord.xy) to do an element lookup in
- * in the mip-level specified by lod in the
- * 2D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
 float4 __overload read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
-
-/**
- * Use the coordinate (coord.xy) to do an element lookup in
- * the mip-level specified by lod in the
- * 2D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
 int4 __overload read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
 uint4 __overload read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
 
-/**
- * Use the coordinate (cood.xy) to do an element
- * lookup in the mip-level specified by lod in
- * the 2D depth image specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
 float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord, float lod);
 
-/**
- * Use the coordinate (coord.z) and the mip-level
- * specified by lod to index into the 2D image
- * array object specified by image_array
- * and (coord.x, coord.y) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 2D image arrays
 float4 __overload read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
-
-/**
- * Use the coordinate (coord.z) and the mip-level
- * specified by lod to index into the 2D image
- * array object specified by image_array
- * and (coord.x, coord.y) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-//2D image arrays
 int4 __overload read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
 uint4 __overload read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
 
-/**
- * Use the coordinate (coord.z) and the mip-level
- * specified by lod to index into the 2D image
- * array object specified by image_array
- * and (coord.x, coord.y) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 2D depth image arrays
 float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord, float lod);
 
-/**
- * Use the coordinate (coord.x, coord.y, coord.z) to do
- * an element lookup in thein the mip-level specified by lod in the
- * 3D image object specified
- * by image. coord.w is ignored.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description are undefined.
- */
-
 float4 __overload read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
-
-/**
- * Use the coordinate (coord.x, coord.y, coord.z) to do
- * an element lookup in thein the mip-level specified by lod in the
- * 3D image object specified
- * by image. coord.w is ignored.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
 int4 __overload read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
 uint4 __overload read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
 
-/**
- * Read Image support for mipmaps using gradients for
- * LOD computation
- */
+float4 __overload read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float gradientX, float gradientY);
+int4 __overload read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float gradientX, float gradientY);
+uint4 __overload read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float gradientX, float gradientY);
 
-/**
- * Use gradients to compute the LOD Read Image support
- * for mipmaps using gradients for LOD computation
- * and coordinate (x) to do an element lookup in
- * the mip-level specified by the lod
- * in the 1D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
+float4 __overload read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float gradientX, float gradientY);
+int4 __overload read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float gradientX, float gradientY);
+uint4 __overload read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float gradientX, float gradientY);
 
-float4 __overload
-read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float gradientX,
-            float gradientY);
+float4 __overload read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX, float2 gradientY);
+int4 __overload read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX, float2 gradientY);
+uint4 __overload read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX, float2 gradientY);
 
-/**
- * Use gradients to compute the LOD
- * and coordinate (x) to do an element lookup in
- * the mip-level specified by the lod
- * in the 1D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
+float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord, float2 gradientX, float2 gradientY);
 
-int4 __overload
-read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float gradientX,
-            float gradientY);
-uint4 __overload
-read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float gradientX,
-             float gradientY);
+float4 __overload read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float2 gradientX, float2 gradientY);
+int4 __overload read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float2 gradientX, float2 gradientY);
+uint4 __overload read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float2 gradientX, float2 gradientY);
 
-/**
- * Use gradients to compute the LOD
- * and the coordinate (coord.y) to index into the
- * 1D image array object specified by image_array
- * and (coord.x) and mip-level specified by lod
- * to do an element lookup in the 1D image array
- * specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
+float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord, float2 gradientX, float2 gradientY);
 
-// 1D image arrays
-float4 __overload
-read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
-            float gradientX, float gradientY);
+float4 __overload read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX, float4 gradientY);
+int4 __overload read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX, float4 gradientY);
+uint4 __overload read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX, float4 gradientY);
 
-/**
- * Use gradients to compute the LOD
- * and the coordinate (coord.y) to index into the
- * 1D image array object and (coord.x) and mip-level
- * specified by lod to do an element lookup in the
- * 1D image array specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
+float4 __overload read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float lod);
+int4 __overload read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float lod);
+uint4 __overload read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float lod);
 
-// 1D image arrays
+float4 __overload read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+int4 __overload read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+uint4 __overload read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
 
-int4 __overload
-read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
-            float gradientX, float gradientY);
-uint4 __overload
-read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
-             float gradientX, float gradientY);
+float4 __overload read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
+int4 __overload read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
+uint4 __overload read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
 
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.xy) to do an element lookup in
- * in the mip-level specified by lod in the
- * 2D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
+float __overload read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord, float lod);
 
-float4 __overload
-read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX,
-            float2 gradientY);
+float4 __overload read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+int4 __overload read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+uint4 __overload read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
 
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.xy) to do an element lookup in
- * the mip-level specified by lod in the
- * 2D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
+float __overload read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord, float lod);
 
-int4 __overload
-read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX,
-            float2 gradientY);
-uint4 __overload
-read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float2 gradientX,
-             float2 gradientY);
-
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (cood.xy) to do an element
- * lookup in the mip-level specified by lod in
- * the 2D depth image specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-float __overload
-read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord,
-            float2 gradientX, float2 gradientY);
-
-/**
-  * Use gradients to compute the LOD
-  * and use the coordinate (coord.z) and the mip-level
-  * specified by lod to index into the 2D image
-  * array object specified by image_array
-  * and (coord.x, coord.y) to do an element lookup in
-  * the 2D image object specified by image.
-  * read_imagef returns floating-point values in the
-  * range [0.0 ... 1.0] for image objects created with
-  * image_channel_data_type set to one of the predefined
-  * packed formats or CL_UNORM_INT8, or
-  * CL_UNORM_INT16.
-  * read_imagef returns floating-point values in the
-  * range [-1.0 ... 1.0] for image objects created with
-  * image_channel_data_type set to CL_SNORM_INT8,
-  * or CL_SNORM_INT16.
-  * read_imagef returns floating-point values for image
-  * objects created with image_channel_data_type set to
-  * CL_HALF_FLOAT or CL_FLOAT.
-  * The read_imagef calls that take integer coordinates
-  * must use a sampler with filter mode set to
-  * CLK_FILTER_NEAREST, normalized coordinates set
-  * to CLK_NORMALIZED_COORDS_FALSE and
-  * addressing mode set to
-  * CLK_ADDRESS_CLAMP_TO_EDGE,
-  * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
-  * otherwise the values returned are undefined.
-  * Values returned by read_imagef for image objects
-  * with image_channel_data_type values not specified
-  * in the description above are undefined.
-  */
-
-// 2D image arrays
-float4 __overload
-read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
-            float2 gradientX, float2 gradientY);
-
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.z) and the mip-level
- * specified by lod to index into the 2D image
- * array object specified by image_array
- * and (coord.x, coord.y) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-// 2D image arrays
-int4 __overload
-read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
-            float2 gradientX, float2 gradientY);
-uint4 __overload
-read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
-             float2 gradientX, float2 gradientY);
-
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.z) and the mip-level
- * specified by lod to index into the 2D image
- * array object specified by image_array
- * and (coord.x, coord.y) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 2D depth image arrays
-float __overload
-read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord,
-            float2 gradientX, float2 gradientY);
-
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.x, coord.y, coord.z) to do
- * an element lookup in thein the mip-level specified by lod in the
- * 3D image object specified
- * by image. coord.w is ignored.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description are undefined.
- */
-
-float4 __overload
-read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX,
-            float4 gradientY);
-
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.x, coord.y, coord.z) to do
- * an element lookup in thein the mip-level specified by lod in the
- * 3D image object specified
- * by image. coord.w is ignored.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-int4 __overload
-read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX,
-            float4 gradientY);
-uint4 __overload
-read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float4 gradientX,
-             float4 gradientY);
-
-/**
-  * Read Image support for mipmaps using specified LOD
-  */
-
-/**
-  * Use coordinate (x) to do an element lookup in
-  * the mip-level specified by the lod
-  * in the 1D image object specified by image.
-  * read_imagef returns floating-point values in the
-  * range [0.0 ... 1.0] for image objects created with
-  * image_channel_data_type set to one of the predefined
-  * packed formats or CL_UNORM_INT8, or
-  * CL_UNORM_INT16.
-  * read_imagef returns floating-point values in the
-  * range [-1.0 ... 1.0] for image objects created with
-  * image_channel_data_type set to CL_SNORM_INT8,
-  * or CL_SNORM_INT16.
-  * read_imagef returns floating-point values for image
-  * objects created with image_channel_data_type set to
-  * CL_HALF_FLOAT or CL_FLOAT.
-  * The read_imagef calls that take integer coordinates
-  * must use a sampler with filter mode set to
-  * CLK_FILTER_NEAREST, normalized coordinates set
-  * to CLK_NORMALIZED_COORDS_FALSE and
-  * addressing mode set to
-  * CLK_ADDRESS_CLAMP_TO_EDGE,
-  * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
-  * otherwise the values returned are undefined.
-  * Values returned by read_imagef for image objects
-  * with image_channel_data_type values not specified
-  * in the description above are undefined.
-  */
-
-float4 __overload
-read_imagef(read_only image1d_t image, sampler_t sampler, float coord, float lod);
-
-/**
- * Use coordinate (x) to do an element lookup in
- * the mip-level specified by the lod
- * in the 1D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-int4 __overload
-read_imagei(read_only image1d_t image, sampler_t sampler, float coord, float lod);
-uint4 __overload
-read_imageui(read_only image1d_t image, sampler_t sampler, float coord, float lod);
-
-/**
- * Use coordinate (coord.y) to index into the
- * 1D image array object specified by image_array
- * and (coord.x) and mip-level specified by lod
- * to do an element lookup in the 1D image array
- * specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 1D image arrays
-float4 __overload
-read_imagef(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
-            float lod);
-
-/**
- * Use the coordinate (coord.y) to index into the
- * 1D image array object and (coord.x) and mip-level
- * specified by lod to do an element lookup in the
- * 1D image array specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-// 1D image arrays
-
-int4 __overload
-read_imagei(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
-            float lod);
-uint4 __overload
-read_imageui(read_only image1d_array_t image_array, sampler_t sampler, float2 coord,
-             float lod);
-
-/**
- * Use the coordinate (coord.xy) to do an element lookup in
- * in the mip-level specified by lod in the
- * 2D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-float4 __overload
-read_imagef(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
-
-/**
- * Use the coordinate (coord.xy) to do an element lookup in
- * the mip-level specified by lod in the
- * 2D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-int4 __overload
-read_imagei(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
-uint4 __overload
-read_imageui(read_only image2d_t image, sampler_t sampler, float2 coord, float lod);
-
-/**
- * Use the coordinate (cood.xy) to do an element
- * lookup in the mip-level specified by lod in
- * the 2D depth image specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-float __overload
-read_imagef(read_only image2d_depth_t image, sampler_t sampler, float2 coord, float lod);
-
-/**
-  * Use the coordinate (coord.z) and the mip-level
-  * specified by lod to index into the 2D image
-  * array object specified by image_array
-  * and (coord.x, coord.y) to do an element lookup in
-  * the 2D image object specified by image.
-  * read_imagef returns floating-point values in the
-  * range [0.0 ... 1.0] for image objects created with
-  * image_channel_data_type set to one of the predefined
-  * packed formats or CL_UNORM_INT8, or
-  * CL_UNORM_INT16.
-  * read_imagef returns floating-point values in the
-  * range [-1.0 ... 1.0] for image objects created with
-  * image_channel_data_type set to CL_SNORM_INT8,
-  * or CL_SNORM_INT16.
-  * read_imagef returns floating-point values for image
-  * objects created with image_channel_data_type set to
-  * CL_HALF_FLOAT or CL_FLOAT.
-  * The read_imagef calls that take integer coordinates
-  * must use a sampler with filter mode set to
-  * CLK_FILTER_NEAREST, normalized coordinates set
-  * to CLK_NORMALIZED_COORDS_FALSE and
-  * addressing mode set to
-  * CLK_ADDRESS_CLAMP_TO_EDGE,
-  * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
-  * otherwise the values returned are undefined.
-  * Values returned by read_imagef for image objects
-  * with image_channel_data_type values not specified
-  * in the description above are undefined.
-  */
-
-// 2D image arrays
-float4 __overload
-read_imagef(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
-            float lod);
-
-/**
- * Use the coordinate (coord.z) and the mip-level
- * specified by lod to index into the 2D image
- * array object specified by image_array
- * and (coord.x, coord.y) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-// 2D image arrays
-int4 __overload
-read_imagei(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
-            float lod);
-uint4 __overload
-read_imageui(read_only image2d_array_t image_array, sampler_t sampler, float4 coord,
-             float lod);
-
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.z) and the mip-level
- * specified by lod to index into the 2D image
- * array object specified by image_array
- * and (coord.x, coord.y) to do an element lookup in
- * the 2D image object specified by image.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description above are undefined.
- */
-
-// 2D depth image arrays
-float __overload
-read_imagef(read_only image2d_array_depth_t image, sampler_t sampler, float4 coord,
-            float lod);
-
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.x, coord.y, coord.z) to do
- * an element lookup in thein the mip-level specified by lod in the
- * 3D image object specified
- * by image. coord.w is ignored.
- * read_imagef returns floating-point values in the
- * range [0.0 ... 1.0] for image objects created with
- * image_channel_data_type set to one of the predefined
- * packed formats or CL_UNORM_INT8, or
- * CL_UNORM_INT16.
- * read_imagef returns floating-point values in the
- * range [-1.0 ... 1.0] for image objects created with
- * image_channel_data_type set to CL_SNORM_INT8,
- * or CL_SNORM_INT16.
- * read_imagef returns floating-point values for image
- * objects created with image_channel_data_type set to
- * CL_HALF_FLOAT or CL_FLOAT.
- * The read_imagef calls that take integer coordinates
- * must use a sampler with filter mode set to
- * CLK_FILTER_NEAREST, normalized coordinates set
- * to CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- * Values returned by read_imagef for image objects
- * with image_channel_data_type values not specified
- * in the description are undefined.
- */
-
-float4 __overload
-read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
-
-/**
- * Use gradients to compute the LOD
- * and use the coordinate (coord.x, coord.y, coord.z) to do
- * an element lookup in thein the mip-level specified by lod in the
- * 3D image object specified
- * by image. coord.w is ignored.
- * read_imagei and read_imageui return
- * unnormalized signed integer and unsigned integer
- * values respectively. Each channel will be stored in a
- * 32-bit integer.
- * read_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imagei
- * are undefined.
- * read_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * If the image_channel_data_type is not one of the
- * above values, the values returned by read_imageui
- * are undefined.
- * The read_image{i|ui} calls support a nearest filter
- * only. The filter_mode specified in sampler
- * must be set to CLK_FILTER_NEAREST; otherwise
- * the values returned are undefined.
- * Furthermore, the read_image{i|ui} calls that take
- * integer coordinates must use a sampler with
- * normalized coordinates set to
- * CLK_NORMALIZED_COORDS_FALSE and
- * addressing mode set to
- * CLK_ADDRESS_CLAMP_TO_EDGE,
- * CLK_ADDRESS_CLAMP or CLK_ADDRESS_NONE;
- * otherwise the values returned are undefined.
- */
-
-int4 __overload
-read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
-uint4 __overload
-read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
+float4 __overload read_imagef(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
+int4 __overload read_imagei(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
+uint4 __overload read_imageui(read_only image3d_t image, sampler_t sampler, float4 coord, float lod);
 
 #endif //cl_khr_mipmap_image
-
 
 /**
 * Sampler-less Image Access
@@ -17595,7 +15792,7 @@ float4 __overload read_imagef(read_only image3d_t image, int4 coord);
 int4 __overload read_imagei(read_only image3d_t image, int4 coord);
 uint4 __overload read_imageui(read_only image3d_t image, int4 coord);
 
-// Image Read Functions Returning half4 Type
+// Image read functions returning half4 type
 #ifdef cl_khr_fp16
 half4 __overload read_imageh(read_only image1d_t image, sampler_t sampler, int coord);
 half4 __overload read_imageh(read_only image1d_t image, sampler_t sampler, float coord);
@@ -17615,6 +15812,7 @@ half4 __overload read_imageh(read_only image2d_array_t image, int4 coord);
 half4 __overload read_imageh(read_only image1d_buffer_t image, int coord);
 #endif //cl_khr_fp16
 
+// Image read functions for read_write images
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 float4 __overload read_imagef(read_write image1d_t image, int coord);
 int4 __overload read_imagei(read_write image1d_t image, int coord);
@@ -17636,16 +15834,103 @@ float4 __overload read_imagef(read_write image2d_array_t image, int4 coord);
 int4 __overload read_imagei(read_write image2d_array_t image, int4 coord);
 uint4 __overload read_imageui(read_write image2d_array_t image, int4 coord);
 
+float4 __overload read_imagef(read_write image3d_t image, int4 coord);
+int4 __overload read_imagei(read_write image3d_t image, int4 coord);
+uint4 __overload read_imageui(read_write image3d_t image, int4 coord);
+
 #ifdef cl_khr_depth_images
 float __overload read_imagef(read_write image2d_depth_t image, int2 coord);
 float __overload read_imagef(read_write image2d_array_depth_t image, int4 coord);
 #endif //cl_khr_depth_images
 
-float4 __overload read_imagef(read_write image3d_t image, int4 coord);
-int4 __overload read_imagei(read_write image3d_t image, int4 coord);
-uint4 __overload read_imageui(read_write image3d_t image, int4 coord);
+#if cl_khr_gl_msaa_sharing
+float4 __overload read_imagef(read_write image2d_msaa_t image, int2 coord, int sample);
+int4 __overload read_imagei(read_write image2d_msaa_t image, int2 coord, int sample);
+uint4 __overload read_imageui(read_write image2d_msaa_t image, int2 coord, int sample);
 
-// Image Read Functions Returning half4 Type
+float4 __overload read_imagef(read_write image2d_array_msaa_t image, int4 coord, int sample);
+int4 __overload read_imagei(read_write image2d_array_msaa_t image, int4 coord, int sample);
+uint4 __overload read_imageui(read_write image2d_array_msaa_t image, int4 coord, int sample);
+
+float __overload read_imagef(read_write image2d_msaa_depth_t image, int2 coord, int sample);
+float __overload read_imagef(read_write image2d_array_msaa_depth_t image, int4 coord, int sample);
+#endif //cl_khr_gl_msaa_sharing
+
+#ifdef cl_khr_mipmap_image
+float4 __overload read_imagef(read_write image1d_t image, sampler_t sampler, float coord, float lod);
+int4 __overload read_imagei(read_write image1d_t image, sampler_t sampler, float coord, float lod);
+uint4 __overload read_imageui(read_write image1d_t image, sampler_t sampler, float coord, float lod);
+
+float4 __overload read_imagef(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+int4 __overload read_imagei(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+uint4 __overload read_imageui(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+
+float4 __overload read_imagef(read_write image2d_t image, sampler_t sampler, float2 coord, float lod);
+int4 __overload read_imagei(read_write image2d_t image, sampler_t sampler, float2 coord, float lod);
+uint4 __overload read_imageui(read_write image2d_t image, sampler_t sampler, float2 coord, float lod);
+
+float __overload read_imagef(read_write image2d_depth_t image, sampler_t sampler, float2 coord, float lod);
+
+float4 __overload read_imagef(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+int4 __overload read_imagei(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+uint4 __overload read_imageui(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+
+float __overload read_imagef(read_write image2d_array_depth_t image, sampler_t sampler, float4 coord, float lod);
+
+float4 __overload read_imagef(read_write image3d_t image, sampler_t sampler, float4 coord, float lod);
+int4 __overload read_imagei(read_write image3d_t image, sampler_t sampler, float4 coord, float lod);
+uint4 __overload read_imageui(read_write image3d_t image, sampler_t sampler, float4 coord, float lod);
+
+float4 __overload read_imagef(read_write image1d_t image, sampler_t sampler, float coord, float gradientX, float gradientY);
+int4 __overload read_imagei(read_write image1d_t image, sampler_t sampler, float coord, float gradientX, float gradientY);
+uint4 __overload read_imageui(read_write image1d_t image, sampler_t sampler, float coord, float gradientX, float gradientY);
+
+float4 __overload read_imagef(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float gradientX, float gradientY);
+int4 __overload read_imagei(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float gradientX, float gradientY);
+uint4 __overload read_imageui(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float gradientX, float gradientY);
+
+float4 __overload read_imagef(read_write image2d_t image, sampler_t sampler, float2 coord, float2 gradientX, float2 gradientY);
+int4 __overload read_imagei(read_write image2d_t image, sampler_t sampler, float2 coord, float2 gradientX, float2 gradientY);
+uint4 __overload read_imageui(read_write image2d_t image, sampler_t sampler, float2 coord, float2 gradientX, float2 gradientY);
+
+float __overload read_imagef(read_write image2d_depth_t image, sampler_t sampler, float2 coord, float2 gradientX, float2 gradientY);
+
+float4 __overload read_imagef(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float2 gradientX, float2 gradientY);
+int4 __overload read_imagei(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float2 gradientX, float2 gradientY);
+uint4 __overload read_imageui(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float2 gradientX, float2 gradientY);
+
+float __overload read_imagef(read_write image2d_array_depth_t image, sampler_t sampler, float4 coord, float2 gradientX, float2 gradientY);
+
+float4 __overload read_imagef(read_write image3d_t image, sampler_t sampler, float4 coord, float4 gradientX, float4 gradientY);
+int4 __overload read_imagei(read_write image3d_t image, sampler_t sampler, float4 coord, float4 gradientX, float4 gradientY);
+uint4 __overload read_imageui(read_write image3d_t image, sampler_t sampler, float4 coord, float4 gradientX, float4 gradientY);
+
+float4 __overload read_imagef(read_write image1d_t image, sampler_t sampler, float coord, float lod);
+int4 __overload read_imagei(read_write image1d_t image, sampler_t sampler, float coord, float lod);
+uint4 __overload read_imageui(read_write image1d_t image, sampler_t sampler, float coord, float lod);
+
+float4 __overload read_imagef(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+int4 __overload read_imagei(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+uint4 __overload read_imageui(read_write image1d_array_t image_array, sampler_t sampler, float2 coord, float lod);
+
+float4 __overload read_imagef(read_write image2d_t image, sampler_t sampler, float2 coord, float lod);
+int4 __overload read_imagei(read_write image2d_t image, sampler_t sampler, float2 coord, float lod);
+uint4 __overload read_imageui(read_write image2d_t image, sampler_t sampler, float2 coord, float lod);
+
+float __overload read_imagef(read_write image2d_depth_t image, sampler_t sampler, float2 coord, float lod);
+
+float4 __overload read_imagef(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+int4 __overload read_imagei(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+uint4 __overload read_imageui(read_write image2d_array_t image_array, sampler_t sampler, float4 coord, float lod);
+
+float __overload read_imagef(read_write image2d_array_depth_t image, sampler_t sampler, float4 coord, float lod);
+
+float4 __overload read_imagef(read_write image3d_t image, sampler_t sampler, float4 coord, float lod);
+int4 __overload read_imagei(read_write image3d_t image, sampler_t sampler, float4 coord, float lod);
+uint4 __overload read_imageui(read_write image3d_t image, sampler_t sampler, float4 coord, float lod);
+#endif //cl_khr_mipmap_image
+
+// Image read functions returning half4 type
 #ifdef cl_khr_fp16
 half4 __overload read_imageh(read_write image1d_t image, int coord);
 half4 __overload read_imageh(read_write image2d_t image, int2 coord);
@@ -17658,12 +15943,40 @@ half4 __overload read_imageh(read_write image1d_buffer_t image, int coord);
 
 /**
  * Write color value to location specified by coordinate
- * (x, y) in the 2D image object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
+ * (coord.x, coord.y) in the 2D image object specified by image.
+ * (coord.x, coord.y) are considered to be unnormalized coordinates
  * and must be in the range 0 ... image width - 1, and 0
  * ... image height - 1.
+
+ * Write color value to location specified by coordinate
+ * (coord.x, coord.y) in the 2D image object specified by index
+ * (coord.z) of the 2D image array object image_array.
+ * (coord.x, coord.y) are considered to be unnormalized
+ * coordinates and must be in the range 0 ... image width
+ * - 1.
+ *
+ * Write color value to location specified by coordinate
+ * (coord) in the 1D image (buffer) object specified by image.
+ * coord is considered to be unnormalized coordinates
+ * and must be in the range 0 ... image width - 1.
+ *
+ * Write color value to location specified by coordinate
+ * (coord.x) in the 1D image object specified by index
+ * (coord.y) of the 1D image array object image_array.
+ * x is considered to be unnormalized coordinates
+ * and must be in the range 0 ... image width - 1.
+ *
+ * Write color value to location specified by coordinate
+ * (coord.x, coord.y, coord.z) in the 3D image object specified by image.
+ * coord.x & coord.y are considered to be unnormalized coordinates
+ * and must be in the range 0 ... image width - 1, and 0
+ * ... image height - 1.
+ *
+ * For mipmap images, use mip-level specified by lod.
+ *
+ * Appropriate data format conversion to the specified
+ * image format is done before writing the color value.
+ *
  * write_imagef can only be used with image objects
  * created with image_channel_data_type set to one of
  * the pre-defined packed formats or set to
@@ -17673,303 +15986,52 @@ half4 __overload read_imageh(read_write image1d_buffer_t image, int coord);
  * format conversion will be done to convert channel
  * data from a floating-point value to actual data format
  * in which the channels are stored.
+ *
  * write_imagei can only be used with image objects
  * created with image_channel_data_type set to one of
  * the following values:
  * CL_SIGNED_INT8,
  * CL_SIGNED_INT16 and
  * CL_SIGNED_INT32.
+ *
  * write_imageui can only be used with image objects
  * created with image_channel_data_type set to one of
  * the following values:
  * CL_UNSIGNED_INT8,
  * CL_UNSIGNED_INT16 and
  * CL_UNSIGNED_INT32.
+ *
  * The behavior of write_imagef, write_imagei and
  * write_imageui for image objects created with
  * image_channel_data_type values not specified in
  * the description above or with (x, y) coordinate
- * values that are not in the range (0 ... image width -
- * 1, 0 ... image height - 1), respectively, is undefined.
+ * values that are not in the range (0 ... image width -1,
+ * 0 ... image height - 1), respectively, is undefined.
  */
 void __overload write_imagef(write_only image2d_t image, int2 coord, float4 color);
 void __overload write_imagei(write_only image2d_t image, int2 coord, int4 color);
 void __overload write_imageui(write_only image2d_t image, int2 coord, uint4 color);
 
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image2d_t image, int2 coord, float4 color);
-void __overload write_imagei(read_write image2d_t image, int2 coord, int4 color);
-void __overload write_imageui(read_write image2d_t image, int2 coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (coord.x, coord.y) in the 2D image object specified by index
- * (coord.z) of the 2D image array object image_array.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * (coord.x, coord.y) are considered to be unnormalized
- * coordinates and must be in the range 0 ... image width
- * - 1. write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-
-//2D image arrays
 void __overload write_imagef(write_only image2d_array_t image_array, int4 coord, float4 color);
 void __overload write_imagei(write_only image2d_array_t image_array, int4 coord, int4 color);
 void __overload write_imageui(write_only image2d_array_t image_array, int4 coord, uint4 color);
 
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image2d_array_t image_array, int4 coord, float4 color);
-void __overload write_imagei(read_write image2d_array_t image_array, int4 coord, int4 color);
-void __overload write_imageui(read_write image2d_array_t image_array, int4 coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x) in the 1D image object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x is considered to be unnormalized coordinates
- * and must be in the range 0 ... image width - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
 void __overload write_imagef(write_only image1d_t image, int coord, float4 color);
 void __overload write_imagei(write_only image1d_t image, int coord, int4 color);
 void __overload write_imageui(write_only image1d_t image, int coord, uint4 color);
 
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image1d_t image, int coord, float4 color);
-void __overload write_imagei(read_write image1d_t image, int coord, int4 color);
-void __overload write_imageui(read_write image1d_t image, int coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x) in the 1D image buffer object specified by image
- * buffer. Appropriate data format conversion to the
- * specified image buffer format is done before writing
- * the color value.x is considered to be unnormalized
- * coordinates and must be in the range 0 ... image width - 1.
- * write_imagef can only be used with image buffer objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image buffer objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image buffer objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image buffer objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
 void __overload write_imagef(write_only image1d_buffer_t image, int coord, float4 color);
 void __overload write_imagei(write_only image1d_buffer_t image, int coord, int4 color);
 void __overload write_imageui(write_only image1d_buffer_t image, int coord, uint4 color);
 
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image1d_buffer_t image, int coord, float4 color);
-void __overload write_imagei(read_write image1d_buffer_t image, int coord, int4 color);
-void __overload write_imageui(read_write image1d_buffer_t image, int coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (coord.x) in the 1D image object specified by index
- * (coord.y) of the 1D image array object image_array.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x is considered to be unnormalized coordinates
- * and must be in the range 0 ... image width - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-
-//1D image arrays
 void __overload write_imagef(write_only image1d_array_t image_array, int2 coord, float4 color);
 void __overload write_imagei(write_only image1d_array_t image_array, int2 coord, int4 color);
 void __overload write_imageui(write_only image1d_array_t image_array, int2 coord, uint4 color);
 
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image1d_array_t image_array, int2 coord, float4 color);
-void __overload write_imagei(read_write image1d_array_t image_array, int2 coord, int4 color);
-void __overload write_imageui(read_write image1d_array_t image_array, int2 coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x, y, z) in the 3D image object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
- * and must be in the range 0 ... image width - 1, and 0
- * ... image height - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x, y) coordinate
- * values that are not in the range (0 ... image width -
- * 1, 0 ... image height - 1), respectively, is undefined.
- */
 void __overload write_imagef(write_only image3d_t image, int4 coord, float4 color);
 void __overload write_imagei(write_only image3d_t image, int4 coord, int4 color);
 void __overload write_imageui(write_only image3d_t image, int4 coord, uint4 color);
 
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload write_imagef(read_write image3d_t image, int4 coord, float4 color);
-void __overload write_imagei(read_write image3d_t image, int4 coord, int4 color);
-void __overload write_imageui(read_write image3d_t image, int4 coord, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (coord.x, coord.y) in the 2D image object specified by
- * image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * (coord.x, coord.y) are considered to be unnormalized
- * coordinates and must be in the range 0 ... image width
- * - 1. write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
 #ifdef cl_khr_depth_images
 void __overload write_imagef(write_only image2d_depth_t image, int2 coord, float color);
 void __overload write_imagef(write_only image2d_array_depth_t image, int4 coord, float color);
@@ -17977,336 +16039,31 @@ void __overload write_imagef(write_only image2d_array_depth_t image, int4 coord,
 
 // OpenCL Extension v2.0 s9.18 - Mipmaps
 #ifdef cl_khr_mipmap_image
-// 1D writes with mipmap support
-/**
- * Write color value to location specified by coordinate
- * (x) in the mip-level specified by lod 2D image
- * object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
- * and must be in the range 0 ... image width
- * of mip-level specified by lod - 1, and 0
- * ... image height of mip-level specified lod - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-void __overload
-write_imagef(write_only image1d_t image, int coord, int lod, float4 color);
-void __overload
-write_imagei(write_only image1d_t image, int coord, int lod, int4 color);
-void __overload
-write_imageui(write_only image1d_t image, int coord, int lod, uint4 color);
+void __overload write_imagef(write_only image1d_t image, int coord, int lod, float4 color);
+void __overload write_imagei(write_only image1d_t image, int coord, int lod, int4 color);
+void __overload write_imageui(write_only image1d_t image, int coord, int lod, uint4 color);
 
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload
-write_imagef(read_write image1d_t image, int coord, int lod, float4 color);
-void __overload
-write_imagei(read_write image1d_t image, int coord, int lod, int4 color);
-void __overload
-write_imageui(read_write image1d_t image, int coord, int lod, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(write_only image1d_array_t image_array, int2 coord, int lod, float4 color);
+void __overload write_imagei(write_only image1d_array_t image_array, int2 coord, int lod, int4 color);
+void __overload write_imageui(write_only image1d_array_t image_array, int2 coord, int lod, uint4 color);
 
-/**
- * Write color value to location specified by coord.x in
- * the 1D image identified by coord.y and mip-level
- * lod in the 1D image array specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * coord.x and coord.y are considered to be
- * unnormalized coordinates and must be in the range 0
- * ... image width of the mip-level specified by lod - 1
- * and 0 ... image number of layers - 1   * write_imagef can only be used with
- * image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
+void __overload write_imagef(write_only image2d_t image, int2 coord, int lod, float4 color);
+void __overload write_imagei(write_only image2d_t image, int2 coord, int lod, int4 color);
+void __overload write_imageui(write_only image2d_t image, int2 coord, int lod, uint4 color);
 
-// 1D image arrays writes with mipmap support
-void __overload
-write_imagef(write_only image1d_array_t image_array, int2 coord, int lod, float4 color);
-void __overload
-write_imagei(write_only image1d_array_t image_array, int2 coord, int lod, int4 color);
-void __overload
-write_imageui(write_only image1d_array_t image_array, int2 coord, int lod, uint4 color);
+void __overload write_imagef(write_only image2d_array_t image_array, int4 coord, int lod, float4 color);
+void __overload write_imagei(write_only image2d_array_t image_array, int4 coord, int lod, int4 color);
+void __overload write_imageui(write_only image2d_array_t image_array, int4 coord, int lod, uint4 color);
 
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload
-write_imagef(read_write image1d_array_t image_array, int2 coord, int lod, float4 color);
-void __overload
-write_imagei(read_write image1d_array_t image_array, int2 coord, int lod, int4 color);
-void __overload
-write_imageui(read_write image1d_array_t image_array, int2 coord, int lod, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(write_only image2d_depth_t image, int2 coord, int lod, float color);
+void __overload write_imagef(write_only image2d_array_depth_t image, int4 coord, int lod, float color);
 
-// 2D writes with mipmap support
-/**
- * Write color value to location specified by coordinate
- * (x, y) in the mip-level specified by lod 2D image
- * object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
- * and must be in the range 0 ... image width
- * of mip-level specified by lod - 1, and 0
- * ... image height of mip-level specified lod - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x, y) coordinate
- * values that are not in the range (0 ... image width -
- * 1, 0 ... image height - 1), respectively, is undefined.
- */
-void __overload
-write_imagef(write_only image2d_t image, int2 coord, int lod, float4 color);
-void __overload
-write_imagei(write_only image2d_t image, int2 coord, int lod, int4 color);
-void __overload
-write_imageui(write_only image2d_t image, int2 coord, int lod, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload
-write_imagef(read_write image2d_t image, int2 coord, int lod, float4 color);
-void __overload
-write_imagei(read_write image2d_t image, int2 coord, int lod, int4 color);
-void __overload
-write_imageui(read_write image2d_t image, int2 coord, int lod, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x, y) in the mip-level specified by lod 2D image
- * object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
- * and must be in the range 0 ... image width
- * of mip-level specified by lod - 1, and 0
- * ... image height of mip-level specified lod - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-
-// 2D image arrays
-void __overload
-write_imagef(write_only image2d_array_t image_array, int4 coord, int lod, float4 color);
-void __overload
-write_imagei(write_only image2d_array_t image_array, int4 coord, int lod, int4 color);
-void __overload
-write_imageui(write_only image2d_array_t image_array, int4 coord, int lod, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload
-write_imagef(read_write image2d_array_t image_array, int4 coord, int lod, float4 color);
-void __overload
-write_imagei(read_write image2d_array_t image_array, int4 coord, int lod, int4 color);
-void __overload
-write_imageui(read_write image2d_array_t image_array, int4 coord, int lod, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-/**
- * Write color value to location specified by coordinate
- * (x, y) in the mip-level specified by lod 2D image
- * object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
- * and must be in the range 0 ... image width
- * of mip-level specified by lod - 1, and 0
- * ... image height of mip-level specified lod - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x) coordinate
- * values that are not in the range (0 ... image width -
- * 1), respectively, is undefined.
- */
-void __overload
-write_imagef(write_only image2d_depth_t image, int2 coord, int lod, float color);
-void __overload
-write_imagef(write_only image2d_array_depth_t image, int4 coord, int lod, float color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload
-write_imagef(read_write image2d_depth_t image, int2 coord, int lod, float color);
-void __overload
-write_imagef(read_write image2d_array_depth_t image, int4 coord, int lod, float color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
-// 3D image write support with mipmaps
-/**
- * Write color value to location specified by coordinate
- * (x, y, z) in the mip-level specified by lod 3D image
- * object specified by image.
- * Appropriate data format conversion to the specified
- * image format is done before writing the color value.
- * x & y are considered to be unnormalized coordinates
- * and must be in the range 0 ... image width
- * of mip-level specified by lod - 1, and 0
- * ... image height of mip-level specified lod - 1.
- * write_imagef can only be used with image objects
- * created with image_channel_data_type set to one of
- * the pre-defined packed formats or set to
- * CL_SNORM_INT8, CL_UNORM_INT8,
- * CL_SNORM_INT16, CL_UNORM_INT16,
- * CL_HALF_FLOAT or CL_FLOAT. Appropriate data
- * format conversion will be done to convert channel
- * data from a floating-point value to actual data format
- * in which the channels are stored.
- * write_imagei can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_SIGNED_INT8,
- * CL_SIGNED_INT16 and
- * CL_SIGNED_INT32.
- * write_imageui can only be used with image objects
- * created with image_channel_data_type set to one of
- * the following values:
- * CL_UNSIGNED_INT8,
- * CL_UNSIGNED_INT16 and
- * CL_UNSIGNED_INT32.
- * The behavior of write_imagef, write_imagei and
- * write_imageui for image objects created with
- * image_channel_data_type values not specified in
- * the description above or with (x, y) coordinate
- * values that are not in the range (0 ... image width -
- * 1, 0 ... image height - 1), respectively, is undefined.
- */
-void __overload
-write_imagef(write_only image3d_t image, int4 coord, int lod, float4 color);
-void __overload
-write_imagei(write_only image3d_t image, int4 coord, int lod, int4 color);
-void __overload
-write_imageui(write_only image3d_t image, int4 coord, int lod, uint4 color);
-
-#if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-void __overload
-write_imagef(read_write image3d_t image, int4 coord, int lod, float4 color);
-void __overload
-write_imagei(read_write image3d_t image, int4 coord, int lod, int4 color);
-void __overload
-write_imageui(read_write image3d_t image, int4 coord, int lod, uint4 color);
-#endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
-
+void __overload write_imagef(write_only image3d_t image, int4 coord, int lod, float4 color);
+void __overload write_imagei(write_only image3d_t image, int4 coord, int lod, int4 color);
+void __overload write_imageui(write_only image3d_t image, int4 coord, int lod, uint4 color);
 #endif //cl_khr_mipmap_image
 
-// Image Write Functions Returning half4 Type
+// Image write functions for half4 type
 #ifdef cl_khr_fp16
 void __overload write_imageh(write_only image1d_t image, int coord, half4 color);
 void __overload write_imageh(write_only image2d_t image, int2 coord, half4 color);
@@ -18316,13 +16073,63 @@ void __overload write_imageh(write_only image2d_array_t image, int4 coord, half4
 void __overload write_imageh(write_only image1d_buffer_t image, int coord, half4 color);
 #endif //cl_khr_fp16
 
+// Image write functions for read_write images
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
+void __overload write_imagef(read_write image2d_t image, int2 coord, float4 color);
+void __overload write_imagei(read_write image2d_t image, int2 coord, int4 color);
+void __overload write_imageui(read_write image2d_t image, int2 coord, uint4 color);
+
+void __overload write_imagef(read_write image2d_array_t image_array, int4 coord, float4 color);
+void __overload write_imagei(read_write image2d_array_t image_array, int4 coord, int4 color);
+void __overload write_imageui(read_write image2d_array_t image_array, int4 coord, uint4 color);
+
+void __overload write_imagef(read_write image1d_t image, int coord, float4 color);
+void __overload write_imagei(read_write image1d_t image, int coord, int4 color);
+void __overload write_imageui(read_write image1d_t image, int coord, uint4 color);
+
+void __overload write_imagef(read_write image1d_buffer_t image, int coord, float4 color);
+void __overload write_imagei(read_write image1d_buffer_t image, int coord, int4 color);
+void __overload write_imageui(read_write image1d_buffer_t image, int coord, uint4 color);
+
+void __overload write_imagef(read_write image1d_array_t image_array, int2 coord, float4 color);
+void __overload write_imagei(read_write image1d_array_t image_array, int2 coord, int4 color);
+void __overload write_imageui(read_write image1d_array_t image_array, int2 coord, uint4 color);
+
+void __overload write_imagef(read_write image3d_t image, int4 coord, float4 color);
+void __overload write_imagei(read_write image3d_t image, int4 coord, int4 color);
+void __overload write_imageui(read_write image3d_t image, int4 coord, uint4 color);
+
 #ifdef cl_khr_depth_images
 void __overload write_imagef(read_write image2d_depth_t image, int2 coord, float color);
 void __overload write_imagef(read_write image2d_array_depth_t image, int4 coord, float color);
 #endif //cl_khr_depth_images
 
-// Image Write Functions Returning half4 Type
+#ifdef cl_khr_mipmap_image
+void __overload write_imagef(read_write image1d_t image, int coord, int lod, float4 color);
+void __overload write_imagei(read_write image1d_t image, int coord, int lod, int4 color);
+void __overload write_imageui(read_write image1d_t image, int coord, int lod, uint4 color);
+
+void __overload write_imagef(read_write image1d_array_t image_array, int2 coord, int lod, float4 color);
+void __overload write_imagei(read_write image1d_array_t image_array, int2 coord, int lod, int4 color);
+void __overload write_imageui(read_write image1d_array_t image_array, int2 coord, int lod, uint4 color);
+
+void __overload write_imagef(read_write image2d_t image, int2 coord, int lod, float4 color);
+void __overload write_imagei(read_write image2d_t image, int2 coord, int lod, int4 color);
+void __overload write_imageui(read_write image2d_t image, int2 coord, int lod, uint4 color);
+
+void __overload write_imagef(read_write image2d_array_t image_array, int4 coord, int lod, float4 color);
+void __overload write_imagei(read_write image2d_array_t image_array, int4 coord, int lod, int4 color);
+void __overload write_imageui(read_write image2d_array_t image_array, int4 coord, int lod, uint4 color);
+
+void __overload write_imagef(read_write image2d_depth_t image, int2 coord, int lod, float color);
+void __overload write_imagef(read_write image2d_array_depth_t image, int4 coord, int lod, float color);
+
+void __overload write_imagef(read_write image3d_t image, int4 coord, int lod, float4 color);
+void __overload write_imagei(read_write image3d_t image, int4 coord, int lod, int4 color);
+void __overload write_imageui(read_write image3d_t image, int4 coord, int lod, uint4 color);
+#endif //cl_khr_mipmap_image
+
+// Image write functions for half4 type
 #ifdef cl_khr_fp16
 void __overload write_imageh(read_write image1d_t image, int coord, half4 color);
 void __overload write_imageh(read_write image2d_t image, int2 coord, half4 color);
