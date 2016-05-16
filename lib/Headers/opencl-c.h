@@ -14774,7 +14774,7 @@ void __overload atomic_init(volatile atomic_double *object, double value);
 void __overload atomic_work_item_fence(cl_mem_fence_flags flags, memory_order order, memory_scope scope);
 
 // atomic_fetch()
-#if defined(cl_khr_int64_base_atomics) && defined(cl_khr_int64_extended_atomics)
+
 // OpenCL v2.0 s6.13.11.7.5:
 // add/sub: atomic type argument can be uintptr_t/intptr_t, value type argument can be ptrdiff_t.
 // or/xor/and: atomic type argument can be intptr_t/uintptr_t, value type argument can be intptr_t/uintptr_t.
