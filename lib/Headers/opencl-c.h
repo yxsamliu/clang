@@ -17158,29 +17158,6 @@ ndrange_t __overload ndrange_3D(const size_t[3]);
 ndrange_t __overload ndrange_3D(const size_t[3], const size_t[3]);
 ndrange_t __overload ndrange_3D(const size_t[3], const size_t[3], const size_t[3]);
 
-// ToDo: Add enqueue_kernel as a Clang builtin because it requires custom check of type of variadic 
-// arguments as well as block arguments.
-int __overload
-enqueue_kernel(queue_t queue, kernel_enqueue_flags_t, const ndrange_t,
-               void (^block)(void));
-
-int __overload
-enqueue_kernel(queue_t queue, kernel_enqueue_flags_t, const ndrange_t, uint,
-               const __private clk_event_t *, __private clk_event_t *,
-               void (^block)(void));
-
-int __overload
-enqueue_kernel(queue_t queue, kernel_enqueue_flags_t flags,
-               const ndrange_t ndrange, void (^block)(local void *, ...),
-               uint size0, ...);
-
-int __overload
-enqueue_kernel(queue_t queue, kernel_enqueue_flags_t flags,
-               const ndrange_t ndrange, uint num_events_in_wait_list,
-               const __private clk_event_t *event_wait_list,
-               __private clk_event_t *event_ret,
-               void (^block)(local void *, ...), uint size0, ...);
-
 // ToDo: Add these functions as Clang builtins since they eed a special check of parameters to block.
 uint __overload get_kernel_work_group_size(void (^block)(void));
 uint __overload get_kernel_work_group_size(void (^block)(local void *, ...));
