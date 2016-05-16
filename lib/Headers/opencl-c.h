@@ -16720,16 +16720,15 @@ bool _ovld is_valid_reserve_id(reserve_id_t reserve_id);
 #define CL_SUBMITTED                                0x2
 #define CL_QUEUED                                   0x3
 
-// The value are defined according to their order in the spec.
 #define CLK_SUCCESS                                 0
-#define CLK_ENQUEUE_FAILURE                         -1
-#define CLK_INVALID_QUEUE                           -2
-#define CLK_INVALID_NDRANGE                         -3
-#define CLK_INVALID_EVENT_WAIT_LIST                 -4
-#define CLK_DEVICE_QUEUE_FULL                       -5
-#define CLK_INVALID_ARG_SIZE                        -6
-#define CLK_EVENT_ALLOCATION_FAILURE                -8
-#define CLK_OUT_OF_RESOURCES                        -9
+#define CLK_ENQUEUE_FAILURE                         -101
+#define CLK_INVALID_QUEUE                           -102
+#define CLK_INVALID_NDRANGE                         -160
+#define CLK_INVALID_EVENT_WAIT_LIST                 -57
+#define CLK_DEVICE_QUEUE_FULL                       -161
+#define CLK_INVALID_ARG_SIZE                        -51
+#define CLK_EVENT_ALLOCATION_FAILURE                -100
+#define CLK_OUT_OF_RESOURCES                        -5
 
 #define CLK_NULL_QUEUE                              0
 #define CLK_NULL_EVENT (__builtin_astype(((void*)(__SIZE_MAX__)), clk_event_t))
