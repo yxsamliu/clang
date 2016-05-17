@@ -476,14 +476,14 @@ static bool SemaOpenCLBuiltinToAddr(Sema &S, unsigned BuiltinID,
   }
 
   auto RT = Call->getArg(0)->getType();
-  if (!RT->isPointerType() || RT->getPointeeType().getCanonicalType()
-      .getQualifiers().getAddressSpace() == LangAS::opencl_constant) {
+  if (!RT->isPointerType() || RT->getPointeeType()
+      .getAddressSpace() == LangAS::opencl_constant) {
     S.Diag(Call->getLocStart(), diag::err_opencl_builtin_to_addr_invalid_arg)
         << Call->getArg(0) << Call->getDirectCallee() << Call->getSourceRange();
     return true;
   }
 
-  RT = RT->getPointeeType().getCanonicalType();
+  RT = RT->getPointeeType();
   auto Qual = RT.getQualifiers();
   switch (BuiltinID) {
   case Builtin::BIto_global:

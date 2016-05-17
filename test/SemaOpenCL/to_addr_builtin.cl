@@ -5,6 +5,8 @@ void test(void) {
   global int *glob;
   local int *loc;
   constant int *con;
+  typedef constant int const_int_ty;
+  const_int_ty *con_typedef;
 
   glob = to_global(glob, loc);
 #if __OPENCL_C_VERSION__ < CL_VERSION_2_0
@@ -26,6 +28,13 @@ void test(void) {
   // expected-error@-2{{'to_global' requires OpenCL version 2.0 or above}}
 #else
   // expected-error@-4{{invalid argument con to function: 'to_global', expecting a generic pointer argument}}
+#endif
+
+  glob = to_global(con_typedef);
+#if __OPENCL_C_VERSION__ < CL_VERSION_2_0
+  // expected-error@-2{{'to_global' requires OpenCL version 2.0 or above}}
+#else
+  // expected-error@-4{{invalid argument con_typedef to function: 'to_global', expecting a generic pointer argument}}
 #endif
 
   loc = to_global(glob);
