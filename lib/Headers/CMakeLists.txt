@@ -49,6 +49,7 @@ set(files
   mwaitxintrin.h
   nmmintrin.h
   pkuintrin.h
+  opencl-c.h
   pmmintrin.h
   popcntintrin.h
   prfchwintrin.h
