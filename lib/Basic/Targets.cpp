@@ -1840,6 +1840,11 @@ public:
 
     return GPU != GK_NONE;
   }
+  void setSupportedOpenCLOpts() override {
+    auto &Opts = getSupportedOpenCLOpts();
+    Opts.cl_clang_storage_class_specifiers = 1;
+    Opts.cl_khr_fp64 = 1;
+ }
 };
 
 const Builtin::Info NVPTXTargetInfo::BuiltinInfo[] = {
