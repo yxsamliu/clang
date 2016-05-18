@@ -1843,6 +1843,7 @@ public:
   void setSupportedOpenCLOpts() override {
     auto &Opts = getSupportedOpenCLOpts();
     Opts.cl_clang_storage_class_specifiers = 1;
+    Opts.cl_khr_byte_addressable_store = 1;
     Opts.cl_khr_fp64 = 1;
  }
 };
