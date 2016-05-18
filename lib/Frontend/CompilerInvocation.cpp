@@ -1482,7 +1482,7 @@ void CompilerInvocation::setLangDefaults(LangOptions &Opts, InputKind IK,
     Opts.DefaultFPContract = 1;
     Opts.NativeHalfType = 1;
     Opts.NativeHalfArgsAndReturns = 1;
-    Opts.Blocks = Opts.OpenCLVersion >= 200;
+    Opts.Blocks = 1;
     // Include default header file for OpenCL.
     if (Opts.ImplicitModules)
       PPOpts.Includes.push_back("opencl-c.h");
