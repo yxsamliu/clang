@@ -155,6 +155,11 @@ module _Builtin_intrinsics [system] [extern_c] {
       header "vecintrin.h"
     }
   }
+  
+  explict module opencl_c {
+    requires opencl
+    header "opencl-c.h"
+  }
 }
 
 module _Builtin_stddef_max_align_t [system] [extern_c] {
