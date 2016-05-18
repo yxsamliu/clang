@@ -1400,6 +1400,7 @@ static void ParseHeaderSearchArgs(HeaderSearchOptions &Opts, ArgList &Args) {
 
 void CompilerInvocation::setLangDefaults(LangOptions &Opts, InputKind IK,
                                          const llvm::Triple &T,
+                                         PreprocessorOptions &PPOpts,
                                          LangStandard::Kind LangStd) {
   // Set some properties which depend solely on the input kind; it would be nice
   // to move these to the language standard, and have the driver resolve the
@@ -1481,6 +1482,10 @@ void CompilerInvocation::setLangDefaults(LangOptions &Opts, InputKind IK,
     Opts.DefaultFPContract = 1;
     Opts.NativeHalfType = 1;
     Opts.NativeHalfArgsAndReturns = 1;
+    Opts.Blocks = Opts.OpenCLVersion >= 200;
+    // Include default header file for OpenCL.
+    if (Opts.ImplicitModules)
+      PPOpts.Includes.push_back("opencl-c.h");
   }
 
   Opts.CUDA = IK == IK_CUDA || IK == IK_PreprocessedCuda ||
