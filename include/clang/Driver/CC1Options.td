@@ -613,7 +613,7 @@ def fallow_half_arguments_and_returns : Flag<["-"], "fallow-half-arguments-and-r
 def fdefault_calling_conv_EQ : Joined<["-"], "fdefault-calling-conv=">,
   HelpText<"Set default MS calling convention">;
 def fno_default_header : Flag<["-"], "fno-default-header">,
-  HelpText<"Do not include the default header file for OpenCL">
+  HelpText<"Do not include the default header file for OpenCL">;
 
 // C++ TSes.
 def fcoroutines : Flag<["-"], "fcoroutines">,
