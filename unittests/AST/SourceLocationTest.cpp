@@ -178,6 +178,7 @@ TEST(CompoundLiteralExpr, ParensCompoundVectorLiteralRange) {
   RangeVerifier<CompoundLiteralExpr> Verifier;
   Verifier.expectRange(2, 20, 2, 31);
   EXPECT_TRUE(Verifier.match(
+                  "typedef int int2 __attribute__((ext_vector_type(2)));\n"
                   "constant int2 i2 = (int2)(1, 2);", 
                   compoundLiteralExpr(), Lang_OpenCL));
 }
@@ -194,6 +195,7 @@ TEST(InitListExpr, VectorLiteralInitListParens) {
   RangeVerifier<InitListExpr> Verifier;
   Verifier.expectRange(2, 26, 2, 31);
   EXPECT_TRUE(Verifier.match(
+                  "typedef int int2 __attribute__((ext_vector_type(2)));\n"
                   "constant int2 i2 = (int2)(1, 2);", initListExpr(), Lang_OpenCL));
 }
 
