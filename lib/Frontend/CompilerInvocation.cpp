@@ -1483,8 +1483,11 @@ void CompilerInvocation::setLangDefaults(LangOptions &Opts, InputKind IK,
     Opts.NativeHalfType = 1;
     Opts.NativeHalfArgsAndReturns = 1;
     // Include default header file for OpenCL.
-    if (!Opts.NoDefaultHeader)
+    if (!Opts.NoDefaultHeader) {
+      Opts.Modules = true;
+      Opts.ImplicitModules = true;
       PPOpts.Includes.push_back("opencl-c.h");
+    }
   }
 
   Opts.CUDA = IK == IK_CUDA || IK == IK_PreprocessedCuda ||
