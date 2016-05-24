@@ -140,14 +140,14 @@ typedef double double16 __attribute__((ext_vector_type(16)));
 #endif
 
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
-#define NULL                              ((void*)0)
+#define NULL ((void*)0)
 #endif
 
 /**
  * Value of maximum non-infinite single-precision floating-point
  * number.
  */
-#define MAXFLOAT    0x1.fffffep127f
+#define MAXFLOAT 0x1.fffffep127f
 
 /**
  * A positive float constant expression. HUGE_VALF evaluates
@@ -7950,7 +7950,7 @@ half16 __ovld __cnfn erf(half16);
 #endif //cl_khr_fp16
 
 /**
- * Compute the base e exponential of x.
+ * Compute the base e exponential function of x.
  */
 float __ovld __cnfn exp(float x);
 float2 __ovld __cnfn exp(float2 x);
@@ -8455,7 +8455,7 @@ half16 __ovld frexp(half16 x, __private int16 *exp);
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 /**
- * Compute the value of the square root of x^2+ y^2
+ * Compute the value of the square root of x^2 + y^2
  * without undue overflow or underflow.
  */
 float __ovld __cnfn hypot(float x, float y);
@@ -12641,15 +12641,21 @@ half16 __ovld __cnfn select(half16 a, half16 b, ushort16 c);
 #endif //cl_khr_fp16
 
 // OpenCL v1.1 s6.11.7, v1.2 s6.12.7, v2.0 s6.13.7 - Vector Data Load and Store Functions
-
+// OpenCL extensions v1.1 s9.6.6, v1.2 s9.5.6, v2.0 s9.4.6 - Vector Data Load and Store Functions for Half Type
 /**
- * Return sizeof (gentypen) bytes of data read
- * from address (p + (offset * n)). The address
- * computed as (p + (offset * n)) must be 8-bit
- * aligned if gentype is char, uchar; 16-bit
- * aligned if gentype is short, ushort; 32-bit
- * aligned if gentype is int, uint, float; 64-bit
- * aligned if gentype is long, ulong.
+ * Use generic type gentype to indicate the built-in data types
+ * char, uchar, short, ushort, int, uint, long, ulong, float,
+ * double or half.
+ *
+ * vloadn return sizeof (gentypen) bytes of data read from address (p + (offset * n)).
+ *
+ * vstoren write sizeof (gentypen) bytes given by data to address (p + (offset * n)).
+ *
+ * The address computed as (p + (offset * n)) must be 
+ * 8-bit aligned if gentype is char, uchar;
+ * 16-bit aligned if gentype is short, ushort, half;
+ * 32-bit aligned if gentype is int, uint, float;
+ * 64-bit aligned if gentype is long, ulong, double.
  */
 
 char2 __ovld vload2(size_t offset, const __constant char *p);
@@ -12954,15 +12960,6 @@ half16 __ovld vload16(size_t offset, const __private half *p);
 #endif //cl_khr_fp16
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
-/**
- * Write sizeof (gentypen) bytes given by data
- * to address (p + (offset * n)). The address
- * computed as (p + (offset * n)) must be 8-bit
- * aligned if gentype is char, uchar; 16-bit
- * aligned if gentype is short, ushort; 32-bit
- * aligned if gentype is int, uint, float; 64-bit
- * aligned if gentype is long, ulong.
- */
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 void __ovld vstore2(char2 data, size_t offset, char *p);
 void __ovld vstore2(uchar2 data, size_t offset, uchar *p);
@@ -14001,10 +13998,12 @@ void __ovld write_mem_fence(cl_mem_fence_flags flags);
 cl_mem_fence_flags __ovld get_fence(const void *ptr);
 cl_mem_fence_flags __ovld get_fence(void *ptr);
 
-// Builtin functions to_global, to_local, and to_private need to be declared as Clang builtin functions
-// and checked in Sema since they should be declared as
-//   addr gentype* to_addr (gentype*);
-// where gentype is builtin type or user defined type.
+/** 
+ * Builtin functions to_global, to_local, and to_private need to be declared as Clang builtin functions
+ * and checked in Sema since they should be declared as
+ *   addr gentype* to_addr (gentype*);
+ * where gentype is builtin type or user defined type.
+ */
 
 #endif //__OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
