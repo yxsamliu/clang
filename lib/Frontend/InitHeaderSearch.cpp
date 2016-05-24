@@ -149,8 +149,10 @@ void InitHeaderSearch::AddUnmappedPath(const Twine &Path, IncludeDirGroup Group,
 
   // If the directory exists, add it.
   if (const DirectoryEntry *DE = FM.getDirectory(MappedPathStr)) {
+    auto Dir = DirectoryLookup(DE, Type, isFramework);
     IncludePath.push_back(
-      std::make_pair(Group, DirectoryLookup(DE, Type, isFramework)));
+      std::make_pair(Group, Dir));
+    llvm::errs() << "adding directory \"" << Dir.getDir()->getName() << "\"\n";
     return;
   }
 
@@ -168,7 +170,7 @@ void InitHeaderSearch::AddUnmappedPath(const Twine &Path, IncludeDirGroup Group,
     }
   }
 
-  if (Verbose)
+  if (1)
     llvm::errs() << "ignoring nonexistent directory \""
                  << MappedPathStr << "\"\n";
 }
