@@ -29,6 +29,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Linker/Linker.h"
 #include "llvm/MC/SubtargetFeature.h"
 #include "llvm/Object/ModuleSummaryIndexObjectFile.h"
 #include "llvm/Support/CommandLine.h"
@@ -59,8 +60,10 @@ class EmitAssemblyHelper {
   const LangOptions &LangOpts;
   Module *TheModule;
 
+  Timer PreLinkTime;
   Timer CodeGenerationTime;
 
+  mutable legacy::PassManager *PreLinkPasses;
   mutable legacy::PassManager *CodeGenPasses;
   mutable legacy::PassManager *PerModulePasses;
   mutable legacy::FunctionPassManager *PerFunctionPasses;
@@ -100,8 +103,21 @@ private:
     return PerFunctionPasses;
   }
 
+  legacy::PassManager *getPreLinkPasses() const {
+    if (!PreLinkPasses) {
+      PreLinkPasses = new legacy::PassManager();
+      PreLinkPasses->add(
+          createTargetTransformInfoWrapperPass(getTargetIRAnalysis()));
+    }
+    return PreLinkPasses;
+  }
+
   /// Set LLVM command line options passed through -backend-option.
   void setCommandLineOpts();
+
+  /// Set up target for target specific pre-linking passes and LLVM code
+  /// generation.
+  void setTarget(BackendAction Action);
 
   void CreatePasses(ModuleSummaryIndex *ModuleSummary);
 
@@ -120,16 +136,23 @@ private:
   /// \return True on success.
   bool AddEmitPasses(BackendAction Action, raw_pwrite_stream &OS);
 
+  /// Add target specific pre-linking passes.
+  ///
+  /// \return True on success.
+  bool AddPreLinkPasses(raw_pwrite_stream &OS);
+
 public:
   EmitAssemblyHelper(DiagnosticsEngine &_Diags, const CodeGenOptions &CGOpts,
                      const clang::TargetOptions &TOpts,
                      const LangOptions &LOpts, Module *M)
       : Diags(_Diags), CodeGenOpts(CGOpts), TargetOpts(TOpts), LangOpts(LOpts),
-        TheModule(M), CodeGenerationTime("Code Generation Time"),
+        TheModule(M), PreLinkTime("Pre-Linking Passes Time"),
+        CodeGenerationTime("Code Generation Time"), PreLinkPasses(nullptr),
         CodeGenPasses(nullptr), PerModulePasses(nullptr),
         PerFunctionPasses(nullptr) {}
 
   ~EmitAssemblyHelper() {
+    delete PreLinkPasses;
     delete CodeGenPasses;
     delete PerModulePasses;
     delete PerFunctionPasses;
@@ -140,6 +163,7 @@ public:
   std::unique_ptr<TargetMachine> TM;
 
   void EmitAssembly(BackendAction Action, raw_pwrite_stream *OS);
+  void DoPreLinkPasses(raw_pwrite_stream *OS);
 };
 
 // We need this wrapper to access LangOpts and CGOpts from extension functions
@@ -504,6 +528,14 @@ void EmitAssemblyHelper::setCommandLineOpts() {
                                     BackendArgs.data());
 }
 
+void EmitAssemblyHelper::setTarget(BackendAction Action) {
+  bool UsesCodeGen = (Action != Backend_EmitNothing &&
+                      Action != Backend_EmitBC &&
+                      Action != Backend_EmitLL);
+  if (!TM)
+    TM.reset(CreateTargetMachine(UsesCodeGen));
+}
+
 TargetMachine *EmitAssemblyHelper::CreateTargetMachine(bool MustCreateTM) {
   // Create the TargetMachine for generating code.
   std::string Error;
@@ -625,6 +657,7 @@ TargetMachine *EmitAssemblyHelper::CreateTargetMachine(bool MustCreateTM) {
   return TM;
 }
 
+
 bool EmitAssemblyHelper::AddEmitPasses(BackendAction Action,
                                        raw_pwrite_stream &OS) {
 
@@ -662,17 +695,24 @@ bool EmitAssemblyHelper::AddEmitPasses(BackendAction Action,
   return true;
 }
 
+bool EmitAssemblyHelper::AddPreLinkPasses(raw_pwrite_stream &OS) {
+  legacy::PassManager *PM = getPreLinkPasses();
+
+  if (TM->addPreLinkPasses(*PM, OS)) {
+    Diags.Report(diag::err_fe_unable_to_interface_with_target);
+    return false;
+  }
+
+  return true;
+}
+
 void EmitAssemblyHelper::EmitAssembly(BackendAction Action,
                                       raw_pwrite_stream *OS) {
   TimeRegion Region(llvm::TimePassesIsEnabled ? &CodeGenerationTime : nullptr);
 
-  setCommandLineOpts();
-
   bool UsesCodeGen = (Action != Backend_EmitNothing &&
                       Action != Backend_EmitBC &&
                       Action != Backend_EmitLL);
-  if (!TM)
-    TM.reset(CreateTargetMachine(UsesCodeGen));
 
   if (UsesCodeGen && !TM)
     return;
@@ -748,6 +788,24 @@ void EmitAssemblyHelper::EmitAssembly(BackendAction Action,
   }
 }
 
+void EmitAssemblyHelper::DoPreLinkPasses(raw_pwrite_stream *OS) {
+  TimeRegion Region(llvm::TimePassesIsEnabled ? &PreLinkTime : nullptr);
+
+  if (!TM)
+    return;
+
+  if (!AddPreLinkPasses(*OS))
+      return;
+
+  // Before executing passes, print the final values of the LLVM options.
+  cl::PrintOptionValues();
+
+  if (PreLinkPasses) {
+    PrettyStackTraceString CrashInfo("Pre-linking passes");
+    PreLinkPasses->run(*TheModule);
+  }
+}
+
 void clang::EmitBackendOutput(
   DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
   const clang::TargetOptions &TOpts, const LangOptions &LOpts,
@@ -755,6 +813,10 @@ void clang::EmitBackendOutput(
   const SmallVectorImpl<std::pair<unsigned, llvm::Module *>> &LinkModules,
   BackendAction Action, raw_pwrite_stream *OS) {
   EmitAssemblyHelper AsmHelper(Diags, CGOpts, TOpts, LOpts, M);
+
+  AsmHelper.setCommandLineOpts();
+  AsmHelper.setTarget(Action);
+  AsmHelper.DoPreLinkPasses(OS);
 
   // Link LinkModule into this module if present, preserving its validity.
   for (auto &I : LinkModules) {
