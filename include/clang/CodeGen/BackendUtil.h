@@ -34,10 +34,12 @@ namespace clang {
     Backend_EmitObj        ///< Emit native object files
   };
 
-  void EmitBackendOutput(DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
-                         const TargetOptions &TOpts, const LangOptions &LOpts,
-                         const llvm::DataLayout &TDesc, llvm::Module *M,
-                         BackendAction Action, raw_pwrite_stream *OS);
+  void EmitBackendOutput(
+    DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
+    const TargetOptions &TOpts, const LangOptions &LOpts,
+    const llvm::DataLayout &TDesc, llvm::Module *M,
+    const SmallVectorImpl<std::pair<unsigned, llvm::Module *>> &LinkModules,
+    BackendAction Action, raw_pwrite_stream *OS);
 
   void EmbedBitcode(llvm::Module *M, const CodeGenOptions &CGOpts,
                     llvm::MemoryBufferRef Buf);

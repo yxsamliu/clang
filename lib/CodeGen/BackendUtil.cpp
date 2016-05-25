@@ -748,13 +748,23 @@ void EmitAssemblyHelper::EmitAssembly(BackendAction Action,
   }
 }
 
-void clang::EmitBackendOutput(DiagnosticsEngine &Diags,
-                              const CodeGenOptions &CGOpts,
-                              const clang::TargetOptions &TOpts,
-                              const LangOptions &LOpts, const llvm::DataLayout &TDesc,
-                              Module *M, BackendAction Action,
-                              raw_pwrite_stream *OS) {
+void clang::EmitBackendOutput(
+  DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
+  const clang::TargetOptions &TOpts, const LangOptions &LOpts,
+  const llvm::DataLayout &TDesc, Module *M,
+  const SmallVectorImpl<std::pair<unsigned, llvm::Module *>> &LinkModules,
+  BackendAction Action, raw_pwrite_stream *OS) {
   EmitAssemblyHelper AsmHelper(Diags, CGOpts, TOpts, LOpts, M);
+
+  // Link LinkModule into this module if present, preserving its validity.
+  for (auto &I : LinkModules) {
+    unsigned LinkFlags = I.first;
+    //CurLinkModule = I.second.get();
+    if (Linker::linkModules(*M, std::move(I.second), LinkFlags))
+      return;
+  }
+
+  EmbedBitcode(M, CGOpts, llvm::MemoryBufferRef());
 
   AsmHelper.EmitAssembly(Action, OS);
 
