@@ -165,19 +165,20 @@ namespace clang {
       void *OldDiagnosticContext = Ctx.getDiagnosticContext();
       Ctx.setDiagnosticHandler(DiagnosticHandler, this);
 
-      // Link LinkModule into this module if present, preserving its validity.
-      for (auto &I : LinkModules) {
-        unsigned LinkFlags = I.first;
-        CurLinkModule = I.second.get();
-        if (Linker::linkModules(*getModule(), std::move(I.second), LinkFlags))
-          return;
-      }
-
-      EmbedBitcode(getModule(), CodeGenOpts, llvm::MemoryBufferRef());
-
+      std::function<bool(llvm::Module*)>
+        LinkCallBack = [=](llvm::Module *M)->bool {
+        // Link LinkModule into this module if present, preserving its validity.
+        for (auto &I : LinkModules) {
+          unsigned LinkFlags = I.first;
+          CurLinkModule = I.second.get();
+          if (Linker::linkModules(*getModule(), std::move(I.second), LinkFlags))
+            return true;
+        }
+        return false;
+      };
       EmitBackendOutput(Diags, CodeGenOpts, TargetOpts, LangOpts,
                         C.getTargetInfo().getDataLayout(),
-                        getModule(), Action, AsmOutStream);
+                        getModule(), Action, AsmOutStream, &LinkCallBack);
 
       Ctx.setInlineAsmDiagnosticHandler(OldHandler, OldContext);
 
