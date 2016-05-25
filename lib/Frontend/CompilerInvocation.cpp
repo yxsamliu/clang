@@ -1398,6 +1398,13 @@ static void ParseHeaderSearchArgs(HeaderSearchOptions &Opts, ArgList &Args) {
     Opts.AddVFSOverlayFile(A->getValue());
 }
 
+bool isOpenCL(LangStandard::Kind LangStd) {
+  return LangStd == LangStandard::lang_opencl
+    || LangStd == LangStandard::lang_opencl11
+    || LangStd == LangStandard::lang_opencl12
+    || LangStd == LangStandard::lang_opencl20;
+}
+
 void CompilerInvocation::setLangDefaults(LangOptions &Opts, InputKind IK,
                                          const llvm::Triple &T,
                                          LangStandard::Kind LangStd) {
@@ -1462,7 +1469,7 @@ void CompilerInvocation::setLangDefaults(LangOptions &Opts, InputKind IK,
   Opts.ImplicitInt = Std.hasImplicitInt();
 
   // Set OpenCL Version.
-  Opts.OpenCL = LangStd == LangStandard::lang_opencl || IK == IK_OpenCL;
+  Opts.OpenCL = isOpenCL(LangStd) || IK == IK_OpenCL;
   if (LangStd == LangStandard::lang_opencl)
     Opts.OpenCLVersion = 100;
   else if (LangStd == LangStandard::lang_opencl11)
@@ -1555,8 +1562,9 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
             << A->getAsString(Args) << "C++/ObjC++";
         break;
       case IK_OpenCL:
-        Diags.Report(diag::err_drv_argument_not_allowed_with)
-          << A->getAsString(Args) << "OpenCL";
+        if (!isOpenCL(LangStd))
+          Diags.Report(diag::err_drv_argument_not_allowed_with)
+            << A->getAsString(Args) << "OpenCL";
         break;
       case IK_CUDA:
       case IK_PreprocessedCuda:

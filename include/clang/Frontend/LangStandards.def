@@ -132,7 +132,7 @@ LANGSTANDARD(gnucxx1z, "gnu++1z",
              Digraphs | HexFloat | GNUMode)
 
 // OpenCL
-LANGSTANDARD(opencl, "cl",
+LANGSTANDARD(opencl, "CL",
              "OpenCL 1.0",
              LineComment | C99 | Digraphs | HexFloat)
 LANGSTANDARD(opencl11, "CL1.1",
