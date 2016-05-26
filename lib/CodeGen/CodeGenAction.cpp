@@ -166,7 +166,7 @@ namespace clang {
 
       EmitBackendOutput(Diags, CodeGenOpts, TargetOpts, LangOpts,
                         C.getTargetInfo().getDataLayout(),
-                        getModule(), Action, AsmOutStream);
+                        getModule(), Action, AsmOutStream, &LinkModules);
 
       Ctx.setInlineAsmDiagnosticHandler(OldHandler, OldContext);
 

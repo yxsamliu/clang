@@ -112,13 +112,6 @@ private:
     return PreLinkPasses;
   }
 
-  /// Set LLVM command line options passed through -backend-option.
-  void setCommandLineOpts();
-
-  /// Set up target for target specific pre-linking passes and LLVM code
-  /// generation.
-  void setTarget(BackendAction Action);
-
   void CreatePasses(ModuleSummaryIndex *ModuleSummary);
 
   /// Generates the TargetMachine.
@@ -137,9 +130,7 @@ private:
   bool AddEmitPasses(BackendAction Action, raw_pwrite_stream &OS);
 
   /// Add target specific pre-linking passes.
-  ///
-  /// \return True on success.
-  bool AddPreLinkPasses(raw_pwrite_stream &OS);
+  void AddPreLinkPasses(raw_pwrite_stream &OS);
 
 public:
   EmitAssemblyHelper(DiagnosticsEngine &_Diags, const CodeGenOptions &CGOpts,
@@ -164,6 +155,13 @@ public:
 
   void EmitAssembly(BackendAction Action, raw_pwrite_stream *OS);
   void DoPreLinkPasses(raw_pwrite_stream *OS);
+
+  /// Set LLVM command line options passed through -backend-option.
+  void setCommandLineOpts();
+
+  /// Set up target for target specific pre-linking passes and LLVM code
+  /// generation.
+  void setTarget(BackendAction Action);
 };
 
 // We need this wrapper to access LangOpts and CGOpts from extension functions
@@ -695,15 +693,9 @@ bool EmitAssemblyHelper::AddEmitPasses(BackendAction Action,
   return true;
 }
 
-bool EmitAssemblyHelper::AddPreLinkPasses(raw_pwrite_stream &OS) {
+void EmitAssemblyHelper::AddPreLinkPasses(raw_pwrite_stream &OS) {
   legacy::PassManager *PM = getPreLinkPasses();
-
-  if (TM->addPreLinkPasses(*PM, OS)) {
-    Diags.Report(diag::err_fe_unable_to_interface_with_target);
-    return false;
-  }
-
-  return true;
+  TM->addPreLinkPasses(*PM, OS);
 }
 
 void EmitAssemblyHelper::EmitAssembly(BackendAction Action,
@@ -794,8 +786,7 @@ void EmitAssemblyHelper::DoPreLinkPasses(raw_pwrite_stream *OS) {
   if (!TM)
     return;
 
-  if (!AddPreLinkPasses(*OS))
-      return;
+  AddPreLinkPasses(*OS);
 
   // Before executing passes, print the final values of the LLVM options.
   cl::PrintOptionValues();
@@ -810,8 +801,9 @@ void clang::EmitBackendOutput(
   DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
   const clang::TargetOptions &TOpts, const LangOptions &LOpts,
   const llvm::DataLayout &TDesc, Module *M,
-  const SmallVectorImpl<std::pair<unsigned, llvm::Module *>> &LinkModules,
-  BackendAction Action, raw_pwrite_stream *OS) {
+  BackendAction Action, raw_pwrite_stream *OS,
+  SmallVectorImpl<std::pair<unsigned, std::unique_ptr<llvm::Module>>>
+    *LinkModules) {
   EmitAssemblyHelper AsmHelper(Diags, CGOpts, TOpts, LOpts, M);
 
   AsmHelper.setCommandLineOpts();
@@ -819,9 +811,8 @@ void clang::EmitBackendOutput(
   AsmHelper.DoPreLinkPasses(OS);
 
   // Link LinkModule into this module if present, preserving its validity.
-  for (auto &I : LinkModules) {
+  for (auto &I : *LinkModules) {
     unsigned LinkFlags = I.first;
-    //CurLinkModule = I.second.get();
     if (Linker::linkModules(*M, std::move(I.second), LinkFlags))
       return;
   }

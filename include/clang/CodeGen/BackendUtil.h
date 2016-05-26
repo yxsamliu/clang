@@ -38,8 +38,9 @@ namespace clang {
     DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
     const TargetOptions &TOpts, const LangOptions &LOpts,
     const llvm::DataLayout &TDesc, llvm::Module *M,
-    const SmallVectorImpl<std::pair<unsigned, llvm::Module *>> &LinkModules,
-    BackendAction Action, raw_pwrite_stream *OS);
+    BackendAction Action, raw_pwrite_stream *OS,
+    SmallVectorImpl<std::pair<unsigned, std::unique_ptr<llvm::Module>>>
+      *LinkModules = nullptr);
 
   void EmbedBitcode(llvm::Module *M, const CodeGenOptions &CGOpts,
                     llvm::MemoryBufferRef Buf);
