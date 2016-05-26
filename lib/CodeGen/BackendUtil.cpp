@@ -808,13 +808,15 @@ void clang::EmitBackendOutput(
 
   AsmHelper.setCommandLineOpts();
   AsmHelper.setTarget(Action);
-  AsmHelper.DoPreLinkPasses(OS);
 
-  // Link LinkModule into this module if present, preserving its validity.
-  for (auto &I : *LinkModules) {
-    unsigned LinkFlags = I.first;
-    if (Linker::linkModules(*M, std::move(I.second), LinkFlags))
-      return;
+  if (LinkModules) {
+    AsmHelper.DoPreLinkPasses(OS);
+    // Link LinkModule into this module if present, preserving its validity.
+    for (auto &I : *LinkModules) {
+      unsigned LinkFlags = I.first;
+      if (Linker::linkModules(*M, std::move(I.second), LinkFlags))
+        return;
+    }
   }
 
   EmbedBitcode(M, CGOpts, llvm::MemoryBufferRef());
