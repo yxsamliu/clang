@@ -29,6 +29,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IRReader/IRReader.h"
+#include "llvm/Linker/Linker.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
@@ -164,9 +165,20 @@ namespace clang {
       void *OldDiagnosticContext = Ctx.getDiagnosticContext();
       Ctx.setDiagnosticHandler(DiagnosticHandler, this);
 
+      std::function<bool(llvm::Module*)>
+        LinkCallBack = [=](llvm::Module *M)->bool {
+        // Link LinkModule into this module if present, preserving its validity.
+        for (auto &I : LinkModules) {
+          unsigned LinkFlags = I.first;
+          CurLinkModule = I.second.get();
+          if (Linker::linkModules(*getModule(), std::move(I.second), LinkFlags))
+            return true;
+        }
+        return false;
+      };
       EmitBackendOutput(Diags, CodeGenOpts, TargetOpts, LangOpts,
                         C.getTargetInfo().getDataLayout(),
-                        getModule(), Action, AsmOutStream, &LinkModules);
+                        getModule(), Action, AsmOutStream, &LinkCallBack);
 
       Ctx.setInlineAsmDiagnosticHandler(OldHandler, OldContext);
 

@@ -29,7 +29,6 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
-#include "llvm/Linker/Linker.h"
 #include "llvm/MC/SubtargetFeature.h"
 #include "llvm/Object/ModuleSummaryIndexObjectFile.h"
 #include "llvm/Support/CommandLine.h"
@@ -802,21 +801,16 @@ void clang::EmitBackendOutput(
   const clang::TargetOptions &TOpts, const LangOptions &LOpts,
   const llvm::DataLayout &TDesc, Module *M,
   BackendAction Action, raw_pwrite_stream *OS,
-  SmallVectorImpl<std::pair<unsigned, std::unique_ptr<llvm::Module>>>
-    *LinkModules) {
+  std::function<bool(Module *)> *LinkCallBack) {
   EmitAssemblyHelper AsmHelper(Diags, CGOpts, TOpts, LOpts, M);
 
   AsmHelper.setCommandLineOpts();
   AsmHelper.setTarget(Action);
 
-  if (LinkModules) {
+  if (LinkCallBack) {
     AsmHelper.DoPreLinkPasses(OS);
-    // Link LinkModule into this module if present, preserving its validity.
-    for (auto &I : *LinkModules) {
-      unsigned LinkFlags = I.first;
-      if (Linker::linkModules(*M, std::move(I.second), LinkFlags))
-        return;
-    }
+    if ((*LinkCallBack)(M))
+      return;
   }
 
   EmbedBitcode(M, CGOpts, llvm::MemoryBufferRef());
