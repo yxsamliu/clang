@@ -1,6 +1,4 @@
-// ToDo: a bug causing cached AST of header containing typedef of atomic_int for CL1.0. After the bug is fixed
-// -fno-default-header should be removed.
-// RUN: %clang_cc1 %s -triple spir-unknown-unknown -verify -pedantic -fsyntax-only -fno-default-header
+// RUN: %clang_cc1 %s -triple spir-unknown-unknown -verify -pedantic -fsyntax-only
 // RUN: %clang_cc1 %s -triple spir-unknown-unknown -verify -fsyntax-only -cl-std=CL2.0 -DCL20
 // RUN: %clang_cc1 %s -triple spir-unknown-unknown -verify -fsyntax-only -cl-std=CL2.0 -DCL20 -DEXT
 
