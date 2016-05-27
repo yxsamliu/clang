@@ -114,9 +114,6 @@ testing::AssertionResult MatchVerifier<NodeType>::match(
     FileName = "input.cc";
     break;
   case Lang_OpenCL:
-    // ConstructJob disables builtin include path which is required by OpenCL
-    // default header file, therefore default header needs to be disabled.
-    Args.push_back("-fno-default-header");
     FileName = "input.cl";
     break;
   case Lang_OBJCXX:
