@@ -37,36 +37,48 @@
 // ===
 // Clear current directory.
 // RUN: rm -rf %t
+// RUN: mkdir -p %t
 
 // ===
 // Compile for OpenCL 1.0 for the first time. A module should be generated.
-// RUN: %clang_cc1 -cc1 -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=. %s | FileCheck %s
-// RUN: cp opencl_c.pcm 1_0.pcm
+// RUN: %clang_cc1 -cc1 -emit-llvm -o - -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t -fdisable-module-hash %s | FileCheck %s
+// RUN: cp %t/opencl_c.pcm %t/1_0.pcm
 
 // ===
 // Compile for OpenCL 1.0 for the second time. The module should not change.
-// RUN: %clang_cc1 -cc1 -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=. %s | FileCheck %s
-// RUN: diff 1_0.pcm opencl_c.pcm
+// RUN: %clang_cc1 -cc1 -emit-llvm -o - -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t -fdisable-module-hash %s | FileCheck %s
+// RUN: diff %t/1_0.pcm %t/opencl_c.pcm
+// RUN: rm %t/opencl_c.pcm
 
 // ===
 // Compile for OpenCL 2.0 for the first time. The module should change.
-// RUN: %clang_cc1 -cc1 -cl-std=CL2.0 -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=. %s | --check-prefix=CHECK20 %s
-// RUN: not diff 1_0.pcm opencl_c.pcm
-// RUN: cp opencl_c.pcm 2_0.pcm
+// RUN: %clang_cc1 -cc1  -emit-llvm -o - -cl-std=CL2.0 -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t -fdisable-module-hash %s | FileCheck --check-prefix=CHECK20 %s
+// RUN: not diff %t/1_0.pcm %t/opencl_c.pcm
+// RUN: cp %t/opencl_c.pcm %t/2_0.pcm
 
 // ===
 // Compile for OpenCL 2.0 for the second time. The module should not change.
-// RUN: %clang_cc1 -cc1 -cl-std=CL2.0 -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=. %s | --check-prefix=CHECK20 %s
-// RUN: diff 2_0.pcm opencl_c.pcm
+// RUN: %clang_cc1 -cc1  -emit-llvm -o - -cl-std=CL2.0 -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t -fdisable-module-hash %s | FileCheck --check-prefix=CHECK20 %s
+// RUN: diff %t/2_0.pcm %t/opencl_c.pcm
+
+// Check cached module works for different OpenCL versions.
+// RUN: rm -rf %t
+// RUN: mkdir -p %t
+// RUN: %clang_cc1 -cc1 -emit-llvm -o - -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t %s | FileCheck %s
+// RUN: %clang_cc1 -cc1  -emit-llvm -o - -cl-std=CL2.0 -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t %s | FileCheck --check-prefix=CHECK20 %s
+// RUN: %clang_cc1 -cc1  -emit-llvm -o - -cl-std=CL2.0 -triple amdgcn--amdhsa -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t %s | FileCheck --check-prefix=CHECK20 %s
+// RUN: %clang_cc1 -cc1 -emit-llvm -o - -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t %s | FileCheck %s
+// RUN: %clang_cc1 -cc1  -emit-llvm -o - -cl-std=CL2.0 -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t %s | FileCheck --check-prefix=CHECK20 %s
+// RUN: %clang_cc1 -cc1  -emit-llvm -o - -cl-std=CL2.0 -triple amdgcn--amdhsa -finclude-default-header -fmodules -fimplicit-module-maps -fmodules-cache-path=%t %s | FileCheck --check-prefix=CHECK20 %s
 
 char f(char x) {
-#if __OPENCL_C_VERSION__ != OPENCL_VERSION_2_0
+#if __OPENCL_C_VERSION__ != CL_VERSION_2_0
   return convert_char_rte(x);
-#else
-  return ctz(x);
-#endif
-
 #ifdef NO_HEADER
   //expected-warning@-2{{implicit declaration of function 'convert_char_rte' is invalid in C99}}
-#endif
+#endif //NO_HEADER
+
+#else //__OPENCL_C_VERSION__
+  return ctz(x);
+#endif //__OPENCL_C_VERSION__
 }
