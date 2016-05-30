@@ -1,4 +1,8 @@
 // RUN: %clang %s
+// RUN: %clang -std=cl %s
+// RUN: %clang -std=cl1.1 %s
+// RUN: %clang -std=cl1.2 %s
+// RUN: %clang -std=cl2.0 %s
 // RUN: %clang -std=CL %s
 // RUN: %clang -std=CL1.1 %s
 // RUN: %clang -std=CL1.2 %s
