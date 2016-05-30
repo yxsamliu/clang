@@ -14774,66 +14774,36 @@ void __ovld atomic_work_item_fence(cl_mem_fence_flags flags, memory_order order,
 
 // atomic_fetch()
 
-// OpenCL v2.0 s6.13.11.7.5:
-// add/sub: atomic type argument can be uintptr_t/intptr_t, value type argument can be ptrdiff_t.
-// or/xor/and: atomic type argument can be intptr_t/uintptr_t, value type argument can be intptr_t/uintptr_t.
 int __ovld atomic_fetch_add(volatile atomic_int *object, int operand);
 int __ovld atomic_fetch_add_explicit(volatile atomic_int *object, int operand, memory_order order);
 int __ovld atomic_fetch_add_explicit(volatile atomic_int *object, int operand, memory_order order, memory_scope scope);
 uint __ovld atomic_fetch_add(volatile atomic_uint *object, uint operand);
 uint __ovld atomic_fetch_add_explicit(volatile atomic_uint *object, uint operand, memory_order order);
 uint __ovld atomic_fetch_add_explicit(volatile atomic_uint *object, uint operand, memory_order order, memory_scope scope);
-uintptr_t __ovld atomic_fetch_add(volatile atomic_uintptr_t *object, ptrdiff_t operand);
-uintptr_t __ovld atomic_fetch_add_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order);
-uintptr_t __ovld atomic_fetch_add_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order, memory_scope scope);
 int __ovld atomic_fetch_sub(volatile atomic_int *object, int operand);
 int __ovld atomic_fetch_sub_explicit(volatile atomic_int *object, int operand, memory_order order);
 int __ovld atomic_fetch_sub_explicit(volatile atomic_int *object, int operand, memory_order order, memory_scope scope);
 uint __ovld atomic_fetch_sub(volatile atomic_uint *object, uint operand);
 uint __ovld atomic_fetch_sub_explicit(volatile atomic_uint *object, uint operand, memory_order order);
 uint __ovld atomic_fetch_sub_explicit(volatile atomic_uint *object, uint operand, memory_order order, memory_scope scope);
-uintptr_t __ovld atomic_fetch_sub(volatile atomic_uintptr_t *object, ptrdiff_t operand);
-uintptr_t __ovld atomic_fetch_sub_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order);
-uintptr_t __ovld atomic_fetch_sub_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order, memory_scope scope);
 int __ovld atomic_fetch_or(volatile atomic_int *object, int operand);
 int __ovld atomic_fetch_or_explicit(volatile atomic_int *object, int operand, memory_order order);
 int __ovld atomic_fetch_or_explicit(volatile atomic_int *object, int operand, memory_order order, memory_scope scope);
 uint __ovld atomic_fetch_or(volatile atomic_uint *object, uint operand);
 uint __ovld atomic_fetch_or_explicit(volatile atomic_uint *object, uint operand, memory_order order);
 uint __ovld atomic_fetch_or_explicit(volatile atomic_uint *object, uint operand, memory_order order, memory_scope scope);
-uintptr_t __ovld atomic_fetch_or(volatile atomic_uintptr_t *object, ptrdiff_t operand);
-uintptr_t __ovld atomic_fetch_or_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order);
-uintptr_t __ovld atomic_fetch_or_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order, memory_scope scope);
 int __ovld atomic_fetch_xor(volatile atomic_int *object, int operand);
 int __ovld atomic_fetch_xor_explicit(volatile atomic_int *object, int operand, memory_order order);
 int __ovld atomic_fetch_xor_explicit(volatile atomic_int *object, int operand, memory_order order, memory_scope scope);
 uint __ovld atomic_fetch_xor(volatile atomic_uint *object, uint operand);
 uint __ovld atomic_fetch_xor_explicit(volatile atomic_uint *object, uint operand, memory_order order);
 uint __ovld atomic_fetch_xor_explicit(volatile atomic_uint *object, uint operand, memory_order order, memory_scope scope);
-uintptr_t __ovld atomic_fetch_xor(volatile atomic_uintptr_t *object, ptrdiff_t operand);
-uintptr_t __ovld atomic_fetch_xor_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order);
-uintptr_t __ovld atomic_fetch_xor_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order, memory_scope scope);
 int __ovld atomic_fetch_and(volatile atomic_int *object, int operand);
 int __ovld atomic_fetch_and_explicit(volatile atomic_int *object, int operand, memory_order order);
 int __ovld atomic_fetch_and_explicit(volatile atomic_int *object, int operand, memory_order order, memory_scope scope);
 uint __ovld atomic_fetch_and(volatile atomic_uint *object, uint operand);
 uint __ovld atomic_fetch_and_explicit(volatile atomic_uint *object, uint operand, memory_order order);
 uint __ovld atomic_fetch_and_explicit(volatile atomic_uint *object, uint operand, memory_order order, memory_scope scope);
-uintptr_t __ovld atomic_fetch_and(volatile atomic_uintptr_t *object, ptrdiff_t operand);
-uintptr_t __ovld atomic_fetch_and_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order);
-uintptr_t __ovld atomic_fetch_and_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order, memory_scope scope);
-intptr_t __ovld atomic_fetch_or(volatile atomic_intptr_t *object, uintptr_t operand);
-intptr_t __ovld atomic_fetch_or_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order);
-intptr_t __ovld atomic_fetch_or_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order, memory_scope scope);
-intptr_t __ovld atomic_fetch_xor(volatile atomic_intptr_t *object, uintptr_t operand);
-intptr_t __ovld atomic_fetch_xor_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order);
-intptr_t __ovld atomic_fetch_xor_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order, memory_scope scope);
-intptr_t __ovld atomic_fetch_and(volatile atomic_intptr_t *object, uintptr_t operand);
-intptr_t __ovld atomic_fetch_and_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order);
-intptr_t __ovld atomic_fetch_and_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order, memory_scope scope);
-
-// atomic_fetch_min/max()
-
 int __ovld atomic_fetch_min(volatile atomic_int *object, int operand);
 int __ovld atomic_fetch_min_explicit(volatile atomic_int *object, int operand, memory_order order);
 int __ovld atomic_fetch_min_explicit(volatile atomic_int *object, int operand, memory_order order, memory_scope scope);
@@ -14852,6 +14822,102 @@ uint __ovld atomic_fetch_max_explicit(volatile atomic_uint *object, uint operand
 uint __ovld atomic_fetch_max(volatile atomic_uint *object, int operand);
 uint __ovld atomic_fetch_max_explicit(volatile atomic_uint *object, int operand, memory_order order);
 uint __ovld atomic_fetch_max_explicit(volatile atomic_uint *object, int operand, memory_order order, memory_scope scope);
+
+#if defined(cl_khr_int64_base_atomics) && defined(cl_khr_int64_extended_atomics)
+long __ovld atomic_fetch_add(volatile atomic_long *object, long operand);
+long __ovld atomic_fetch_add_explicit(volatile atomic_long *object, long operand, memory_order order);
+long __ovld atomic_fetch_add_explicit(volatile atomic_long *object, long operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_add(volatile atomic_ulong *object, ulong operand);
+ulong __ovld atomic_fetch_add_explicit(volatile atomic_ulong *object, ulong operand, memory_order order);
+ulong __ovld atomic_fetch_add_explicit(volatile atomic_ulong *object, ulong operand, memory_order order, memory_scope scope);
+long __ovld atomic_fetch_sub(volatile atomic_long *object, long operand);
+long __ovld atomic_fetch_sub_explicit(volatile atomic_long *object, long operand, memory_order order);
+long __ovld atomic_fetch_sub_explicit(volatile atomic_long *object, long operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_sub(volatile atomic_ulong *object, ulong operand);
+ulong __ovld atomic_fetch_sub_explicit(volatile atomic_ulong *object, ulong operand, memory_order order);
+ulong __ovld atomic_fetch_sub_explicit(volatile atomic_ulong *object, ulong operand, memory_order order, memory_scope scope);
+long __ovld atomic_fetch_or(volatile atomic_long *object, long operand);
+long __ovld atomic_fetch_or_explicit(volatile atomic_long *object, long operand, memory_order order);
+long __ovld atomic_fetch_or_explicit(volatile atomic_long *object, long operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_or(volatile atomic_ulong *object, ulong operand);
+ulong __ovld atomic_fetch_or_explicit(volatile atomic_ulong *object, ulong operand, memory_order order);
+ulong __ovld atomic_fetch_or_explicit(volatile atomic_ulong *object, ulong operand, memory_order order, memory_scope scope);
+long __ovld atomic_fetch_xor(volatile atomic_long *object, long operand);
+long __ovld atomic_fetch_xor_explicit(volatile atomic_long *object, long operand, memory_order order);
+long __ovld atomic_fetch_xor_explicit(volatile atomic_long *object, long operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_xor(volatile atomic_ulong *object, ulong operand);
+ulong __ovld atomic_fetch_xor_explicit(volatile atomic_ulong *object, ulong operand, memory_order order);
+ulong __ovld atomic_fetch_xor_explicit(volatile atomic_ulong *object, ulong operand, memory_order order, memory_scope scope);
+long __ovld atomic_fetch_and(volatile atomic_long *object, long operand);
+long __ovld atomic_fetch_and_explicit(volatile atomic_long *object, long operand, memory_order order);
+long __ovld atomic_fetch_and_explicit(volatile atomic_long *object, long operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_and(volatile atomic_ulong *object, ulong operand);
+ulong __ovld atomic_fetch_and_explicit(volatile atomic_ulong *object, ulong operand, memory_order order);
+ulong __ovld atomic_fetch_and_explicit(volatile atomic_ulong *object, ulong operand, memory_order order, memory_scope scope);
+long __ovld atomic_fetch_min(volatile atomic_long *object, long operand);
+long __ovld atomic_fetch_min_explicit(volatile atomic_long *object, long operand, memory_order order);
+long __ovld atomic_fetch_min_explicit(volatile atomic_long *object, long operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_min(volatile atomic_ulong *object, ulong operand);
+ulong __ovld atomic_fetch_min_explicit(volatile atomic_ulong *object, ulong operand, memory_order order);
+ulong __ovld atomic_fetch_min_explicit(volatile atomic_ulong *object, ulong operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_min(volatile atomic_ulong *object, long operand);
+ulong __ovld atomic_fetch_min_explicit(volatile atomic_ulong *object, long operand, memory_order order);
+ulong __ovld atomic_fetch_min_explicit(volatile atomic_ulong *object, long operand, memory_order order, memory_scope scope);
+long __ovld atomic_fetch_max(volatile atomic_long *object, long operand);
+long __ovld atomic_fetch_max_explicit(volatile atomic_long *object, long operand, memory_order order);
+long __ovld atomic_fetch_max_explicit(volatile atomic_long *object, long operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_max(volatile atomic_ulong *object, ulong operand);
+ulong __ovld atomic_fetch_max_explicit(volatile atomic_ulong *object, ulong operand, memory_order order);
+ulong __ovld atomic_fetch_max_explicit(volatile atomic_ulong *object, ulong operand, memory_order order, memory_scope scope);
+ulong __ovld atomic_fetch_max(volatile atomic_ulong *object, long operand);
+ulong __ovld atomic_fetch_max_explicit(volatile atomic_ulong *object, long operand, memory_order order);
+ulong __ovld atomic_fetch_max_explicit(volatile atomic_ulong *object, long operand, memory_order order, memory_scope scope);
+#endif //defined(cl_khr_int64_base_atomics) && defined(cl_khr_int64_extended_atomics)
+
+// OpenCL v2.0 s6.13.11.7.5:
+// add/sub: atomic type argument can be uintptr_t/intptr_t, value type argument can be ptrdiff_t.
+// or/xor/and/min/max: atomic type argument can be intptr_t/uintptr_t, value type argument can be intptr_t/uintptr_t.
+
+#if defined(cl_khr_int64_base_atomics) && defined(cl_khr_int64_extended_atomics) 
+uintptr_t __ovld atomic_fetch_add(volatile atomic_uintptr_t *object, ptrdiff_t operand);
+uintptr_t __ovld atomic_fetch_add_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order);
+uintptr_t __ovld atomic_fetch_add_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order, memory_scope scope);
+uintptr_t __ovld atomic_fetch_sub(volatile atomic_uintptr_t *object, ptrdiff_t operand);
+uintptr_t __ovld atomic_fetch_sub_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order);
+uintptr_t __ovld atomic_fetch_sub_explicit(volatile atomic_uintptr_t *object, ptrdiff_t operand, memory_order order, memory_scope scope);
+
+uintptr_t __ovld atomic_fetch_or(volatile atomic_uintptr_t *object, intptr_t operand);
+uintptr_t __ovld atomic_fetch_or_explicit(volatile atomic_uintptr_t *object, intptr_t operand, memory_order order);
+uintptr_t __ovld atomic_fetch_or_explicit(volatile atomic_uintptr_t *object, intptr_t operand, memory_order order, memory_scope scope);
+uintptr_t __ovld atomic_fetch_xor(volatile atomic_uintptr_t *object, intptr_t operand);
+uintptr_t __ovld atomic_fetch_xor_explicit(volatile atomic_uintptr_t *object, intptr_t operand, memory_order order);
+uintptr_t __ovld atomic_fetch_xor_explicit(volatile atomic_uintptr_t *object, intptr_t operand, memory_order order, memory_scope scope);
+uintptr_t __ovld atomic_fetch_and(volatile atomic_uintptr_t *object, intptr_t operand);
+uintptr_t __ovld atomic_fetch_and_explicit(volatile atomic_uintptr_t *object, intptr_t operand, memory_order order);
+uintptr_t __ovld atomic_fetch_and_explicit(volatile atomic_uintptr_t *object, intptr_t operand, memory_order order, memory_scope scope);
+uintptr_t __ovld atomic_fetch_min(volatile atomic_uintptr_t *object, intptr_t opermax);
+uintptr_t __ovld atomic_fetch_min_explicit(volatile atomic_uintptr_t *object, intptr_t opermax, memory_order minder);
+uintptr_t __ovld atomic_fetch_min_explicit(volatile atomic_uintptr_t *object, intptr_t opermax, memory_order minder, memory_scope scope);
+uintptr_t __ovld atomic_fetch_max(volatile atomic_uintptr_t *object, intptr_t opermax);
+uintptr_t __ovld atomic_fetch_max_explicit(volatile atomic_uintptr_t *object, intptr_t opermax, memory_order minder);
+uintptr_t __ovld atomic_fetch_max_explicit(volatile atomic_uintptr_t *object, intptr_t opermax, memory_order minder, memory_scope scope);
+
+intptr_t __ovld atomic_fetch_or(volatile atomic_intptr_t *object, uintptr_t operand);
+intptr_t __ovld atomic_fetch_or_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order);
+intptr_t __ovld atomic_fetch_or_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order, memory_scope scope);
+intptr_t __ovld atomic_fetch_xor(volatile atomic_intptr_t *object, uintptr_t operand);
+intptr_t __ovld atomic_fetch_xor_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order);
+intptr_t __ovld atomic_fetch_xor_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order, memory_scope scope);
+intptr_t __ovld atomic_fetch_and(volatile atomic_intptr_t *object, uintptr_t operand);
+intptr_t __ovld atomic_fetch_and_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order);
+intptr_t __ovld atomic_fetch_and_explicit(volatile atomic_intptr_t *object, uintptr_t operand, memory_order order, memory_scope scope);
+intptr_t __ovld atomic_fetch_min(volatile atomic_intptr_t *object, uintptr_t opermax);
+intptr_t __ovld atomic_fetch_min_explicit(volatile atomic_intptr_t *object, uintptr_t opermax, memory_order minder);
+intptr_t __ovld atomic_fetch_min_explicit(volatile atomic_intptr_t *object, uintptr_t opermax, memory_order minder, memory_scope scope);
+intptr_t __ovld atomic_fetch_max(volatile atomic_intptr_t *object, uintptr_t opermax);
+intptr_t __ovld atomic_fetch_max_explicit(volatile atomic_intptr_t *object, uintptr_t opermax, memory_order minder);
+intptr_t __ovld atomic_fetch_max_explicit(volatile atomic_intptr_t *object, uintptr_t opermax, memory_order minder, memory_scope scope);
+#endif
 
 // atomic_store()
 
