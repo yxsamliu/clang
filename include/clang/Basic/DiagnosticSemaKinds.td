@@ -7344,7 +7344,7 @@ def err_generic_sel_multi_match : Error<
 
 // Blocks
 def err_blocks_disable : Error<"blocks support disabled - compile with -fblocks"
-  " or pick a deployment target that supports them">;
+  " or %select{pick a deployment target that supports them|as OpenCL 2.0 or above}0">;
 def err_block_returning_array_function : Error<
   "block cannot return %select{array|function}0 type %1">;
 
