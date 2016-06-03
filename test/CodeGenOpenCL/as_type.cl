@@ -29,6 +29,7 @@ char3 f3(int x) {
 
 //CHECK: define spir_func <4 x i8> @f4(i32 %[[x:.*]])
 //CHECK: %[[astype:.*]] = bitcast i32 %[[x]] to <4 x i8>
+//CHECK-NOT: shufflevector
 //CHECK: ret <4 x i8> %[[astype]]
 char4 f4(int x) {
   return __builtin_astype(x, char4);
@@ -44,12 +45,15 @@ int f5(char3 x) {
 
 //CHECK: define spir_func i32 @f6(<4 x i8> %[[x:.*]])
 //CHECK: %[[astype]] = bitcast <4 x i8> %[[x]] to i32
+//CHECK-NOT: shufflevector
 //CHECK: ret i32 %[[astype]]
 int f6(char4 x) {
   return __builtin_astype(x, int);
 }
 
 //CHECK: define spir_func <3 x i8> @f7(<3 x i8> %[[x:.*]])
+//CHECK-NOT: bitcast
+//CHECK-NOT: shufflevector
 //CHECK: ret <3 x i8> %[[x]]
 char3 f7(char3 x) {
   return __builtin_astype(x, char3);
