@@ -10,7 +10,7 @@ kernel __attribute__((vec_type_hint(uint4))) __attribute__((work_group_size_hint
 
 // CHECK: attributes #[[AT1]] = { 
 // CHECK-DAG: "reqd_work_group_size"="1 2 4"
-// CHECK-DAG: "vec_type_hint"="vec_type_hint"
+// CHECK-DAG: "vec_type_hint"="int"
 // CHECK: attributes #[[AT2]] = {
-// CHECK-DAG: "vec_type_hint"="vec_type_hint"
+// CHECK-DAG: "vec_type_hint"="uint4"
 // CHECK-DAG: "work_group_size_hint"="8 16 32"

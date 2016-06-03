@@ -600,8 +600,12 @@ void CodeGenFunction::EmitOpenCLKernelMetadata(const FunctionDecl *FD,
 
   GenOpenCLArgMetadata(FD, Fn, CGM, Context, Builder, getContext());
 
-  if (const VecTypeHintAttr *A = FD->getAttr<VecTypeHintAttr>())
-    SetFunctionAttribute(*Fn, "vec_type_hint", A->getSpelling());
+  if (const VecTypeHintAttr *A = FD->getAttr<VecTypeHintAttr>()) {
+    std::string S;
+    llvm::raw_string_ostream SS(S);
+    SS << A->getTypeHint();
+    SetFunctionAttribute(*Fn, "vec_type_hint", SS.str());
+  }
 
   if (const WorkGroupSizeHintAttr *A = FD->getAttr<WorkGroupSizeHintAttr>()) {
     std::string S;
