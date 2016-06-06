@@ -10,7 +10,7 @@
 void f(void (^g)(void)) {
 #ifdef __OPENCL_C_VERSION__
 #if __OPENCL_C_VERSION__ < CL_VERSION_2_0 && !defined(BLOCKS)
-  // expected-error@-3{{blocks support disabled - compile with -fblocks or as OpenCL 2.0 or above}}
+  // expected-error@-3{{blocks support disabled - compile with -fblocks or for OpenCL 2.0 or above}}
 #else
   // expected-no-diagnostics
 #endif
