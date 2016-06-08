@@ -666,7 +666,6 @@ TargetMachine *EmitAssemblyHelper::CreateTargetMachine(bool MustCreateTM) {
   return TM;
 }
 
-
 bool EmitAssemblyHelper::AddEmitPasses(BackendAction Action,
                                        raw_pwrite_stream &OS) {
 
