@@ -12,7 +12,6 @@
 
 #include "clang/Basic/LLVM.h"
 #include "llvm/IR/ModuleSummaryIndex.h"
-#include <functional>
 #include <memory>
 
 namespace llvm {
@@ -35,17 +34,18 @@ namespace clang {
     Backend_EmitObj        ///< Emit native object files
   };
 
-  // LinkCallBack is a call back function for linking the input module with
-  // other modules.
-  void EmitBackendOutput(
-    DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
-    const TargetOptions &TOpts, const LangOptions &LOpts,
-    const llvm::DataLayout &TDesc, llvm::Module *M,
-    BackendAction Action, raw_pwrite_stream *OS,
-    std::function<bool(llvm::Module *)> *LinkCallBack = nullptr);
+  void EmitBackendOutput(DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
+                         const TargetOptions &TOpts, const LangOptions &LOpts,
+                         const llvm::DataLayout &TDesc, llvm::Module *M,
+                         BackendAction Action, raw_pwrite_stream *OS);
 
   void EmbedBitcode(llvm::Module *M, const CodeGenOptions &CGOpts,
                     llvm::MemoryBufferRef Buf);
 }
+
+  void PerformPrelinkPasses(DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
+                            const TargetOptions &TOpts, const LangOptions &LOpts,
+                            const llvm::DataLayout &TDesc, llvm::Module *M,
+                            BackendAction Action, raw_pwrite_stream *OS);
 
 #endif

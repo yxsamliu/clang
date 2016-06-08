@@ -807,25 +807,16 @@ void EmitAssemblyHelper::DoPreLinkPasses(raw_pwrite_stream *OS) {
   }
 }
 
-void clang::EmitBackendOutput(
-  DiagnosticsEngine &Diags, const CodeGenOptions &CGOpts,
-  const clang::TargetOptions &TOpts, const LangOptions &LOpts,
-  const llvm::DataLayout &TDesc, Module *M,
-  BackendAction Action, raw_pwrite_stream *OS,
-  std::function<bool(Module *)> *LinkCallBack) {
+void clang::EmitBackendOutput(DiagnosticsEngine &Diags,
+                              const CodeGenOptions &CGOpts,
+                              const clang::TargetOptions &TOpts,
+                              const LangOptions &LOpts, const llvm::DataLayout &TDesc,
+                              Module *M, BackendAction Action,
+                              raw_pwrite_stream *OS) {
   EmitAssemblyHelper AsmHelper(Diags, CGOpts, TOpts, LOpts, M);
 
   AsmHelper.setCommandLineOpts();
   AsmHelper.setTarget(Action);
-
-  if (LinkCallBack) {
-    AsmHelper.DoPreLinkPasses(OS);
-    if ((*LinkCallBack)(M))
-      return;
-  }
-
-  EmbedBitcode(M, CGOpts, llvm::MemoryBufferRef());
-
   AsmHelper.EmitAssembly(Action, OS);
 
   // Verify clang's TargetInfo DataLayout against the LLVM TargetMachine's
@@ -839,6 +830,19 @@ void clang::EmitBackendOutput(
       Diags.Report(DiagID) << DLDesc << TDesc.getStringRepresentation();
     }
   }
+}
+
+void clang::PerformPrelinkPasses(DiagnosticsEngine &Diags,
+                                 const CodeGenOptions &CGOpts,
+                                 const clang::TargetOptions &TOpts,
+                                 const LangOptions &LOpts, const llvm::DataLayout &TDesc,
+                                 Module *M, BackendAction Action,
+                                 raw_pwrite_stream *OS) {
+  EmitAssemblyHelper AsmHelper(Diags, CGOpts, TOpts, LOpts, M);
+
+  AsmHelper.setCommandLineOpts();
+  AsmHelper.setTarget(Action);
+  AsmHelper.DoPreLinkPasses(OS);
 }
 
 static const char* getSectionNameForBitcode(const Triple &T) {
