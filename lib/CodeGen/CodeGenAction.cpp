@@ -167,7 +167,7 @@ namespace clang {
 
       PerformPrelinkPasses(Diags, CodeGenOpts, TargetOpts, LangOpts,
                            C.getTargetInfo().getDataLayout(),
-                           getModule(), Action, AsmOutStream);
+                           getModule(), Action);
 
       // Link LinkModule into this module if present, preserving its validity.
       for (auto &I : LinkModules) {
@@ -181,7 +181,8 @@ namespace clang {
 
       EmitBackendOutput(Diags, CodeGenOpts, TargetOpts, LangOpts,
                         C.getTargetInfo().getDataLayout(),
-                        getModule(), Action, AsmOutStream);
+                        getModule(), Action, AsmOutStream,
+                        false /* SetLLVMOpts */);
 
       Ctx.setInlineAsmDiagnosticHandler(OldHandler, OldContext);
 

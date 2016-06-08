@@ -129,7 +129,7 @@ private:
   bool AddEmitPasses(BackendAction Action, raw_pwrite_stream &OS);
 
   /// Add target specific pre-linking passes.
-  void AddPreLinkPasses(raw_pwrite_stream &OS);
+  void AddPreLinkPasses();
 
 public:
   EmitAssemblyHelper(DiagnosticsEngine &_Diags, const CodeGenOptions &CGOpts,
@@ -153,7 +153,7 @@ public:
   std::unique_ptr<TargetMachine> TM;
 
   void EmitAssembly(BackendAction Action, raw_pwrite_stream *OS);
-  void DoPreLinkPasses(raw_pwrite_stream *OS);
+  void DoPreLinkPasses();
 
   /// Set LLVM command line options passed through -backend-option.
   void setCommandLineOpts();
@@ -703,9 +703,9 @@ bool EmitAssemblyHelper::AddEmitPasses(BackendAction Action,
   return true;
 }
 
-void EmitAssemblyHelper::AddPreLinkPasses(raw_pwrite_stream &OS) {
+void EmitAssemblyHelper::AddPreLinkPasses() {
   legacy::PassManager *PM = getPreLinkPasses();
-  TM->addPreLinkPasses(*PM, OS);
+  TM->addPreLinkPasses(*PM);
 }
 
 void EmitAssemblyHelper::EmitAssembly(BackendAction Action,
@@ -790,13 +790,13 @@ void EmitAssemblyHelper::EmitAssembly(BackendAction Action,
   }
 }
 
-void EmitAssemblyHelper::DoPreLinkPasses(raw_pwrite_stream *OS) {
+void EmitAssemblyHelper::DoPreLinkPasses() {
   TimeRegion Region(llvm::TimePassesIsEnabled ? &PreLinkTime : nullptr);
 
   if (!TM)
     return;
 
-  AddPreLinkPasses(*OS);
+  AddPreLinkPasses();
 
   // Before executing passes, print the final values of the LLVM options.
   cl::PrintOptionValues();
@@ -812,10 +812,12 @@ void clang::EmitBackendOutput(DiagnosticsEngine &Diags,
                               const clang::TargetOptions &TOpts,
                               const LangOptions &LOpts, const llvm::DataLayout &TDesc,
                               Module *M, BackendAction Action,
-                              raw_pwrite_stream *OS) {
+                              raw_pwrite_stream *OS,
+                              bool SetLLVMOpts) {
   EmitAssemblyHelper AsmHelper(Diags, CGOpts, TOpts, LOpts, M);
 
-  AsmHelper.setCommandLineOpts();
+  if (SetLLVMOpts)
+    AsmHelper.setCommandLineOpts();
   AsmHelper.setTarget(Action);
   AsmHelper.EmitAssembly(Action, OS);
 
@@ -836,13 +838,12 @@ void clang::PerformPrelinkPasses(DiagnosticsEngine &Diags,
                                  const CodeGenOptions &CGOpts,
                                  const clang::TargetOptions &TOpts,
                                  const LangOptions &LOpts, const llvm::DataLayout &TDesc,
-                                 Module *M, BackendAction Action,
-                                 raw_pwrite_stream *OS) {
+                                 Module *M, BackendAction Action) {
   EmitAssemblyHelper AsmHelper(Diags, CGOpts, TOpts, LOpts, M);
 
   AsmHelper.setCommandLineOpts();
   AsmHelper.setTarget(Action);
-  AsmHelper.DoPreLinkPasses(OS);
+  AsmHelper.DoPreLinkPasses();
 }
 
 static const char* getSectionNameForBitcode(const Triple &T) {
