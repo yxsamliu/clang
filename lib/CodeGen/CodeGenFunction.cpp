@@ -584,12 +584,6 @@ static void GenOpenCLArgMetadata(const FunctionDecl *FD, llvm::Function *Fn,
                     llvm::MDNode::get(Context, argNames));
 }
 
-static void SetFunctionAttribute(llvm::Function &F, llvm::StringRef Name,
-                                 llvm::StringRef Value) {
-  F.setAttributes(F.getAttributes().addAttribute(
-    F.getContext(), llvm::AttributeSet::FunctionIndex, Name, Value));
-}
-
 void CodeGenFunction::EmitOpenCLKernelMetadata(const FunctionDecl *FD,
                                                llvm::Function *Fn)
 {
@@ -601,24 +595,35 @@ void CodeGenFunction::EmitOpenCLKernelMetadata(const FunctionDecl *FD,
   GenOpenCLArgMetadata(FD, Fn, CGM, Context, Builder, getContext());
 
   if (const VecTypeHintAttr *A = FD->getAttr<VecTypeHintAttr>()) {
-    std::string S;
-    llvm::raw_string_ostream SS(S);
-    SS << A->getTypeHint();
-    SetFunctionAttribute(*Fn, "vec_type_hint", SS.str());
+    QualType hintQTy = A->getTypeHint();
+    const ExtVectorType *hintEltQTy = hintQTy->getAs<ExtVectorType>();
+    bool isSignedInteger =
+        hintQTy->isSignedIntegerType() ||
+        (hintEltQTy && hintEltQTy->getElementType()->isSignedIntegerType());
+    llvm::Metadata *attrMDArgs[] = {
+        llvm::ConstantAsMetadata::get(llvm::UndefValue::get(
+            CGM.getTypes().ConvertType(A->getTypeHint()))),
+        llvm::ConstantAsMetadata::get(llvm::ConstantInt::get(
+            llvm::IntegerType::get(Context, 32),
+            llvm::APInt(32, (uint64_t)(isSignedInteger ? 1 : 0))))};
+    Fn->setMetadata("vec_type_hint", llvm::MDNode::get(Context, attrMDArgs));
   }
 
   if (const WorkGroupSizeHintAttr *A = FD->getAttr<WorkGroupSizeHintAttr>()) {
-    std::string S;
-    llvm::raw_string_ostream SS(S);
-    SS << A->getXDim() << " " << A->getYDim() << " " << A->getZDim();
-    SetFunctionAttribute(*Fn, "work_group_size_hint", SS.str());
+    llvm::Metadata *attrMDArgs[] = {
+        llvm::ConstantAsMetadata::get(Builder.getInt32(A->getXDim())),
+        llvm::ConstantAsMetadata::get(Builder.getInt32(A->getYDim())),
+        llvm::ConstantAsMetadata::get(Builder.getInt32(A->getZDim()))};
+    Fn->setMetadata("work_group_size_hint", llvm::MDNode::get(Context, attrMDArgs));
   }
 
   if (const ReqdWorkGroupSizeAttr *A = FD->getAttr<ReqdWorkGroupSizeAttr>()) {
-    std::string S;
-    llvm::raw_string_ostream SS(S);
-    SS << A->getXDim() << " " << A->getYDim() << " " << A->getZDim();
-    SetFunctionAttribute(*Fn, "reqd_work_group_size", SS.str());
+    llvm::Metadata *attrMDArgs[] = {
+        llvm::MDString::get(Context, "reqd_work_group_size"),
+        llvm::ConstantAsMetadata::get(Builder.getInt32(A->getXDim())),
+        llvm::ConstantAsMetadata::get(Builder.getInt32(A->getYDim())),
+        llvm::ConstantAsMetadata::get(Builder.getInt32(A->getZDim()))};
+    Fn->setMetadata("reqd_work_group_size", llvm::MDNode::get(Context, attrMDArgs));
   }
 }
 
