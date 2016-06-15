@@ -17,24 +17,6 @@ constant sampler_t glb_smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_NORMALIZED_COORDS_T
 // CHECK-SAMPLER-TYPE: [[smp_arg:@[-a-zA-Z$._][-a-zA-Z$._0-9]*]] = internal addrspace(2) constant %spirv.ConstantSampler { i32 1, i32 1, i32 0 }
 // CHECK-SAMPLER-TYPE: [[glb_smp_arg:@[-a-zA-Z$._][-a-zA-Z$._0-9]*]] = internal addrspace(2) constant %spirv.ConstantSampler { i32 1, i32 1, i32 1 }
 
-void fnc1(image1d_t img) {}
-// CHECK: @fnc1(%opencl.image1d_ro_t*
-
-void fnc1arr(image1d_array_t img) {}
-// CHECK: @fnc1arr(%opencl.image1d_array_ro_t*
-
-void fnc1buff(image1d_buffer_t img) {}
-// CHECK: @fnc1buff(%opencl.image1d_buffer_ro_t*
-
-void fnc2(image2d_t img) {}
-// CHECK: @fnc2(%opencl.image2d_ro_t*
-
-void fnc2arr(image2d_array_t img) {}
-// CHECK: @fnc2arr(%opencl.image2d_array_ro_t*
-
-void fnc3(image3d_t img) {}
-// CHECK: @fnc3(%opencl.image3d_ro_t*
-
 void fnc4smp(sampler_t s) {}
 // CHECK: define spir_func void @fnc4smp(i32
 // CHECK-SAMPLER-TYPE: define spir_func void @fnc4smp(%spirv.Sampler addrspace(2)* %
@@ -48,9 +30,6 @@ kernel void foo(image1d_t img) {
   // CHECK-SAMPLER-TYPE: [[smp_ptr:%[A-Za-z0-9_\.]+]] = alloca %spirv.Sampler addrspace(2)*
   // CHECK-SAMPLER-TYPE: store %spirv.Sampler addrspace(2)* bitcast (%spirv.ConstantSampler addrspace(2)* [[smp_init]] to %spirv.Sampler addrspace(2)*), %spirv.Sampler addrspace(2)** [[smp_ptr]], align 4
 
-  event_t evt;
-  // CHECK: alloca %opencl.event_t*
-
   fnc4smp(smp);
   // CHECK: store i32 19,
   // CHECK: call spir_func void @fnc4smp(i32
@@ -60,6 +39,3 @@ kernel void foo(image1d_t img) {
   // CHECK: call spir_func void @fnc4smp(i32
   // CHECK-SAMPLER-TYPE: call spir_func void @fnc4smp(%spirv.Sampler addrspace(2)* bitcast (%spirv.ConstantSampler addrspace(2)* [[glb_smp_arg]] to %spirv.Sampler addrspace(2)*))
 }
-
-void __attribute__((overloadable)) bad1(image1d_t b, image2d_t c, image2d_t d) {}
-// CHECK-LABEL: @{{_Z4bad114ocl_image1d_ro14ocl_image2d_roS0_|"\\01\?bad1@@\$\$J0YAXPAUocl_image1d_ro@@PAUocl_image2d_ro@@1@Z"}}
