@@ -21,12 +21,11 @@ void fnc4smp(sampler_t s) {}
 // CHECK: define spir_func void @fnc4smp(i32
 // CHECK-SAMPLER-TYPE: define spir_func void @fnc4smp(%spirv.Sampler addrspace(2)* %
 
-kernel void foo(image1d_t img) {
-// CHECK: define spir_kernel void @foo(%opencl.image1d_t {{.*}}*
-// CHECK-SAMPLER-TYPE: define spir_kernel void @foo(%opencl.image1d_t {{.*}}*
-
+kernel void foo() {
   sampler_t smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_NORMALIZED_COORDS_TRUE | CLK_FILTER_NEAREST;
+  // CHECK-LABEL: define spir_kernel void @foo()
   // CHECK: alloca i32
+  // CHECK-SAMPLER-TYPE-LABEL: define spir_kernel void @foo()
   // CHECK-SAMPLER-TYPE: [[smp_ptr:%[A-Za-z0-9_\.]+]] = alloca %spirv.Sampler addrspace(2)*
   // CHECK-SAMPLER-TYPE: store %spirv.Sampler addrspace(2)* bitcast (%spirv.ConstantSampler addrspace(2)* [[smp_init]] to %spirv.Sampler addrspace(2)*), %spirv.Sampler addrspace(2)** [[smp_ptr]], align 4
 
