@@ -1570,6 +1570,7 @@ bool CastExpr::CastConsistency() const {
   case CK_ARCReclaimReturnedObject:
   case CK_ARCExtendBlockObject:
   case CK_ZeroToOCLEvent:
+  case CK_IntToOCLSampler:
     assert(!getType()->isBooleanType() && "unheralded conversion to bool");
     goto CheckNoBasePath;
 
@@ -1598,8 +1599,6 @@ const char *CastExpr::getCastKindName() const {
   switch (getCastKind()) {
 #define CAST_OPERATION(Name) case CK_##Name: return #Name;
 #include "clang/AST/OperationKinds.def"
-  case CK_IntToOCLSampler:
-    return "IntToOCLSampler";
   }
   llvm_unreachable("Unhandled cast kind!");
 }
