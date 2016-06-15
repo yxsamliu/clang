@@ -6,8 +6,7 @@
 #define CLK_FILTER_NEAREST              0x10
 #define CLK_FILTER_LINEAR               0x20
 
-//constant sampler_t glb_smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_NORMALIZED_COORDS_TRUE | CLK_FILTER_LINEAR;
-constant sampler_t glb_smp = 2;
+constant sampler_t glb_smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_NORMALIZED_COORDS_TRUE | CLK_FILTER_LINEAR;
 // CHECK: constant i32 35
 // CHECK-SAMPLER-TYPE: %spirv.ConstantSampler = type { i32, i32, i32 }
 // CHECK-SAMPLER-TYPE: %spirv.Sampler = type opaque
