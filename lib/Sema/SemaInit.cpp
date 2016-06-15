@@ -6891,6 +6891,13 @@ InitializationSequence::Perform(Sema &S,
              "Sampler initialization on non-sampler type.");
 
       Expr *Init = CurInit.get();
+      QualType SourceType = Init->getType();
+      if (Entity.isParameterKind()) {
+        if (!SourceType->isSamplerT())
+          S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
+            << SourceType;
+      }
+
       // In case of passing sampler or integer variable to a function
       // use its initializer
       if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Init))
@@ -6898,18 +6905,15 @@ InitializationSequence::Perform(Sema &S,
       if (ImplicitCastExpr *ICE = dyn_cast<ImplicitCastExpr>(Init))
         if (ICE->getCastKind() == CK_IntToOCLSampler)
           Init = ICE->getSubExpr();
+      SourceType = Init->getType();
 
-      QualType SourceType = Init->getType();
       bool isConst = Init->isConstantInitializer(S.Context, false);
       InitializedEntity::EntityKind EntityKind = Entity.getKind();
-      if (Entity.isParameterKind()) {
-        if (!SourceType->isSamplerT())
-          S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
-            << SourceType;
-      } else if (EntityKind == InitializedEntity::EK_Variable ||
-                 EntityKind == InitializedEntity::EK_Parameter) {
+      if (EntityKind == InitializedEntity::EK_Variable ||
+          EntityKind == InitializedEntity::EK_Parameter) {
         if (!isConst)
-          S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_constant);
+          S.Diag(Kind.getLocation(),
+                 diag::err_sampler_initializer_not_constant);
         if (!SourceType->isIntegerType() ||
             32 != S.Context.getIntWidth(SourceType))
           S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_integer)
