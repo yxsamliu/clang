@@ -6902,8 +6902,12 @@ InitializationSequence::Perform(Sema &S,
       QualType SourceType = Init->getType();
       bool isConst = Init->isConstantInitializer(S.Context, false);
       InitializedEntity::EntityKind EntityKind = Entity.getKind();
-      if (EntityKind == InitializedEntity::EK_Variable ||
-          EntityKind == InitializedEntity::EK_Parameter) {
+      if (Entity.isParameterKind()) {
+        if (!SourceType->isSamplerT())
+          S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
+            << SourceType;
+      } else if (EntityKind == InitializedEntity::EK_Variable ||
+                 EntityKind == InitializedEntity::EK_Parameter) {
         if (!isConst)
           S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_constant);
         if (!SourceType->isIntegerType() ||
