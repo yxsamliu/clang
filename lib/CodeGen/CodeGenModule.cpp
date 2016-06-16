@@ -4307,7 +4307,7 @@ llvm::SanitizerStatReport &CodeGenModule::getSanStats() {
 
   return *SanStats;
 }
-llvm::Constant*
+llvm::Value*
 CodeGenModule::createIntToSamplerConversion(const Expr *E,
                                             CodeGenFunction *CGF,
                                             llvm::GlobalVariable *InsertBefore,
@@ -4319,11 +4319,11 @@ CodeGenModule::createIntToSamplerConversion(const Expr *E,
     return C;
 
   llvm::StructType*
-    ConstSamplerTy = TheModule.getTypeByName("spirv.ConstantSampler");
+    ConstSamplerTy = TheModule.getTypeByName("__sampler_initializer");
   if (!ConstSamplerTy ) {
     llvm::Type* Elements[] = {Int32Ty, Int32Ty, Int32Ty};
     ConstSamplerTy = llvm::StructType::create(VMContext, Elements,
-                                              "spirv.ConstantSampler");
+                                              "__sampler_initializer");
   }
   const llvm::ConstantInt *CI = static_cast<llvm::ConstantInt*>(C);
   const uint64_t SamplerValue = CI->getValue().getZExtValue();
@@ -4358,9 +4358,9 @@ CodeGenModule::createIntToSamplerConversion(const Expr *E,
     llvm::ConstantInt::get(Int32Ty, FilterMode),
     nullptr);
   llvm::StructType*
-    SamplerTy = TheModule.getTypeByName("spirv.Sampler");
+    SamplerTy = TheModule.getTypeByName("__sampler");
   if(!SamplerTy)
-    SamplerTy = llvm::StructType::create(VMContext, "spirv.Sampler");
+    SamplerTy = llvm::StructType::create(VMContext, "__sampler");
 
   unsigned AS = Context.getTargetAddressSpace(LangAS::opencl_constant);
   llvm::GlobalVariable *GV =
@@ -4369,6 +4369,7 @@ CodeGenModule::createIntToSamplerConversion(const Expr *E,
                              Initializer, Name + ".sampler.init", InsertBefore,
                              llvm::GlobalVariable::NotThreadLocal, AS);
 
-  return llvm::ConstantExpr::getBitCast(GV,
-                                        llvm::PointerType::get(SamplerTy, AS));
+  auto FTy = llvm::FunctionType::get(llvm::PointerType::get(SamplerTy, AS),
+                                    {ConstSamplerTy}, false);
+  return CGF->Builder.CreateCall(CreateRuntimeFunction(FTy, Name), {GV});
 }

@@ -1147,7 +1147,7 @@ public:
 
   llvm::SanitizerStatReport &getSanStats();
 
-  llvm::Constant*
+  llvm::Value*
   createIntToSamplerConversion(const Expr *E,
                                CodeGenFunction *CGF,
                                llvm::GlobalVariable *InsertBefore = nullptr,

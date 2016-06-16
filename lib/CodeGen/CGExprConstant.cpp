@@ -693,7 +693,8 @@ public:
     case CK_IntToOCLSampler: {
       if (!CGM.getLangOpts().CLSamplerOpaque)
         return C;
-      return CGM.createIntToSamplerConversion(subExpr, CGF);
+      return nullptr;
+      //return CGM.createIntToSamplerConversion(subExpr, CGF);
     }
 
     case CK_Dependent: llvm_unreachable("saw dependent cast!");
