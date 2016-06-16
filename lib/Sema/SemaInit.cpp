@@ -6891,7 +6891,10 @@ InitializationSequence::Perform(Sema &S,
              "Sampler initialization on non-sampler type.");
 
       Expr *Init = CurInit.get();
-      QualType SourceType = Init->getType();
+      llvm::errs() << "InitializationSequence::Perform ";
+      Init->dump();
+      llvm::errs() << '\n';
+        QualType SourceType = Init->getType();
       if (Entity.isParameterKind()) {
         if (!SourceType->isSamplerT())
           S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
