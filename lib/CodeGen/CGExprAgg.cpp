@@ -701,7 +701,7 @@ void AggExprEmitter::VisitCastExpr(CastExpr *E) {
            "Implicit cast types must be compatible");
     Visit(E->getSubExpr());
     break;
-
+      
   case CK_LValueBitCast:
     llvm_unreachable("should not be emitting lvalue bitcast as rvalue");
 

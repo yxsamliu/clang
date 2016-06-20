@@ -165,8 +165,6 @@ void clang::ParseAST(Sema &S, bool PrintStats, bool SkipFunctionBodies) {
     Consumer->HandleTopLevelDecl(DeclGroupRef(D));
   
   Consumer->HandleTranslationUnit(S.getASTContext());
-  llvm::errs().flush();
-  llvm::outs().flush();
 
   std::swap(OldCollectStats, S.CollectStats);
   if (PrintStats) {
