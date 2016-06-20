@@ -202,6 +202,7 @@ public:
 
   Value *Visit(Expr *E) {
     ApplyDebugLocation DL(CGF, E);
+    llvm::errs() << "[visit] "; E->dump(); llvm::errs() << '\n';
     return StmtVisitor<ScalarExprEmitter, Value*>::Visit(E);
   }
 

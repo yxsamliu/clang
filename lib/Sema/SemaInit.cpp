@@ -6898,11 +6898,11 @@ InitializationSequence::Perform(Sema &S,
       llvm::errs() << '\n';
       QualType SourceType = Init->getType();
       if (Entity.isParameterKind()) {
-        if (SourceType->isSamplerInitT())
+        if (SourceType->isSamplerInitT()) {
+          Init->setValueKind(VK_RValue);
           CurInit = S.ImpCastExprToType(Init, Step->Type,
-                                        CK_OCLSamplerInitializerToSampler,
-                                        Init->getValueKind());
-        else if (!SourceType->isSamplerT())
+                                        CK_OCLSamplerInitializerToSampler);
+        } else if (!SourceType->isSamplerT())
           S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
             << SourceType;
       } else {
@@ -6914,8 +6914,7 @@ InitializationSequence::Perform(Sema &S,
           S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_integer)
             << SourceType;
         CurInit = S.ImpCastExprToType(Init, S.Context.OCLSamplerInitTy,
-                                      CK_IntToOCLSamplerInitializer,
-                                      Init->getValueKind());
+                                      CK_IntToOCLSamplerInitializer);
       }
       break;
     }
