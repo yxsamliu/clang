@@ -1573,12 +1573,13 @@ Value *ScalarExprEmitter::VisitCastExpr(CastExpr *CE) {
     return llvm::Constant::getNullValue(ConvertType(DestTy));
   }
 
-  case CK_IntToOCLSamplerInitializer:
-    llvm_unreachable("saw dependent cast!");
+  case CK_IntToOCLSamplerInitializer: {
+    if (!CGF.CGM.getLangOpts().CLSamplerOpaque)
+      return Visit(E);
+    return CGF.CGM.createIntToSamplerConversion(E, &CGF);
+  }
 
   case CK_OCLSamplerInitializerToSampler: {
-    assert(DestTy->isSamplerT() &&
-           "CK_IntToOCLSamplerInitializer cast to non sampler type");
     if (!CGF.CGM.getLangOpts().CLSamplerOpaque)
       return Visit(E);
 
