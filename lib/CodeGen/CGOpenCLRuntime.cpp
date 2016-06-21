@@ -54,14 +54,17 @@ llvm::Type *CGOpenCLRuntime::convertOpenCLSpecificType(const Type *T) {
                            LangAS::opencl_constant));
     else
       return llvm::IntegerType::get(Ctx, 32);
-  case BuiltinType::OCLSamplerInit: {
-    auto Int32Ty = llvm::IntegerType::get(Ctx, 32);
-    llvm::Type* Elements[] = {Int32Ty, Int32Ty, Int32Ty};
-    return llvm::PointerType::get(llvm::StructType::create(
+  case BuiltinType::OCLSamplerInit:
+    if (CGM.getLangOpts().CLSamplerOpaque) {
+      auto Int32Ty = llvm::IntegerType::get(Ctx, 32);
+      llvm::Type* Elements[] = {Int32Ty, Int32Ty, Int32Ty};
+      return llvm::PointerType::get(llvm::StructType::create(
                            Ctx, Elements, "__sampler_initializer"),
                            CGM.getContext().getTargetAddressSpace(
                            LangAS::opencl_constant));
-  }
+    }
+    else
+      return llvm::IntegerType::get(Ctx, 32);
   case BuiltinType::OCLEvent:
     return llvm::PointerType::get(llvm::StructType::create(
                            Ctx, "opencl.event_t"), 0);
