@@ -9032,7 +9032,6 @@ bool Sema::CheckForConstantInitializer(Expr *Init, QualType DclT) {
   // (We never end up here for C++, so the constant expression
   // rules there don't matter.)
   const Expr *Culprit;
-  llvm::errs() << "isConstantInitializer: "; Init->dump(); llvm::errs() << '\n';
   if (Init->isConstantInitializer(Context, false, &Culprit))
     return false;
   Diag(Culprit->getExprLoc(), diag::err_init_element_not_constant)

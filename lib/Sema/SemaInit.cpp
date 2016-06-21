@@ -4885,11 +4885,6 @@ static bool TryOCLSamplerInitialization(Sema &S,
                                         InitializationSequence &Sequence,
                                         QualType DestType,
                                         Expr *Initializer) {
-  llvm::errs() << "[TryOCLSamplerInitialization]";
-  DestType.dump();
-  Initializer->dump();
-  llvm::errs() << '\n';
-
   if (!S.getLangOpts().OpenCL || !DestType->isSamplerT() ||
       (!Initializer->isIntegerConstantExpr(S.Context) &&
       !Initializer->getType()->isSamplerInitT()))
@@ -6888,13 +6883,6 @@ InitializationSequence::Perform(Sema &S,
     }
 
     case SK_OCLSamplerInit: {
-      llvm::errs() << "InitializationSequence::Perform ";
-      CurInit.get()->dump();
-      llvm::errs() << '\n';
-
-      assert(Step->Type->isSamplerT() && 
-             "Sampler initialization on non-sampler type.");
-
       Expr *Init = CurInit.get();
       QualType SourceType = Init->getType();
       if (Entity.isParameterKind()) {
