@@ -4881,19 +4881,18 @@ static bool tryObjCWritebackConversion(Sema &S,
   return true;
 }
 
-// Only add sampler initialization steps when the initializer is either an
-// integer constant or a variable initialized with an integer constant.
 static bool TryOCLSamplerInitialization(Sema &S,
                                         InitializationSequence &Sequence,
                                         QualType DestType,
                                         Expr *Initializer) {
-  if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Initializer))
-    if (const VarDecl *VD = dyn_cast<VarDecl>(DRE->getDecl()))
-      if (const CastExpr* Init = dyn_cast_or_null<CastExpr>(VD->getInit()))
-        Initializer = const_cast<Expr*>(Init->getSubExpr());
+  llvm::errs() << "[TryOCLSamplerInitialization]";
+  DestType.dump();
+  Initializer->dump();
+  llvm::errs() << '\n';
 
   if (!S.getLangOpts().OpenCL || !DestType->isSamplerT() ||
-    !Initializer->isIntegerConstantExpr(S.getASTContext()))
+      (!Initializer->isIntegerConstantExpr(S.Context) &&
+      !Initializer->getType()->isSamplerInitT()))
     return false;
 
   Sequence.AddOCLSamplerInitStep(DestType);
@@ -6889,6 +6888,10 @@ InitializationSequence::Perform(Sema &S,
     }
 
     case SK_OCLSamplerInit: {
+      llvm::errs() << "InitializationSequence::Perform ";
+      CurInit.get()->dump();
+      llvm::errs() << '\n';
+
       assert(Step->Type->isSamplerT() && 
              "Sampler initialization on non-sampler type.");
 

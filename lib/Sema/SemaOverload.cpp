@@ -1738,7 +1738,11 @@ static bool IsStandardConversion(Sema &S, Expr* From, QualType ToType,
              From->EvaluateKnownConstInt(S.getASTContext()) == 0) {
     SCS.Second = ICK_Zero_Event_Conversion;
     FromType = ToType;
-  } else {
+  } else if (ToType->isSamplerT() && From->getType()->isSamplerInitT()) {
+    SCS.Second = ICK_Sampler_Conversion;
+    FromType = ToType;
+  }
+  else {
     // No second conversion required.
     SCS.Second = ICK_Identity;
   }
@@ -5105,6 +5109,7 @@ static bool CheckConvertedConstantConversions(Sema &S,
   case ICK_TransparentUnionConversion:
   case ICK_Writeback_Conversion:
   case ICK_Zero_Event_Conversion:
+  case ICK_Sampler_Conversion:
   case ICK_C_Only_Conversion:
     return false;
 
