@@ -86,15 +86,12 @@ public:
     OptMap = Opts.OptMap;
   }
 
-  // Enable all supported options.
   void supportAll() {
     for (llvm::StringMap<Info>::iterator I = OptMap.begin(),
          E = OptMap.end(); I != E; ++I)
-      if (I->second.Supported)
-        I->second.Enabled = true;
+      I->second.Supported = true;
   }
 
-  // Disable all options.
   void disableAll() {
     for (llvm::StringMap<Info>::iterator I = OptMap.begin(),
          E = OptMap.end(); I != E; ++I)
