@@ -1405,12 +1405,12 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
       "OPENCL";
     return;
   }
-  IdentifierInfo *ename = Tok.getIdentifierInfo();
+  IdentifierInfo *Ident = Tok.getIdentifierInfo();
   SourceLocation NameLoc = Tok.getLocation();
 
   PP.Lex(Tok);
   if (Tok.isNot(tok::colon)) {
-    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_colon) << ename;
+    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_colon) << Ident;
     return;
   }
 
@@ -1421,13 +1421,13 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
   }
   IdentifierInfo *op = Tok.getIdentifierInfo();
 
-  OpenCLExtState state;
+  OpenCLExtState State;
   if (op->isStr("enable")) {
-    state = Enable;
+    State = Enable;
   } else if (op->isStr("disable")) {
-    state = Disable;
+    State = Disable;
   } else if (op->isStr("register"))
-    state = Register;
+    State = Register;
   else {
     PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_enable_disable);
     return;
@@ -1441,19 +1441,21 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
     return;
   }
 
-  OpenCLExtData data(ename, state);
+  auto Info = PP.getPreprocessorAllocator().Allocate<OpenCLExtData>(1);
+  Info->first = Ident;
+  Info->second = State;
   MutableArrayRef<Token> Toks(PP.getPreprocessorAllocator().Allocate<Token>(1),
                               1);
   Toks[0].startToken();
   Toks[0].setKind(tok::annot_pragma_opencl_extension);
   Toks[0].setLocation(NameLoc);
-  Toks[0].setAnnotationValue(static_cast<void*>(&data));
+  Toks[0].setAnnotationValue(static_cast<void*>(Info));
   Toks[0].setAnnotationEndLoc(StateLoc);
   PP.EnterTokenStream(Toks, /*DisableMacroExpansion=*/true);
 
   if (PP.getPPCallbacks())
-    PP.getPPCallbacks()->PragmaOpenCLExtension(NameLoc, ename, 
-                                               StateLoc, state);
+    PP.getPPCallbacks()->PragmaOpenCLExtension(NameLoc, Ident, 
+                                               StateLoc, State);
 }
 
 /// \brief Handle '#pragma omp ...' when OpenMP is disabled.
