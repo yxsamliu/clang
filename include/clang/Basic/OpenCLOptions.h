@@ -44,14 +44,14 @@ public:
   // Is supported OpenCL extension or (optional) core feature for OpenCL version
   // \p CLVer.
   bool isSupported(StringRef Ext, unsigned CLVer) const {
-    auto I = OptMap.find(Ext)->second;
+    auto I = OptMap.find(Ext)->getValue();
     return I.Supported && I.Avail <= CLVer;
   }
 
   // Is supported (optional) OpenCL core features for OpenCL version \p CLVer.
   // For supported extension, return false.
   bool isSupportedCore(StringRef Ext, unsigned CLVer) const {
-    auto I = OptMap.find(Ext)->second;
+    auto I = OptMap.find(Ext)->getValue();
     return I.Supported && I.Avail <= CLVer &&
       I.Core != ~0U && CLVer >= I.Core;
   }
@@ -59,7 +59,7 @@ public:
   // Is supported OpenCL extension for OpenCL version \p CLVer.
   // For supported (optional) core feature, return false.
  bool isSupportedExtension(StringRef Ext, unsigned CLVer) const {
-    auto I = OptMap.find(Ext)->second;
+    auto I = OptMap.find(Ext)->getValue();
     return I.Supported && I.Avail <= CLVer &&
       (I.Core == ~0U || CLVer < I.Core);
   }
@@ -101,6 +101,8 @@ public:
       I->second.Enabled = false;
   }
 
+  friend class ASTWriter;
+  friend class ASTReader;
 };
 
 }  // end namespace clang
