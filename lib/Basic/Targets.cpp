@@ -1864,16 +1864,16 @@ public:
   }
   void setSupportedOpenCLOpts() override {
     auto &Opts = getSupportedOpenCLOpts();
-    Opts.cl_clang_storage_class_specifiers = 1;
-    Opts.cl_khr_gl_sharing = 1;
-    Opts.cl_khr_icd = 1;
+    Opts.support("cl_clang_storage_class_specifiers");
+    Opts.support("cl_khr_gl_sharing");
+    Opts.support("cl_khr_icd");
 
-    Opts.cl_khr_fp64 = 1;
-    Opts.cl_khr_byte_addressable_store = 1;
-    Opts.cl_khr_global_int32_base_atomics = 1;
-    Opts.cl_khr_global_int32_extended_atomics = 1;
-    Opts.cl_khr_local_int32_base_atomics = 1;
-    Opts.cl_khr_local_int32_extended_atomics = 1;
+    Opts.support("cl_khr_fp64");
+    Opts.support("cl_khr_byte_addressable_store");
+    Opts.support("cl_khr_global_int32_base_atomics");
+    Opts.support("cl_khr_global_int32_extended_atomics");
+    Opts.support("cl_khr_local_int32_base_atomics");
+    Opts.support("cl_khr_local_int32_extended_atomics");
   }
 };
 
@@ -2111,23 +2111,23 @@ public:
 
   void setSupportedOpenCLOpts() override {
     auto &Opts = getSupportedOpenCLOpts();
-    Opts.cl_clang_storage_class_specifiers = 1;
-    Opts.cl_khr_icd = 1;
+    Opts.support("cl_clang_storage_class_specifiers");
+    Opts.support("cl_khr_icd");
 
     if (hasFP64)
-      Opts.cl_khr_fp64 = 1;
+      Opts.support("cl_khr_fp64");
     if (GPU >= GK_EVERGREEN) {
-      Opts.cl_khr_byte_addressable_store = 1;
-      Opts.cl_khr_global_int32_base_atomics = 1;
-      Opts.cl_khr_global_int32_extended_atomics = 1;
-      Opts.cl_khr_local_int32_base_atomics = 1;
-      Opts.cl_khr_local_int32_extended_atomics = 1;
+      Opts.support("cl_khr_byte_addressable_store");
+      Opts.support("cl_khr_global_int32_base_atomics");
+      Opts.support("cl_khr_global_int32_extended_atomics");
+      Opts.support("cl_khr_local_int32_base_atomics");
+      Opts.support("cl_khr_local_int32_extended_atomics");
     }
     if (GPU >= GK_SOUTHERN_ISLANDS) {
-      Opts.cl_khr_fp16 = 1;
-      Opts.cl_khr_int64_base_atomics = 1;
-      Opts.cl_khr_int64_extended_atomics = 1;
-      Opts.cl_khr_3d_image_writes = 1;
+      Opts.support("cl_khr_fp16");
+      Opts.support("cl_khr_int64_base_atomics");
+      Opts.support("cl_khr_int64_extended_atomics");
+      Opts.support("cl_khr_3d_image_writes");
     }
   }
 };
@@ -2805,7 +2805,7 @@ public:
   }
 
   void setSupportedOpenCLOpts() override {
-    getSupportedOpenCLOpts().setAll();
+    getSupportedOpenCLOpts().supportAll();
   }
 };
 
@@ -7927,7 +7927,7 @@ public:
   void setSupportedOpenCLOpts() override {
     // Assume all OpenCL extensions and optional core features are supported
     // for SPIR since it is a generic target.
-    getSupportedOpenCLOpts().setAll();
+    getSupportedOpenCLOpts().supportAll();
   }
 };
 
