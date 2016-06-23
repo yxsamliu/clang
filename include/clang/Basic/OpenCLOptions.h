@@ -87,7 +87,7 @@ public:
   }
 
   // Enable all supported options.
-  void enableAll() {
+  void supportAll() {
     for (llvm::StringMap<Info>::iterator I = OptMap.begin(),
          E = OptMap.end(); I != E; ++I)
       if (I->second.Supported)
