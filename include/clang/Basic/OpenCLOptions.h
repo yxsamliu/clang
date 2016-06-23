@@ -98,6 +98,13 @@ public:
       I->second.Enabled = false;
   }
 
+  void enableSupportedCore(unsigned CLVer) {
+    for (llvm::StringMap<Info>::iterator I = OptMap.begin(),
+         E = OptMap.end(); I != E; ++I)
+      if (isSupportedCore(I->getKey(), CLVer))
+        I->second.Enabled = true;
+  }
+
   friend class ASTWriter;
   friend class ASTReader;
 };
