@@ -1414,7 +1414,7 @@ static QualType ConvertDeclSpecToType(TypeProcessingState &state) {
 
     if (S.getLangOpts().OpenCL &&
         !((S.getLangOpts().OpenCLVersion >= 120) ||
-          S.getOpenCLOptions().cl_khr_fp64)) {
+          S.getOpenCLOptions().isEnabled("cl_khr_fp64"))) {
       S.Diag(DS.getTypeSpecTypeLoc(), diag::err_type_requires_extension)
           << Result << "cl_khr_fp64";
       declarator.setInvalidType(true);
@@ -1478,24 +1478,25 @@ static QualType ConvertDeclSpecToType(TypeProcessingState &state) {
                 .Cases("atomic_int", "atomic_uint", "atomic_float",
                        "atomic_flag", true)
                 .Default(false);
-        if (!S.getOpenCLOptions().cl_khr_int64_base_atomics && !NoExtTypes) {
+        if (!S.getOpenCLOptions().isEnabled("cl_khr_int64_base_atomics") &&
+            !NoExtTypes) {
           S.Diag(DS.getTypeSpecTypeLoc(), diag::err_type_requires_extension)
               << Result << "cl_khr_int64_base_atomics";
           declarator.setInvalidType(true);
         }
-        if (!S.getOpenCLOptions().cl_khr_int64_extended_atomics &&
-            !NoExtTypes) {
+        if (!S.getOpenCLOptions().isEnabled("cl_khr_int64_extended_atomics")
+            && !NoExtTypes) {
           S.Diag(DS.getTypeSpecTypeLoc(), diag::err_type_requires_extension)
               << Result << "cl_khr_int64_extended_atomics";
           declarator.setInvalidType(true);
         }
-        if (!S.getOpenCLOptions().cl_khr_fp64 &&
+        if (!S.getOpenCLOptions().isEnabled("cl_khr_fp64") &&
             !TypeName.compare("atomic_double")) {
           S.Diag(DS.getTypeSpecTypeLoc(), diag::err_type_requires_extension)
               << Result << "cl_khr_fp64";
           declarator.setInvalidType(true);
         }
-      } else if (!S.getOpenCLOptions().cl_khr_gl_msaa_sharing &&
+      } else if (!S.getOpenCLOptions().isEnabled("cl_khr_gl_msaa_sharing") &&
                  (Result->isOCLImage2dArrayMSAADepthROType() ||
                   Result->isOCLImage2dArrayMSAADepthWOType() ||
                   Result->isOCLImage2dArrayMSAADepthRWType() ||
@@ -4032,7 +4033,7 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
       // FIXME: This really should be in BuildFunctionType.
       if (T->isHalfType()) {
         if (S.getLangOpts().OpenCL) {
-          if (!S.getOpenCLOptions().cl_khr_fp16) {
+          if (!S.getOpenCLOptions().isEnabled("cl_khr_fp16")) {
             S.Diag(D.getIdentifierLoc(), diag::err_opencl_invalid_return)
                 << T << 0 /*pointer hint*/;
             D.setInvalidType(true);
@@ -4239,7 +4240,7 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
             // Disallow half FP parameters.
             // FIXME: This really should be in BuildFunctionType.
             if (S.getLangOpts().OpenCL) {
-              if (!S.getOpenCLOptions().cl_khr_fp16) {
+              if (!S.getOpenCLOptions().isEnabled("cl_khr_fp16")) {
                 S.Diag(Param->getLocation(),
                   diag::err_opencl_half_param) << ParamTy;
                 D.setInvalidType();
