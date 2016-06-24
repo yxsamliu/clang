@@ -787,7 +787,7 @@ private:
   SourceLocation PointersToMembersPragmaLocation;
 
   /// \brief The OpenCL extension settings.
-  SmallVector<uint64_t, 1> OpenCLExtensions;
+  OpenCLOptions OpenCLExtensions;
 
   /// \brief A list of the namespaces we've seen.
   SmallVector<uint64_t, 4> KnownNamespaces;
