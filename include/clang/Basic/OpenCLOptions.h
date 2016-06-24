@@ -69,11 +69,8 @@ public:
     OptMap[Ext].Enabled = V;
   }
 
-  void support(StringRef Ext, bool V = true, unsigned Avail = 100,
-              unsigned Core = ~0U) {
+  void support(StringRef Ext, bool V = true) {
     OptMap[Ext].Supported = V;
-    OptMap[Ext].Avail = Avail;
-    OptMap[Ext].Core = Core;
   }
 
   OpenCLOptions(){
