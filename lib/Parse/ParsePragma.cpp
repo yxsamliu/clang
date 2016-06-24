@@ -1412,12 +1412,12 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
       "OPENCL";
     return;
   }
-  IdentifierInfo *Ident = Tok.getIdentifierInfo();
+  IdentifierInfo *Ext = Tok.getIdentifierInfo();
   SourceLocation NameLoc = Tok.getLocation();
 
   PP.Lex(Tok);
   if (Tok.isNot(tok::colon)) {
-    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_colon) << Ident;
+    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_colon) << Ext;
     return;
   }
 
@@ -1426,17 +1426,18 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
     PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_predicate) << 0;
     return;
   }
-  IdentifierInfo *op = Tok.getIdentifierInfo();
+  IdentifierInfo *Pred = Tok.getIdentifierInfo();
 
   OpenCLExtState State;
-  if (op->isStr("enable")) {
+  if (Pred->isStr("enable")) {
     State = Enable;
-  } else if (op->isStr("disable")) {
+  } else if (Pred->isStr("disable")) {
     State = Disable;
-  } else if (op->isStr("register"))
+  } else if (Pred->isStr("register"))
     State = Register;
   else {
-    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_predicate) << 0;
+    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_predicate)
+      << Ext->isStr("all");
     return;
   }
   SourceLocation StateLoc = Tok.getLocation();
@@ -1449,7 +1450,7 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
   }
 
   auto Info = PP.getPreprocessorAllocator().Allocate<OpenCLExtData>(1);
-  Info->first = Ident;
+  Info->first = Ext;
   Info->second = State;
   MutableArrayRef<Token> Toks(PP.getPreprocessorAllocator().Allocate<Token>(1),
                               1);
@@ -1461,7 +1462,7 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
   PP.EnterTokenStream(Toks, /*DisableMacroExpansion=*/true);
 
   if (PP.getPPCallbacks())
-    PP.getPPCallbacks()->PragmaOpenCLExtension(NameLoc, Ident, 
+    PP.getPPCallbacks()->PragmaOpenCLExtension(NameLoc, Ext, 
                                                StateLoc, State);
 }
 
