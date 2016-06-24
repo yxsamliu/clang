@@ -465,33 +465,34 @@ void Parser::HandlePragmaOpenCLExtension() {
   assert(Tok.is(tok::annot_pragma_opencl_extension));
   OpenCLExtData *Data = static_cast<OpenCLExtData*>(Tok.getAnnotationValue());
   auto State = Data->second;
-  auto EName = Data->first;
+  auto Ident = Data->first;
   SourceLocation NameLoc = Tok.getLocation();
   ConsumeToken(); // The annotation token.
 
-  OpenCLOptions &f = Actions.getOpenCLOptions();
-  auto Name = EName->getName();
+  auto &Opt = Actions.getOpenCLOptions();
+  auto Name = Ident->getName();
   // OpenCL 1.1 9.1: "The all variant sets the behavior for all extensions,
   // overriding all previously issued extension directives, but only if the
   // behavior is set to disable."
   if (Name == "all") {
     if (State == Disable)
-      f.disableAll();
+      Opt.disableAll();
     else
       PP.Diag(NameLoc, diag::warn_pragma_expected_predicate) << 1;
   } else if (State == Register) {
-    if (!f.isSupported(Name, getLangOpts().OpenCLVersion))
-      f.support(Name);
+    if (!Opt.isKnown(Name) ||
+        !Opt.isSupported(Name, getLangOpts().OpenCLVersion))
+      Opt.support(Name);
     else
       PP.Diag(NameLoc, diag::warn_pragma_register_supported);
-  } else if (!f.isKnown(Name))
-    PP.Diag(NameLoc, diag::warn_pragma_unknown_extension) << EName;
-  else if (f.isSupportedExtension(Name, getLangOpts().OpenCLVersion))
-    f.enable(Name, State == Enable);
-  else if (f.isSupportedCore(Name, getLangOpts().OpenCLVersion))
-    PP.Diag(NameLoc, diag::warn_pragma_extension_is_core) << EName;
+  } else if (!Opt.isKnown(Name))
+    PP.Diag(NameLoc, diag::warn_pragma_unknown_extension) << Ident;
+  else if (Opt.isSupportedExtension(Name, getLangOpts().OpenCLVersion))
+    Opt.enable(Name, State == Enable);
+  else if (Opt.isSupportedCore(Name, getLangOpts().OpenCLVersion))
+    PP.Diag(NameLoc, diag::warn_pragma_extension_is_core) << Ident;
   else
-    PP.Diag(NameLoc, diag::warn_pragma_unsupported_extension) << EName;
+    PP.Diag(NameLoc, diag::warn_pragma_unsupported_extension) << Ident;
 }
 
 void Parser::HandlePragmaMSPointersToMembers() {
