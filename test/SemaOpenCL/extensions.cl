@@ -34,4 +34,3 @@ void f2(void) {
 void f3(void) {
   double d; // expected-error {{type 'double' requires cl_khr_fp64 extension}}
 }
-
