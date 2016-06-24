@@ -3839,8 +3839,14 @@ void ASTWriter::WriteOpenCLExtensions(Sema &SemaRef) {
 
   const OpenCLOptions &Opts = SemaRef.getOpenCLOptions();
   RecordData Record;
-#define OPENCLEXT(nm)  Record.push_back(Opts.nm);
-#include "clang/Basic/OpenCLExtensions.def"
+  for (const auto &I:Opts.OptMap) {
+    AddString(I.getKey(), Record);
+    auto V = I.getValue();
+    Record.push_back(V.Supported);
+    Record.push_back(V.Enabled);
+    Record.push_back(V.Avail);
+    Record.push_back(V.Core);
+  }
   Stream.EmitRecord(OPENCL_EXTENSIONS, Record);
 }
 
