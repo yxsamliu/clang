@@ -1423,7 +1423,7 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
 
   PP.Lex(Tok);
   if (Tok.isNot(tok::identifier) && Tok.isNot(tok::kw_register)) {
-    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_predicate);
+    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_predicate) << 0;
     return;
   }
   IdentifierInfo *op = Tok.getIdentifierInfo();
@@ -1436,7 +1436,7 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
   } else if (op->isStr("register"))
     State = Register;
   else {
-    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_predicate);
+    PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_predicate) << 0;
     return;
   }
   SourceLocation StateLoc = Tok.getLocation();
