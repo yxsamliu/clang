@@ -212,7 +212,7 @@ void Sema::Initialize() {
   // Initialize predefined OpenCL types and supported extensions and (optional)
   // core features.
   if (getLangOpts().OpenCL) {
-    getOpenCLOptions().copy(Context.getTargetInfo().getSupportedOpenCLOpts());
+    getOpenCLOptions().addSupport(Context.getTargetInfo().getSupportedOpenCLOpts());
     getOpenCLOptions().enableSupportedCore(getLangOpts().OpenCLVersion);
     addImplicitTypedef("sampler_t", Context.OCLSamplerTy);
     addImplicitTypedef("event_t", Context.OCLEventTy);

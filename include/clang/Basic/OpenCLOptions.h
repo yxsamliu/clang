@@ -80,6 +80,12 @@ public:
 #include "clang/Basic/OpenCLExtensions.def"
   }
 
+  void addSupport(const OpenCLOptions &Opts) {
+    for (auto &I:Opts.OptMap)
+      if (I.second.Supported)
+        OptMap[I.getKey()].Supported = true;
+  }
+
   void copy(const OpenCLOptions &Opts) {
     OptMap = Opts.OptMap;
   }
