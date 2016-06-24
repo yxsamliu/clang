@@ -463,29 +463,35 @@ namespace {
 
 void Parser::HandlePragmaOpenCLExtension() {
   assert(Tok.is(tok::annot_pragma_opencl_extension));
-  OpenCLExtData *data = static_cast<OpenCLExtData*>(Tok.getAnnotationValue());
-  auto state = data->second;
-  auto ename = data->first;
+  OpenCLExtData *Data = static_cast<OpenCLExtData*>(Tok.getAnnotationValue());
+  auto State = Data->second;
+  auto EName = Data->first;
   SourceLocation NameLoc = Tok.getLocation();
   ConsumeToken(); // The annotation token.
 
   OpenCLOptions &f = Actions.getOpenCLOptions();
-  auto Name = ename->getName();
+  auto Name = EName->getName();
   // OpenCL 1.1 9.1: "The all variant sets the behavior for all extensions,
   // overriding all previously issued extension directives, but only if the
   // behavior is set to disable."
-  if (state == Disable && Name == "all")
-    f.disableAll();
-  else if (state == Register)
-    f.support(Name);
-  else if (!f.isKnown(Name))
-    PP.Diag(NameLoc, diag::warn_pragma_unknown_extension) << ename;
+  if (Name == "all") {
+    if (State == Disable)
+      f.disableAll();
+    else
+      PP.Diag(NameLoc, diag::warn_pragma_expected_predicate) << 1;
+  } else if (State == Register) {
+    if (!f.isSupported(Name, getLangOpts().OpenCLVersion))
+      f.support(Name);
+    else
+      PP.Diag(NameLoc, diag::warn_pragma_register_supported);
+  } else if (!f.isKnown(Name))
+    PP.Diag(NameLoc, diag::warn_pragma_unknown_extension) << EName;
   else if (f.isSupportedExtension(Name, getLangOpts().OpenCLVersion))
-    f.enable(Name, state == Enable);
+    f.enable(Name, State == Enable);
   else if (f.isSupportedCore(Name, getLangOpts().OpenCLVersion))
-    PP.Diag(NameLoc, diag::warn_pragma_extension_is_core) << ename;
+    PP.Diag(NameLoc, diag::warn_pragma_extension_is_core) << EName;
   else
-    PP.Diag(NameLoc, diag::warn_pragma_unsupported_extension) << ename;
+    PP.Diag(NameLoc, diag::warn_pragma_unsupported_extension) << EName;
 }
 
 void Parser::HandlePragmaMSPointersToMembers() {
