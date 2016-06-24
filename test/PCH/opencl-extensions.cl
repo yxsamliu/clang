@@ -6,9 +6,12 @@
 // Header.
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#pragma OPENCL EXTENSION my_ext_example : register
 
 #else
 // Using the header.
+
+#pragma OPENCL EXTENSION my_extension : enable
 
 void test(void) {
   double d;
