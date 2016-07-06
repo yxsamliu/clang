@@ -796,6 +796,8 @@ namespace clang {
       PREDEF_TYPE_OMP_ARRAY_SECTION = 43,
       /// \brief The '__float128' type
       PREDEF_TYPE_FLOAT128_ID = 44,
+      /// \brief Internal OpenCL sampler initializer type
+      PREDEF_TYPE_SAMPLER_INIT_ID = 45,
       /// \brief OpenCL image types with auto numeration
 #define IMAGE_TYPE(ImgType, Id, SingletonId, Access, Suffix) \
       PREDEF_TYPE_##Id##_ID,

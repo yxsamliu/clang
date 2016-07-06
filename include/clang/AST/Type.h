@@ -1738,6 +1738,7 @@ public:
   bool isImageType() const;                     // Any OpenCL image type
 
   bool isSamplerT() const;                      // OpenCL sampler_t
+  bool isSamplerInitT() const;                  // Internal sampler_init_t
   bool isEventT() const;                        // OpenCL event_t
   bool isClkEventT() const;                     // OpenCL clk_event_t
   bool isQueueT() const;                        // OpenCL queue_t
@@ -5597,6 +5598,10 @@ inline bool Type::isSamplerT() const {
   return isSpecificBuiltinType(BuiltinType::OCLSampler);
 }
 
+inline bool Type::isSamplerInitT() const {
+  return isSpecificBuiltinType(BuiltinType::OCLSamplerInit);
+}
+
 inline bool Type::isEventT() const {
   return isSpecificBuiltinType(BuiltinType::OCLEvent);
 }
@@ -5630,7 +5635,8 @@ inline bool Type::isPipeType() const {
 
 inline bool Type::isOpenCLSpecificType() const {
   return isSamplerT() || isEventT() || isImageType() || isClkEventT() ||
-         isQueueT() || isNDRangeT() || isReserveIDT() || isPipeType();
+         isQueueT() || isNDRangeT() || isReserveIDT() || isPipeType() ||
+         isSamplerInitT();
 }
 
 inline bool Type::isTemplateTypeParmType() const {
