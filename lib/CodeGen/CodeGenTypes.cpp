@@ -469,6 +469,7 @@ llvm::Type *CodeGenTypes::ConvertType(QualType T) {
     case BuiltinType::Id:
 #include "clang/Basic/OpenCLImageTypes.def"
     case BuiltinType::OCLSampler:
+    case BuiltinType::OCLSamplerInit:
     case BuiltinType::OCLEvent:
     case BuiltinType::OCLClkEvent:
     case BuiltinType::OCLQueue:

@@ -635,6 +635,7 @@ void USRGenerator::VisitType(QualType T) {
         case BuiltinType::OCLNDRange:
         case BuiltinType::OCLReserveID:
         case BuiltinType::OCLSampler:
+        case BuiltinType::OCLSamplerInit:
           IgnoreResults = true;
           return;
         case BuiltinType::ObjCId:

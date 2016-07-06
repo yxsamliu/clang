@@ -160,6 +160,9 @@ BUILTIN_TYPE(ObjCSel, ObjCBuiltinSelTy)
 // OpenCL sampler_t.
 BUILTIN_TYPE(OCLSampler, OCLSamplerTy)
 
+// Internal OpenCL sampler initializer type.
+BUILTIN_TYPE(OCLSamplerInit, OCLSamplerInitTy)
+
 // OpenCL event_t.
 BUILTIN_TYPE(OCLEvent, OCLEventTy)
 

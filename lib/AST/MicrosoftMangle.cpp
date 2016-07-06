@@ -1732,6 +1732,10 @@ void MicrosoftCXXNameMangler::mangleType(const BuiltinType *T, Qualifiers,
     Out << "PA";
     mangleArtificalTagType(TTK_Struct, "ocl_sampler");
     break;
+  case BuiltinType::OCLSamplerInit:
+    Out << "PA";
+    mangleArtificalTagType(TTK_Struct, "ocl_sampler_init");
+    break;
   case BuiltinType::OCLEvent:
     Out << "PA";
     mangleArtificalTagType(TTK_Struct, "ocl_event");

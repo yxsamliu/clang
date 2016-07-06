@@ -2127,6 +2127,9 @@ void CXXNameMangler::mangleType(const BuiltinType *T) {
   case BuiltinType::OCLSampler:
     Out << "11ocl_sampler";
     break;
+  case BuiltinType::OCLSamplerInit:
+    Out << "16ocl_sampler_init";
+    break;
   case BuiltinType::OCLEvent:
     Out << "9ocl_event";
     break;

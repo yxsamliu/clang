@@ -7582,6 +7582,16 @@ Sema::CheckAssignmentConstraints(QualType LHSType, ExprResult &RHS,
     }
   }
 
+  if (LHSType->isSamplerT() && RHSType->isIntegerType()) {
+    Kind = CK_IntToOCLSamplerInitializer;
+    return Compatible;
+  }
+
+  if (LHSType->isSpecificBuiltinType(BuiltinType::OCLSamplerInit) &&
+      RHSType->isSamplerT()) {
+    Kind = CK_OCLSamplerInitializerToSampler;
+    return Compatible;
+  }
   return Incompatible;
 }
 
