@@ -4296,8 +4296,6 @@ CodeGenModule::createIntToSamplerConversion(const Expr *E,
   llvm::Constant *C = EmitConstantExpr(E, E->getType(), CGF);
   assert(C && "Sampler must be initialized by constant");
   assert(isa<llvm::ConstantInt>(C) && "Sampler must be initialized by integer");
-  if (!getLangOpts().CLSamplerOpaque)
-    return C;
 
   llvm::StructType*
     ConstSamplerTy = TheModule.getTypeByName("__sampler_initializer");
