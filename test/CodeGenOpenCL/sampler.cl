@@ -24,6 +24,6 @@ kernel void foo() {
   // CHECK: call spir_func void @fnc4smp(%__sampler addrspace(2)* [[SAMP]])
 
   fnc4smp(glb_smp);
-  // CHECK: [[SAMP:%[0-9]+]] = call %__sampler addrspace(2)* @__translate_sampler_initializer(i32 19)
+  // CHECK: [[SAMP:%[0-9]+]] = call %__sampler addrspace(2)* @__translate_sampler_initializer(i32 35)
   // CHECK: call spir_func void @fnc4smp(%__sampler addrspace(2)* [[SAMP]])
 }
