@@ -6900,15 +6900,20 @@ InitializationSequence::Perform(Sema &S,
 
     case SK_OCLSamplerInit: {
       Expr *Init = CurInit.get();
+      Init->dump();
       QualType SourceType = Init->getType();
+      // For copy initialization, get the integer literal.
       if (Entity.isParameterKind()) {
         if (!SourceType->isSamplerT()) {
           S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
             << SourceType;
-        } else if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Init))
+        } else if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Init)) {
           Init = const_cast<Expr*>(cast<VarDecl>(DRE->getDecl())->getInit());
+          if (!Init)
+            break;
           Init = cast<ImplicitCastExpr>(Init)->getSubExpr();
           SourceType = Init->getType();
+        }
       }
 
       if (!Init->isConstantInitializer(S.Context, false))
