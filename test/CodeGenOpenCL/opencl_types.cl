@@ -30,7 +30,7 @@ void fnc4smp(sampler_t s) {}
 
 kernel void foo(image1d_t img) {
   sampler_t smp = CLK_ADDRESS_CLAMP_TO_EDGE|CLK_NORMALIZED_COORDS_TRUE|CLK_FILTER_LINEAR;
-  // CHECK: alloca %__sampler adrspace(2)*
+  // CHECK: alloca %__sampler addrspace(2)*
   event_t evt;
   // CHECK: alloca %opencl.event_t*
   // CHECK: store %__sampler addrspace(2)*
