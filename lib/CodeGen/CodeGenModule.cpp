@@ -2394,6 +2394,11 @@ void CodeGenModule::EmitGlobalVarDefinition(const VarDecl *D,
   const VarDecl *InitDecl;
   const Expr *InitExpr = D->getAnyInitializer(InitDecl);
 
+  // OpenCL global variables of sampler type are translated to function calls,
+  // therefore no need to be translated.
+  if (getLangOpts().OpenCL && ASTTy->isSamplerT())
+    return;
+
   // CUDA E.2.4.1 "__shared__ variables cannot have an initialization
   // as part of their declaration."  Sema has already checked for
   // error cases, so we just need to set Init to UndefValue.
@@ -4310,4 +4315,14 @@ llvm::SanitizerStatReport &CodeGenModule::getSanStats() {
     SanStats = llvm::make_unique<llvm::SanitizerStatReport>(&getModule());
 
   return *SanStats;
+}
+llvm::Value *
+CodeGenModule::createOpenCLIntToSamplerConversion(const Expr *E,
+                                                  CodeGenFunction &CGF) {
+  llvm::Constant *C = EmitConstantExpr(E, E->getType(), &CGF);
+  auto SamplerT = getOpenCLRuntime().getSamplerType();
+  auto FTy = llvm::FunctionType::get(SamplerT, {C->getType()}, false);
+  return CGF.Builder.CreateCall(CreateRuntimeFunction(FTy,
+                                "__translate_sampler_initializer"),
+                                {C});
 }
