@@ -6900,7 +6900,6 @@ InitializationSequence::Perform(Sema &S,
 
     case SK_OCLSamplerInit: {
       Expr *Init = CurInit.get();
-      Init->dump();
       QualType SourceType = Init->getType();
       // For copy initialization, get the integer literal.
       if (Entity.isParameterKind()) {
