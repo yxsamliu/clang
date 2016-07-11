@@ -1,4 +1,9 @@
-// RUN: %clang_cc1 %s -emit-llvm -triple spir-unknown-unknown -o - -O0 | FileCheck %s
+// RUN: %clang_cc1 %s -emit-llvm -triple spir-unknown-unknown -o - -O0 -Wspir-compat -verify -DCHECK_SAMPLER_VALUE | FileCheck %s
+// RUN: %clang_cc1 %s -emit-llvm -triple spir-unknown-unknown -o - -O0 -verify | FileCheck %s
+
+#ifndef CHECK_SAMPLER_VALUE
+// expected-no-diagnostics
+#endif
 
 #define CLK_ADDRESS_CLAMP_TO_EDGE       2
 #define CLK_NORMALIZED_COORDS_TRUE      1
@@ -9,6 +14,16 @@
 
 constant sampler_t glb_smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_NORMALIZED_COORDS_TRUE | CLK_FILTER_LINEAR;
 // CHECK-NOT: glb_smp
+
+constant sampler_t glb_smp2 = 0;
+#ifdef CHECK_SAMPLER_VALUE
+// expected-warning@-2{{sampler initializer has invalid Filter Mode bits}}
+#endif
+
+constant sampler_t glb_smp3 = 0x1f;
+#ifdef CHECK_SAMPLER_VALUE
+// expected-warning@-2{{sampler initializer has invalid Addressing Mode bits}}
+#endif
 
 void fnc4smp(sampler_t s) {}
 // CHECK: define spir_func void @fnc4smp(%__opencl_sampler_t addrspace(2)* %
@@ -33,4 +48,7 @@ kernel void foo() {
   fnc4smp(glb_smp);
   // CHECK: [[SAMP:%[0-9]+]] = call %__opencl_sampler_t addrspace(2)* @__translate_sampler_initializer(i32 35)
   // CHECK: call spir_func void @fnc4smp(%__opencl_sampler_t addrspace(2)* [[SAMP]])
+
+  fnc4smp(glb_smp2);
+  fnc4smp(glb_smp3);
 }
