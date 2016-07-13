@@ -6905,6 +6905,8 @@ InitializationSequence::Perform(Sema &S,
     }
 
     case SK_OCLSamplerInit: {
+      assert(Step->Type->isSamplerT() &&
+             "Sampler initialization on non-sampler type.");
       Expr *Init = CurInit.get();
       QualType SourceType = Init->getType();
       // For copy initialization, get the integer literal.
@@ -6913,10 +6915,15 @@ InitializationSequence::Perform(Sema &S,
           S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
             << SourceType;
         } else if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Init)) {
-          Init = const_cast<Expr*>(cast<VarDecl>(DRE->getDecl())->getInit());
-          if (!Init)
+          auto Var = cast<VarDecl>(DRE->getDecl());
+          if (!Var->hasGlobalStorage()) {
+            CurInit = ImplicitCastExpr::Create(S.Context, Step->Type,
+                                               CK_LValueToRValue, CurInit.get(),
+                                               /*BasePath=*/nullptr, VK_RValue);
             break;
-          Init = cast<ImplicitCastExpr>(Init)->getSubExpr();
+          }
+          Init = cast<ImplicitCastExpr>(const_cast<Expr*>(
+            Var->getInit()))->getSubExpr();
           SourceType = Init->getType();
         }
       }
