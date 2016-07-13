@@ -80,7 +80,7 @@ llvm::Type *CGOpenCLRuntime::getPipeType() {
 llvm::PointerType *CGOpenCLRuntime::getSamplerType() {
   if (!SamplerTy)
     SamplerTy = llvm::PointerType::get(llvm::StructType::create(
-      CGM.getLLVMContext(), "__sampler"),
+      CGM.getLLVMContext(), "__opencl_sampler"),
       CGM.getContext().getTargetAddressSpace(
       LangAS::opencl_constant));
   return SamplerTy;
