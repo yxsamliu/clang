@@ -37,12 +37,12 @@ kernel void foo() {
 
   fnc4smp(smp);
   // CHECK-NOT: call %__opencl_sampler_t addrspace(2)* @__translate_sampler_initializer(i32 19)
-  // CHECK: [[SAMP:%[0-9]+]] = load %__opencl_sampler addrspace(2)** [[smp_ptr]]
+  // CHECK: [[SAMP:%[0-9]+]] = load %__opencl_sampler_t addrspace(2)*, %__opencl_sampler_t addrspace(2)** [[smp_ptr]]
   // CHECK: call spir_func void @fnc4smp(%__opencl_sampler_t addrspace(2)* [[SAMP]])
 
   fnc4smp(smp);
   // CHECK-NOT: call %__opencl_sampler_t addrspace(2)* @__translate_sampler_initializer(i32 19)
-  // CHECK: [[SAMP:%[0-9]+]] = load %__opencl_sampler addrspace(2)** [[smp_ptr]]
+  // CHECK: [[SAMP:%[0-9]+]] = load %__opencl_sampler_t addrspace(2)*, %__opencl_sampler_t addrspace(2)** [[smp_ptr]]
   // CHECK: call spir_func void @fnc4smp(%__opencl_sampler_t addrspace(2)* [[SAMP]])
 
   fnc4smp(glb_smp);
