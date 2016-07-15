@@ -11,12 +11,12 @@ constant sampler_t glb_smp = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_NORMALIZED_COORDS_T
 constant sampler_t glb_smp2; // expected-error{{variable in constant address space must be initialized}}
 global sampler_t glb_smp3 = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_NORMALIZED_COORDS_TRUE | CLK_FILTER_NEAREST; // expected-error{{sampler type cannot be used with the __local and __global address space qualifiers}}
 
-constant sampler_t glb_smp2 = 0;
+constant sampler_t glb_smp4 = 0;
 #ifdef CHECK_SAMPLER_VALUE
 // expected-warning@-2{{sampler initializer has invalid Filter Mode bits}}
 #endif
 
-constant sampler_t glb_smp3 = 0x1f;
+constant sampler_t glb_smp5 = 0x1f;
 #ifdef CHECK_SAMPLER_VALUE
 // expected-warning@-2{{sampler initializer has invalid Addressing Mode bits}}
 #endif
@@ -52,4 +52,4 @@ void bar() {
   *smp2; //expected-error{{invalid argument type 'sampler_t' to unary expression}}
 }
 
-sampler_t bad(); //expected-error{{declaring function return value of type 'sampler_t' is not allowed}}
+sampler_t bad(void); //expected-error{{declaring function return value of type 'sampler_t' is not allowed}}

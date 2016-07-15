@@ -6914,6 +6914,7 @@ InitializationSequence::Perform(Sema &S,
         if (!SourceType->isSamplerT()) {
           S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
             << SourceType;
+          break;
         } else if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Init)) {
           auto Var = cast<VarDecl>(DRE->getDecl());
           if (!Var->hasGlobalStorage()) {
