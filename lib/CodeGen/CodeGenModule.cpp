@@ -4320,24 +4320,6 @@ llvm::Value *
 CodeGenModule::createOpenCLIntToSamplerConversion(const Expr *E,
                                                   CodeGenFunction &CGF) {
   llvm::Constant *C = EmitConstantExpr(E, E->getType(), &CGF);
-
-  const llvm::ConstantInt *CI = cast<llvm::ConstantInt>(C);
-  const uint64_t SamplerValue = CI->getValue().getZExtValue();
-  // 32-bit value of sampler's initializer is interpreted as
-  // bit-field with the following structure:
-  // |unspecified|Filter|Addressing Mode| Normalized Coords|
-  // |31        6|5    4|3             1|                 0|
-  // This structure corresponds to enum values of sampler properties defined
-  // in SPIR spec v1.2 and also opencl-c.h
-  unsigned AddressingMode  = (0x0E & SamplerValue) >> 1;
-  unsigned FilterMode      = (0x30 & SamplerValue) >> 4;
-  if (FilterMode != 1 && FilterMode != 2)
-    getDiags().Report(Context.getFullLoc(E->getLocStart()),
-      diag::warn_sampler_initializer_invalid_bits) << "Filter Mode";
-  if (AddressingMode > 4)
-    getDiags().Report(Context.getFullLoc(E->getLocStart()),
-      diag::warn_sampler_initializer_invalid_bits) << "Addressing Mode";
-
   auto SamplerT = getOpenCLRuntime().getSamplerType();
   auto FTy = llvm::FunctionType::get(SamplerT, {C->getType()}, false);
   return CGF.Builder.CreateCall(CreateRuntimeFunction(FTy,
