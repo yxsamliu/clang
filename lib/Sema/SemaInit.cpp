@@ -6936,6 +6936,24 @@ InitializationSequence::Perform(Sema &S,
         S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_integer)
           << SourceType;
 
+      llvm::APSInt Result;
+      Init->EvaluateAsInt(Result, S.Context);
+      const uint64_t SamplerValue = Result.getLimitedValue();
+      // 32-bit value of sampler's initializer is interpreted as
+      // bit-field with the following structure:
+      // |unspecified|Filter|Addressing Mode| Normalized Coords|
+      // |31        6|5    4|3             1|                 0|
+      // This structure corresponds to enum values of sampler properties defined
+      // in SPIR spec v1.2 and also opencl-c.h
+      unsigned AddressingMode  = (0x0E & SamplerValue) >> 1;
+      unsigned FilterMode      = (0x30 & SamplerValue) >> 4;
+      if (FilterMode != 1 && FilterMode != 2)
+        S.Diag(Kind.getLocation(), diag::warn_sampler_initializer_invalid_bits)
+          << "Filter Mode";
+      if (AddressingMode > 4)
+        S.Diag(Kind.getLocation(), diag::warn_sampler_initializer_invalid_bits)
+          << "Addressing Mode";
+
       CurInit = S.ImpCastExprToType(Init, S.Context.OCLSamplerTy,
                                       CK_IntToOCLSampler);
       break;
