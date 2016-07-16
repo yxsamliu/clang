@@ -456,7 +456,7 @@ StmtResult Parser::HandlePragmaCaptured()
 
 namespace {
   enum OpenCLExtState : char {
-    Disable, Enable, Register
+    Disable, Enable, Begin, End
   };
   typedef std::pair<const IdentifierInfo *, OpenCLExtState> OpenCLExtData;
 }
@@ -479,7 +479,7 @@ void Parser::HandlePragmaOpenCLExtension() {
       Opt.disableAll();
     else
       PP.Diag(NameLoc, diag::warn_pragma_expected_predicate) << 1;
-  } else if (State == Register) {
+  } else if (State == Begin) {
     if (!Opt.isKnown(Name) ||
         !Opt.isSupported(Name, getLangOpts().OpenCLVersion))
       Opt.support(Name);
@@ -1433,8 +1433,10 @@ PragmaOpenCLExtensionHandler::HandlePragma(Preprocessor &PP,
     State = Enable;
   } else if (Pred->isStr("disable")) {
     State = Disable;
-  } else if (Pred->isStr("register"))
-    State = Register;
+  } else if (Pred->isStr("begin"))
+    State = Begin;
+  else if (Pred->isStr("end"))
+    State = End;
   else {
     PP.Diag(Tok.getLocation(), diag::warn_pragma_expected_predicate)
       << Ext->isStr("all");
