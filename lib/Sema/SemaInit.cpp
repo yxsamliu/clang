@@ -6905,11 +6905,26 @@ InitializationSequence::Perform(Sema &S,
     }
 
     case SK_OCLSamplerInit: {
+      // Sampler initialzation have 6 cases:
+      //   1. function argument passing
+      //      1a. argument is a file-scope variable
+      //      1b. argument is a function-scope variable
+      //      1c. argument is one of caller function's parameters
+      //   2. variable initialization
+      //      2a. initializing a file-scope variable
+      //      2b. initializing a function-scope variable
+      //
+      // For file-scope variables, since they cannot be initialized by function
+      // call of __translate_sampler_initializer in LLVM IR, their references
+      // need to be replaced by a cast from their literal initializers to
+      // sampler type. Since sampler variables can only be used in function
+      // calls as arguments, we only need to replace them when handling the
+      // argument passing.
       assert(Step->Type->isSamplerT() &&
              "Sampler initialization on non-sampler type.");
       Expr *Init = CurInit.get();
       QualType SourceType = Init->getType();
-      // For copy initialization, get the integer literal.
+      // Case 1
       if (Entity.isParameterKind()) {
         if (!SourceType->isSamplerT()) {
           S.Diag(Kind.getLocation(), diag::err_sampler_argument_required)
@@ -6917,18 +6932,25 @@ InitializationSequence::Perform(Sema &S,
           break;
         } else if (const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(Init)) {
           auto Var = cast<VarDecl>(DRE->getDecl());
+          // Case 1b and 1c
+          // No cast from integer to sampler is needed.
           if (!Var->hasGlobalStorage()) {
             CurInit = ImplicitCastExpr::Create(S.Context, Step->Type,
-                                               CK_LValueToRValue, CurInit.get(),
+                                               CK_LValueToRValue, Init,
                                                /*BasePath=*/nullptr, VK_RValue);
             break;
           }
+          // Case 1a
+          // For function call with a file-scope sampler variable as argument,
+          // get the integer literal.
           Init = cast<ImplicitCastExpr>(const_cast<Expr*>(
             Var->getInit()))->getSubExpr();
           SourceType = Init->getType();
         }
       }
 
+      // Case 1a, 2a and 2b
+      // Insert cast from integer to sampler.
       if (!Init->isConstantInitializer(S.Context, false))
         S.Diag(Kind.getLocation(),
                diag::err_sampler_initializer_not_constant);

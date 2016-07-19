@@ -2385,6 +2385,11 @@ void CodeGenModule::maybeSetTrivialComdat(const Decl &D,
 /// Pass IsTentative as true if you want to create a tentative definition.
 void CodeGenModule::EmitGlobalVarDefinition(const VarDecl *D,
                                             bool IsTentative) {
+  // OpenCL global variables of sampler type are translated to function calls,
+  // therefore no need to be translated.
+  if (getLangOpts().OpenCL && ASTTy->isSamplerT())
+    return;
+
   llvm::Constant *Init = nullptr;
   QualType ASTTy = D->getType();
   CXXRecordDecl *RD = ASTTy->getBaseElementTypeUnsafe()->getAsCXXRecordDecl();
@@ -2393,11 +2398,6 @@ void CodeGenModule::EmitGlobalVarDefinition(const VarDecl *D,
 
   const VarDecl *InitDecl;
   const Expr *InitExpr = D->getAnyInitializer(InitDecl);
-
-  // OpenCL global variables of sampler type are translated to function calls,
-  // therefore no need to be translated.
-  if (getLangOpts().OpenCL && ASTTy->isSamplerT())
-    return;
 
   // CUDA E.2.4.1 "__shared__ variables cannot have an initialization
   // as part of their declaration."  Sema has already checked for
