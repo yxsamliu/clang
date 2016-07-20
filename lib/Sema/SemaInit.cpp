@@ -6950,13 +6950,17 @@ InitializationSequence::Perform(Sema &S,
 
       // Case 1a, 2a and 2b
       // Insert cast from integer to sampler.
-      if (!Init->isConstantInitializer(S.Context, false))
+      if (!Init->isConstantInitializer(S.Context, false)) {
         S.Diag(Kind.getLocation(),
                diag::err_sampler_initializer_not_constant);
+        break;
+      }
       if (!SourceType->isIntegerType() ||
-          32 != S.Context.getIntWidth(SourceType))
+          32 != S.Context.getIntWidth(SourceType)) {
         S.Diag(Kind.getLocation(), diag::err_sampler_initializer_not_integer)
           << SourceType;
+        break;
+      }
 
       llvm::APSInt Result;
       Init->EvaluateAsInt(Result, S.Context);

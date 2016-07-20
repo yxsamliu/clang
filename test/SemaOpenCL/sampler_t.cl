@@ -21,6 +21,15 @@ constant sampler_t glb_smp5 = 0x1f;
 // expected-warning@-2{{sampler initializer has invalid Addressing Mode bits}}
 #endif
 
+constant sampler_t glb_smp6 = glb_smp; // expected-error{{sampler_t initialization requires compile time constant}} // expected-error{{initializer element is not a compile-time constant}}
+
+int f(void);
+constant sampler_t glb_smp7 = f(); // expected-error{{initializer element is not a compile-time constant}}
+
+constant sampler_t glb_smp8 = 1.0f; // expected-error{{initializing '__constant sampler_t' with an expression of incompatible type 'float'}}
+
+constant sampler_t glb_smp9 = 0x100000000LL; // expected-error{{sampler_t initialization requires 32-bit integer, not 'long long'}}
+
 void foo(sampler_t);
 
 constant struct sampler_s {
