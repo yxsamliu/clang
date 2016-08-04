@@ -1590,7 +1590,7 @@ bool Sema::isOpenCLDisabledFunction(FunctionDecl *FD) {
 }
 
 bool Sema::checkOpenCLDisabledTypeDeclSpec(const DeclSpec &DS, QualType T) {
-  auto Loc = OpenCLTypeExtMap.find(T.getTypePtr());
+  auto Loc = OpenCLTypeExtMap.find(T.getCanonicalType().getTypePtr());
   if (Loc == OpenCLTypeExtMap.end())
     return false;
   bool Disabled = false;
