@@ -7933,6 +7933,25 @@ public:
   void CheckCompletedCoroutineBody(FunctionDecl *FD, Stmt *&Body);
 
   //===--------------------------------------------------------------------===//
+  // OpenCL extensions.
+  //
+private:
+  /// Extensions required by an OpenCL type.
+  llvm::DenseMap<const Type*, std::set<std::string>> OpenCLTypeExtMap;
+  /// Extensions required by an OpenCL function.
+  llvm::DenseMap<FunctionDecl*, std::set<std::string>> OpenCLFuncExtMap;
+public:
+  void setOpenCLExtensionForType(QualType T, llvm::StringRef Exts);
+  void setOpenCLExtensionForFunction(FunctionDecl *FD, llvm::StringRef Exts);
+  bool isOpenCLDisabledType(QualType T);
+  bool isOpenCLDisabledFunction(FunctionDecl *FD);
+  /// \brief Check if type \p T corresponding to declaration specifier \p DS
+  /// is disabled due to required OpenCL extensions are disabled. If so,
+  /// emit diagnostics.
+  /// \return true if type is disabled.
+  bool checkOpenCLDisabledTypeDeclSpec(const DeclSpec &DS, QualType T);
+
+  //===--------------------------------------------------------------------===//
   // OpenMP directives and clauses.
   //
 private:
