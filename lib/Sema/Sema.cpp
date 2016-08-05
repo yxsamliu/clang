@@ -1554,8 +1554,9 @@ void Sema::setOpenCLExtensionForType(QualType T, llvm::StringRef ExtStr) {
   ExtStr.split(Exts, " ", /* limit */ -1, /* keep empty */ false);
   if (Exts.empty())
     return;
+  auto CanT = T.getCanonicalType().getTypePtr();
   for (auto &I : Exts)
-    OpenCLTypeExtMap[T.getTypePtr()].insert(I.str());
+    OpenCLTypeExtMap[CanT].insert(I.str());
 }
 
 void Sema::setOpenCLExtensionForFunction(FunctionDecl *FD, StringRef ExtStr) {
@@ -1568,7 +1569,7 @@ void Sema::setOpenCLExtensionForFunction(FunctionDecl *FD, StringRef ExtStr) {
 }
 
 bool Sema::isOpenCLDisabledType(QualType T) {
-  auto Loc = OpenCLTypeExtMap.find(T.getTypePtr());
+  auto Loc = OpenCLTypeExtMap.find(T.getCanonicalType().getTypePtr());
   if (Loc == OpenCLTypeExtMap.end())
     return false;
   for (auto &I : Loc->second) {
