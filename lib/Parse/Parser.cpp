@@ -552,7 +552,7 @@ bool Parser::ParseTopLevelDecl(DeclGroupPtrTy &Result) {
   case tok::annot_pragma_unused:
     HandlePragmaUnused();
     return false;
-
+ 
   case tok::annot_module_include:
     Actions.ActOnModuleInclude(Tok.getLocation(),
                                reinterpret_cast<Module *>(

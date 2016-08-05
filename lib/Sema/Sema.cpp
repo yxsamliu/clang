@@ -265,7 +265,7 @@ void Sema::Initialize() {
       }
       for (auto &I : Atomic64BitTypes)
         setOpenCLExtensionForType(I,
-            "cl_khr_int64_base_atomics cl_khr_int64_base_atomics");
+            "cl_khr_int64_base_atomics cl_khr_int64_extended_atomics");
 
       setOpenCLExtensionForType(AtomicDoubleT, "cl_khr_fp64");
     }
