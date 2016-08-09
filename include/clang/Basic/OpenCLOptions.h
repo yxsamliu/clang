@@ -34,13 +34,6 @@ public:
 #include "clang/Basic/OpenCLExtensions.def"
   }
 
-  // Enable all non-vendor-specific options.
-  void setAllNonVendor() {
-#define OPENCLEXT_INTERNAL_VENDOR(nm, ...)
-#define OPENCLEXT(nm)   nm = 1;
-#include "clang/Basic/OpenCLExtensions.def"
-  }
-
   // Is supported with OpenCL version \p OCLVer.
 #define OPENCLEXT_INTERNAL(Ext, Avail, ...) \
   bool is_##Ext##_supported(unsigned OCLVer) const { \
