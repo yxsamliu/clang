@@ -294,6 +294,11 @@ public:
     return AddrSpace == 0 ? PointerAlign : getPointerAlignV(AddrSpace);
   }
 
+  /// \brief Return the maximum width of pointers for OpenCL on this target.
+  virtual uint64_t getOpenCLMaxPointerWidth() const {
+    return PointerWidth;
+  }
+
   /// \brief Return the size of '_Bool' and C++ 'bool' for this target, in bits.
   unsigned getBoolWidth() const { return BoolWidth; }
 
