@@ -273,21 +273,6 @@ bool TargetInfo::isTypeSigned(IntType T) {
   };
 }
 
-// Calculate maximum pointer width for different OpenCL address spaces
-// since pointers to different address space may have different width for
-// certain targets, e.g. amdgcn.
-static unsigned getOpenCLMaxPointerWidth(const TargetInfo &T) {
-  unsigned AddrSpaces[] = {0, LangAS::opencl_global, LangAS::opencl_constant,
-      LangAS::opencl_local, LangAS::opencl_generic};
-  unsigned Max = 0;
-  for (unsigned I : AddrSpaces) {
-    auto W = T.getPointerWidth(I);
-    if (Max < W)
-      Max = W;
-  }
-  return Max;
-}
-
 /// adjust - Set forced language options.
 /// Apply changes to the target information with respect to certain
 /// language options which change the target configuration.
@@ -321,7 +306,7 @@ void TargetInfo::adjust(const LangOptions &Opts) {
     }
     LongDoubleWidth = LongDoubleAlign = 128;
 
-    unsigned MaxPointerWidth = getOpenCLMaxPointerWidth(*this);
+    unsigned MaxPointerWidth = getOpenCLMaxPointerWidth();
     assert(MaxPointerWidth == 32 || MaxPointerWidth == 64);
     bool Is32BitArch = MaxPointerWidth == 32;
     SizeType = Is32BitArch ? UnsignedInt : UnsignedLong;

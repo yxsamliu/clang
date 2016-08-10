@@ -2004,6 +2004,12 @@ public:
     }
   }
 
+  uint64_t getOpenCLMaxPointerWidth() const override {
+    if (GPU <= GK_CAYMAN)
+      return 32;
+    return 64;
+  }
+
   const char * getClobbers() const override {
     return "";
   }
