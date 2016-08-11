@@ -104,7 +104,8 @@ CodeGenModule::CodeGenModule(ASTContext &C, const HeaderSearchOptions &HSO,
   IntAlignInBytes =
     C.toCharUnitsFromBits(C.getTargetInfo().getIntAlign()).getQuantity();
   IntTy = llvm::IntegerType::get(LLVMContext, C.getTargetInfo().getIntWidth());
-  IntPtrTy = llvm::IntegerType::get(LLVMContext, PointerWidthInBits);
+  IntPtrTy = llvm::IntegerType::get(LLVMContext,
+    C.getTargetInfo().getMaxPointerWidth();
   Int8PtrTy = Int8Ty->getPointerTo(0);
   Int8PtrPtrTy = Int8PtrTy->getPointerTo(0);
 
