@@ -2005,9 +2005,7 @@ public:
   }
 
   uint64_t getOpenCLMaxPointerWidth() const override {
-    if (GPU <= GK_CAYMAN)
-      return 32;
-    return 64;
+    return getTriple().getArch() == llvm::Triple::amdgcn ? 64 : 32;
   }
 
   const char * getClobbers() const override {
