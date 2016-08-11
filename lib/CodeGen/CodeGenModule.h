@@ -660,6 +660,9 @@ public:
   void DecorateInstructionWithInvariantGroup(llvm::Instruction *I,
                                              const CXXRecordDecl *RD);
 
+  /// Get integer type of the same size as a pointer type.
+  llvm::IntegerType *getIntPtrTy(llvm::PointerType *PT);
+
   /// Emit the given number of characters as a value of type size_t.
   llvm::ConstantInt *getSize(CharUnits numChars);
 
