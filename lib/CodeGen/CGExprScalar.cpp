@@ -787,22 +787,47 @@ Value *ScalarExprEmitter::EmitScalarConversion(Value *Src, QualType SrcType,
   // Handle pointer conversions next: pointers can only be converted to/from
   // other pointers and integers. Check for pointer types in terms of LLVM, as
   // some native types (like Obj-C id) may map to a pointer type.
-  if (isa<llvm::PointerType>(DstTy)) {
+  // For certain targets, pointers in different address spaces have different
+  // sizes. There are 6 cases:
+  // 1. ptr -> ptr
+  //   a. same size: bitcast
+  //   b. different size: ptrtoint -> inttoptr
+  // 2. int -> ptr
+  //   a. same size: inttoptr
+  //   b. different size: inttoptr
+  // 3. ptr -> int
+  //   a. same size: ptrtoint
+  //   b. different size: ptrtoint
+  if (auto DstPT = dyn_cast<llvm::PointerType>(DstTy)) {
     // The source value may be an integer, or a pointer.
-    if (isa<llvm::PointerType>(SrcTy))
-      return Builder.CreateBitCast(Src, DstTy, "conv");
+    if (auto SrcPT = dyn_cast<llvm::PointerType>(SrcTy)) {
+      auto DL = CGF.CGM.getDataLayout();
+      auto DstPTSize = DL.getTypeStoreSize(DstPT);
+      auto SrcPTSize = DL.getTypeStoreSize(SrcPT);
+      // Case 1a.
+      if (DstPTSize == SrcPTSize)
+        return Builder.CreateBitCast(Src, DstTy, "conv");
+      // Case 1b.
+      SrcTy = CGF.CGM.getIntPtrTy(SrcPT);
+      Src = Builder.CreatePtrToInt(Src, SrcTy, "conv");
+    }
 
+    // Cases 1b, 2a and 2b.
     assert(SrcType->isIntegerType() && "Not ptr->ptr or int->ptr conversion?");
     // First, convert to the correct width so that we control the kind of
     // extension.
-    llvm::Type *MiddleTy = CGF.IntPtrTy;
+    llvm::Type *MiddleTy = CGF.CGM.getIntPtrTy(DstPT);
     bool InputSigned = SrcType->isSignedIntegerOrEnumerationType();
+    // Cases 2a is automatically handled by Builder.CreateIntCast.
+    // ToDo: inttoptr allows target size to be different than the source type.
+    // It is unclear why the following integer cast is needed here.
     llvm::Value* IntResult =
         Builder.CreateIntCast(Src, MiddleTy, InputSigned, "conv");
     // Then, cast to pointer.
     return Builder.CreateIntToPtr(IntResult, DstTy, "conv");
   }
 
+  // Cases 3a and 3b.
   if (isa<llvm::PointerType>(SrcTy)) {
     // Must be an ptr to int cast.
     assert(isa<llvm::IntegerType>(DstTy) && "not ptr->int?");
@@ -1510,12 +1535,14 @@ Value *ScalarExprEmitter::VisitCastExpr(CastExpr *CE) {
 
     // First, convert to the correct width so that we control the kind of
     // extension.
-    llvm::Type *MiddleTy = CGF.IntPtrTy;
+    auto DestLLVMTy = ConvertType(DestTy);
+    llvm::Type *MiddleTy = CGF.CGM.getIntPtrTy(
+      cast<llvm::PointerType>(DestLLVMTy));
     bool InputSigned = E->getType()->isSignedIntegerOrEnumerationType();
     llvm::Value* IntResult =
       Builder.CreateIntCast(Src, MiddleTy, InputSigned, "conv");
 
-    return Builder.CreateIntToPtr(IntResult, ConvertType(DestTy));
+    return Builder.CreateIntToPtr(IntResult, DestLLVMTy);
   }
   case CK_PointerToIntegral:
     assert(!DestTy->isBooleanType() && "bool should use PointerToBool");
@@ -2427,6 +2454,7 @@ static Value *emitPointerArithmetic(CodeGenFunction &CGF,
 
   Value *pointer = op.LHS;
   Expr *pointerOperand = expr->getLHS();
+  auto PtrTy = cast<llvm::PointerType>(pointer->getType());
   Value *index = op.RHS;
   Expr *indexOperand = expr->getRHS();
 
@@ -2437,11 +2465,11 @@ static Value *emitPointerArithmetic(CodeGenFunction &CGF,
   }
 
   unsigned width = cast<llvm::IntegerType>(index->getType())->getBitWidth();
-  if (width != CGF.PointerWidthInBits) {
+  if (width != CGF.CGM.getDataLayout().getTypeStoreSizeInBits(PtrTy)) {
     // Zero-extend or sign-extend the pointer value according to
     // whether the index is signed or not.
     bool isSigned = indexOperand->getType()->isSignedIntegerOrEnumerationType();
-    index = CGF.Builder.CreateIntCast(index, CGF.PtrDiffTy, isSigned,
+    index = CGF.Builder.CreateIntCast(index, CGF.CGM.getIntPtrTy(PtrTy), isSigned,
                                       "idx.ext");
   }
 
@@ -2647,10 +2675,16 @@ Value *ScalarExprEmitter::EmitSub(const BinOpInfo &op) {
   // Otherwise, this is a pointer subtraction.
 
   // Do the raw subtraction part.
+  auto LPtrTy = cast<llvm::PointerType>(op.LHS->getType());
+  auto RPtrTy = cast<llvm::PointerType>(op.RHS->getType());
+  auto &DL = CGF.CGM.getDataLayout();
+  auto MaxPtrTy = DL.getTypeStoreSize(LPtrTy) > DL.getTypeStoreSize(RPtrTy)
+                      ? LPtrTy : RPtrTy;
+  auto PtrDiffTy = CGF.CGM.getIntPtrTy(MaxPtrTy);
   llvm::Value *LHS
-    = Builder.CreatePtrToInt(op.LHS, CGF.PtrDiffTy, "sub.ptr.lhs.cast");
+    = Builder.CreatePtrToInt(op.LHS, PtrDiffTy, "sub.ptr.lhs.cast");
   llvm::Value *RHS
-    = Builder.CreatePtrToInt(op.RHS, CGF.PtrDiffTy, "sub.ptr.rhs.cast");
+    = Builder.CreatePtrToInt(op.RHS, PtrDiffTy, "sub.ptr.rhs.cast");
   Value *diffInChars = Builder.CreateSub(LHS, RHS, "sub.ptr.sub");
 
   // Okay, figure out the element size.
