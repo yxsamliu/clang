@@ -787,47 +787,22 @@ Value *ScalarExprEmitter::EmitScalarConversion(Value *Src, QualType SrcType,
   // Handle pointer conversions next: pointers can only be converted to/from
   // other pointers and integers. Check for pointer types in terms of LLVM, as
   // some native types (like Obj-C id) may map to a pointer type.
-  // For certain targets, pointers in different address spaces have different
-  // sizes. There are 6 cases:
-  // 1. ptr -> ptr
-  //   a. same size: bitcast
-  //   b. different size: ptrtoint -> inttoptr
-  // 2. int -> ptr
-  //   a. same size: inttoptr
-  //   b. different size: inttoptr
-  // 3. ptr -> int
-  //   a. same size: ptrtoint
-  //   b. different size: ptrtoint
   if (auto DstPT = dyn_cast<llvm::PointerType>(DstTy)) {
     // The source value may be an integer, or a pointer.
-    if (auto SrcPT = dyn_cast<llvm::PointerType>(SrcTy)) {
-      auto DL = CGF.CGM.getDataLayout();
-      auto DstPTSize = DL.getTypeStoreSize(DstPT);
-      auto SrcPTSize = DL.getTypeStoreSize(SrcPT);
-      // Case 1a.
-      if (DstPTSize == SrcPTSize)
-        return Builder.CreateBitCast(Src, DstTy, "conv");
-      // Case 1b.
-      SrcTy = CGF.CGM.getIntPtrTy(SrcPT);
-      Src = Builder.CreatePtrToInt(Src, SrcTy, "conv");
-    }
+    if (isa<llvm::PointerType>(SrcTy))
+      return Builder.CreateBitCast(Src, DstTy, "conv");
 
-    // Cases 1b, 2a and 2b.
     assert(SrcType->isIntegerType() && "Not ptr->ptr or int->ptr conversion?");
     // First, convert to the correct width so that we control the kind of
     // extension.
     llvm::Type *MiddleTy = CGF.CGM.getIntPtrTy(DstPT);
     bool InputSigned = SrcType->isSignedIntegerOrEnumerationType();
-    // Cases 2a is automatically handled by Builder.CreateIntCast.
-    // ToDo: inttoptr allows target size to be different than the source type.
-    // It is unclear why the following integer cast is needed here.
     llvm::Value* IntResult =
         Builder.CreateIntCast(Src, MiddleTy, InputSigned, "conv");
     // Then, cast to pointer.
     return Builder.CreateIntToPtr(IntResult, DstTy, "conv");
   }
 
-  // Cases 3a and 3b.
   if (isa<llvm::PointerType>(SrcTy)) {
     // Must be an ptr to int cast.
     assert(isa<llvm::IntegerType>(DstTy) && "not ptr->int?");
