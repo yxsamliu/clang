@@ -2423,7 +2423,6 @@ static Value *emitPointerArithmetic(CodeGenFunction &CGF,
 
   Value *pointer = op.LHS;
   Expr *pointerOperand = expr->getLHS();
-  auto PtrTy = cast<llvm::PointerType>(pointer->getType());
   Value *index = op.RHS;
   Expr *indexOperand = expr->getRHS();
 
@@ -2435,6 +2434,7 @@ static Value *emitPointerArithmetic(CodeGenFunction &CGF,
 
   unsigned width = cast<llvm::IntegerType>(index->getType())->getBitWidth();
   auto &DL = CGF.CGM.getDataLayout();
+  auto PtrTy = cast<llvm::PointerType>(pointer->getType());
   if (width != DL.getTypeSizeInBits(PtrTy)) {
     // Zero-extend or sign-extend the pointer value according to
     // whether the index is signed or not.
