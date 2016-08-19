@@ -7950,7 +7950,7 @@ private:
   /// Extensions required by an OpenCL type.
   llvm::DenseMap<const Type*, std::set<std::string>> OpenCLTypeExtMap;
   /// Extensions required by an OpenCL declaration.
-  llvm::DenseMap<Decl*, std::set<std::string>> OpenCLDeclExtMap;
+  llvm::DenseMap<const Decl*, std::set<std::string>> OpenCLDeclExtMap;
 public:
   llvm::StringRef getCurrentOpenCLExtension() const {
     return CurrOpenCLExtension;
@@ -7988,6 +7988,12 @@ public:
   /// emit diagnostics.
   /// \return true if type is disabled.
   bool checkOpenCLDisabledTypeDeclSpec(const DeclSpec &DS, QualType T);
+
+  /// \brief Check if declaration \p D used by expression \p E
+  /// is disabled due to required OpenCL extensions are disabled. If so,
+  /// emit diagnostics.
+  /// \return true if type is disabled.
+  bool checkOpenCLDisabledDecl(const Decl &D, const Expr &E);
 
   //===--------------------------------------------------------------------===//
   // OpenMP directives and clauses.

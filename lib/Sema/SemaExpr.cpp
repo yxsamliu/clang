@@ -5245,6 +5245,9 @@ Sema::ActOnCallExpr(Scope *S, Expr *Fn, SourceLocation LParenLoc,
                                            Fn->getLocStart()))
       return ExprError();
 
+    if (LangOpts.OpenCL && checkOpenCLDisabledDecl(*FD, *Fn))
+      return ExprError();
+    
     // CheckEnableIf assumes that the we're passing in a sane number of args for
     // FD, but that doesn't always hold true here. This is because, in some
     // cases, we'll emit a diag about an ill-formed function call, but then

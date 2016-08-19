@@ -1642,3 +1642,22 @@ bool Sema::checkOpenCLDisabledTypeDeclSpec(const DeclSpec &DS, QualType QT) {
   }
   return Disabled;
 }
+
+bool Sema::checkOpenCLDisabledDecl(const Decl &D, const Expr &E) {
+  // Check extensions for declared types.
+  llvm::errs() << "[Sema::checkOpenCLDisabledDecl]\n";
+  llvm::errs() << "Expr: "; E.dump(); llvm::errs() << '\n';
+  llvm::errs() << "Decl: "; D.dump(); llvm::errs() << '\n';
+
+  auto DL = OpenCLDeclExtMap.find(&D);
+  if (DL != OpenCLDeclExtMap.end()) {
+    for (auto &I : DL->second) {
+      if (I != CurrOpenCLExtension && !getOpenCLOptions().isEnabled(I)) {
+        Diag(E.getLocStart(), diag::err_decl_requires_extension)
+            << I << D.getSourceRange();
+        return true;
+      }
+    }
+  }
+  return false;
+}
