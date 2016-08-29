@@ -3097,8 +3097,14 @@ ASTReader::ReadASTBlock(ModuleFile &F, unsigned ClientLoadCapabilities) {
       break;
 
     case OPENCL_EXTENSIONS:
-      // Later tables overwrite earlier ones.
-      OpenCLExtensions.swap(Record);
+      for (unsigned I = 0, E = Record.size(); I != E; ) {
+        auto Name = ReadString(Record, I);
+        OpenCLExtensions.OptMap[Name] = {
+          static_cast<bool>(Record[I++]),
+          static_cast<bool>(Record[I++]),
+          static_cast<unsigned>(Record[I++]),
+          static_cast<unsigned>(Record[I++])};
+      }
       break;
 
     case TENTATIVE_DEFINITIONS:
@@ -6934,14 +6940,7 @@ void ASTReader::InitializeSema(Sema &S) {
     SemaObj->FPFeatures.fp_contract = FPPragmaOptions[0];
   }
 
-  // FIXME: What happens if these are changed by a module import?
-  if (!OpenCLExtensions.empty()) {
-    unsigned I = 0;
-#define OPENCLEXT(nm)  SemaObj->OpenCLFeatures.nm = OpenCLExtensions[I++];
-#include "clang/Basic/OpenCLExtensions.def"
-
-    assert(OpenCLExtensions.size() == I && "Wrong number of OPENCL_EXTENSIONS");
-  }
+  SemaObj->OpenCLFeatures.copy(OpenCLExtensions);
 
   UpdateSema();
 }

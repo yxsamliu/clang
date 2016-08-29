@@ -663,7 +663,7 @@ ExprResult Sema::DefaultLvalueConversion(Expr *E) {
     return E;
 
   // OpenCL usually rejects direct accesses to values of 'half' type.
-  if (getLangOpts().OpenCL && !getOpenCLOptions().cl_khr_fp16 &&
+  if (getLangOpts().OpenCL && !getOpenCLOptions().isEnabled("cl_khr_fp16") &&
       T->isHalfType()) {
     Diag(E->getExprLoc(), diag::err_opencl_half_load_store)
       << 0 << T;
@@ -3366,7 +3366,7 @@ ExprResult Sema::ActOnNumericConstant(const Token &Tok, Scope *UDLScope) {
   if (Literal.isFloatingLiteral()) {
     QualType Ty;
     if (Literal.isHalf){
-      if (getOpenCLOptions().cl_khr_fp16)
+      if (getOpenCLOptions().isEnabled("cl_khr_fp16"))
         Ty = Context.HalfTy;
       else {
         Diag(Tok.getLocation(), diag::err_half_const_requires_fp16);
@@ -3388,7 +3388,7 @@ ExprResult Sema::ActOnNumericConstant(const Token &Tok, Scope *UDLScope) {
         Res = ImpCastExprToType(Res, Context.FloatTy, CK_FloatingCast).get();
       } else if (getLangOpts().OpenCL &&
                  !((getLangOpts().OpenCLVersion >= 120) ||
-                   getOpenCLOptions().cl_khr_fp64)) {
+                   getOpenCLOptions().isEnabled("cl_khr_fp64"))) {
         Diag(Tok.getLocation(), diag::warn_double_const_requires_fp64);
         Res = ImpCastExprToType(Res, Context.FloatTy, CK_FloatingCast).get();
       }
@@ -5245,6 +5245,9 @@ Sema::ActOnCallExpr(Scope *S, Expr *Fn, SourceLocation LParenLoc,
                                            Fn->getLocStart()))
       return ExprError();
 
+    if (LangOpts.OpenCL && checkOpenCLDisabledDecl(*FD, *Fn))
+      return ExprError();
+    
     // CheckEnableIf assumes that the we're passing in a sane number of args for
     // FD, but that doesn't always hold true here. This is because, in some
     // cases, we'll emit a diag about an ill-formed function call, but then
