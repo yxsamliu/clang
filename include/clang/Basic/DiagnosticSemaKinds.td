@@ -3280,6 +3280,8 @@ def note_ovl_candidate_has_pass_object_size_params: Note<
     "pass_object_size attribute">;
 def note_ovl_candidate_disabled_by_enable_if_attr : Note<
     "candidate disabled: %0">;
+def note_ovl_candidate_disabled_by_extension : Note<
+    "candidate disabled due to OpenCL extension">;
 def err_addrof_function_disabled_by_enable_if_attr : Error<
     "cannot take address of function %0 becuase it has one or more "
     "non-tautological enable_if conditions">;
@@ -7993,6 +7995,8 @@ def err_opencl_type_can_only_be_used_as_function_parameter : Error <
 def warn_opencl_attr_deprecated_ignored : Warning <
   "%0 attribute is deprecated and ignored in OpenCL version %1">,
   InGroup<IgnoredAttributes>;
+ def err_decl_requires_extension : Error<
+  "use of declaration requires %0 extension to be enabled">;
 
 // OpenCL v2.0 s6.13.6 -- Builtin Pipe Functions
 def err_opencl_builtin_pipe_first_arg : Error<
