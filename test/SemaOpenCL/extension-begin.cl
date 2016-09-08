@@ -14,6 +14,7 @@ void f(void);
 __attribute__((overloadable)) void g(long x);
 
 #pragma OPENCL EXTENSION my_ext : end
+#pragma OPENCL EXTENSION my_ext : end // expected-warning {{OpenCL extension end directive mismatches begin directive - ignoring}}
 
 __attribute__((overloadable)) void g(void);
 

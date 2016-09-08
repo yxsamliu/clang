@@ -8026,13 +8026,13 @@ public:
   bool isOpenCLDisabledDecl(Decl *FD);
 
   /// \brief Check if type \p T corresponding to declaration specifier \p DS
-  /// is disabled due to required OpenCL extensions are disabled. If so,
+  /// is disabled due to required OpenCL extensions being disabled. If so,
   /// emit diagnostics.
   /// \return true if type is disabled.
   bool checkOpenCLDisabledTypeDeclSpec(const DeclSpec &DS, QualType T);
 
   /// \brief Check if declaration \p D used by expression \p E
-  /// is disabled due to required OpenCL extensions are disabled. If so,
+  /// is disabled due to required OpenCL extensions being disabled. If so,
   /// emit diagnostics.
   /// \return true if type is disabled.
   bool checkOpenCLDisabledDecl(const Decl &D, const Expr &E);

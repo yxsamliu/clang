@@ -15,8 +15,6 @@
 #ifndef LLVM_CLANG_BASIC_OPENCLOPTIONS_H
 #define LLVM_CLANG_BASIC_OPENCLOPTIONS_H
 
-#include <string>
-#include <vector>
 #include "llvm/ADT/StringMap.h"
 
 namespace clang {

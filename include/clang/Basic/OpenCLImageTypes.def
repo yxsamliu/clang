@@ -17,9 +17,9 @@
 
 #ifdef GENERIC_IMAGE_TYPE
 
-#define IMAGE_READ_TYPE(Type, Id, ...) GENERIC_IMAGE_TYPE(Type, Id)
-#define IMAGE_WRITE_TYPE(Type, Id, ...)
-#define IMAGE_READ_WRITE_TYPE(Type, Id, ...)
+#define IMAGE_READ_TYPE(Type, Id, Ext) GENERIC_IMAGE_TYPE(Type, Id)
+#define IMAGE_WRITE_TYPE(Type, Id, Ext)
+#define IMAGE_READ_WRITE_TYPE(Type, Id, Ext)
 
 #elif defined(GENERIC_IMAGE_TYPE_EXT)
 #define IMAGE_READ_TYPE(Type, Id, Ext) GENERIC_IMAGE_TYPE_EXT(Type, Id##ROTy, Ext)
@@ -28,15 +28,15 @@
 
 #else
 #ifndef IMAGE_READ_TYPE
-#define IMAGE_READ_TYPE(Type, Id, ...) \
+#define IMAGE_READ_TYPE(Type, Id, Ext) \
           IMAGE_TYPE(Type, Id##RO, Id##ROTy,  read_only, ro)
 #endif
 #ifndef IMAGE_WRITE_TYPE
-#define IMAGE_WRITE_TYPE(Type, Id, ...) \
+#define IMAGE_WRITE_TYPE(Type, Id, Ext) \
           IMAGE_TYPE(Type, Id##WO, Id##WOTy, write_only, wo)
 #endif
 #ifndef IMAGE_READ_WRITE_TYPE
-#define IMAGE_READ_WRITE_TYPE(Type, Id, ...) \
+#define IMAGE_READ_WRITE_TYPE(Type, Id, Ext) \
           IMAGE_TYPE(Type, Id##RW, Id##RWTy, read_write, rw)
 #endif
 
