@@ -1965,7 +1965,7 @@ class AMDGPUTargetInfo final : public TargetInfo {
   bool hasFP64:1;
   bool hasFMAF:1;
   bool hasLDEXPF:1;
-  bool hasFP32DenormSupport:1;
+  bool hasFullSpeedFP32Denorms:1;
 
   static bool isAMDGCN(const llvm::Triple &TT) {
     return TT.getArch() == llvm::Triple::amdgcn;
@@ -1978,7 +1978,7 @@ public:
       hasFP64(false),
       hasFMAF(false),
       hasLDEXPF(false),
-      hasFP32DenormSupport(false){
+      hasFullSpeedFP32Denorms(false){
     if (getTriple().getArch() == llvm::Triple::amdgcn) {
       hasFP64 = true;
       hasFMAF = true;
@@ -2047,7 +2047,7 @@ public:
         hasFP64Denormals = true;
     }
     if (!hasFP32Denormals)
-      TargetOpts.Features.push_back((Twine(hasFP32DenormSupport &&
+      TargetOpts.Features.push_back((Twine(hasFullSpeedFP32Denorms &&
           !CGOpts.FlushDenorm ? '+' : '-') + Twine("fp32-denormals")).str());
     // Always do not flush fp64 denorms.
     if (!hasFP64Denormals && hasFP64)
