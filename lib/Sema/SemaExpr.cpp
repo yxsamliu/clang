@@ -10688,6 +10688,14 @@ static QualType CheckIndirectionOperand(Sema &S, Expr *Op, ExprValueKind &VK,
   if (const PointerType *PT = OpTy->getAs<PointerType>())
   {
     Result = PT->getPointeeType();
+    // OpenCL v1.2 s6.1.1.1 p2:
+    // The half data type can only be used to declare a pointer to a buffer that
+    // contains half values
+    if (S.getLangOpts().OpenCL && !S.getOpenCLOptions().cl_khr_fp16 &&
+        Result->isHalfType()) {
+      S.Diag(OpLoc, diag::err_opencl_half_load_store) << 1 << OpTy;
+      return QualType();
+    }
   }
   else if (const ObjCObjectPointerType *OPT =
              OpTy->getAs<ObjCObjectPointerType>())
