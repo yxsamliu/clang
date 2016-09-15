@@ -25,6 +25,9 @@ half half_disabled(half *p, // expected-error{{declaring function return value o
   return h;
 }
 
+kernel void half_disabled_kernel(half *p,
+                                 half h);  // expected-error{{'half' cannot be used as the type of a kernel parameter}}
+
 // Exactly the same as above but with the cl_khr_fp16 extension enabled.
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
 constant half a = 1.0h;
@@ -48,3 +51,7 @@ half half_enabled(half *p, half h)
 
   return h;
 }
+
+kernel void half_enabled_kernel(half *p,
+                                half h);
+
