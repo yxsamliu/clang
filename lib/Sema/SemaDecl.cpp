@@ -7596,7 +7596,10 @@ static void checkIsValidOpenCLKernelParameter(
     // OpenCL v1.2 s6.8 n:
     // A kernel function argument cannot be declared
     // of event_t type.
-    S.Diag(Param->getLocation(), diag::err_bad_kernel_param_type) << PT;
+    // Do not diagnose half type since it is diagnosed as invalid argument
+    // type for any function eleswhere.
+    if (!PT->isHalfType())
+      S.Diag(Param->getLocation(), diag::err_bad_kernel_param_type) << PT;
     D.setInvalidType();
     return;
 
