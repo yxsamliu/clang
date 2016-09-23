@@ -83,11 +83,8 @@ bool operator<(const Replacement &LHS, const Replacement &RHS) {
   if (LHS.getOffset() != RHS.getOffset())
     return LHS.getOffset() < RHS.getOffset();
 
-  // Apply longer replacements first, specifically so that deletions are
-  // executed before insertions. It is (hopefully) never the intention to
-  // delete parts of newly inserted code.
   if (LHS.getLength() != RHS.getLength())
-    return LHS.getLength() > RHS.getLength();
+    return LHS.getLength() < RHS.getLength();
 
   if (LHS.getFilePath() != RHS.getFilePath())
     return LHS.getFilePath() < RHS.getFilePath();
@@ -188,7 +185,7 @@ llvm::Error Replacements::add(const Replacement &R) {
     return llvm::Error::success();
   }
 
-  // I is the smallest iterator whose entry cannot overlap.
+  // `I` is the smallest iterator (after `R`) whose entry cannot overlap.
   // If that is begin(), there are no overlaps.
   if (I == Replaces.begin()) {
     Replaces.insert(R);
@@ -202,7 +199,7 @@ llvm::Error Replacements::add(const Replacement &R) {
     // If `R` and `I` do not have the same offset, it is safe to add `R` since
     // it must come after `I`. Otherwise:
     //   - If `R` is an insertion, `I` must not be an insertion since it would
-    //   have come after `AtEnd` if it has length 0.
+    //   have come after `AtEnd`.
     //   - If `R` is not an insertion, `I` must be an insertion; otherwise, `R`
     //   and `I` would have overlapped.
     // In either case, we can safely insert `R`.
@@ -429,9 +426,7 @@ unsigned Replacements::getShiftedCodePosition(unsigned Position) const {
 
 bool applyAllReplacements(const Replacements &Replaces, Rewriter &Rewrite) {
   bool Result = true;
-  for (Replacements::const_iterator I = Replaces.begin(),
-                                    E = Replaces.end();
-       I != E; ++I) {
+  for (auto I = Replaces.rbegin(), E = Replaces.rend(); I != E; ++I) {
     if (I->isApplicable()) {
       Result = I->apply(Rewrite) && Result;
     } else {
@@ -458,8 +453,7 @@ llvm::Expected<std::string> applyAllReplacements(StringRef Code,
       "<stdin>", 0, llvm::MemoryBuffer::getMemBuffer(Code, "<stdin>"));
   FileID ID = SourceMgr.createFileID(Files.getFile("<stdin>"), SourceLocation(),
                                      clang::SrcMgr::C_User);
-  for (Replacements::const_iterator I = Replaces.begin(), E = Replaces.end();
-       I != E; ++I) {
+  for (auto I = Replaces.rbegin(), E = Replaces.rend(); I != E; ++I) {
     Replacement Replace("<stdin>", I->getOffset(), I->getLength(),
                         I->getReplacementText());
     if (!Replace.apply(Rewrite))

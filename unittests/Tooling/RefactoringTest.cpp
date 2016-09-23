@@ -573,6 +573,17 @@ TEST(Range, CalculateRangesOfReplacements) {
   EXPECT_TRUE(Ranges[1].getLength() == 22);
 }
 
+TEST(Range, CalculateRangesOfInsertionAroundReplacement) {
+  Replacements Replaces = toReplacements(
+      {Replacement("foo", 0, 2, ""), Replacement("foo", 0, 0, "ba")});
+
+  std::vector<Range> Ranges = Replaces.getAffectedRanges();
+
+  EXPECT_EQ(1ul, Ranges.size());
+  EXPECT_EQ(0u, Ranges[0].getOffset());
+  EXPECT_EQ(2u, Ranges[0].getLength());
+}
+
 TEST(Range, RangesAfterEmptyReplacements) {
   std::vector<Range> Ranges = {Range(5, 6), Range(10, 5)};
   Replacements Replaces;
