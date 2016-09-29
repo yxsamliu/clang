@@ -3421,7 +3421,7 @@ Value *ScalarExprEmitter::VisitAsTypeExpr(AsTypeExpr *E) {
   // vector to get a vec4, then a bitcast if the target type is different.
   if (NumElementsSrc == 3 && NumElementsDst != 3) {
     Src = ConvertVec3AndVec4(Builder, CGF, Src, 4);
-    Src = Builder.CreateBitCast(Src, DstTy);
+    Src = Builder.CreateBitOrPointerCast(Src, DstTy);
     Src->setName("astype");
     return Src;
   }
@@ -3431,13 +3431,13 @@ Value *ScalarExprEmitter::VisitAsTypeExpr(AsTypeExpr *E) {
   // get a vec3.
   if (NumElementsSrc != 3 && NumElementsDst == 3) {
     auto Vec4Ty = llvm::VectorType::get(DstTy->getVectorElementType(), 4);
-    Src = Builder.CreateBitCast(Src, Vec4Ty);
+    Src = Builder.CreateBitOrPointerCast(Src, Vec4Ty);
     Src = ConvertVec3AndVec4(Builder, CGF, Src, 3);
     Src->setName("astype");
     return Src;
   }
 
-  return Builder.CreateBitCast(Src, DstTy, "astype");
+  return Builder.CreateBitOrPointerCast(Src, DstTy, "astype");
 }
 
 Value *ScalarExprEmitter::VisitAtomicExpr(AtomicExpr *E) {
