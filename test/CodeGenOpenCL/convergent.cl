@@ -17,7 +17,7 @@ void g(void);
 //      non_conffun();
 //    }
 //
-// CHECK-LABEL: define spir_func void @test_merge_if(i32 %[[a:.+]])
+// CHECK: define spir_func void @test_merge_if(i32 %[[a:.+]])
 // CHECK: %[[tobool:.+]] = icmp eq i32 %[[a]], 0
 // CHECK: br i1 %[[tobool]], label %[[if_end3_critedge:.+]], label %[[if_then:.+]]
 // CHECK: [[if_then]]:
@@ -28,7 +28,7 @@ void g(void);
 // CHECK: [[if_end3_critedge]]:
 // CHECK: tail call spir_func void @non_convfun()
 // CHECK: br label %[[if_end3]]
-// CHECK: [[if.end3]]:
+// CHECK: [[if_end3]]:
 // CHECK-LABEL: ret void
 
 void test_merge_if(int a) {
@@ -46,7 +46,7 @@ void test_merge_if(int a) {
 // CHECK-DAG: declare spir_func void @g()
 
 // Test two if's are not merged.
-// CHECK-LABEL: define spir_func void @test_no_merge_if(i32 %[[a:.+]])
+// CHECK: define spir_func void @test_no_merge_if(i32 %[[a:.+]])
 // CHECK:  %[[tobool:.+]] = icmp eq i32 %[[a]], 0
 // CHECK: br i1 %[[tobool]], label %[[if_end:.+]], label %[[if_then:.+]]
 // CHECK: [[if_then]]:
@@ -74,7 +74,7 @@ void test_no_merge_if(int a) {
   }
 }
 
-// CHECK-LABEL: declare spir_func void @convfun(){{[^#]*}} #[[attr2:[0-9]+]]
+// CHECK: declare spir_func void @convfun(){{[^#]*}} #[[attr2:[0-9]+]]
 
 // Test loop is unrolled for convergent function.
 // CHECK-LABEL: define spir_func void @test_unroll()
@@ -96,7 +96,7 @@ void test_unroll() {
 }
 
 // Test loop is not unrolled for noduplicate function.
-// CHECK: define spir_func void @test_not_unroll()
+// CHECK-LABEL: define spir_func void @test_not_unroll()
 // CHECK:  br label %[[for_body:.+]]
 // CHECK: [[for_cond_cleanup:.+]]:
 // CHECK:  ret void
@@ -110,7 +110,9 @@ void test_not_unroll() {
     nodupfun();
 }
 
-// CHECK-DAG: attributes #[[attr2]] = {{{[^}]*}} convergent {{[^}]*}}}
-// CHECK-DAG: attributes #[[attr3]] = {{{[^}]*}} noduplicate {{[^}]*}}}
-// CHECK-DAG: attributes #[[attr5]] = {{{[^}]*}} convergent {{[^}]*}
-// CHECK-DAG: attributes #[[attr6]] = {{{[^}]*}} noduplicate {{[^}]*}
+// CHECK: declare spir_func void @nodupfun(){{[^#]*}} #[[attr3:[0-9]+]]
+
+// CHECK-DAG: attributes #[[attr2]] = { {{[^}]*}}convergent{{[^}]*}} }
+// CHECK-DAG: attributes #[[attr3]] = { {{[^}]*}}noduplicate{{[^}]*}} }
+// CHECK-DAG: attributes #[[attr5]] = { {{[^}]*}}convergent{{[^}]*}} }
+// CHECK-DAG: attributes #[[attr6]] = { {{[^}]*}}noduplicate{{[^}]*}} }
