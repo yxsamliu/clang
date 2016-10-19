@@ -14,7 +14,7 @@ void g(void);
 //      non_convfun();
 //      g();
 //    } else {
-//      non_conffun();
+//      non_convfun();
 //    }
 //
 // CHECK: define spir_func void @test_merge_if(i32 %[[a:.+]])
