@@ -1070,6 +1070,7 @@ namespace {
     unsigned InvalidBase : 1;
     unsigned CallIndex : 31;
     SubobjectDesignator Designator;
+    bool IsNullPtr;
 
     const APValue::LValueBase getLValueBase() const { return Base; }
     CharUnits &getLValueOffset() { return Offset; }
@@ -1077,13 +1078,15 @@ namespace {
     unsigned getLValueCallIndex() const { return CallIndex; }
     SubobjectDesignator &getLValueDesignator() { return Designator; }
     const SubobjectDesignator &getLValueDesignator() const { return Designator;}
+    bool isNullPtr() const { return IsNullPtr;}
 
     void moveInto(APValue &V) const {
       if (Designator.Invalid)
-        V = APValue(Base, Offset, APValue::NoLValuePath(), CallIndex);
+        V = APValue(Base, Offset, APValue::NoLValuePath(), CallIndex,
+                    IsNullPtr);
       else
         V = APValue(Base, Offset, Designator.Entries,
-                    Designator.IsOnePastTheEnd, CallIndex);
+                    Designator.IsOnePastTheEnd, CallIndex, IsNullPtr);
     }
     void setFrom(ASTContext &Ctx, const APValue &V) {
       assert(V.isLValue());
@@ -1092,14 +1095,17 @@ namespace {
       InvalidBase = false;
       CallIndex = V.getLValueCallIndex();
       Designator = SubobjectDesignator(Ctx, V);
+      IsNullPtr = V.isNullPtr();
     }
 
-    void set(APValue::LValueBase B, unsigned I = 0, bool BInvalid = false) {
+    void set(APValue::LValueBase B, unsigned I = 0, bool BInvalid = false,
+             bool IsNullPtr_ = false, uint64_t Offset_ = 0) {
       Base = B;
-      Offset = CharUnits::Zero();
+      Offset = CharUnits::fromQuantity(Offset_);
       InvalidBase = BInvalid;
       CallIndex = I;
       Designator = SubobjectDesignator(getType(B));
+      IsNullPtr = IsNullPtr_;
     }
 
     void setInvalid(APValue::LValueBase B, unsigned I = 0) {
@@ -1112,7 +1118,7 @@ namespace {
                           CheckSubobjectKind CSK) {
       if (Designator.Invalid)
         return false;
-      if (!Base) {
+      if (IsNullPtr) {
         Info.CCEDiag(E, diag::note_constexpr_null_subobject)
           << CSK;
         Designator.setInvalid();
@@ -1141,9 +1147,21 @@ namespace {
       if (checkSubobject(Info, E, Imag ? CSK_Imag : CSK_Real))
         Designator.addComplexUnchecked(EltTy, Imag);
     }
-    void adjustIndex(EvalInfo &Info, const Expr *E, uint64_t N) {
-      if (N && checkNullPointer(Info, E, CSK_ArrayIndex))
-        Designator.adjustIndex(Info, E, N);
+    void clearIsNullPtr(bool DoIt) {
+      if (DoIt)
+        IsNullPtr = false;
+    }
+    void adjustOffsetAndIndex(EvalInfo &Info, const Expr *E, uint64_t Index,
+                              CharUnits ElementSize) {
+      // Compute the new offset in the appropriate width.
+      Offset += Index * ElementSize;
+      if (Index && checkNullPointer(Info, E, CSK_ArrayIndex))
+        Designator.adjustIndex(Info, E, Index);
+      clearIsNullPtr(Index);
+    }
+    void adjustOffset(CharUnits N) {
+      Offset += N;
+      clearIsNullPtr(N.getQuantity());
     }
   };
 
@@ -2018,7 +2036,7 @@ static bool HandleLValueMember(EvalInfo &Info, const Expr *E, LValue &LVal,
   }
 
   unsigned I = FD->getFieldIndex();
-  LVal.Offset += Info.Ctx.toCharUnitsFromBits(RL->getFieldOffset(I));
+  LVal.adjustOffset(Info.Ctx.toCharUnitsFromBits(RL->getFieldOffset(I)));
   LVal.addDecl(Info, E, FD);
   return true;
 }
@@ -2034,8 +2052,7 @@ static bool HandleLValueIndirectMember(EvalInfo &Info, const Expr *E,
 }
 
 /// Get the size of the given type in char units.
-static bool HandleSizeof(EvalInfo &Info, SourceLocation Loc,
-                         QualType Type, CharUnits &Size) {
+static bool GetSizeof(EvalInfo &Info, QualType Type, CharUnits &Size) {
   // sizeof(void), __alignof__(void), sizeof(function) = 1 as a gcc
   // extension.
   if (Type->isVoidType() || Type->isFunctionType()) {
@@ -2044,19 +2061,27 @@ static bool HandleSizeof(EvalInfo &Info, SourceLocation Loc,
   }
 
   if (Type->isDependentType()) {
-    Info.FFDiag(Loc);
     return false;
   }
 
   if (!Type->isConstantSizeType()) {
-    // sizeof(vla) is not a constantexpr: C99 6.5.3.4p2.
-    // FIXME: Better diagnostic.
-    Info.FFDiag(Loc);
     return false;
   }
 
   Size = Info.Ctx.getTypeSizeInChars(Type);
   return true;
+}
+
+/// Get the size of the given type in char units or diagnose.
+static bool HandleSizeof(EvalInfo &Info, SourceLocation Loc,
+                         QualType Type, CharUnits &Size) {
+  bool Succ = GetSizeof(Info, Type, Size);
+  if (!Succ) {
+    // sizeof(vla) is not a constantexpr: C99 6.5.3.4p2.
+    // FIXME: Better diagnostic.
+    Info.FFDiag(Loc);
+  }
+  return Succ;
 }
 
 /// Update a pointer value to model pointer arithmetic.
@@ -2072,9 +2097,7 @@ static bool HandleLValueArrayAdjustment(EvalInfo &Info, const Expr *E,
   if (!HandleSizeof(Info, E->getExprLoc(), EltTy, SizeOfPointee))
     return false;
 
-  // Compute the new offset in the appropriate width.
-  LVal.Offset += Adjustment * SizeOfPointee;
-  LVal.adjustIndex(Info, E, Adjustment);
+  LVal.adjustOffsetAndIndex(Info, E, Adjustment, SizeOfPointee);
   return true;
 }
 
@@ -5059,8 +5082,15 @@ public:
     Result.setFrom(Info.Ctx, V);
     return true;
   }
+
+  // If the null pointer has pointee type with known constant size, the offset
+  // is initialized with the value of the pointer divided by the pointee type
+  // size. Otherwise, the offset is initialized with the value of the null
+  // pointer.
   bool ZeroInitialization(const Expr *E) {
-    return Success((Expr*)nullptr);
+    auto Offset = Info.Ctx.getTargetNullPtrValue(E->getType());
+    Result.set((Expr*)nullptr, 0, false, true, Offset);
+    return true;
   }
 
   bool VisitBinaryOperator(const BinaryOperator *E);
@@ -5159,6 +5189,8 @@ bool PointerExprEvaluator::VisitCastExpr(const CastExpr* E) {
       else
         CCEDiag(E, diag::note_constexpr_invalid_cast) << 2;
     }
+    if (E->getCastKind() == CK_AddressSpaceConversion && Result.IsNullPtr)
+      ZeroInitialization(E);
     return true;
 
   case CK_DerivedToBase:
@@ -5200,6 +5232,7 @@ bool PointerExprEvaluator::VisitCastExpr(const CastExpr* E) {
       Result.Offset = CharUnits::fromQuantity(N);
       Result.CallIndex = 0;
       Result.Designator.setInvalid();
+      Result.IsNullPtr = false;
       return true;
     } else {
       // Cast is of an lvalue, no need to change value.
@@ -8289,8 +8322,13 @@ bool IntExprEvaluator::VisitCastExpr(const CastExpr *E) {
       return true;
     }
 
-    APSInt AsInt = Info.Ctx.MakeIntValue(LV.getLValueOffset().getQuantity(), 
-                                         SrcType);
+    uint64_t V;
+    if (LV.isNullPtr())
+      V = Info.Ctx.getTargetNullPtrValue(SrcType);
+    else
+      V = LV.getLValueOffset().getQuantity();
+
+    APSInt AsInt = Info.Ctx.MakeIntValue(V, SrcType);
     return Success(HandleIntToIntCast(Info, E, DestType, SrcType, AsInt), E);
   }
 
