@@ -16,6 +16,7 @@
 #include "CGObjCRuntime.h"
 #include "CGRecordLayout.h"
 #include "CodeGenModule.h"
+#include "TargetInfo.h"
 #include "clang/AST/APValue.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/RecordLayout.h"
@@ -1262,6 +1263,10 @@ llvm::Constant *CodeGenModule::EmitConstantExpr(const Expr *E,
   return C;
 }
 
+llvm::Constant *CodeGenModule::getNullPtr(llvm::PointerType *T) {
+  return getTargetCodeGenInfo().getNullPtr(*this, T);
+}
+
 llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
                                                  QualType DestType,
                                                  CodeGenFunction *CGF) {
@@ -1323,13 +1328,16 @@ llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
 
       // Convert to the appropriate type; this could be an lvalue for
       // an integer.
-      if (isa<llvm::PointerType>(DestTy)) {
+      if (auto PT = dyn_cast<llvm::PointerType>(DestTy)) {
         // Convert the integer to a pointer-sized integer before converting it
         // to a pointer.
         C = llvm::ConstantExpr::getIntegerCast(
             C, getDataLayout().getIntPtrType(DestTy),
             /*isSigned=*/false);
-        return llvm::ConstantExpr::getIntToPtr(C, DestTy);
+        C = llvm::ConstantExpr::getIntToPtr(C, DestTy);
+        if (!isa<llvm::ConstantPointerNull>(C))
+          return C;
+        return getNullPtr(PT);
       }
 
       // If the types don't match this should only be a truncate.
