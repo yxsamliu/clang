@@ -1449,12 +1449,30 @@ Value *ScalarExprEmitter::VisitCastExpr(CastExpr *CE) {
   case CK_FunctionToPointerDecay:
     return EmitLValue(E).getPointer();
 
-  case CK_NullToPointer:
+  case CK_NullToPointer: {
     if (MustVisitNullValue(E))
       (void) Visit(E);
 
-    return llvm::ConstantPointerNull::get(
-                               cast<llvm::PointerType>(ConvertType(DestTy)));
+    auto &Ctx = CGF.CGM.getContext();
+    auto AS = cast<PointerType>(Ctx.getCanonicalType(DestTy).getTypePtr())
+        ->getPointeeType().getQualifiers().getAddressSpace();
+    auto PT = cast<llvm::PointerType>(ConvertType(DestTy));
+    // ToDo: Remove this workaround after LLVM is able to handle null pointers
+    // which are not zero.
+    // In amdgcn target the null pointer in global, constant, and generic
+    // address space has value 0 but in private and local address space has
+    // value -1. Currently some LLVM passes assume null pointers always have
+    // value 0, which results in incorrectly transformed IR. As a workaround,
+    // a null pointer in generic address space is emitted which is then casted
+    // to a pointer in local or private address space.
+    if (CGF.getTarget().getTriple().getArch() != llvm::Triple::amdgcn ||
+        (AS != LangAS::opencl_local && AS != 0))
+      return llvm::ConstantPointerNull::get(PT);
+    auto NPT = llvm::PointerType::get(PT->getElementType(),
+      Ctx.getTargetAddressSpace(LangAS::opencl_generic));
+    return llvm::ConstantExpr::getAddrSpaceCast(
+      llvm::ConstantPointerNull::get(NPT), PT);
+  }
 
   case CK_NullToMemberPointer: {
     if (MustVisitNullValue(E))
