@@ -16,6 +16,7 @@
 #include "CGObjCRuntime.h"
 #include "CGRecordLayout.h"
 #include "CodeGenModule.h"
+#include "TargetInfo.h"
 #include "clang/AST/APValue.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/RecordLayout.h"
@@ -1262,6 +1263,10 @@ llvm::Constant *CodeGenModule::EmitConstantExpr(const Expr *E,
   return C;
 }
 
+llvm::Constant *CodeGenModule::translateNullPtr(llvm::Constant *C) {
+  return getTargetCodeGenInfo().translateNullPtr(*this, C);
+}
+
 llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
                                                  QualType DestType,
                                                  CodeGenFunction *CGF) {
@@ -1329,7 +1334,8 @@ llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
         C = llvm::ConstantExpr::getIntegerCast(
             C, getDataLayout().getIntPtrType(DestTy),
             /*isSigned=*/false);
-        return llvm::ConstantExpr::getIntToPtr(C, DestTy);
+        C = llvm::ConstantExpr::getIntToPtr(C, DestTy);
+        return translateNullPtr(C);
       }
 
       // If the types don't match this should only be a truncate.

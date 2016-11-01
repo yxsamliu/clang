@@ -1152,6 +1152,9 @@ public:
   llvm::Value *
   createOpenCLIntToSamplerConversion(const Expr *E, CodeGenFunction &CGF);
 
+  /// Perform target specific translation on null pointer.
+  llvm::Constant *translateNullPtr(llvm::Constant *C);
+
 private:
   llvm::Constant *
   GetOrCreateLLVMFunction(StringRef MangledName, llvm::Type *Ty, GlobalDecl D,
@@ -1266,6 +1269,7 @@ private:
   /// Check whether we can use a "simpler", more core exceptions personality
   /// function.
   void SimplifyPersonality();
+
 };
 }  // end namespace CodeGen
 }  // end namespace clang

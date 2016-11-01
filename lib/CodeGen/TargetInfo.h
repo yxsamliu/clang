@@ -220,6 +220,13 @@ public:
 
   /// Get LLVM calling convention for OpenCL kernel.
   virtual unsigned getOpenCLKernelCallingConv() const;
+
+  /// Translate null pointer to target specific value.
+  virtual llvm::Constant *translateNullPtr(const CodeGen::CodeGenModule &CGM,
+      llvm::Constant *C) const {
+    return C;
+  }
+
 };
 
 } // namespace CodeGen
