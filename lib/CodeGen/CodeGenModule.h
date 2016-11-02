@@ -1152,8 +1152,8 @@ public:
   llvm::Value *
   createOpenCLIntToSamplerConversion(const Expr *E, CodeGenFunction &CGF);
 
-  /// Perform target specific translation on null pointer.
-  llvm::Constant *translateNullPtr(llvm::Constant *C);
+  /// Get target specific null pointer.
+  llvm::Constant *getNullPtr(llvm::PointerType *T);
 
 private:
   llvm::Constant *

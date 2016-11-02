@@ -1263,8 +1263,8 @@ llvm::Constant *CodeGenModule::EmitConstantExpr(const Expr *E,
   return C;
 }
 
-llvm::Constant *CodeGenModule::translateNullPtr(llvm::Constant *C) {
-  return getTargetCodeGenInfo().translateNullPtr(*this, C);
+llvm::Constant *CodeGenModule::getNullPtr(llvm::PointerType *T) {
+  return getTargetCodeGenInfo().getNullPtr(*this, T);
 }
 
 llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
@@ -1328,14 +1328,16 @@ llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
 
       // Convert to the appropriate type; this could be an lvalue for
       // an integer.
-      if (isa<llvm::PointerType>(DestTy)) {
+      if (auto PT = dyn_cast<llvm::PointerType>(DestTy)) {
         // Convert the integer to a pointer-sized integer before converting it
         // to a pointer.
         C = llvm::ConstantExpr::getIntegerCast(
             C, getDataLayout().getIntPtrType(DestTy),
             /*isSigned=*/false);
         C = llvm::ConstantExpr::getIntToPtr(C, DestTy);
-        return translateNullPtr(C);
+        if (!isa<llvm::ConstantPointerNull>(C))
+          return C;
+        return getNullPtr(PT);
       }
 
       // If the types don't match this should only be a truncate.

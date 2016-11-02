@@ -188,12 +188,100 @@ void test_cast_null_pointer_to_sizet(void) {
                                         (size_t)((generic char*)NULL));
 }
 
-#define TEST_EQ_0_0(addr) int test_compare_nullptr_with_nullptr(void) { return (addr char*)0 == (addr char*)0; }
-#define TEST_EQ_0_NULL(addr) int test_compare_nullptr_with_nullptr(void) { return (addr char*)0 == (addr char*)NULL; }
-#define TEST_EQ_NULL_NULL(addr) int test_compare_nullptr_with_nullptr(void) { return (addr char*)0 == (addr char*)NULL; }
-#define TEST_NE_0_0(addr) int test_compare_nullptr_with_nullptr(void) { return (addr char*)0 != (addr char*)0; }
-#define TEST_NE_0_NULL(addr) int test_compare_nullptr_with_nullptr(void) { return (addr char*)0 != (addr char*)NULL; }
-#define TEST_NE_NULL_NULL(addr) int test_compare_nullptr_with_nullptr(void) { return (addr char*)0 != (addr char*)NULL; }
+// Test comparision between null pointers.
+#define TEST_EQ00(addr1, addr2) int test_eq00_##addr1##_##addr2(void) { return (addr1 char*)0 == (addr2 char*)0; }
+#define TEST_EQ0N(addr1, addr2) int test_eq0N_##addr1##_##addr2(void) { return (addr1 char*)0 == (addr2 char*)NULL; }
+#define TEST_EQN0(addr1, addr2) int test_eqN0_##addr1##_##addr2(void) { return (addr1 char*)NULL == (addr2 char*)0; }
+#define TEST_EQNN(addr1, addr2) int test_eqNN_##addr1##_##addr2(void) { return (addr1 char*)0 == (addr2 char*)NULL; }
+#define TEST_NE00(addr1, addr2) int test_ne00_##addr1##_##addr2(void) { return (addr1 char*)0 != (addr2 char*)0; }
+#define TEST_NE0N(addr1, addr2) int test_ne0N_##addr1##_##addr2(void) { return (addr1 char*)0 != (addr2 char*)NULL; }
+#define TEST_NEN0(addr1, addr2) int test_neN0_##addr1##_##addr2(void) { return (addr1 char*)NULL != (addr2 char*)0; }
+#define TEST_NENN(addr1, addr2) int test_neNN_##addr1##_##addr2(void) { return (addr1 char*)0 != (addr2 char*)NULL; }
+#define TEST(addr1, addr2) \
+        TEST_EQ00(addr1, addr2) \
+        TEST_EQ0N(addr1, addr2) \
+        TEST_EQN0(addr1, addr2) \
+        TEST_EQNN(addr1, addr2) \
+        TEST_NE00(addr1, addr2) \
+        TEST_NE0N(addr1, addr2) \
+        TEST_NEN0(addr1, addr2) \
+        TEST_NENN(addr1, addr2)
+
+// CHECK-LABEL: test_eq00_generic_private
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eq0N_generic_private
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eqN0_generic_private
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eqNN_generic_private
+// CHECK: ret i32 1
+// CHECK-LABEL: test_ne00_generic_private
+// CHECK: ret i32 0
+// CHECK-LABEL: test_ne0N_generic_private
+// CHECK: ret i32 0
+// CHECK-LABEL: test_neN0_generic_private
+// CHECK: ret i32 0
+// CHECK-LABEL: test_neNN_generic_private
+// CHECK: ret i32 0
+TEST(generic, private)
+
+// CHECK-LABEL: test_eq00_generic_local
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eq0N_generic_local
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eqN0_generic_local
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eqNN_generic_local
+// CHECK: ret i32 1
+// CHECK-LABEL: test_ne00_generic_local
+// CHECK: ret i32 0
+// CHECK-LABEL: test_ne0N_generic_local
+// CHECK: ret i32 0
+// CHECK-LABEL: test_neN0_generic_local
+// CHECK: ret i32 0
+// CHECK-LABEL: test_neNN_generic_local
+// CHECK: ret i32 0
+TEST(generic, local)
+
+// CHECK-LABEL: test_eq00_generic_global
+// CHECK: ret i32 zext (i1 icmp eq (i8 addrspace(4)* addrspacecast (i8 addrspace(1)* null to i8 addrspace(4)*), i8 addrspace(4)* null) to i32)
+// CHECK-LABEL: test_eq0N_generic_global
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eqN0_generic_global
+// CHECK: ret i32 zext (i1 icmp eq (i8 addrspace(4)* addrspacecast (i8 addrspace(1)* null to i8 addrspace(4)*), i8 addrspace(4)* null) to i32)
+// CHECK-LABEL: test_eqNN_generic_global
+// CHECK: ret i32 1
+// CHECK-LABEL: test_ne00_generic_global
+// CHECK: ret i32 zext (i1 icmp ne (i8 addrspace(4)* addrspacecast (i8 addrspace(1)* null to i8 addrspace(4)*), i8 addrspace(4)* null) to i32)
+// CHECK-LABEL: test_ne0N_generic_global
+// CHECK: ret i32 0
+// CHECK-LABEL: test_neN0_generic_global
+// CHECK: ret i32 zext (i1 icmp ne (i8 addrspace(4)* addrspacecast (i8 addrspace(1)* null to i8 addrspace(4)*), i8 addrspace(4)* null) to i32)
+// CHECK-LABEL: test_neNN_generic_global
+// CHECK: ret i32 0
+TEST(generic, global)
+
+// CHECK-LABEL: test_eq00_generic_generic
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eq0N_generic_generic
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eqN0_generic_generic
+// CHECK: ret i32 1
+// CHECK-LABEL: test_eqNN_generic_generic
+// CHECK: ret i32 1
+// CHECK-LABEL: test_ne00_generic_generic
+// CHECK: ret i32 0
+// CHECK-LABEL: test_ne0N_generic_generic
+// CHECK: ret i32 0
+// CHECK-LABEL: test_neN0_generic_generic
+// CHECK: ret i32 0
+// CHECK-LABEL: test_neNN_generic_generic
+// CHECK: ret i32 0
+TEST(generic, generic)
+
+// CHECK-LABEL: test_eq00_constant_constant
+// CHECK: ret i32 1
+TEST_EQ00(constant, constant)
 
 // Test cast to bool.
 

@@ -172,8 +172,8 @@ public:
 
   /// EmitPointerToBoolConversion - Perform a pointer to boolean conversion.
   Value *EmitPointerToBoolConversion(Value *V) {
-    Value *Zero = llvm::ConstantPointerNull::get(
-                                      cast<llvm::PointerType>(V->getType()));
+    Value *Zero = CGF.CGM.getNullPtr(cast<llvm::PointerType>(V->getType()));
+
     return Builder.CreateICmpNE(V, Zero, "tobool");
   }
 
@@ -1454,7 +1454,7 @@ Value *ScalarExprEmitter::VisitCastExpr(CastExpr *CE) {
       (void) Visit(E);
 
     auto PT = cast<llvm::PointerType>(ConvertType(DestTy));
-    return CGF.CGM.translateNullPtr(llvm::ConstantPointerNull::get(PT));
+    return CGF.CGM.getNullPtr(PT);
   }
 
   case CK_NullToMemberPointer: {
