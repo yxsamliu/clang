@@ -402,7 +402,7 @@ unsigned TargetCodeGenInfo::getOpenCLKernelCallingConv() const {
 }
 
 llvm::Constant *TargetCodeGenInfo::getNullPtr(const CodeGen::CodeGenModule &CGM,
-    llvm::PointerType *T) const {
+    llvm::PointerType *T, QualType QT) const {
   return llvm::ConstantPointerNull::get(T);
 }
 
@@ -6960,7 +6960,7 @@ public:
   unsigned getOpenCLKernelCallingConv() const override;
 
   llvm::Constant *getNullPtr(const CodeGen::CodeGenModule &CGM,
-      llvm::PointerType *T) const override;
+      llvm::PointerType *T, QualType QT) const override;
 };
 
 }
@@ -7034,7 +7034,8 @@ unsigned AMDGPUTargetCodeGenInfo::getOpenCLKernelCallingConv() const {
 // pointer in generic address space is emitted which is casted to a
 // pointer in local or private address space.
 llvm::Constant *AMDGPUTargetCodeGenInfo::getNullPtr(
-    const CodeGen::CodeGenModule &CGM, llvm::PointerType *PT) const {
+    const CodeGen::CodeGenModule &CGM, llvm::PointerType *PT,
+    QualType QT) const {
   auto &Ctx = CGM.getContext();
   auto AS = PT->getAddressSpace();
   if (AS != Ctx.getTargetAddressSpace(LangAS::opencl_local) && AS != 0)

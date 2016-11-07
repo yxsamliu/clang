@@ -1263,8 +1263,8 @@ llvm::Constant *CodeGenModule::EmitConstantExpr(const Expr *E,
   return C;
 }
 
-llvm::Constant *CodeGenModule::getNullPtr(llvm::PointerType *T) {
-  return getTargetCodeGenInfo().getNullPtr(*this, T);
+llvm::Constant *CodeGenModule::getNullPtr(llvm::PointerType *T, QualType QT) {
+  return getTargetCodeGenInfo().getNullPtr(*this, T, QT);
 }
 
 llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
@@ -1337,7 +1337,7 @@ llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
         C = llvm::ConstantExpr::getIntToPtr(C, DestTy);
         if (!isa<llvm::ConstantPointerNull>(C))
           return C;
-        return getNullPtr(PT);
+        return getNullPtr(PT, DestType);
       }
 
       // If the types don't match this should only be a truncate.

@@ -225,7 +225,7 @@ public:
   /// \return ConstantPointerNull with the given type \p T.
   /// Each target can override it to return its own desired constant value.
   virtual llvm::Constant *getNullPtr(const CodeGen::CodeGenModule &CGM,
-      llvm::PointerType *T) const;
+      llvm::PointerType *T, QualType QT) const;
 };
 
 } // namespace CodeGen
