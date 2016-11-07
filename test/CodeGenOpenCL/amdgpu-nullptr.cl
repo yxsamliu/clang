@@ -1,4 +1,7 @@
-// RUN: %clang_cc1 %s -cl-std=CL2.0 -include opencl-c.h -triple amdgcn -emit-llvm -o - | FileCheck %s
+// RUN: %clang_cc1 %s -cl-std=CL2.0 -include opencl-c.h -triple amdgcn -fno-common -emit-llvm -o - | FileCheck %s
+
+// LLVM requests global variable with common linkage to be initialized with zeroinitializer, therefore use -fno-common
+// to suppress common linkage for tentative definition.
 
 // Test 0 as initializer.
 
@@ -33,6 +36,51 @@ constant char *constant_p_NULL = NULL;
 
 // CHECK: @generic_p_NULL = local_unnamed_addr addrspace(1) global i8 addrspace(4)* null, align 4
 generic char *generic_p_NULL = NULL;
+
+// Test default initialization of pointers.
+
+// CHECK: @p1 = local_unnamed_addr addrspace(1) global i8* addrspacecast (i8 addrspace(4)* null to i8*), align 4
+private char *p1;
+
+// CHECK: @p2 = local_unnamed_addr addrspace(1) global i8 addrspace(3)* addrspacecast (i8 addrspace(4)* null to i8 addrspace(3)*), align 4
+local char *p2;
+
+// CHECK: @p3 = local_unnamed_addr addrspace(1) global i8 addrspace(2)* null, align 4
+constant char *p3;
+
+// CHECK: @p4 = local_unnamed_addr addrspace(1) global i8 addrspace(1)* null, align 4
+global char *p4;
+
+// CHECK: @p5 = local_unnamed_addr addrspace(1) global i8 addrspace(4)* null, align 4
+generic char *p5;
+
+// Test default initialization of sturcture.
+typedef struct {
+  private char *p1;
+  local char *p2;
+  constant char *p3;
+  global char *p4;
+  generic char *p5;
+} StructTy1;
+
+// CHECK: @S1 = local_unnamed_addr addrspace(1) global %struct.StructTy1 { i8* addrspacecast (i8 addrspace(4)* null to i8*), i8 addrspace(3)* addrspacecast (i8 addrspace(4)* null to i8 addrspace(3)*), i8 addrspace(2)* null, i8 addrspace(1)* null, i8 addrspace(4)* null }, align 4
+StructTy1 S1;
+
+typedef struct {
+  constant char *p3;
+  global char *p4;
+  generic char *p5;
+} StructTy2;
+
+// CHECK: @S2 = local_unnamed_addr addrspace(1) global %struct.StructTy2 zeroinitializer, align 4
+StructTy2 S2;
+
+// Test default initialization of array.
+// CHECK: @A1 = local_unnamed_addr addrspace(1) global [2 x %struct.StructTy1] [%struct.StructTy1 { i8* addrspacecast (i8 addrspace(4)* null to i8*), i8 addrspace(3)* addrspacecast (i8 addrspace(4)* null to i8 addrspace(3)*), i8 addrspace(2)* null, i8 addrspace(1)* null, i8 addrspace(4)* null }, %struct.StructTy1 { i8* addrspacecast (i8 addrspace(4)* null to i8*), i8 addrspace(3)* addrspacecast (i8 addrspace(4)* null to i8 addrspace(3)*), i8 addrspace(2)* null, i8 addrspace(1)* null, i8 addrspace(4)* null }], align 4
+StructTy1 A1[2];
+
+// CHECK: @A2 = local_unnamed_addr addrspace(1) global [2 x %struct.StructTy2] zeroinitializer, align 4
+StructTy2 A2[2];
 
 // Test comparison with 0.
 

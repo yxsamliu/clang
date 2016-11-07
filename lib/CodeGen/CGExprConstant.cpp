@@ -1518,7 +1518,7 @@ static llvm::Constant *EmitNullConstantForBase(CodeGenModule &CGM,
                                                const CXXRecordDecl *base);
 
 static llvm::Constant *EmitNullConstant(CodeGenModule &CGM,
-                                        const CXXRecordDecl *record,
+                                        const RecordDecl *record,
                                         bool asCompleteObject) {
   const CGRecordLayout &layout = CGM.getTypes().getCGRecordLayout(record);
   llvm::StructType *structure =
@@ -1528,25 +1528,29 @@ static llvm::Constant *EmitNullConstant(CodeGenModule &CGM,
   unsigned numElements = structure->getNumElements();
   std::vector<llvm::Constant *> elements(numElements);
 
+  auto CXXR = dyn_cast<CXXRecordDecl>(record);
   // Fill in all the bases.
-  for (const auto &I : record->bases()) {
-    if (I.isVirtual()) {
-      // Ignore virtual bases; if we're laying out for a complete
-      // object, we'll lay these out later.
-      continue;
+  if (CXXR) {
+    for (const auto &I : CXXR->bases()) {
+      if (I.isVirtual()) {
+        // Ignore virtual bases; if we're laying out for a complete
+        // object, we'll lay these out later.
+        continue;
+      }
+
+      const CXXRecordDecl *base =
+        cast<CXXRecordDecl>(I.getType()->castAs<RecordType>()->getDecl());
+
+      // Ignore empty bases.
+      if (base->isEmpty() ||
+          CGM.getContext().getASTRecordLayout(base).getNonVirtualSize()
+              .isZero())
+        continue;
+
+      unsigned fieldIndex = layout.getNonVirtualBaseLLVMFieldNo(base);
+      llvm::Type *baseType = structure->getElementType(fieldIndex);
+      elements[fieldIndex] = EmitNullConstantForBase(CGM, baseType, base);
     }
-
-    const CXXRecordDecl *base = 
-      cast<CXXRecordDecl>(I.getType()->castAs<RecordType>()->getDecl());
-
-    // Ignore empty bases.
-    if (base->isEmpty() ||
-        CGM.getContext().getASTRecordLayout(base).getNonVirtualSize().isZero())
-      continue;
-    
-    unsigned fieldIndex = layout.getNonVirtualBaseLLVMFieldNo(base);
-    llvm::Type *baseType = structure->getElementType(fieldIndex);
-    elements[fieldIndex] = EmitNullConstantForBase(CGM, baseType, base);
   }
 
   // Fill in all the fields.
@@ -1570,8 +1574,8 @@ static llvm::Constant *EmitNullConstant(CodeGenModule &CGM,
   }
 
   // Fill in the virtual bases, if we're working with the complete object.
-  if (asCompleteObject) {
-    for (const auto &I : record->vbases()) {
+  if (CXXR && asCompleteObject) {
+    for (const auto &I : CXXR->vbases()) {
       const CXXRecordDecl *base = 
         cast<CXXRecordDecl>(I.getType()->castAs<RecordType>()->getDecl());
 
@@ -1613,6 +1617,10 @@ static llvm::Constant *EmitNullConstantForBase(CodeGenModule &CGM,
 }
 
 llvm::Constant *CodeGenModule::EmitNullConstant(QualType T) {
+  if (auto PT = T->getAs<PointerType>())
+    return getNullPtr(cast<llvm::PointerType>(getTypes().ConvertTypeForMem(T)),
+                      T);
+
   if (getTypes().isZeroInitializable(T))
     return llvm::Constant::getNullValue(getTypes().ConvertTypeForMem(T));
     
@@ -1629,7 +1637,7 @@ llvm::Constant *CodeGenModule::EmitNullConstant(QualType T) {
   }
 
   if (const RecordType *RT = T->getAs<RecordType>()) {
-    const CXXRecordDecl *RD = cast<CXXRecordDecl>(RT->getDecl());
+    const RecordDecl *RD = cast<RecordDecl>(RT->getDecl());
     return ::EmitNullConstant(*this, RD, /*complete object*/ true);
   }
 
