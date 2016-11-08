@@ -739,8 +739,7 @@ CodeGenTypes::getCGRecordLayout(const RecordDecl *RD) {
 bool CodeGenTypes::isZeroInitializable(QualType T) {
   if (auto PT = T->getAs<PointerType>()) {
     auto LLPT = cast<llvm::PointerType>(ConvertType(T));
-    auto NullPtr = CGM.getNullPtr(LLPT, T);
-    return isa<llvm::ConstantPointerNull>(NullPtr);
+    return CGM.isNullPtrZero(LLPT, T);
   }
 
   if (const auto *AT = Context.getAsArrayType(T)) {

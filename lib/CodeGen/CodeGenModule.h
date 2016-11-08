@@ -1155,6 +1155,9 @@ public:
   /// Get target specific null pointer.
   llvm::Constant *getNullPtr(llvm::PointerType *T, QualType QT);
 
+  /// Does null pointer have zero value.
+  bool isNullPtrZero(llvm::PointerType *T, QualType QT);
+
 private:
   llvm::Constant *
   GetOrCreateLLVMFunction(StringRef MangledName, llvm::Type *Ty, GlobalDecl D,

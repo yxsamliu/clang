@@ -1267,6 +1267,11 @@ llvm::Constant *CodeGenModule::getNullPtr(llvm::PointerType *T, QualType QT) {
   return getTargetCodeGenInfo().getNullPtr(*this, T, QT);
 }
 
+bool CodeGenModule::isNullPtrZero(llvm::PointerType *T, QualType QT) {
+  return getTargetCodeGenInfo().isNullPtrZero(*this, T, QT);
+}
+
+
 llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
                                                  QualType DestType,
                                                  CodeGenFunction *CGF) {

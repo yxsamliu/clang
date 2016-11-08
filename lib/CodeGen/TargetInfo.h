@@ -226,6 +226,12 @@ public:
   /// Each target can override it to return its own desired constant value.
   virtual llvm::Constant *getNullPtr(const CodeGen::CodeGenModule &CGM,
       llvm::PointerType *T, QualType QT) const;
+
+  /// Does null pointer have zero value.
+  virtual bool isNullPtrZero(const CodeGen::CodeGenModule &CGM,
+      llvm::PointerType *T, QualType QT) const {
+    return true;
+  }
 };
 
 } // namespace CodeGen
