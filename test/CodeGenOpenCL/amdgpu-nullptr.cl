@@ -370,4 +370,19 @@ void cast_bool_generic(generic char* p) {
     *p = 0;
 }
 
+// Test initialize a struct using memset.
+// For large structures which is mostly zero, clang generats llvm.memset for
+// the zero part and store for non-zero members.
+typedef struct {
+  long a, b, c, d;
+  private char *p;
+} StructTy3;
+
+// CHECK-LABEL: test_memset
+// CHECK: call void @llvm.memset.p0i8.i64(i8* {{.*}}, i8 0, i64 32, i32 8, i1 false)
+// CHECK: store i8* addrspacecast (i8 addrspace(4)* null to i8*), i8** {{.*}}
+StructTy3 test_memset(void) {
+  StructTy3 S3 = {0, 0, 0, 0, 0};
+  return S3;
+}
 
