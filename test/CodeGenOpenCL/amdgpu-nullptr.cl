@@ -386,3 +386,29 @@ StructTy3 test_memset(void) {
   return S3;
 }
 
+// Test casting literal 0 to pointer.
+// A 0 literal casted to pointer should become a null pointer.
+
+// CHECK-LABEL: test_cast_0_to_ptr
+// CHECK: ret i32* addrspacecast (i32 addrspace(4)* null to i32*)
+private int* test_cast_0_to_ptr(void) {
+  return (private int*)0;
+}
+
+// Test casting non-literal integer with 0 value to pointer.
+// A non-literal integer expression with 0 value is casted to a pointer with
+// zero value. 
+
+// CHECK-LABEL: test_cast_int_to_ptr1
+// CHECK: ret i32* null
+private int* test_cast_int_to_ptr1(void) {
+  return (private int*)((void)0, 0);
+}
+
+// CHECK-LABEL: test_cast_int_to_ptr2
+// CHECK: ret i32* null
+private int* test_cast_int_to_ptr2(void) {
+  int x = 0;
+  return (private int*)x;
+}
+
