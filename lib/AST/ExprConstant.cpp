@@ -1070,6 +1070,7 @@ namespace {
     unsigned InvalidBase : 1;
     unsigned CallIndex : 31;
     SubobjectDesignator Designator;
+    bool IsNullPtr;
 
     const APValue::LValueBase getLValueBase() const { return Base; }
     CharUnits &getLValueOffset() { return Offset; }
@@ -1077,13 +1078,15 @@ namespace {
     unsigned getLValueCallIndex() const { return CallIndex; }
     SubobjectDesignator &getLValueDesignator() { return Designator; }
     const SubobjectDesignator &getLValueDesignator() const { return Designator;}
+    bool isNullPtr() const { return IsNullPtr;}
 
     void moveInto(APValue &V) const {
       if (Designator.Invalid)
-        V = APValue(Base, Offset, APValue::NoLValuePath(), CallIndex);
+        V = APValue(Base, Offset, APValue::NoLValuePath(), CallIndex,
+                    IsNullPtr);
       else
         V = APValue(Base, Offset, Designator.Entries,
-                    Designator.IsOnePastTheEnd, CallIndex);
+                    Designator.IsOnePastTheEnd, CallIndex, IsNullPtr);
     }
     void setFrom(ASTContext &Ctx, const APValue &V) {
       assert(V.isLValue());
@@ -1092,14 +1095,17 @@ namespace {
       InvalidBase = false;
       CallIndex = V.getLValueCallIndex();
       Designator = SubobjectDesignator(Ctx, V);
+      IsNullPtr = V.isNullPtr();
     }
 
-    void set(APValue::LValueBase B, unsigned I = 0, bool BInvalid = false) {
+    void set(APValue::LValueBase B, unsigned I = 0, bool BInvalid = false,
+             bool IsNullPtr_ = false) {
       Base = B;
       Offset = CharUnits::Zero();
       InvalidBase = BInvalid;
       CallIndex = I;
       Designator = SubobjectDesignator(getType(B));
+      IsNullPtr = IsNullPtr_;
     }
 
     void setInvalid(APValue::LValueBase B, unsigned I = 0) {
@@ -1112,7 +1118,7 @@ namespace {
                           CheckSubobjectKind CSK) {
       if (Designator.Invalid)
         return false;
-      if (!Base) {
+      if (IsNullPtr) {
         Info.CCEDiag(E, diag::note_constexpr_null_subobject)
           << CSK;
         Designator.setInvalid();
@@ -5048,8 +5054,9 @@ public:
     Result.setFrom(Info.Ctx, V);
     return true;
   }
-  bool ZeroInitialization(const Expr *E) {
-    return Success((Expr*)nullptr);
+  bool NullPtrInitialization(const Expr *E) {
+    Result.set((Expr*)nullptr, 0, false, true);
+    return true;
   }
 
   bool VisitBinaryOperator(const BinaryOperator *E);
@@ -5171,7 +5178,7 @@ bool PointerExprEvaluator::VisitCastExpr(const CastExpr* E) {
 
   case CK_NullToPointer:
     VisitIgnoredValue(E->getSubExpr());
-    return ZeroInitialization(E);
+    return NullPtrInitialization(E);
 
   case CK_IntegralToPointer: {
     CCEDiag(E, diag::note_constexpr_invalid_cast) << 2;
@@ -5188,6 +5195,7 @@ bool PointerExprEvaluator::VisitCastExpr(const CastExpr* E) {
       Result.Offset = CharUnits::fromQuantity(N);
       Result.CallIndex = 0;
       Result.Designator.setInvalid();
+      Result.IsNullPtr = false;
       return true;
     } else {
       // Cast is of an lvalue, no need to change value.
