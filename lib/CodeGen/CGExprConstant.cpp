@@ -1303,6 +1303,7 @@ llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
       llvm::ConstantInt::get(Int64Ty, Value.getLValueOffset().getQuantity());
 
     llvm::Constant *C = nullptr;
+
     if (APValue::LValueBase LVBase = Value.getLValueBase()) {
       // An array can be represented as an lvalue referring to the base.
       if (isa<llvm::ArrayType>(DestTy)) {
@@ -1334,15 +1335,14 @@ llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
       // Convert to the appropriate type; this could be an lvalue for
       // an integer.
       if (auto PT = dyn_cast<llvm::PointerType>(DestTy)) {
+        if (Value.isNullPtr())
+          return getNullPtr(PT, DestType);
         // Convert the integer to a pointer-sized integer before converting it
         // to a pointer.
         C = llvm::ConstantExpr::getIntegerCast(
             C, getDataLayout().getIntPtrType(DestTy),
             /*isSigned=*/false);
-        C = llvm::ConstantExpr::getIntToPtr(C, DestTy);
-        if (!isa<llvm::ConstantPointerNull>(C))
-          return C;
-        return getNullPtr(PT, DestType);
+        return llvm::ConstantExpr::getIntToPtr(C, DestTy);
       }
 
       // If the types don't match this should only be a truncate.

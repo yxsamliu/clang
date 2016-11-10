@@ -1,4 +1,5 @@
 // RUN: %clang_cc1 %s -cl-std=CL2.0 -include opencl-c.h -triple amdgcn -fno-common -emit-llvm -o - | FileCheck %s
+// RUN: %clang_cc1 %s -O0 -cl-std=CL2.0 -include opencl-c.h -triple amdgcn -fno-common -emit-llvm -o - | FileCheck --check-prefix=NOOPT %s
 
 // LLVM requests global variable with common linkage to be initialized with zeroinitializer, therefore use -fno-common
 // to suppress common linkage for tentative definition.
@@ -72,6 +73,7 @@ typedef struct {
   generic char *p5;
 } StructTy2;
 
+
 // CHECK: @S2 = local_unnamed_addr addrspace(1) global %struct.StructTy2 zeroinitializer, align 4
 StructTy2 S2;
 
@@ -81,6 +83,48 @@ StructTy1 A1[2];
 
 // CHECK: @A2 = local_unnamed_addr addrspace(1) global [2 x %struct.StructTy2] zeroinitializer, align 4
 StructTy2 A2[2];
+
+// Test static variable initialization.
+
+// NOOPT: @test_static_var.sp1 = internal addrspace(1) global i8* addrspacecast (i8 addrspace(4)* null to i8*), align 4
+// NOOPT: @test_static_var.sp2 = internal addrspace(1) global i8* addrspacecast (i8 addrspace(4)* null to i8*), align 4
+// NOOPT: @test_static_var.sp3 = internal addrspace(1) global i8* addrspacecast (i8 addrspace(4)* null to i8*), align 4
+// NOOPT: @test_static_var.sp4 = internal addrspace(1) global i8* null, align 4
+// NOOPT: @test_static_var.sp5 = internal addrspace(1) global i8* null, align 4
+// NOOPT: @test_static_var.SS1 = internal addrspace(1) global %struct.StructTy1 { i8* addrspacecast (i8 addrspace(4)* null to i8*), i8 addrspace(3)* addrspacecast (i8 addrspace(4)* null to i8 addrspace(3)*), i8 addrspace(2)* null, i8 addrspace(1)* null, i8 addrspace(4)* null }, align 4
+// NOOPT: @test_static_var.SS2 = internal addrspace(1) global %struct.StructTy2 zeroinitializer, align 4
+
+void test_static_var(void) {
+  static private char *sp1 = 0;
+  static private char *sp2 = NULL;
+  static private char *sp3;
+  static private char *sp4 = (private char*)((void)0, 0);
+  const int x = 0;
+  static private char *sp5 = (private char*)x;
+  static StructTy1 SS1;
+  static StructTy2 SS2;
+}
+
+// Test function-scope variable initialization.
+// NOOPT-LABEL: test_func_scope_var
+// NOOPT: store i8* addrspacecast (i8 addrspace(4)* null to i8*), i8** %sp1, align 4
+// NOOPT: store i8* addrspacecast (i8 addrspace(4)* null to i8*), i8** %sp2, align 4
+// NOOPT: store i8* null, i8** %sp3, align 4
+// NOOPT: store i8* null, i8** %sp4, align 4
+// NOOPT: %[[SS1:.*]] = bitcast %struct.StructTy1* %SS1 to i8*
+// NOOPT: call void @llvm.memcpy.p0i8.p0i8.i64(i8* %[[SS1]], i8* bitcast (%struct.StructTy1* @test_func_scope_var.SS1 to i8*), i64 32, i32 4, i1 false)
+// NOOPT: %[[SS2:.*]] = bitcast %struct.StructTy2* %SS2 to i8*
+// NOOPT: call void @llvm.memset.p0i8.i64(i8* %[[SS2]], i8 0, i64 24, i32 4, i1 false)
+
+void test_func_scope_var(void) {
+  private char *sp1 = 0;
+  private char *sp2 = NULL;
+  private char *sp3 = (private char*)((void)0, 0);
+  const int x = 0;
+  private char *sp4 = (private char*)x;
+  StructTy1 SS1 = {0, 0, 0, 0, 0};
+  StructTy2 SS2 = {0, 0, 0};
+}
 
 // Test comparison with 0.
 

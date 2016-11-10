@@ -5054,7 +5054,7 @@ public:
     Result.setFrom(Info.Ctx, V);
     return true;
   }
-  bool NullPtrInitialization(const Expr *E) {
+  bool ZeroInitialization(const Expr *E) {
     Result.set((Expr*)nullptr, 0, false, true);
     return true;
   }
@@ -5178,7 +5178,7 @@ bool PointerExprEvaluator::VisitCastExpr(const CastExpr* E) {
 
   case CK_NullToPointer:
     VisitIgnoredValue(E->getSubExpr());
-    return NullPtrInitialization(E);
+    return ZeroInitialization(E);
 
   case CK_IntegralToPointer: {
     CCEDiag(E, diag::note_constexpr_invalid_cast) << 2;
