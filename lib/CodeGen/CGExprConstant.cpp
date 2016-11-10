@@ -1267,10 +1267,10 @@ llvm::Constant *CodeGenModule::getNullPtr(llvm::PointerType *T, QualType QT) {
   return getTargetCodeGenInfo().getNullPtr(*this, T, QT);
 }
 
-bool CodeGenModule::isNullPtrZero(llvm::PointerType *T, QualType QT) {
-  return getTargetCodeGenInfo().isNullPtrZero(*this, T, QT);
+bool CodeGenModule::isNullPtrZero(QualType QT) {
+  assert(QT->getAs<PointerType>() && "Invalid type");
+  return getTargetCodeGenInfo().isNullPtrZero(QT);
 }
-
 
 llvm::Constant *CodeGenModule::EmitConstantValue(const APValue &Value,
                                                  QualType DestType,
@@ -1641,10 +1641,8 @@ llvm::Constant *CodeGenModule::EmitNullConstant(QualType T) {
     return llvm::ConstantArray::get(ATy, Array);
   }
 
-  if (const RecordType *RT = T->getAs<RecordType>()) {
-    const RecordDecl *RD = cast<RecordDecl>(RT->getDecl());
-    return ::EmitNullConstant(*this, RD, /*complete object*/ true);
-  }
+  if (const RecordType *RT = T->getAs<RecordType>())
+    return ::EmitNullConstant(*this, RT->getDecl(), /*complete object*/ true);
 
   assert(T->isMemberDataPointerType() &&
          "Should only see pointers to data members here!");

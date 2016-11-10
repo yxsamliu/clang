@@ -228,8 +228,7 @@ public:
       llvm::PointerType *T, QualType QT) const;
 
   /// Does null pointer have zero value.
-  virtual bool isNullPtrZero(const CodeGen::CodeGenModule &CGM,
-      llvm::PointerType *T, QualType QT) const {
+  virtual bool isNullPtrZero(QualType QT) const {
     return true;
   }
 };

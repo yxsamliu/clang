@@ -6962,8 +6962,7 @@ public:
   llvm::Constant *getNullPtr(const CodeGen::CodeGenModule &CGM,
       llvm::PointerType *T, QualType QT) const override;
 
-  bool isNullPtrZero(const CodeGen::CodeGenModule &CGM,
-      llvm::PointerType *T, QualType QT) const override;
+  bool isNullPtrZero(QualType QT) const override;
 };
 
 }
@@ -7032,12 +7031,9 @@ unsigned AMDGPUTargetCodeGenInfo::getOpenCLKernelCallingConv() const {
 // In amdgcn target the null pointer in global, constant, and generic
 // address space has value 0 but in private and local address space has
 // value -1.
-bool AMDGPUTargetCodeGenInfo::isNullPtrZero(
-   const CodeGen::CodeGenModule &CGM, llvm::PointerType *PT,
-   QualType QT) const {
- auto &Ctx = CGM.getContext();
- auto AS = PT->getAddressSpace();
- return AS != Ctx.getTargetAddressSpace(LangAS::opencl_local) && AS != 0;
+bool AMDGPUTargetCodeGenInfo::isNullPtrZero(QualType QT) const {
+ auto AS = QT->getAs<PointerType>()->getPointeeType().getAddressSpace();
+ return AS != LangAS::opencl_local && AS != 0;
 }
 
 // Currently LLVM assumes null pointers always have value 0,
@@ -7048,7 +7044,7 @@ bool AMDGPUTargetCodeGenInfo::isNullPtrZero(
 llvm::Constant *AMDGPUTargetCodeGenInfo::getNullPtr(
     const CodeGen::CodeGenModule &CGM, llvm::PointerType *PT,
     QualType QT) const {
-  if (isNullPtrZero(CGM, PT, QT))
+  if (isNullPtrZero(QT))
     return llvm::ConstantPointerNull::get(PT);
 
   auto &Ctx = CGM.getContext();

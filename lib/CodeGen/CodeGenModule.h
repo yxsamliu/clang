@@ -1156,7 +1156,7 @@ public:
   llvm::Constant *getNullPtr(llvm::PointerType *T, QualType QT);
 
   /// Does null pointer have zero value.
-  bool isNullPtrZero(llvm::PointerType *T, QualType QT);
+  bool isNullPtrZero(QualType QT);
 
 private:
   llvm::Constant *
@@ -1272,7 +1272,6 @@ private:
   /// Check whether we can use a "simpler", more core exceptions personality
   /// function.
   void SimplifyPersonality();
-
 };
 }  // end namespace CodeGen
 }  // end namespace clang
