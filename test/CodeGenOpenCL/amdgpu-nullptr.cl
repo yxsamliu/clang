@@ -456,3 +456,32 @@ private int* test_cast_int_to_ptr2(void) {
   return (private int*)x;
 }
 
+// Test logical operations.
+// CHECK-LABEL: test_not_nullptr
+// CHECK: ret i32 1
+int test_not_nullptr(void) {
+  return !(private char*)NULL;
+}
+
+// CHECK-LABEL: test_and_nullptr
+// CHECK: ret i32 0
+int test_and_nullptr(int a) {
+  return a && ((private char*)NULL);
+}
+
+// CHECK-LABEL: test_not_ptr
+// CHECK: %[[lnot:.*]] = icmp eq i8* %p, addrspacecast (i8 addrspace(4)* null to i8*)
+// CHECK: %[[lnot_ext:.*]] = zext i1 %[[lnot]] to i32
+// CHECK: ret i32 %[[lnot_ext]]
+int test_not_ptr(private char* p) {
+  return !p;
+}
+// CHECK-LABEL: test_and_ptr
+// CHECK: %[[tobool:.*]] = icmp ne i8* %p1, addrspacecast (i8 addrspace(4)* null to i8*)
+// CHECK: %[[tobool1:.*]] = icmp ne i8 addrspace(3)* %p2, addrspacecast (i8 addrspace(4)* null to i8 addrspace(3)*)
+// CHECK: %[[res:.*]] = and i1 %[[tobool]], %[[tobool1]]
+// CHECK: %[[land_ext:.*]] = zext i1 %[[res]] to i32
+// CHECK: ret i32 %[[land_ext]]
+int test_and_ptr(private char* p1, local char* p2) {
+  return p1 && p2;
+} 
