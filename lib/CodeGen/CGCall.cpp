@@ -1077,8 +1077,9 @@ void CodeGenFunction::ExpandTypeToArgs(
 /// Create a temporary allocation for the purposes of coercion.
 static Address CreateTempAllocaForCoercion(CodeGenFunction &CGF, llvm::Type *Ty,
                                            CharUnits MinAlign) {
+  const llvm::DataLayout &DL = CGF.CGM.getDataLayout();
   // Don't use an alignment that's worse than what LLVM would prefer.
-  auto PrefAlign = CGF.CGM.getDataLayout().getPrefTypeAlignment(Ty);
+  auto PrefAlign = DL.getPrefTypeAlignment(Ty);
   CharUnits Align = std::max(MinAlign, CharUnits::fromQuantity(PrefAlign));
 
   return CGF.CreateTempAlloca(Ty, Align);
@@ -1101,10 +1102,10 @@ EnterStructPointerForCoercedAccess(Address SrcPtr,
   // first element is the same size as the whole struct, we can enter it. The
   // comparison must be made on the store size and not the alloca size. Using
   // the alloca size may overstate the size of the load.
-  uint64_t FirstEltSize =
-    CGF.CGM.getDataLayout().getTypeStoreSize(FirstElt);
+  const llvm::DataLayout &DL = CGF.CGM.getDataLayout();
+  uint64_t FirstEltSize = DL.getTypeStoreSize(FirstElt);
   if (FirstEltSize < DstSize &&
-      FirstEltSize < CGF.CGM.getDataLayout().getTypeStoreSize(SrcSTy))
+      FirstEltSize < DL.getTypeStoreSize(SrcSTy))
     return SrcPtr;
 
   // GEP into the first element.

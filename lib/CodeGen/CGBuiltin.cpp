@@ -1190,7 +1190,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
         CGM.getContext()
             .toCharUnitsFromBits(TI.getSuitableAlign())
             .getQuantity();
-    AllocaInst *AI = Builder.CreateAlloca(Builder.getInt8Ty(), Size);
+    AllocaInst *AI = Builder.CreateAlloca(CGM.getDataLayout(),
+                                          Builder.getInt8Ty(), Size);
     AI->setAlignment(SuitableAlignmentInBytes);
     return RValue::get(AI);
   }
@@ -1202,7 +1203,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
     unsigned AlignmentInBits = AlignmentInBitsCI->getZExtValue();
     unsigned AlignmentInBytes =
         CGM.getContext().toCharUnitsFromBits(AlignmentInBits).getQuantity();
-    AllocaInst *AI = Builder.CreateAlloca(Builder.getInt8Ty(), Size);
+    AllocaInst *AI = Builder.CreateAlloca(CGM.getDataLayout(),
+                                          Builder.getInt8Ty(), Size);
     AI->setAlignment(AlignmentInBytes);
     return RValue::get(AI);
   }

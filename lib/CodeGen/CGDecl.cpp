@@ -900,7 +900,7 @@ llvm::Value *CodeGenFunction::EmitLifetimeStart(uint64_t Size,
     return nullptr;
 
   llvm::Value *SizeV = llvm::ConstantInt::get(Int64Ty, Size);
-  Addr = Builder.CreatePointerCast(Addr, Int8PtrTy);
+  Addr = Builder.CreatePointerCast(Addr, Int8AllocaPtrTy);
   llvm::CallInst *C =
       Builder.CreateCall(CGM.getLLVMLifetimeStartFn(), {SizeV, Addr});
   C->setDoesNotThrow();
@@ -908,7 +908,7 @@ llvm::Value *CodeGenFunction::EmitLifetimeStart(uint64_t Size,
 }
 
 void CodeGenFunction::EmitLifetimeEnd(llvm::Value *Size, llvm::Value *Addr) {
-  Addr = Builder.CreatePointerCast(Addr, Int8PtrTy);
+  Addr = Builder.CreatePointerCast(Addr, Int8AllocaPtrTy);
   llvm::CallInst *C =
       Builder.CreateCall(CGM.getLLVMLifetimeEndFn(), {Size, Addr});
   C->setDoesNotThrow();
@@ -1072,7 +1072,8 @@ CodeGenFunction::EmitAutoVarAlloca(const VarDecl &D) {
     llvm::Type *llvmTy = ConvertTypeForMem(elementType);
 
     // Allocate memory for the array.
-    llvm::AllocaInst *vla = Builder.CreateAlloca(llvmTy, elementCount, "vla");
+    llvm::AllocaInst *vla = Builder.CreateAlloca(CGM.getDataLayout(),
+                                                 llvmTy, elementCount, "vla");
     vla->setAlignment(alignment.getQuantity());
 
     llvm::Value *V = vla;
@@ -1712,18 +1713,16 @@ void CodeGenFunction::pushRegularPartialArrayCleanup(llvm::Value *arrayBegin,
 /// Lazily declare the @llvm.lifetime.start intrinsic.
 llvm::Constant *CodeGenModule::getLLVMLifetimeStartFn() {
   if (LifetimeStartFn) return LifetimeStartFn;
-  llvm::Type *PtrTy = llvm::PointerType::getInt8PtrTy(getLLVMContext());
   LifetimeStartFn = llvm::Intrinsic::getDeclaration(
-    &getModule(), llvm::Intrinsic::lifetime_start, { PtrTy });
+    &getModule(), llvm::Intrinsic::lifetime_start, { Int8AllocaPtrTy });
   return LifetimeStartFn;
 }
 
 /// Lazily declare the @llvm.lifetime.end intrinsic.
 llvm::Constant *CodeGenModule::getLLVMLifetimeEndFn() {
   if (LifetimeEndFn) return LifetimeEndFn;
-  llvm::Type *PtrTy = llvm::PointerType::getInt8PtrTy(getLLVMContext());
   LifetimeEndFn = llvm::Intrinsic::getDeclaration(
-    &getModule(), llvm::Intrinsic::lifetime_end, { PtrTy });
+    &getModule(), llvm::Intrinsic::lifetime_end, { Int8AllocaPtrTy });
   return LifetimeEndFn;
 }
 

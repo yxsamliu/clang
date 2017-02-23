@@ -1330,7 +1330,8 @@ CGObjCGNU::GenerateMessageSendSuper(CodeGenFunction &CGF,
       Receiver->getType(), IdTy, nullptr);
 
   // FIXME: Is this really supposed to be a dynamic alloca?
-  Address ObjCSuper = Address(Builder.CreateAlloca(ObjCSuperTy),
+  Address ObjCSuper = Address(Builder.CreateAlloca(CGM.getDataLayout(),
+                                                   ObjCSuperTy),
                               CGF.getPointerAlign());
 
   Builder.CreateStore(Receiver,
