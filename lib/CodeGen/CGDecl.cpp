@@ -1075,7 +1075,15 @@ CodeGenFunction::EmitAutoVarAlloca(const VarDecl &D) {
     llvm::AllocaInst *vla = Builder.CreateAlloca(llvmTy, elementCount, "vla");
     vla->setAlignment(alignment.getQuantity());
 
-    address = Address(vla, alignment);
+    llvm::Value *V = vla;
+    auto DefaultAddr = getTarget().getDefaultTargetAddressSpace(getLangOpts());
+    if (DefaultAddr != 0) {
+      auto *DestTy =
+          llvm::PointerType::get(vla->getType()->getElementType(), DefaultAddr);
+      V = Builder.CreateAddrSpaceCast(vla, DestTy);
+    }
+
+    address = Address(V, alignment);
   }
 
   setAddrOfLocalVar(&D, address);

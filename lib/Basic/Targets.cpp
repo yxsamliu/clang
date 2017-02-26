@@ -1997,16 +1997,6 @@ ArrayRef<const char *> NVPTXTargetInfo::getGCCRegNames() const {
   return llvm::makeArrayRef(GCCRegNames);
 }
 
-static const unsigned AMDGPUAddrSpaceMap[] = {
-  1,    // opencl_global
-  3,    // opencl_local
-  2,    // opencl_constant
-  4,    // opencl_generic
-  1,    // cuda_device
-  2,    // cuda_constant
-  3     // cuda_shared
-};
-
 // If you edit the description strings, make sure you update
 // getPointerWidthV().
 
@@ -2020,8 +2010,17 @@ static const char *const DataLayoutStringSI =
   "-v192:256-v256:256-v512:512-v1024:1024-v2048:2048-n32:64";
 
 class AMDGPUTargetInfo final : public TargetInfo {
+  static const unsigned AddrSpaceMap_[7];
   static const Builtin::Info BuiltinInfo[];
   static const char * const GCCRegNames[];
+
+  enum AddrSpaceKind {
+    AS_Private = 0,
+    AS_Global = 1,
+    AS_Constant = 2,
+    AS_Local = 3,
+    AS_Generic = 4
+  };
 
   /// \brief The GPU profiles supported by the AMDGPU target.
   enum GPUKind {
@@ -2066,7 +2065,7 @@ public:
     resetDataLayout(getTriple().getArch() == llvm::Triple::amdgcn ?
                     DataLayoutStringSI : DataLayoutStringR600);
 
-    AddrSpaceMap = &AMDGPUAddrSpaceMap;
+    AddrSpaceMap = &AddrSpaceMap_;
     UseAddrSpaceMapMangling = true;
   }
 
@@ -2254,6 +2253,15 @@ public:
     }
   }
 
+  unsigned
+  getDefaultTargetAddressSpace(const LangOptions &Opts) const override {
+    // OpenCL sets address space explicitly in AST. The default case (type
+    // qualifier containing no address space) represents private address space.
+    if (Opts.OpenCL)
+      return AS_Private;
+    return AS_Generic;
+  }
+
   LangAS::ID getOpenCLImageAddrSpace() const override {
     return LangAS::opencl_constant;
   }
@@ -2274,6 +2282,16 @@ public:
   uint64_t getNullPointerValue(unsigned AS) const override {
     return AS != LangAS::opencl_local && AS != 0 ? 0 : ~0;
   }
+};
+
+const unsigned AMDGPUTargetInfo::AddrSpaceMap_[] = {
+    AS_Global,   // opencl_global
+    AS_Local,    // opencl_local
+    AS_Constant, // opencl_constant
+    AS_Generic,  // opencl_generic
+    AS_Global,   // cuda_device
+    AS_Constant, // cuda_constant
+    AS_Local     // cuda_shared
 };
 
 const Builtin::Info AMDGPUTargetInfo::BuiltinInfo[] = {

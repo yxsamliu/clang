@@ -9538,6 +9538,12 @@ uint64_t ASTContext::getTargetNullPointerValue(QualType QT) const {
   return getTargetInfo().getNullPointerValue(AS);
 }
 
+unsigned ASTContext::getTargetAddressSpace(Qualifiers Q) const {
+  return Q.hasAddressSpace()
+             ? getTargetAddressSpace(Q.getAddressSpace())
+             : getTargetInfo().getDefaultTargetAddressSpace(LangOpts);
+}
+
 // Explicitly instantiate this in case a Redeclarable<T> is used from a TU that
 // doesn't include ASTContext.h
 template
