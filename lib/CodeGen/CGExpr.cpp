@@ -86,8 +86,8 @@ llvm::Instruction *CodeGenFunction::CreateTempAlloca(llvm::Type *Ty,
 llvm::Instruction *CodeGenFunction::CreateAlloca(llvm::Type *Ty,
                                                  const Twine &Name,
                                                  llvm::Instruction *InsertPos) {
-  return new llvm::AllocaInst(Ty, CGM.getDataLayout().getStackAddrSpace(),
-    nullptr, Name, AllocaInsertPt);
+  llvm::Instruction *V = new llvm::AllocaInst(Ty,
+      CGM.getDataLayout().getStackAddrSpace(), nullptr, Name, InsertPos);
   auto Addr = getContext().getTargetAddressSpaceForAutoVar();
   if (Addr != V->getType()->getPointerAddressSpace()) {
     auto *DestTy = llvm::PointerType::get(V->getType()->getPointerElementType(),
@@ -101,6 +101,7 @@ llvm::AllocaInst *
 CodeGenFunction::getAddrSpaceCastedAlloca(llvm::Instruction *V) const {
   if (auto *Cast = dyn_cast<llvm::AddrSpaceCastInst>(V))
     return cast<llvm::AllocaInst>(Cast->getOperand(0));
+  return cast<llvm::AllocaInst>(V);
 }
 
 /// CreateDefaultAlignTempAlloca - This creates an alloca with the
