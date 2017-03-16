@@ -47,6 +47,7 @@
 #include "llvm/ADT/Triple.h"
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/CallingConv.h"
+#include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/LLVMContext.h"
@@ -750,7 +751,7 @@ void CodeGenModule::EmitCtorList(CtorList &Fns, const char *GlobalName) {
     ctor.addInt(Int32Ty, I.Priority);
     ctor.add(llvm::ConstantExpr::getBitCast(I.Initializer, CtorPFTy));
     if (I.AssociatedData)
-      ctor.add(llvm::ConstantExpr::getBitCast(I.AssociatedData, VoidPtrTy));
+      ctor.add(llvm::ConstantExpr::getPointerCast(I.AssociatedData, VoidPtrTy));
     else
       ctor.addNullPointer(VoidPtrTy);
     ctor.finishAndAddTo(ctors);
@@ -1418,10 +1419,13 @@ llvm::Constant *CodeGenModule::EmitAnnotateAttr(llvm::GlobalValue *GV,
                  *LineNoCst = EmitAnnotationLineNo(L);
 
   // Create the ConstantStruct for the global annotation.
+  unsigned AS = GV->getType()->getAddressSpace();
+  llvm::PointerType *I8PTy = (AS == Int8PtrTy->getAddressSpace()) ?
+    Int8PtrTy : Int8Ty->getPointerTo(AS);
   llvm::Constant *Fields[4] = {
-    llvm::ConstantExpr::getBitCast(GV, Int8PtrTy),
-    llvm::ConstantExpr::getBitCast(AnnoGV, Int8PtrTy),
-    llvm::ConstantExpr::getBitCast(UnitGV, Int8PtrTy),
+    llvm::ConstantExpr::getPointerCast(GV, I8PTy),
+    llvm::ConstantExpr::getPointerCast(AnnoGV, I8PTy),
+    llvm::ConstantExpr::getPointerCast(UnitGV, I8PTy),
     LineNoCst
   };
   return llvm::ConstantStruct::getAnon(Fields);
@@ -1548,7 +1552,7 @@ ConstantAddress CodeGenModule::GetWeakRefReference(const ValueDecl *VD) {
   llvm::GlobalValue *Entry = GetGlobalValue(AA->getAliasee());
   if (Entry) {
     unsigned AS = getContext().getTargetAddressSpace(VD->getType());
-    auto Ptr = llvm::ConstantExpr::getBitCast(Entry, DeclTy->getPointerTo(AS));
+    auto Ptr = llvm::ConstantExpr::getPointerCast(Entry, DeclTy->getPointerTo(AS));
     return ConstantAddress(Ptr, Alignment);
   }
 
@@ -1900,7 +1904,7 @@ static void ReplaceUsesOfNonProtoTypeWithRealFunction(llvm::GlobalValue *Old,
 /// GetOrCreateLLVMFunction - If the specified mangled name is not in the
 /// module, create and return an llvm Function with the specified type. If there
 /// is something in the module with the specified name, return it potentially
-/// bitcasted to the right type.
+/// casted to the right type.
 ///
 /// If D is non-null, it specifies a decl that correspond to this.  This is used
 /// to set the attributes on the function when it is first created.
@@ -1952,7 +1956,7 @@ CodeGenModule::GetOrCreateLLVMFunction(StringRef MangledName,
     // (If function is requested for a definition, we always need to create a new
     // function, not just return a bitcast.)
     if (!IsForDefinition)
-      return llvm::ConstantExpr::getBitCast(Entry, Ty->getPointerTo());
+      return llvm::ConstantExpr::getPointerCast(Entry, Ty->getPointerTo());
   }
 
   // This function doesn't have a complete type (for example, the return
@@ -2060,7 +2064,7 @@ CodeGenModule::GetOrCreateLLVMFunction(StringRef MangledName,
   }
 
   llvm::Type *PTy = llvm::PointerType::getUnqual(Ty);
-  return llvm::ConstantExpr::getBitCast(F, PTy);
+  return llvm::ConstantExpr::getPointerCast(F, PTy);
 }
 
 /// GetAddrOfFunction - Return the address of the given function.  If Ty is
@@ -2189,7 +2193,7 @@ bool CodeGenModule::isTypeConstant(QualType Ty, bool ExcludeCtor) {
 /// GetOrCreateLLVMGlobal - If the specified mangled name is not in the module,
 /// create and return an llvm GlobalVariable with the specified type.  If there
 /// is something in the module with the specified name, return it potentially
-/// bitcasted to the right type.
+/// casted to the right type.
 ///
 /// If D is non-null, it specifies a decl that correspond to this.  This is used
 /// to set the attributes on the global when it is first created.
@@ -2237,14 +2241,10 @@ CodeGenModule::GetOrCreateLLVMGlobal(StringRef MangledName,
       }
     }
 
-    // Make sure the result is of the correct type.
-    if (Entry->getType()->getAddressSpace() != Ty->getAddressSpace())
-      return llvm::ConstantExpr::getAddrSpaceCast(Entry, Ty);
-
     // (If global is requested for a definition, we always need to create a new
     // global, not just return a bitcast.)
     if (!IsForDefinition)
-      return llvm::ConstantExpr::getBitCast(Entry, Ty);
+      return llvm::ConstantExpr::getPointerCast(Entry, Ty);
   }
 
   unsigned AddrSpace = GetGlobalVarAddressSpace(D, Ty->getAddressSpace());
@@ -2260,7 +2260,7 @@ CodeGenModule::GetOrCreateLLVMGlobal(StringRef MangledName,
 
     if (!Entry->use_empty()) {
       llvm::Constant *NewPtrForOldDecl =
-          llvm::ConstantExpr::getBitCast(GV, Entry->getType());
+          llvm::ConstantExpr::getPointerCast(GV, Entry->getType());
       Entry->replaceAllUsesWith(NewPtrForOldDecl);
     }
 
@@ -2372,7 +2372,7 @@ CodeGenModule::CreateOrReplaceCXXRuntimeVariable(StringRef Name,
     
     if (!OldGV->use_empty()) {
       llvm::Constant *NewPtrForOldDecl =
-      llvm::ConstantExpr::getBitCast(GV, OldGV->getType());
+      llvm::ConstantExpr::getPointerCast(GV, OldGV->getType());
       OldGV->replaceAllUsesWith(NewPtrForOldDecl);
     }
     
@@ -2452,6 +2452,12 @@ unsigned CodeGenModule::GetGlobalVarAddressSpace(const VarDecl *D,
       AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_shared);
     else
       AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_device);
+  } else if (getTriple().getArch() == llvm::Triple::amdgcn &&
+      (LangOpts.CPlusPlus || LangOpts.OpenMP)) {
+    if (D && D->getType().isConstant(getContext()))
+      AddrSpace = getContext().getTargetAddressSpace(LangAS::opencl_constant);
+    else
+      AddrSpace = getContext().getTargetAddressSpace(LangAS::opencl_global);
   }
 
   return AddrSpace;
@@ -2621,7 +2627,7 @@ void CodeGenModule::EmitGlobalVarDefinition(const VarDecl *D,
 
     // Replace all uses of the old global with the new global
     llvm::Constant *NewPtrForOldDecl =
-        llvm::ConstantExpr::getBitCast(GV, Entry->getType());
+        llvm::ConstantExpr::getPointerCast(GV, Entry->getType());
     Entry->replaceAllUsesWith(NewPtrForOldDecl);
 
     // Erase the old global, since it is no longer used.
@@ -3116,7 +3122,7 @@ void CodeGenModule::EmitAliasDefinition(GlobalDecl GD) {
     // Remove it and replace uses of it with the alias.
     GA->takeName(Entry);
 
-    Entry->replaceAllUsesWith(llvm::ConstantExpr::getBitCast(GA,
+    Entry->replaceAllUsesWith(llvm::ConstantExpr::getPointerCast(GA,
                                                           Entry->getType()));
     Entry->eraseFromParent();
   } else {
@@ -3334,7 +3340,7 @@ CodeGenModule::GetAddrOfConstantCFString(const StringLiteral *Literal) {
 
   if (isUTF16)
     // Cast the UTF16 string to the correct type.
-    Str = llvm::ConstantExpr::getBitCast(Str, Int8PtrTy);
+    Str = llvm::ConstantExpr::getPointerCast(Str, Int8PtrTy);
   Fields.add(Str);
 
   // String length.
@@ -3442,7 +3448,7 @@ GenerateStringLiteral(llvm::Constant *C, llvm::GlobalValue::LinkageTypes LT,
                       CodeGenModule &CGM, StringRef GlobalName,
                       CharUnits Alignment) {
   // OpenCL v1.2 s6.5.3: a string literal is in the constant address space.
-  unsigned AddrSpace = 0;
+  unsigned AddrSpace = CGM.getContext().getTargetConstantAddressSpace();
   if (CGM.getLangOpts().OpenCL)
     AddrSpace = CGM.getContext().getTargetAddressSpace(LangAS::opencl_constant);
 
@@ -3760,6 +3766,9 @@ void CodeGenModule::EmitDeclContext(const DeclContext *DC) {
 
 /// EmitTopLevelDecl - Emit code for a single top level declaration.
 void CodeGenModule::EmitTopLevelDecl(Decl *D) {
+  if (getenv("DBG_CG_DECL")) {
+    llvm::errs() << "decl: "; D->dump();
+  }
   // Ignore dependent declarations.
   if (D->getDeclContext() && D->getDeclContext()->isDependentContext())
     return;

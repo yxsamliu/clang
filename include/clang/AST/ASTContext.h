@@ -2300,24 +2300,25 @@ public:
   QualType getFloatingTypeOfSizeWithinDomain(QualType typeSize,
                                              QualType typeDomain) const;
 
-  unsigned getTargetAddressSpace(QualType T) const {
-    return getTargetAddressSpace(T.getQualifiers());
-  }
+  unsigned getTargetAddressSpace(QualType T) const;
 
-  unsigned getTargetAddressSpace(Qualifiers Q) const {
-    return getTargetAddressSpace(Q.getAddressSpace());
-  }
+  unsigned getTargetAddressSpace(Qualifiers Q) const;
 
-  unsigned getTargetAddressSpace(unsigned AS) const {
-    if (AS < LangAS::Offset || AS >= LangAS::Offset + LangAS::Count)
-      return AS;
-    else
-      return (*AddrSpaceMap)[AS - LangAS::Offset];
-  }
+  unsigned getTargetAddressSpace(unsigned AS) const;
+
+  unsigned getTargetAddressSpaceForAutoVar() const;
 
   /// Get target-dependent integer value for null pointer which is used for
   /// constant folding.
   uint64_t getTargetNullPointerValue(QualType QT) const;
+
+  /// The target address space corresponding to OpenCL constant address space
+  /// CUDA constant specifier.
+  unsigned getTargetConstantAddressSpace() const;
+
+  /// The target address space corresponding to OpenCL global address space
+  /// or CUDA device specifier.
+  unsigned getTargetGlobalAddressSpace() const;
 
   bool addressSpaceMapManglingFor(unsigned AS) const {
     return AddrSpaceMapMangling || 
@@ -2328,6 +2329,8 @@ public:
 private:
   // Helper for integer ordering
   unsigned getIntegerRank(const Type *T) const;
+
+  unsigned getMappedAddressSpace(unsigned AS) const;
 
 public:
   //===--------------------------------------------------------------------===//
