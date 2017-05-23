@@ -2471,13 +2471,34 @@ CharUnits CodeGenModule::GetTargetTypeStoreSize(llvm::Type *Ty) const {
 
 unsigned CodeGenModule::GetGlobalVarAddressSpace(const VarDecl *D,
                                                  unsigned AddrSpace) {
-  if (D && LangOpts.CUDA && LangOpts.CUDAIsDevice) {
-    if (D->hasAttr<CUDAConstantAttr>())
-      AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_constant);
-    else if (D->hasAttr<CUDASharedAttr>())
-      AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_shared);
-    else
-      AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_device);
+  if (D) {
+    if (LangOpts.CUDA && LangOpts.CUDAIsDevice) {
+      if (D->hasAttr<CUDAConstantAttr>())
+        AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_constant);
+      else if (D->hasAttr<CUDASharedAttr>())
+        AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_shared);
+      else
+        AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_device);
+    } else if (getTriple().getArch() == llvm::Triple::amdgcn) {
+      auto LangAddr = D->getType().getAddressSpace();
+      if (LangOpts.OpenCL) {
+        assert(LangAddr == LangAS::opencl_global ||
+               LangAddr == LangAS::opencl_constant ||
+               LangAddr == LangAS::opencl_local ||
+               LangAddr >= LangAS::FirstTargetAddressSpace);
+      } else {
+        assert(LangAddr == LangAS::Default ||
+               LangAddr >= LangAS::FirstTargetAddressSpace);
+      }
+      if (!LangOpts.OpenCL && LangAddr == LangAS::Default) {
+        if (isTypeConstant(D->getType(), false)) {
+          LangAddr = LangAS::opencl_constant;
+        } else {
+          LangAddr = LangAS::opencl_global;
+        }
+        AddrSpace = getContext().getTargetAddressSpace(LangAddr);
+      }
+    }
   }
 
   return AddrSpace;
