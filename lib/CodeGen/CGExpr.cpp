@@ -353,9 +353,15 @@ createReferenceTemporary(CodeGenFunction &CGF,
         (Ty->isArrayType() || Ty->isRecordType()) &&
         CGF.CGM.isTypeConstant(Ty, true))
       if (llvm::Constant *Init = CGF.CGM.EmitConstantExpr(Inner, Ty, &CGF)) {
+        unsigned AddrSpace = 0;
+        if (CGF.CGM.getTriple().getArch() == llvm::Triple::amdgcn) {
+          AddrSpace =
+              CGF.getContext().getTargetAddressSpace(LangAS::opencl_constant);
+        }
         auto *GV = new llvm::GlobalVariable(
             CGF.CGM.getModule(), Init->getType(), /*isConstant=*/true,
-            llvm::GlobalValue::PrivateLinkage, Init, ".ref.tmp");
+            llvm::GlobalValue::PrivateLinkage, Init, ".ref.tmp", nullptr,
+            llvm::GlobalValue::NotThreadLocal, AddrSpace);
         CharUnits alignment = CGF.getContext().getTypeAlignInChars(Ty);
         GV->setAlignment(alignment.getQuantity());
         // FIXME: Should we put the new global into a COMDAT?
@@ -441,8 +447,8 @@ EmitMaterializeTemporaryExpr(const MaterializeTemporaryExpr *M) {
   // Create and initialize the reference temporary.
   Address Object = createReferenceTemporary(*this, M, E);
   if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer())) {
-    Object = Address(llvm::ConstantExpr::getBitCast(
-        Var, ConvertTypeForMem(E->getType())->getPointerTo()),
+    Object = Address(llvm::ConstantExpr::getPointerCast(
+                         Var, ConvertTypeForMem(E->getType())->getPointerTo()),
                      Object.getAlignment());
     // If the temporary is a global and has a constant initializer or is a
     // constant temporary that we promoted to a global, we may have already

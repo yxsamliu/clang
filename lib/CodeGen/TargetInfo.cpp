@@ -7403,7 +7403,8 @@ void AMDGPUTargetCodeGenInfo::setTargetAttributes(
       F->addFnAttr("amdgpu-num-vgpr", llvm::utostr(NumVGPR));
   }
 
-  appendOpenCLVersionMD(M);
+  if (M.getLangOpts().OpenCL)
+    appendOpenCLVersionMD(M);
 }
 
 unsigned AMDGPUTargetCodeGenInfo::getOpenCLKernelCallingConv() const {

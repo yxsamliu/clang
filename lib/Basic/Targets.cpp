@@ -2170,6 +2170,13 @@ public:
     assert(DataLayout->getAllocaAddrSpace() == AS.Private);
 
     UseAddrSpaceMapMangling = true;
+
+    if (getMaxPointerWidth() == 64) {
+      LongWidth = LongAlign = 64;
+      SizeType = UnsignedLong;
+      PtrDiffType = SignedLong;
+      IntPtrType = SignedLong;
+    }
   }
 
   void adjust(LangOptions &Opts) override {
@@ -2181,6 +2188,9 @@ public:
       AddrSpaceMap = Opts.OpenCL ? &AMDGPUOpenCLPrivateIsZeroMap
                                  : &AMDGPUNonOpenCLPrivateIsZeroMap;
     }
+    // Set default pointer width and alignment.
+    PointerWidth = getPointerWidthV(Opts.OpenCL ? AS.Private : AS.Generic);
+    PointerAlign = PointerWidth;
   }
 
   uint64_t getPointerWidthV(unsigned AddrSpace) const override {
