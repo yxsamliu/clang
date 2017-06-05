@@ -1850,7 +1850,9 @@ provided, with values corresponding to the enumerators of C11's
 ``memory_order`` enumeration.
 
 (Note that Clang additionally provides GCC-compatible ``__atomic_*``
-builtins)
+builtins and OpenCL 2.0 ``__opencl_atomic_*`` builtins. The OpenCL 2.0
+atomic builtins are in ``explicit`` form of the corresponding OpenCL 2.0
+builtin function, and are named with a ``__opencl__`` prefix.)
 
 Low-level ARM exclusive memory builtins
 ---------------------------------------

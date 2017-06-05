@@ -5061,9 +5061,11 @@ public:
 
 /// AtomicExpr - Variadic atomic builtins: __atomic_exchange, __atomic_fetch_*,
 /// __atomic_load, __atomic_store, and __atomic_compare_exchange_*, for the
-/// similarly-named C++11 instructions, and __c11 variants for <stdatomic.h>.
-/// All of these instructions take one primary pointer and at least one memory
-/// order.
+/// similarly-named C++11 instructions, and __c11 variants for <stdatomic.h>,
+/// and corresponding __opencl_atomic_* for OpenCL 2.0.
+/// All of these instructions take one primary pointer, at least one memory
+/// order, and one synchronization scope. The C++11 and __c11 atomic AtomicExpr
+/// always take the default synchronization scope.
 class AtomicExpr : public Expr {
 public:
   enum AtomicOp {
@@ -5075,7 +5077,7 @@ public:
   };
 
 private:
-  enum { PTR, ORDER, VAL1, ORDER_FAIL, VAL2, WEAK, END_EXPR };
+  enum { PTR, ORDER, SCOPE, VAL1, ORDER_FAIL, VAL2, WEAK, END_EXPR };
   Stmt* SubExprs[END_EXPR];
   unsigned NumSubExprs;
   SourceLocation BuiltinLoc, RParenLoc;
@@ -5099,6 +5101,9 @@ public:
   }
   Expr *getOrder() const {
     return cast<Expr>(SubExprs[ORDER]);
+  }
+  Expr *getScope() const {
+    return cast<Expr>(SubExprs[SCOPE]);
   }
   Expr *getVal1() const {
     if (Op == AO__c11_atomic_init)

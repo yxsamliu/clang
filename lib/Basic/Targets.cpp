@@ -2170,6 +2170,7 @@ public:
     assert(DataLayout->getAllocaAddrSpace() == AS.Private);
 
     UseAddrSpaceMapMangling = true;
+    MaxAtomicPromoteWidth = MaxAtomicInlineWidth = 64;
   }
 
   void adjust(LangOptions &Opts) override {

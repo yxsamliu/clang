@@ -3929,9 +3929,12 @@ AtomicExpr::AtomicExpr(SourceLocation BLoc, ArrayRef<Expr*> args,
 unsigned AtomicExpr::getNumSubExprs(AtomicOp Op) {
   switch (Op) {
   case AO__c11_atomic_init:
+    return 2;
+
   case AO__c11_atomic_load:
   case AO__atomic_load_n:
-    return 2;
+  case AO__opencl_atomic_load:
+    return 3;
 
   case AO__c11_atomic_store:
   case AO__c11_atomic_exchange:
@@ -3956,18 +3959,18 @@ unsigned AtomicExpr::getNumSubExprs(AtomicOp Op) {
   case AO__atomic_or_fetch:
   case AO__atomic_xor_fetch:
   case AO__atomic_nand_fetch:
-    return 3;
+    return 4;
 
   case AO__atomic_exchange:
-    return 4;
+    return 5;
 
   case AO__c11_atomic_compare_exchange_strong:
   case AO__c11_atomic_compare_exchange_weak:
-    return 5;
+    return 6;
 
   case AO__atomic_compare_exchange:
   case AO__atomic_compare_exchange_n:
-    return 6;
+    return 7;
   }
   llvm_unreachable("unknown atomic op");
 }

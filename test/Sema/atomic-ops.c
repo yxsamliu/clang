@@ -107,6 +107,9 @@ void f(_Atomic(int) *i, const _Atomic(int) *ci,
 
   __c11_atomic_load(0); // expected-error {{too few arguments to function}}
   __c11_atomic_load(0,0,0); // expected-error {{too many arguments to function}}
+  __opencl_atomic_load(0); // expected-error {{too few arguments to function}}
+  __opencl_atomic_load(0,0); // expected-error {{too few arguments to function}}
+  __opencl_atomic_load(0,0,0); // expected-error {{too many arguments to function}}
   __c11_atomic_store(0,0,0); // expected-error {{address argument to atomic builtin must be a pointer}}
   __c11_atomic_store((int*)0,0,0); // expected-error {{address argument to atomic operation must be a pointer to _Atomic}}
   __c11_atomic_store(i, 0, memory_order_relaxed);
@@ -116,6 +119,10 @@ void f(_Atomic(int) *i, const _Atomic(int) *ci,
   __c11_atomic_load(p, memory_order_seq_cst);
   __c11_atomic_load(d, memory_order_seq_cst);
   __c11_atomic_load(ci, memory_order_seq_cst); // expected-error {{address argument to atomic operation must be a pointer to non-const _Atomic type ('const _Atomic(int) *' invalid)}}
+  __opencl_atomic_load(i, memory_order_seq_cst, 0);
+  __opencl_atomic_load(p, memory_order_seq_cst, 0);
+  __opencl_atomic_load(d, memory_order_seq_cst, 0);
+  __opencl_atomic_load(ci, memory_order_seq_cst, 0); // expected-error {{address argument to atomic operation must be a pointer to non-const _Atomic type ('const _Atomic(int) *' invalid)}}
 
   int load_n_1 = __atomic_load_n(I, memory_order_relaxed);
   int *load_n_2 = __atomic_load_n(P, memory_order_relaxed);
