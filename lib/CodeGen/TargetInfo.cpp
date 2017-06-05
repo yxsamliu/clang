@@ -444,6 +444,12 @@ TargetCodeGenInfo::performAddrSpaceCast(CodeGenModule &CGM, llvm::Constant *Src,
   return llvm::ConstantExpr::getPointerCast(Src, DestTy);
 }
 
+llvm::StringRef TargetCodeGenInfo::getSyncScopeName(SyncScope::ID S) const {
+  if (S == SyncScope::SingleThread)
+    return "singlethread";
+  return ""; /* system */
+}
+
 static bool isEmptyRecord(ASTContext &Context, QualType T, bool AllowArrays);
 
 /// isEmptyField - Return true iff a the field is "empty", that is it
@@ -7430,6 +7436,7 @@ public:
   }
   unsigned getGlobalVarAddressSpace(CodeGenModule &CGM,
                                     const VarDecl *D) const override;
+  llvm::StringRef getSyncScopeName(SyncScope::ID S) const override;
 };
 }
 
@@ -7537,6 +7544,22 @@ AMDGPUTargetCodeGenInfo::getGlobalVarAddressSpace(CodeGenModule &CGM,
       return ConstAS.getValue();
   }
   return DefaultGlobalAS;
+}
+
+llvm::StringRef
+AMDGPUTargetCodeGenInfo::getSyncScopeName(SyncScope::ID S) const {
+  switch (S) {
+  case SyncScope::SingleThread:
+    return "singlethread";
+  case SyncScope::WorkGroup:
+    return "workgroup";
+  case SyncScope::Device:
+    return "agent";
+  case SyncScope::System:
+    return "";
+  case SyncScope::SubGroup:
+    return "subgroup";
+  }
 }
 
 //===----------------------------------------------------------------------===//
