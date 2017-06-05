@@ -539,9 +539,9 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     return;
   }
   case AtomicExpr::AO__c11_atomic_load:
+  case AtomicExpr::AO__opencl_atomic_load:
   case AtomicExpr::AO__atomic_load_n:
-  case AtomicExpr::AO__atomic_load:
-  case AtomicExpr::AO__opencl_atomic_load: {
+  case AtomicExpr::AO__atomic_load: {
     llvm::LoadInst *Load = CGF.Builder.CreateLoad(Ptr);
     Load->setAtomic(Order, Scope);
     Load->setVolatile(E->isVolatile());
@@ -550,6 +550,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
   }
 
   case AtomicExpr::AO__c11_atomic_store:
+  case AtomicExpr::AO__opencl_atomic_store:
   case AtomicExpr::AO__atomic_store:
   case AtomicExpr::AO__atomic_store_n: {
     llvm::Value *LoadVal1 = CGF.Builder.CreateLoad(Val1);
@@ -764,6 +765,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   case AtomicExpr::AO__atomic_or_fetch:
   case AtomicExpr::AO__atomic_xor_fetch:
   case AtomicExpr::AO__atomic_nand_fetch:
+  case AtomicExpr::AO__opencl_atomic_store:
     Val1 = EmitValToTemp(*this, E->getVal1());
     break;
   }
@@ -828,6 +830,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     case AtomicExpr::AO__atomic_compare_exchange_n:
     case AtomicExpr::AO__atomic_compare_exchange:
     case AtomicExpr::AO__opencl_atomic_load:
+    case AtomicExpr::AO__opencl_atomic_store:
       // Only use optimized library calls for sizes for which they exist.
       if (Size == 1 || Size == 2 || Size == 4 || Size == 8)
         UseOptimizedLibcall = true;
@@ -891,6 +894,14 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     case AtomicExpr::AO__atomic_store:
     case AtomicExpr::AO__atomic_store_n:
       LibCallName = "__atomic_store";
+      RetTy = getContext().VoidTy;
+      HaveRetTy = true;
+      AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
+                        MemTy, E->getExprLoc(), sizeChars);
+      break;
+      // void __opencl_atomic_store(size_t size, void *mem, void *val, int order)
+    case AtomicExpr::AO__opencl_atomic_store:
+      LibCallName = "__opencl_atomic_store";
       RetTy = getContext().VoidTy;
       HaveRetTy = true;
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),

@@ -37,7 +37,7 @@ void fi1(atomic_int *i, int *j, int cmp, int ord1, int ord2) {
   // CHECK: load atomic i32, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} seq_cst
   x = __opencl_atomic_load(i, memory_order_seq_cst, synch_scope_cross_thread);
   // CHECK: store atomic i32 %{{[.0-9A-Z_a-z]+}}, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} singlethread seq_cst
-  __c11_atomic_store(i, 1, memory_order_seq_cst, synch_scope_single_thread);
+  __opencl_atomic_store(i, 1, memory_order_seq_cst, synch_scope_single_thread);
   // CHECK: atomicrmw and i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} singlethread seq_cst
   x = __c11_atomic_fetch_and(i, 1, memory_order_seq_cst, synch_scope_single_thread);
   // CHECK: cmpxchg i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} singlethread acquire acquire

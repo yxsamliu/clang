@@ -3930,7 +3930,6 @@ unsigned AtomicExpr::getNumSubExprs(AtomicOp Op) {
   switch (Op) {
   case AO__c11_atomic_init:
     return 2;
-
   case AO__c11_atomic_load:
   case AO__atomic_load_n:
   case AO__opencl_atomic_load:
@@ -3959,6 +3958,7 @@ unsigned AtomicExpr::getNumSubExprs(AtomicOp Op) {
   case AO__atomic_or_fetch:
   case AO__atomic_xor_fetch:
   case AO__atomic_nand_fetch:
+  case AO__opencl_atomic_store:
     return 4;
 
   case AO__atomic_exchange:

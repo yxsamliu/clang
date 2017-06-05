@@ -621,4 +621,5 @@ int PR17306_2(volatile int *i, int value) {
   // CHECK-NEXT: ret i32 %[[retval]]
   return __atomic_add_fetch(i, value, memory_order_seq_cst);
 }
+
 #endif

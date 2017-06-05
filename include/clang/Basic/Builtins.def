@@ -701,6 +701,7 @@ BUILTIN(__atomic_is_lock_free, "izvCD*", "n")
 
 // OpenCL 2.0 atomic builtins.
 ATOMIC_BUILTIN(__opencl_atomic_load, "v.", "t")
+ATOMIC_BUILTIN(__opencl_atomic_store, "v.", "t")
 
 #undef ATOMIC_BUILTIN
 
