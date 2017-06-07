@@ -498,13 +498,16 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
 
   switch (E->getOp()) {
   case AtomicExpr::AO__c11_atomic_init:
+  case AtomicExpr::AO__opencl_atomic_init:
     llvm_unreachable("Already handled!");
 
   case AtomicExpr::AO__c11_atomic_compare_exchange_strong:
+  case AtomicExpr::AO__opencl_atomic_compare_exchange_strong:
     emitAtomicCmpXchgFailureSet(CGF, E, false, Dest, Ptr, Val1, Val2,
                                 FailureOrder, Size, Order, Scope);
     return;
   case AtomicExpr::AO__c11_atomic_compare_exchange_weak:
+  case AtomicExpr::AO__opencl_atomic_compare_exchange_weak:
     emitAtomicCmpXchgFailureSet(CGF, E, true, Dest, Ptr, Val1, Val2,
                                 FailureOrder, Size, Order, Scope);
     return;
@@ -561,6 +564,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
   }
 
   case AtomicExpr::AO__c11_atomic_exchange:
+  case AtomicExpr::AO__opencl_atomic_exchange:
   case AtomicExpr::AO__atomic_exchange_n:
   case AtomicExpr::AO__atomic_exchange:
     Op = llvm::AtomicRMWInst::Xchg;
@@ -570,6 +574,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     PostOp = llvm::Instruction::Add;
     // Fall through.
   case AtomicExpr::AO__c11_atomic_fetch_add:
+  case AtomicExpr::AO__opencl_atomic_fetch_add:
   case AtomicExpr::AO__atomic_fetch_add:
     Op = llvm::AtomicRMWInst::Add;
     break;
@@ -578,6 +583,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     PostOp = llvm::Instruction::Sub;
     // Fall through.
   case AtomicExpr::AO__c11_atomic_fetch_sub:
+  case AtomicExpr::AO__opencl_atomic_fetch_sub:
   case AtomicExpr::AO__atomic_fetch_sub:
     Op = llvm::AtomicRMWInst::Sub;
     break;
@@ -586,6 +592,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     PostOp = llvm::Instruction::And;
     // Fall through.
   case AtomicExpr::AO__c11_atomic_fetch_and:
+  case AtomicExpr::AO__opencl_atomic_fetch_and:
   case AtomicExpr::AO__atomic_fetch_and:
     Op = llvm::AtomicRMWInst::And;
     break;
@@ -594,6 +601,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     PostOp = llvm::Instruction::Or;
     // Fall through.
   case AtomicExpr::AO__c11_atomic_fetch_or:
+  case AtomicExpr::AO__opencl_atomic_fetch_or:
   case AtomicExpr::AO__atomic_fetch_or:
     Op = llvm::AtomicRMWInst::Or;
     break;
@@ -602,6 +610,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     PostOp = llvm::Instruction::Xor;
     // Fall through.
   case AtomicExpr::AO__c11_atomic_fetch_xor:
+  case AtomicExpr::AO__opencl_atomic_fetch_xor:
   case AtomicExpr::AO__atomic_fetch_xor:
     Op = llvm::AtomicRMWInst::Xor;
     break;
@@ -665,6 +674,7 @@ AddDirectArgument(CodeGenFunction &CGF, CallArgList &Args,
 }
 
 RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
+  bool IsOpenCL = E->isOpenCL();
   QualType AtomicTy = E->getPtr()->getType()->getPointeeType();
   QualType MemTy = AtomicTy;
   if (const AtomicType *AT = AtomicTy->getAs<AtomicType>())
@@ -683,7 +693,8 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   Address Dest = Address::invalid();
   Address Ptr(EmitScalarExpr(E->getPtr()), alignChars);
 
-  if (E->getOp() == AtomicExpr::AO__c11_atomic_init) {
+  if (E->getOp() == AtomicExpr::AO__c11_atomic_init ||
+      E->getOp() == AtomicExpr::AO__opencl_atomic_init) {
     LValue lvalue = MakeAddrLValue(Ptr, AtomicTy);
     EmitAtomicInit(E->getVal1(), lvalue);
     return RValue::get(nullptr);
@@ -694,11 +705,12 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
 
   switch (E->getOp()) {
   case AtomicExpr::AO__c11_atomic_init:
+  case AtomicExpr::AO__opencl_atomic_init:
     llvm_unreachable("Already handled above with EmitAtomicInit!");
 
   case AtomicExpr::AO__c11_atomic_load:
-  case AtomicExpr::AO__atomic_load_n:
   case AtomicExpr::AO__opencl_atomic_load:
+  case AtomicExpr::AO__atomic_load_n:
     break;
 
   case AtomicExpr::AO__atomic_load:
@@ -716,6 +728,8 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
 
   case AtomicExpr::AO__c11_atomic_compare_exchange_strong:
   case AtomicExpr::AO__c11_atomic_compare_exchange_weak:
+  case AtomicExpr::AO__opencl_atomic_compare_exchange_strong:
+  case AtomicExpr::AO__opencl_atomic_compare_exchange_weak:
   case AtomicExpr::AO__atomic_compare_exchange_n:
   case AtomicExpr::AO__atomic_compare_exchange:
     Val1 = EmitPointerWithAlignment(E->getVal1());
@@ -730,6 +744,8 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
 
   case AtomicExpr::AO__c11_atomic_fetch_add:
   case AtomicExpr::AO__c11_atomic_fetch_sub:
+  case AtomicExpr::AO__opencl_atomic_fetch_add:
+  case AtomicExpr::AO__opencl_atomic_fetch_sub:
     if (MemTy->isPointerType()) {
       // For pointer arithmetic, we're required to do a bit of math:
       // adding 1 to an int* is not the same as adding 1 to a uintptr_t.
@@ -752,11 +768,16 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   case AtomicExpr::AO__atomic_sub_fetch:
   case AtomicExpr::AO__c11_atomic_store:
   case AtomicExpr::AO__c11_atomic_exchange:
+  case AtomicExpr::AO__opencl_atomic_store:
+  case AtomicExpr::AO__opencl_atomic_exchange:
   case AtomicExpr::AO__atomic_store_n:
   case AtomicExpr::AO__atomic_exchange_n:
   case AtomicExpr::AO__c11_atomic_fetch_and:
   case AtomicExpr::AO__c11_atomic_fetch_or:
   case AtomicExpr::AO__c11_atomic_fetch_xor:
+  case AtomicExpr::AO__opencl_atomic_fetch_and:
+  case AtomicExpr::AO__opencl_atomic_fetch_or:
+  case AtomicExpr::AO__opencl_atomic_fetch_xor:
   case AtomicExpr::AO__atomic_fetch_and:
   case AtomicExpr::AO__atomic_fetch_or:
   case AtomicExpr::AO__atomic_fetch_xor:
@@ -765,7 +786,6 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   case AtomicExpr::AO__atomic_or_fetch:
   case AtomicExpr::AO__atomic_xor_fetch:
   case AtomicExpr::AO__atomic_nand_fetch:
-  case AtomicExpr::AO__opencl_atomic_store:
     Val1 = EmitValToTemp(*this, E->getVal1());
     break;
   }
@@ -793,18 +813,24 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     bool UseOptimizedLibcall = false;
     switch (E->getOp()) {
     case AtomicExpr::AO__c11_atomic_init:
+    case AtomicExpr::AO__opencl_atomic_init:
       llvm_unreachable("Already handled above with EmitAtomicInit!");
 
     case AtomicExpr::AO__c11_atomic_fetch_add:
+    case AtomicExpr::AO__opencl_atomic_fetch_add:
     case AtomicExpr::AO__atomic_fetch_add:
     case AtomicExpr::AO__c11_atomic_fetch_and:
+    case AtomicExpr::AO__opencl_atomic_fetch_and:
     case AtomicExpr::AO__atomic_fetch_and:
     case AtomicExpr::AO__c11_atomic_fetch_or:
+    case AtomicExpr::AO__opencl_atomic_fetch_or:
     case AtomicExpr::AO__atomic_fetch_or:
     case AtomicExpr::AO__atomic_fetch_nand:
     case AtomicExpr::AO__c11_atomic_fetch_sub:
+    case AtomicExpr::AO__opencl_atomic_fetch_sub:
     case AtomicExpr::AO__atomic_fetch_sub:
     case AtomicExpr::AO__c11_atomic_fetch_xor:
+    case AtomicExpr::AO__opencl_atomic_fetch_xor:
     case AtomicExpr::AO__atomic_fetch_xor:
     case AtomicExpr::AO__atomic_add_fetch:
     case AtomicExpr::AO__atomic_and_fetch:
@@ -821,6 +847,11 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     case AtomicExpr::AO__c11_atomic_exchange:
     case AtomicExpr::AO__c11_atomic_compare_exchange_weak:
     case AtomicExpr::AO__c11_atomic_compare_exchange_strong:
+    case AtomicExpr::AO__opencl_atomic_load:
+    case AtomicExpr::AO__opencl_atomic_store:
+    case AtomicExpr::AO__opencl_atomic_exchange:
+    case AtomicExpr::AO__opencl_atomic_compare_exchange_weak:
+    case AtomicExpr::AO__opencl_atomic_compare_exchange_strong:
     case AtomicExpr::AO__atomic_load_n:
     case AtomicExpr::AO__atomic_load:
     case AtomicExpr::AO__atomic_store_n:
@@ -829,8 +860,6 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     case AtomicExpr::AO__atomic_exchange:
     case AtomicExpr::AO__atomic_compare_exchange_n:
     case AtomicExpr::AO__atomic_compare_exchange:
-    case AtomicExpr::AO__opencl_atomic_load:
-    case AtomicExpr::AO__opencl_atomic_store:
       // Only use optimized library calls for sizes for which they exist.
       if (Size == 1 || Size == 2 || Size == 4 || Size == 8)
         UseOptimizedLibcall = true;
@@ -844,7 +873,8 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
                getContext().getSizeType());
     }
     // Atomic address is the first or second parameter
-    Args.add(RValue::get(EmitCastToVoidPtr(Ptr.getPointer())),
+    Args.add(RValue::get(EmitCastToVoidPtr(Ptr.getPointer(),
+        /*CastToGenericAddrSpace*/true)),
              getContext().VoidPtrTy);
 
     std::string LibCallName;
@@ -855,6 +885,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     llvm::Instruction::BinaryOps PostOp = (llvm::Instruction::BinaryOps)0;
     switch (E->getOp()) {
     case AtomicExpr::AO__c11_atomic_init:
+    case AtomicExpr::AO__opencl_atomic_init:
       llvm_unreachable("Already handled!");
 
     // There is only one libcall for compare an exchange, because there is no
@@ -866,12 +897,15 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     //                                  int success, int failure)
     case AtomicExpr::AO__c11_atomic_compare_exchange_weak:
     case AtomicExpr::AO__c11_atomic_compare_exchange_strong:
+    case AtomicExpr::AO__opencl_atomic_compare_exchange_weak:
+    case AtomicExpr::AO__opencl_atomic_compare_exchange_strong:
     case AtomicExpr::AO__atomic_compare_exchange:
     case AtomicExpr::AO__atomic_compare_exchange_n:
       LibCallName = "__atomic_compare_exchange";
       RetTy = getContext().BoolTy;
       HaveRetTy = true;
-      Args.add(RValue::get(EmitCastToVoidPtr(Val1.getPointer())),
+      Args.add(RValue::get(EmitCastToVoidPtr(Val1.getPointer(),
+          /*CastToGenericAddrSpace*/true)),
                getContext().VoidPtrTy);
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val2.getPointer(),
                         MemTy, E->getExprLoc(), sizeChars);
@@ -882,6 +916,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     //                        int order)
     // T __atomic_exchange_N(T *mem, T val, int order)
     case AtomicExpr::AO__c11_atomic_exchange:
+    case AtomicExpr::AO__opencl_atomic_exchange:
     case AtomicExpr::AO__atomic_exchange_n:
     case AtomicExpr::AO__atomic_exchange:
       LibCallName = "__atomic_exchange";
@@ -891,6 +926,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     // void __atomic_store(size_t size, void *mem, void *val, int order)
     // void __atomic_store_N(T *mem, T val, int order)
     case AtomicExpr::AO__c11_atomic_store:
+    case AtomicExpr::AO__opencl_atomic_store:
     case AtomicExpr::AO__atomic_store:
     case AtomicExpr::AO__atomic_store_n:
       LibCallName = "__atomic_store";
@@ -899,24 +935,13 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
                         MemTy, E->getExprLoc(), sizeChars);
       break;
-      // void __opencl_atomic_store(size_t size, void *mem, void *val, int order)
-    case AtomicExpr::AO__opencl_atomic_store:
-      LibCallName = "__opencl_atomic_store";
-      RetTy = getContext().VoidTy;
-      HaveRetTy = true;
-      AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
-                        MemTy, E->getExprLoc(), sizeChars);
-      break;
     // void __atomic_load(size_t size, void *mem, void *return, int order)
     // T __atomic_load_N(T *mem, int order)
     case AtomicExpr::AO__c11_atomic_load:
+    case AtomicExpr::AO__opencl_atomic_load:
     case AtomicExpr::AO__atomic_load:
     case AtomicExpr::AO__atomic_load_n:
       LibCallName = "__atomic_load";
-      break;
-    // T __opencl_atomic_load(T *mem, int order, int scope)
-    case AtomicExpr::AO__opencl_atomic_load:
-      LibCallName = "__opencl_atomic_load";
       break;
     // T __atomic_add_fetch_N(T *mem, T val, int order)
     // T __atomic_fetch_add_N(T *mem, T val, int order)
@@ -924,6 +949,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       PostOp = llvm::Instruction::Add;
     // Fall through.
     case AtomicExpr::AO__c11_atomic_fetch_add:
+    case AtomicExpr::AO__opencl_atomic_fetch_add:
     case AtomicExpr::AO__atomic_fetch_add:
       LibCallName = "__atomic_fetch_add";
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
@@ -935,6 +961,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       PostOp = llvm::Instruction::And;
     // Fall through.
     case AtomicExpr::AO__c11_atomic_fetch_and:
+    case AtomicExpr::AO__opencl_atomic_fetch_and:
     case AtomicExpr::AO__atomic_fetch_and:
       LibCallName = "__atomic_fetch_and";
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
@@ -946,6 +973,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       PostOp = llvm::Instruction::Or;
     // Fall through.
     case AtomicExpr::AO__c11_atomic_fetch_or:
+    case AtomicExpr::AO__opencl_atomic_fetch_or:
     case AtomicExpr::AO__atomic_fetch_or:
       LibCallName = "__atomic_fetch_or";
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
@@ -957,6 +985,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       PostOp = llvm::Instruction::Sub;
     // Fall through.
     case AtomicExpr::AO__c11_atomic_fetch_sub:
+    case AtomicExpr::AO__opencl_atomic_fetch_sub:
     case AtomicExpr::AO__atomic_fetch_sub:
       LibCallName = "__atomic_fetch_sub";
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
@@ -968,6 +997,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       PostOp = llvm::Instruction::Xor;
     // Fall through.
     case AtomicExpr::AO__c11_atomic_fetch_xor:
+    case AtomicExpr::AO__opencl_atomic_fetch_xor:
     case AtomicExpr::AO__atomic_fetch_xor:
       LibCallName = "__atomic_fetch_xor";
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
@@ -985,6 +1015,11 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       break;
     }
 
+    if (IsOpenCL) {
+      LibCallName = std::string("__opencl") +
+          StringRef(LibCallName).drop_front(1).str();
+
+    }
     // Optimized functions have the size in their name.
     if (UseOptimizedLibcall)
       LibCallName += "_" + llvm::utostr(Size);
@@ -1005,6 +1040,8 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     // order is always the last parameter
     Args.add(RValue::get(Order),
              getContext().IntTy);
+    if (IsOpenCL)
+      Args.add(RValue::get(Scope), getContext().IntTy);
 
     // PostOp is only needed for the atomic_*_fetch operations, and
     // thus is only needed for and implemented in the
@@ -1041,12 +1078,13 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   }
 
   bool IsStore = E->getOp() == AtomicExpr::AO__c11_atomic_store ||
+                 E->getOp() == AtomicExpr::AO__opencl_atomic_store ||
                  E->getOp() == AtomicExpr::AO__atomic_store ||
                  E->getOp() == AtomicExpr::AO__atomic_store_n;
   bool IsLoad = E->getOp() == AtomicExpr::AO__c11_atomic_load ||
+                E->getOp() == AtomicExpr::AO__opencl_atomic_load ||
                 E->getOp() == AtomicExpr::AO__atomic_load ||
-                E->getOp() == AtomicExpr::AO__atomic_load_n ||
-                E->getOp() == AtomicExpr::AO__opencl_atomic_load;
+                E->getOp() == AtomicExpr::AO__atomic_load_n;
 
   assert(isa<llvm::ConstantInt>(Scope) &&
       "Non-constant synchronization scope not supported");

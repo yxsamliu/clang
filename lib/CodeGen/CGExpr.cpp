@@ -46,16 +46,23 @@ using namespace CodeGen;
 //                        Miscellaneous Helper Methods
 //===--------------------------------------------------------------------===//
 
-llvm::Value *CodeGenFunction::EmitCastToVoidPtr(llvm::Value *value) {
-  unsigned addressSpace =
-    cast<llvm::PointerType>(value->getType())->getAddressSpace();
+llvm::Value *CodeGenFunction::EmitCastToVoidPtr(llvm::Value *value,
+    bool CastToGenericAddrSpace) {
+  unsigned addressSpace;
+  if (CastToGenericAddrSpace) {
+    unsigned AS = getLangOpts().OpenCLVersion >= 200 ? LangAS::opencl_generic :
+        LangAS::Default;
+    addressSpace = getContext().getTargetAddressSpace(AS);
+  } else {
+    addressSpace = cast<llvm::PointerType>(value->getType())->getAddressSpace();
+  }
 
   llvm::PointerType *destType = Int8PtrTy;
   if (addressSpace)
     destType = llvm::Type::getInt8PtrTy(getLLVMContext(), addressSpace);
 
   if (value->getType() == destType) return value;
-  return Builder.CreateBitCast(value, destType);
+  return Builder.CreatePointerCast(value, destType);
 }
 
 /// CreateTempAlloca - This creates a alloca and inserts it into the entry

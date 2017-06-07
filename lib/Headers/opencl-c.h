@@ -13952,11 +13952,11 @@ unsigned long __ovld atom_xor(volatile __local unsigned long *p, unsigned long v
 // enum values aligned with what clang uses in EmitAtomicExpr()
 typedef enum memory_order
 {
-  memory_order_relaxed,
-  memory_order_acquire,
-  memory_order_release,
-  memory_order_acq_rel,
-  memory_order_seq_cst
+  memory_order_relaxed = __ATOMIC_RELAXED,
+  memory_order_acquire = __ATOMIC_ACQUIRE,
+  memory_order_release = __ATOMIC_RELEASE,
+  memory_order_acq_rel = __ATOMIC_ACQ_REL,
+  memory_order_seq_cst = __ATOMIC_SEQ_CST
 } memory_order;
 
 // double atomics support requires extensions cl_khr_int64_base_atomics and cl_khr_int64_extended_atomics

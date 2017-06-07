@@ -2723,6 +2723,7 @@ static bool isValidOrderingForOp(int64_t Ordering, AtomicExpr::AtomicOp Op) {
   auto OrderingCABI = (llvm::AtomicOrderingCABI)Ordering;
   switch (Op) {
   case AtomicExpr::AO__c11_atomic_init:
+  case AtomicExpr::AO__opencl_atomic_init:
     llvm_unreachable("There is no ordering argument for an init");
 
   case AtomicExpr::AO__c11_atomic_load:
@@ -2750,9 +2751,9 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
   CallExpr *TheCall = cast<CallExpr>(TheCallResult.get());
   DeclRefExpr *DRE =cast<DeclRefExpr>(TheCall->getCallee()->IgnoreParenCasts());
 
-  // All these operations take one of the following forms:
-  // The last optional argument is for synchronization scope. The default value
-  // 1 is for crossthread.
+  // All the non-OpenCL operations take one of the following forms.
+  // The OpenCL operations take the __c11 forms with one extra argument for
+  // synchronization scope.
   enum {
     // C    __c11_atomic_init(A *, C)
     Init,
@@ -2760,29 +2761,22 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
     Load,
     // void __atomic_load(A *, CP, int)
     LoadCopy,
-    // void __opencl_atomic_load(A *, int, int)
-    OCLLoad,
     // void __atomic_store(A *, CP, int)
     Copy,
-    // void __opencl_store(A *, CP, int, int)
-    OCLCopy,
-    // C    __c11_atomic_add(A *, M, int, int = 1)
+    // C    __c11_atomic_add(A *, M, int, int)
     Arithmetic,
-    // C    __atomic_exchange_n(A *, CP, int, int = 1)
+    // C    __atomic_exchange_n(A *, CP, int, int)
     Xchg,
-    // void __atomic_exchange(A *, C *, CP, int, int = 1)
+    // void __atomic_exchange(A *, C *, CP, int, int)
     GNUXchg,
-    // bool __c11_atomic_compare_exchange_strong(A *, C *, CP, int, int, int = 1)
+    // bool __c11_atomic_compare_exchange_strong(A *, C *, CP, int, int, int)
     C11CmpXchg,
-    // bool __atomic_compare_exchange(A *, C *, CP, bool, int, int, int = 1)
+    // bool __atomic_compare_exchange(A *, C *, CP, bool, int, int, int)
     GNUCmpXchg
   } Form = Init;
   const unsigned NumForm = GNUCmpXchg + 1;
-  const unsigned NumArgsMin[] = { 2, 2, 3, 3, 3, 4, 3, 3, 4, 5, 6 };
-  const unsigned NumArgsMax[] = { 2, 2, 3, 3, 3, 4, 4, 4, 5, 6, 7 };
-  const unsigned NumVals[]    = { 1, 0, 1, 0, 1, 1, 1, 1, 2, 2, 3 };
-  const bool HasScope[] = { false, false, false, true, false, true, true, true,
-      true, true, true };
+  const unsigned NumArgs[] = { 2, 2, 3, 3, 3, 3, 4, 5, 6 };
+  const unsigned NumVals[]    = { 1, 0, 1, 1, 1, 1, 2, 2, 3 };
   // where:
   //   C is an appropriate type,
   //   A is volatile _Atomic(C) for __c11 builtins and is C for GNU builtins,
@@ -2790,17 +2784,15 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
   //   M is C if C is an integer, and ptrdiff_t if C is a pointer, and
   //   the int parameters are for orderings.
 
-  static_assert(sizeof(NumArgsMin)/sizeof(NumArgsMin[0]) == NumForm
-      && sizeof(NumArgsMax)/sizeof(NumArgsMax[0]) == NumForm
-      && sizeof(NumVals)/sizeof(NumVals[0]) == NumForm
-      && sizeof(HasScope)/sizeof(HasScope[0]) == NumForm,
+  static_assert(sizeof(NumArgs)/sizeof(NumArgs[0]) == NumForm
+      && sizeof(NumVals)/sizeof(NumVals[0]) == NumForm,
       "need to update code for modified forms");
   static_assert(AtomicExpr::AO__c11_atomic_init == 0 &&
                     AtomicExpr::AO__c11_atomic_fetch_xor + 1 ==
                         AtomicExpr::AO__atomic_load,
                 "need to update code for modified C11 atomics");
-  bool IsOpenCL = Op >= AtomicExpr::AO__opencl_atomic_load &&
-                  Op <= AtomicExpr::AO__opencl_atomic_store;
+  bool IsOpenCL = Op >= AtomicExpr::AO__opencl_atomic_init &&
+                  Op <= AtomicExpr::AO__opencl_atomic_fetch_xor;
   bool IsC11 = (Op >= AtomicExpr::AO__c11_atomic_init &&
                Op <= AtomicExpr::AO__c11_atomic_fetch_xor) ||
                IsOpenCL;
@@ -2812,10 +2804,12 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
 
   switch (Op) {
   case AtomicExpr::AO__c11_atomic_init:
+  case AtomicExpr::AO__opencl_atomic_init:
     Form = Init;
     break;
 
   case AtomicExpr::AO__c11_atomic_load:
+  case AtomicExpr::AO__opencl_atomic_load:
   case AtomicExpr::AO__atomic_load_n:
     Form = Load;
     break;
@@ -2824,22 +2818,17 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
     Form = LoadCopy;
     break;
 
-  case AtomicExpr::AO__opencl_atomic_load:
-    Form = OCLLoad;
-    break;
-
   case AtomicExpr::AO__c11_atomic_store:
+  case AtomicExpr::AO__opencl_atomic_store:
   case AtomicExpr::AO__atomic_store:
   case AtomicExpr::AO__atomic_store_n:
     Form = Copy;
     break;
 
-  case AtomicExpr::AO__opencl_atomic_store:
-    Form = OCLCopy;
-    break;
-
   case AtomicExpr::AO__c11_atomic_fetch_add:
   case AtomicExpr::AO__c11_atomic_fetch_sub:
+  case AtomicExpr::AO__opencl_atomic_fetch_add:
+  case AtomicExpr::AO__opencl_atomic_fetch_sub:
   case AtomicExpr::AO__atomic_fetch_add:
   case AtomicExpr::AO__atomic_fetch_sub:
   case AtomicExpr::AO__atomic_add_fetch:
@@ -2849,6 +2838,9 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
   case AtomicExpr::AO__c11_atomic_fetch_and:
   case AtomicExpr::AO__c11_atomic_fetch_or:
   case AtomicExpr::AO__c11_atomic_fetch_xor:
+  case AtomicExpr::AO__opencl_atomic_fetch_and:
+  case AtomicExpr::AO__opencl_atomic_fetch_or:
+  case AtomicExpr::AO__opencl_atomic_fetch_xor:
   case AtomicExpr::AO__atomic_fetch_and:
   case AtomicExpr::AO__atomic_fetch_or:
   case AtomicExpr::AO__atomic_fetch_xor:
@@ -2861,6 +2853,7 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
     break;
 
   case AtomicExpr::AO__c11_atomic_exchange:
+  case AtomicExpr::AO__opencl_atomic_exchange:
   case AtomicExpr::AO__atomic_exchange_n:
     Form = Xchg;
     break;
@@ -2871,6 +2864,8 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
 
   case AtomicExpr::AO__c11_atomic_compare_exchange_strong:
   case AtomicExpr::AO__c11_atomic_compare_exchange_weak:
+  case AtomicExpr::AO__opencl_atomic_compare_exchange_strong:
+  case AtomicExpr::AO__opencl_atomic_compare_exchange_weak:
     Form = C11CmpXchg;
     break;
 
@@ -2880,19 +2875,19 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
     break;
   }
 
+  unsigned AdjustedNumArgs = NumArgs[Form];
+  if (IsOpenCL && Op != AtomicExpr::AO__opencl_atomic_init)
+    ++AdjustedNumArgs;
   // Check we have the right number of arguments.
-  assert((NumArgsMin[Form] == NumArgsMax[Form] ||
-         NumArgsMin[Form] + 1 == NumArgsMax[Form]) &&
-         "Only one optional argument");
-  if (TheCall->getNumArgs() < NumArgsMin[Form]) {
+  if (TheCall->getNumArgs() < AdjustedNumArgs) {
     Diag(TheCall->getLocEnd(), diag::err_typecheck_call_too_few_args)
-      << 0 << NumArgsMin[Form] << TheCall->getNumArgs()
+      << 0 << AdjustedNumArgs << TheCall->getNumArgs()
       << TheCall->getCallee()->getSourceRange();
     return ExprError();
-  } else if (TheCall->getNumArgs() > NumArgsMax[Form]) {
-    Diag(TheCall->getArg(NumArgsMax[Form])->getLocStart(),
+  } else if (TheCall->getNumArgs() > AdjustedNumArgs) {
+    Diag(TheCall->getArg(AdjustedNumArgs)->getLocStart(),
          diag::err_typecheck_call_too_many_args)
-      << 0 << NumArgsMax[Form] << TheCall->getNumArgs()
+      << 0 << AdjustedNumArgs << TheCall->getNumArgs()
       << TheCall->getCallee()->getSourceRange();
     return ExprError();
   }
@@ -2926,7 +2921,7 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
       return ExprError();
     }
     ValType = AtomTy->getAs<AtomicType>()->getValueType();
-  } else if (Form != Load && Form != LoadCopy && Form != OCLLoad) {
+  } else if (Form != Load && Form != LoadCopy) {
     if (ValType.isConstQualified()) {
       Diag(DRE->getLocStart(), diag::err_atomic_op_needs_non_const_pointer)
         << Ptr->getType() << Ptr->getSourceRange();
@@ -2991,7 +2986,7 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
   ValType.removeLocalVolatile();
   ValType.removeLocalConst();
   QualType ResultType = ValType;
-  if (Form == Copy || Form == OCLCopy || Form == LoadCopy || Form == GNUXchg ||
+  if (Form == Copy || Form == LoadCopy || Form == GNUXchg ||
       Form == Init)
     ResultType = Context.VoidTy;
   else if (Form == C11CmpXchg || Form == GNUCmpXchg)
@@ -3018,7 +3013,7 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
         assert(Form != Load);
         if (Form == Init || (Form == Arithmetic && ValType->isIntegerType()))
           Ty = ValType;
-        else if (Form == Copy || Form == Xchg || Form == OCLCopy)
+        else if (Form == Copy || Form == Xchg)
           Ty = ByValType;
         else if (Form == Arithmetic)
           Ty = Context.getPointerDiffType();
@@ -3062,12 +3057,12 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
   }
 
   Expr *Scope;
-  if (!HasScope[Form] || TheCall->getNumArgs() < NumArgsMax[Form]) {
+  if (IsOpenCL) {
+    Scope = TheCall->getArg(TheCall->getNumArgs() - 1);
+  } else {
     Scope = IntegerLiteral::Create(Context,
       llvm::APInt(Context.getTypeSize(Context.IntTy), (uint64_t) 1),
       Context.IntTy, SourceLocation());
-  } else {
-    Scope = TheCall->getArg(TheCall->getNumArgs() - 1);
   }
 
   // Permute the arguments into a 'consistent' order.
@@ -3079,13 +3074,11 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
     SubExprs.push_back(TheCall->getArg(1)); // Val1
     break;
   case Load:
-  case OCLLoad:
     SubExprs.push_back(TheCall->getArg(1)); // Order
     SubExprs.push_back(Scope);              // Scope
     break;
   case LoadCopy:
   case Copy:
-  case OCLCopy:
   case Arithmetic:
   case Xchg:
     SubExprs.push_back(TheCall->getArg(2)); // Order
@@ -3130,12 +3123,13 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
                                             TheCall->getRParenLoc());
   
   if ((Op == AtomicExpr::AO__c11_atomic_load ||
-       (Op == AtomicExpr::AO__c11_atomic_store) ||
-       Op == AtomicExpr::AO__opencl_atomic_load) &&
+       Op == AtomicExpr::AO__c11_atomic_store ||
+       Op == AtomicExpr::AO__opencl_atomic_load ||
+       Op == AtomicExpr::AO__opencl_atomic_store ) &&
       Context.AtomicUsesUnsupportedLibcall(AE))
     Diag(AE->getLocStart(), diag::err_atomic_load_store_uses_lib)
         << ((Op == AtomicExpr::AO__c11_atomic_load ||
-             Op == AtomicExpr::AO__opencl_atomic_load)
+            Op == AtomicExpr::AO__opencl_atomic_load)
                 ? 0
                 : 1);
 

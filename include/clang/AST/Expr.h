@@ -5106,7 +5106,7 @@ public:
     return cast<Expr>(SubExprs[SCOPE]);
   }
   Expr *getVal1() const {
-    if (Op == AO__c11_atomic_init)
+    if (Op == AO__c11_atomic_init || Op == AO__opencl_atomic_init)
       return cast<Expr>(SubExprs[ORDER]);
     assert(NumSubExprs > VAL1);
     return cast<Expr>(SubExprs[VAL1]);
@@ -5141,8 +5141,15 @@ public:
   bool isCmpXChg() const {
     return getOp() == AO__c11_atomic_compare_exchange_strong ||
            getOp() == AO__c11_atomic_compare_exchange_weak ||
+           getOp() == AO__opencl_atomic_compare_exchange_strong ||
+           getOp() == AO__opencl_atomic_compare_exchange_weak ||
            getOp() == AO__atomic_compare_exchange ||
            getOp() == AO__atomic_compare_exchange_n;
+  }
+
+  bool isOpenCL() const {
+    return getOp() >= AO__opencl_atomic_init &&
+           getOp() <= AO__opencl_atomic_fetch_xor;
   }
 
   SourceLocation getBuiltinLoc() const { return BuiltinLoc; }

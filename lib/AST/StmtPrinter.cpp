@@ -1861,7 +1861,8 @@ void StmtPrinter::VisitAtomicExpr(AtomicExpr *Node) {
     OS << ", ";
     PrintExpr(Node->getWeak());
   }
-  if (Node->getOp() != AtomicExpr::AO__c11_atomic_init) {
+  if (Node->getOp() != AtomicExpr::AO__c11_atomic_init &&
+      Node->getOp() != AtomicExpr::AO__opencl_atomic_init) {
     OS << ", ";
     PrintExpr(Node->getOrder());
   }
