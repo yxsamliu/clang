@@ -873,8 +873,10 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
                getContext().getSizeType());
     }
     // Atomic address is the first or second parameter
+    // The OpenCL atomic library functions only accept pointer arguments to
+    // generic address space.
     Args.add(RValue::get(EmitCastToVoidPtr(Ptr.getPointer(),
-        /*CastToGenericAddrSpace*/true)),
+        /*CastToGenericAddrSpace*/IsOpenCL)),
              getContext().VoidPtrTy);
 
     std::string LibCallName;
@@ -905,7 +907,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       RetTy = getContext().BoolTy;
       HaveRetTy = true;
       Args.add(RValue::get(EmitCastToVoidPtr(Val1.getPointer(),
-          /*CastToGenericAddrSpace*/true)),
+          /*CastToGenericAddrSpace*/IsOpenCL)),
                getContext().VoidPtrTy);
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val2.getPointer(),
                         MemTy, E->getExprLoc(), sizeChars);

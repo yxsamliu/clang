@@ -1971,6 +1971,10 @@ public:
   }
 
   /// Emit a cast to void* in the appropriate address space.
+  /// If \p CastToGenericAddrSpace is true, cast to void* in generic address
+  /// space, which corresponds to LangAS::opencl_generic for OpenCL 2.0 and
+  /// LangAS::Default for other languages. Otherwise keep the pointer in its
+  /// own address space.
   llvm::Value *EmitCastToVoidPtr(llvm::Value *value,
       bool CastToGenericAddrSpace = false);
 
