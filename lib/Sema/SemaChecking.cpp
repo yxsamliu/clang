@@ -2764,20 +2764,20 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
     LoadCopy,
     // void __atomic_store(A *, CP, int)
     Copy,
-    // C    __c11_atomic_add(A *, M, int, int)
+    // C    __c11_atomic_add(A *, M, int)
     Arithmetic,
-    // C    __atomic_exchange_n(A *, CP, int, int)
+    // C    __atomic_exchange_n(A *, CP, int)
     Xchg,
-    // void __atomic_exchange(A *, C *, CP, int, int)
+    // void __atomic_exchange(A *, C *, CP, int)
     GNUXchg,
-    // bool __c11_atomic_compare_exchange_strong(A *, C *, CP, int, int, int)
+    // bool __c11_atomic_compare_exchange_strong(A *, C *, CP, int, int)
     C11CmpXchg,
-    // bool __atomic_compare_exchange(A *, C *, CP, bool, int, int, int)
+    // bool __atomic_compare_exchange(A *, C *, CP, bool, int, int)
     GNUCmpXchg
   } Form = Init;
   const unsigned NumForm = GNUCmpXchg + 1;
   const unsigned NumArgs[] = { 2, 2, 3, 3, 3, 3, 4, 5, 6 };
-  const unsigned NumVals[]    = { 1, 0, 1, 1, 1, 1, 2, 2, 3 };
+  const unsigned NumVals[] = { 1, 0, 1, 1, 1, 1, 2, 2, 3 };
   // where:
   //   C is an appropriate type,
   //   A is volatile _Atomic(C) for __c11 builtins and is C for GNU builtins,
