@@ -353,11 +353,8 @@ createReferenceTemporary(CodeGenFunction &CGF,
         (Ty->isArrayType() || Ty->isRecordType()) &&
         CGF.CGM.isTypeConstant(Ty, true))
       if (llvm::Constant *Init = CGF.CGM.EmitConstantExpr(Inner, Ty, &CGF)) {
-        unsigned AddrSpace = 0;
-        if (CGF.CGM.getTriple().getArch() == llvm::Triple::amdgcn) {
-          AddrSpace =
-              CGF.getContext().getTargetAddressSpace(LangAS::opencl_constant);
-        }
+        unsigned AddrSpace =
+            CGF.getTarget().getTargetConstantAddressSpace().getValueOr(0);
         auto *GV = new llvm::GlobalVariable(
             CGF.CGM.getModule(), Init->getType(), /*isConstant=*/true,
             llvm::GlobalValue::PrivateLinkage, Init, ".ref.tmp", nullptr,

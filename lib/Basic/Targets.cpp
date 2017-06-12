@@ -2378,12 +2378,13 @@ public:
     return LangAS::opencl_constant;
   }
 
+  llvm::Optional<unsigned> getTargetConstantAddressSpace() const override {
+    return AS.Constant;
+  }
+
   /// \returns Target specific vtbl ptr address space.
   unsigned getVtblPtrAddressSpace() const override {
-    // \todo: We currently have address spaces defined in AMDGPU Backend. It
-    // would be nice if we could use it here instead of using bare numbers (same
-    // applies to getDWARFAddressSpace).
-    return 2; // constant.
+    return getTargetConstantAddressSpace().getValue();
   }
 
   /// \returns If a target requires an address within a target specific address

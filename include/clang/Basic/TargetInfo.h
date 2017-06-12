@@ -23,6 +23,7 @@
 #include "clang/Basic/VersionTuple.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/IntrusiveRefCntPtr.h"
+#include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/ADT/StringRef.h"
@@ -952,6 +953,12 @@ public:
 
   const LangAS::Map &getAddressSpaceMap() const {
     return *AddrSpaceMap;
+  }
+
+  /// \brief Return the target address space which is read only and can be
+  /// casted to the generic address space.
+  virtual llvm::Optional<unsigned> getTargetConstantAddressSpace() const {
+    return llvm::None;
   }
 
   /// \brief Retrieve the name of the platform as it is used in the
