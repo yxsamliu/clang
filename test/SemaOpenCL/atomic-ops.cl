@@ -135,6 +135,11 @@ void memory_checks(atomic_int *Ap, int *p, int val) {
   (void)__opencl_atomic_compare_exchange_weak(Ap, p, val, memory_order_seq_cst, memory_order_relaxed, memory_scope_work_item);
 }
 
+void synchscope_checks(atomic_int *Ap, int scope) {
+  (void)__opencl_atomic_load(Ap, memory_order_relaxed, scope); // expected-error{{non-constant synchronization scope argument to atomic operation is not supported}}
+  (void)__opencl_atomic_load(Ap, memory_order_relaxed, 10);    //expected-error{{synchronization scope argument to atomic operation is invalid}}
+}
+
 void nullPointerWarning(atomic_int *Ap, int *p, int val) {
   // The 'expected' pointer shouldn't be NULL.
   (void)__opencl_atomic_compare_exchange_strong(Ap, NULL, val, memory_order_relaxed, memory_order_relaxed, memory_scope_work_item); // expected-warning {{null passed to a callee that requires a non-null argument}}

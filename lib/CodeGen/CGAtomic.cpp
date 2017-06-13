@@ -15,6 +15,7 @@
 #include "CGRecordLayout.h"
 #include "CodeGenFunction.h"
 #include "CodeGenModule.h"
+#include "TargetInfo.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/CodeGen/CGFunctionInfo.h"
 #include "llvm/IR/DataLayout.h"
@@ -703,7 +704,8 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   llvm::Value *Order = EmitScalarExpr(E->getOrder());
   llvm::Value *Scope = EmitScalarExpr(E->getScope());
 
-  switch (E->getOp()) {
+  auto Op = E->getOp();
+  switch (Op) {
   case AtomicExpr::AO__c11_atomic_init:
   case AtomicExpr::AO__opencl_atomic_init:
     llvm_unreachable("Already handled above with EmitAtomicInit!");
@@ -738,7 +740,8 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     else
       Val2 = EmitValToTemp(*this, E->getVal2());
     OrderFail = EmitScalarExpr(E->getOrderFail());
-    if (E->getNumSubExprs() == 7)
+    if (Op == AtomicExpr::AO__atomic_compare_exchange_n ||
+        Op == AtomicExpr::AO__atomic_compare_exchange)
       IsWeak = EmitScalarExpr(E->getWeak());
     break;
 
@@ -875,9 +878,29 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     // Atomic address is the first or second parameter
     // The OpenCL atomic library functions only accept pointer arguments to
     // generic address space.
-    Args.add(RValue::get(EmitCastToVoidPtr(Ptr.getPointer(),
-        /*CastToGenericAddrSpace*/IsOpenCL)),
-             getContext().VoidPtrTy);
+    auto CastToGenericAddrSpace = [&](llvm::Value *V, Expr *E, bool DoIt) {
+      if (!DoIt)
+        return V;
+      auto DestAS = getContext().getTargetAddressSpace(LangAS::opencl_generic);
+      auto T = V->getType();
+      auto OrigAS = T->getPointerAddressSpace();
+      if (OrigAS == DestAS)
+        return V;
+      auto OrigLangAS = E->getType()
+                            .getTypePtr()
+                            ->getAs<PointerType>()
+                            ->getPointeeType()
+                            .getAddressSpace();
+      auto *DestType = T->getPointerElementType()->getPointerTo(DestAS);
+
+      return getTargetHooks().performAddrSpaceCast(
+          *this, V, OrigLangAS, LangAS::opencl_generic, DestType, false);
+    };
+
+    Args.add(
+        RValue::get(CastToGenericAddrSpace(EmitCastToVoidPtr(Ptr.getPointer()),
+                                           E->getPtr(), /*DoIt*/ IsOpenCL)),
+        getContext().VoidPtrTy);
 
     std::string LibCallName;
     QualType LoweredMemTy =
@@ -906,8 +929,9 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       LibCallName = "__atomic_compare_exchange";
       RetTy = getContext().BoolTy;
       HaveRetTy = true;
-      Args.add(RValue::get(EmitCastToVoidPtr(Val1.getPointer(),
-          /*CastToGenericAddrSpace*/IsOpenCL)),
+      Args.add(RValue::get(
+                   CastToGenericAddrSpace(EmitCastToVoidPtr(Val1.getPointer()),
+                                          E->getVal1(), /*DoIt*/ IsOpenCL)),
                getContext().VoidPtrTy);
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val2.getPointer(),
                         MemTy, E->getExprLoc(), sizeChars);

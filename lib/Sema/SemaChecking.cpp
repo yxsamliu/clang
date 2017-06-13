@@ -25,6 +25,7 @@
 #include "clang/AST/StmtObjC.h"
 #include "clang/Analysis/Analyses/FormatString.h"
 #include "clang/Basic/CharInfo.h"
+#include "clang/Basic/SynchScope.h"
 #include "clang/Basic/TargetBuiltins.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Lex/Lexer.h" // TODO: Extract static functions to fix layering.
@@ -3043,7 +3044,7 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
         break;
       }
     } else {
-      // The order(s) are always converted to int.
+      // The order(s) and scope are always converted to int.
       Ty = Context.IntTy;
     }
 
@@ -3057,12 +3058,24 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
   }
 
   Expr *Scope;
-  if (IsOpenCL) {
-    Scope = TheCall->getArg(TheCall->getNumArgs() - 1);
-  } else {
-    Scope = IntegerLiteral::Create(Context,
-      llvm::APInt(Context.getTypeSize(Context.IntTy), (uint64_t) 1),
-      Context.IntTy, SourceLocation());
+  if (Form != Init) {
+    if (IsOpenCL) {
+      Scope = TheCall->getArg(TheCall->getNumArgs() - 1);
+      llvm::APSInt Result(32);
+      if (!Scope->isIntegerConstantExpr(Result, Context))
+        Diag(Scope->getLocStart(),
+             diag::err_atomic_op_has_non_constant_synch_scope)
+            << Scope->getSourceRange();
+      else if (!isValidOrderingForOp(Result.getSExtValue(), Op))
+        Diag(Scope->getLocStart(), diag::err_atomic_op_has_invalid_synch_scope)
+            << Scope->getSourceRange();
+    } else {
+      Scope =
+          IntegerLiteral::Create(Context,
+                                 llvm::APInt(Context.getTypeSize(Context.IntTy),
+                                             (uint64_t)SynchScope::CrossThread),
+                                 Context.IntTy, SourceLocation());
+    }
   }
 
   // Permute the arguments into a 'consistent' order.
