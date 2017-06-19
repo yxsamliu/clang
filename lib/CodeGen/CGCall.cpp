@@ -3825,7 +3825,7 @@ RValue CodeGenFunction::EmitCall(const CGFunctionInfo &CallInfo,
         // Make a temporary alloca to pass the argument.
         Address Addr = CreateMemTemp(I->Ty, ArgInfo.getIndirectAlign(),
                                      "indirect-arg-temp");
-        IRCallArgs[FirstIRArg] = Addr.getPointer();
+        IRCallArgs[FirstIRArg] = CastToAllocaAddrSpace(Addr.getPointer());
 
         LValue argLV = MakeAddrLValue(Addr, I->Ty);
         EmitInitStoreOfNonAggregate(*this, RV, argLV);
@@ -3841,7 +3841,10 @@ RValue CodeGenFunction::EmitCall(const CGFunctionInfo &CallInfo,
         Address Addr = RV.getAggregateAddress();
         CharUnits Align = ArgInfo.getIndirectAlign();
         const llvm::DataLayout *TD = &CGM.getDataLayout();
-        const unsigned RVAddrSpace = Addr.getType()->getAddressSpace();
+        const unsigned RVAddrSpace = Addr.getPointer()
+                                         ->stripPointerCasts()
+                                         ->getType()
+                                         ->getPointerAddressSpace();
         const unsigned ArgAddrSpace =
             (FirstIRArg < IRFuncTy->getNumParams()
                  ? IRFuncTy->getParamType(FirstIRArg)->getPointerAddressSpace()
@@ -3855,7 +3858,7 @@ RValue CodeGenFunction::EmitCall(const CGFunctionInfo &CallInfo,
           // Create an aligned temporary, and copy to it.
           Address AI = CreateMemTemp(I->Ty, ArgInfo.getIndirectAlign(),
                                      "byval-temp");
-          IRCallArgs[FirstIRArg] = AI.getPointer();
+          IRCallArgs[FirstIRArg] = CastToAllocaAddrSpace(AI.getPointer());
           EmitAggregateCopy(AI, Addr, I->Ty, RV.isVolatileQualified());
         } else {
           // Skip the extra memcpy call.
