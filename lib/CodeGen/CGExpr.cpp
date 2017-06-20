@@ -338,9 +338,10 @@ pushTemporaryCleanup(CodeGenFunction &CGF, const MaterializeTemporaryExpr *M,
   }
 }
 
-static Address
-createReferenceTemporary(CodeGenFunction &CGF,
-                         const MaterializeTemporaryExpr *M, const Expr *Inner) {
+static Address createReferenceTemporary(CodeGenFunction &CGF,
+                                        const TargetCodeGenInfo &TCG,
+                                        const MaterializeTemporaryExpr *M,
+                                        const Expr *Inner) {
   switch (M->getStorageDuration()) {
   case SD_FullExpression:
   case SD_Automatic: {
@@ -353,16 +354,22 @@ createReferenceTemporary(CodeGenFunction &CGF,
         (Ty->isArrayType() || Ty->isRecordType()) &&
         CGF.CGM.isTypeConstant(Ty, true))
       if (llvm::Constant *Init = CGF.CGM.EmitConstantExpr(Inner, Ty, &CGF)) {
-        unsigned AddrSpace =
-            CGF.getTarget().getTargetConstantAddressSpace().getValueOr(0);
-        auto *GV = new llvm::GlobalVariable(
-            CGF.CGM.getModule(), Init->getType(), /*isConstant=*/true,
-            llvm::GlobalValue::PrivateLinkage, Init, ".ref.tmp", nullptr,
-            llvm::GlobalValue::NotThreadLocal, AddrSpace);
-        CharUnits alignment = CGF.getContext().getTypeAlignInChars(Ty);
-        GV->setAlignment(alignment.getQuantity());
-        // FIXME: Should we put the new global into a COMDAT?
-        return Address(GV, alignment);
+        if (auto AddrSpace = CGF.getTarget().getConstantAddressSpace()) {
+          auto *GV = new llvm::GlobalVariable(
+              CGF.CGM.getModule(), Init->getType(), /*isConstant=*/true,
+              llvm::GlobalValue::PrivateLinkage, Init, ".ref.tmp", nullptr,
+              llvm::GlobalValue::NotThreadLocal,
+              CGF.getContext().getTargetAddressSpace(AddrSpace.getValue()));
+          CharUnits alignment = CGF.getContext().getTypeAlignInChars(Ty);
+          GV->setAlignment(alignment.getQuantity());
+          auto *V = TCG.performAddrSpaceCast(
+              CGF, GV, AddrSpace.getValue(), LangAS::Default,
+              GV->getType()->getPointerElementType()->getPointerTo(
+                  CGF.getContext().getTargetAddressSpace(LangAS::Default)),
+              true);
+          // FIXME: Should we put the new global into a COMDAT?
+          return Address(V, alignment);
+        }
       }
     return CGF.CreateMemTemp(Ty, "ref.tmp");
   }
@@ -385,7 +392,7 @@ EmitMaterializeTemporaryExpr(const MaterializeTemporaryExpr *M) {
   auto ownership = M->getType().getObjCLifetime();
   if (ownership != Qualifiers::OCL_None &&
       ownership != Qualifiers::OCL_ExplicitNone) {
-    Address Object = createReferenceTemporary(*this, M, E);
+    Address Object = createReferenceTemporary(*this, getTargetHooks(), M, E);
     if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer())) {
       Object = Address(llvm::ConstantExpr::getBitCast(Var,
                            ConvertTypeForMem(E->getType())
@@ -442,9 +449,9 @@ EmitMaterializeTemporaryExpr(const MaterializeTemporaryExpr *M) {
   }
 
   // Create and initialize the reference temporary.
-  Address Object = createReferenceTemporary(*this, M, E);
+  Address Object = createReferenceTemporary(*this, getTargetHooks(), M, E);
   if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer())) {
-    Object = Address(llvm::ConstantExpr::getPointerCast(
+    Object = Address(llvm::ConstantExpr::getBitCast(
                          Var, ConvertTypeForMem(E->getType())->getPointerTo()),
                      Object.getAlignment());
     // If the temporary is a global and has a constant initializer or is a

@@ -2378,14 +2378,12 @@ public:
     return LangAS::opencl_constant;
   }
 
-  llvm::Optional<unsigned> getTargetConstantAddressSpace() const override {
-    return AS.Constant;
+  llvm::Optional<unsigned> getConstantAddressSpace() const override {
+    return LangAS::FirstTargetAddressSpace + AS.Constant;
   }
 
   /// \returns Target specific vtbl ptr address space.
-  unsigned getVtblPtrAddressSpace() const override {
-    return getTargetConstantAddressSpace().getValue();
-  }
+  unsigned getVtblPtrAddressSpace() const override { return AS.Constant; }
 
   /// \returns If a target requires an address within a target specific address
   /// space \p AddressSpace to be converted in order to be used, then return the

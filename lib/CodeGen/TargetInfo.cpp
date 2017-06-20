@@ -421,6 +421,8 @@ llvm::Value *TargetCodeGenInfo::performAddrSpaceCast(
     unsigned DestAddr, llvm::Type *DestTy, bool isNonNull) const {
   // Since target may map different address spaces in AST to the same address
   // space, an address space conversion may end up as a bitcast.
+  if (auto *C = dyn_cast<llvm::Constant>(Src))
+    return llvm::ConstantExpr::getPointerCast(C, DestTy);
   return CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(Src, DestTy);
 }
 
