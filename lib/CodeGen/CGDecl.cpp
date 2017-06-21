@@ -221,8 +221,8 @@ llvm::Constant *CodeGenModule::getOrCreateStaticVarDecl(
     Name = getStaticDeclName(*this, D);
 
   llvm::Type *LTy = getTypes().ConvertTypeForMem(Ty);
-  unsigned AS = GetGlobalVarAddressSpace(&D);
-  unsigned TargetAS = getContext().getTargetAddressSpace(AS);
+  unsigned AddrSpace =
+      GetGlobalVarAddressSpace(&D, getContext().getTargetAddressSpace(Ty));
 
   // Local address space cannot have an initializer.
   llvm::Constant *Init = nullptr;
@@ -231,9 +231,12 @@ llvm::Constant *CodeGenModule::getOrCreateStaticVarDecl(
   else
     Init = llvm::UndefValue::get(LTy);
 
-  llvm::GlobalVariable *GV = new llvm::GlobalVariable(
-      getModule(), LTy, Ty.isConstant(getContext()), Linkage, Init, Name,
-      nullptr, llvm::GlobalVariable::NotThreadLocal, TargetAS);
+  llvm::GlobalVariable *GV =
+    new llvm::GlobalVariable(getModule(), LTy,
+                             Ty.isConstant(getContext()), Linkage,
+                             Init, Name, nullptr,
+                             llvm::GlobalVariable::NotThreadLocal,
+                             AddrSpace);
   GV->setAlignment(getContext().getDeclAlign(&D).getQuantity());
   setGlobalVisibility(GV, &D);
 
@@ -251,12 +254,11 @@ llvm::Constant *CodeGenModule::getOrCreateStaticVarDecl(
   }
 
   // Make sure the result is of the correct type.
-  unsigned ExpectedAS = Ty.getAddressSpace();
+  unsigned ExpectedAddrSpace = getContext().getTargetAddressSpace(Ty);
   llvm::Constant *Addr = GV;
-  if (AS != ExpectedAS) {
-    Addr = getTargetCodeGenInfo().performAddrSpaceCast(
-        GV, AS, ExpectedAS,
-        LTy->getPointerTo(getContext().getTargetAddressSpace(ExpectedAS)));
+  if (AddrSpace != ExpectedAddrSpace) {
+    llvm::PointerType *PTy = llvm::PointerType::get(LTy, ExpectedAddrSpace);
+    Addr = llvm::ConstantExpr::getAddrSpaceCast(GV, PTy);
   }
 
   setStaticLocalDeclAddress(&D, Addr);
