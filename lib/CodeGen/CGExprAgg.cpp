@@ -350,6 +350,8 @@ AggExprEmitter::VisitCXXStdInitializerListExpr(CXXStdInitializerListExpr *E) {
     return;
   }
 
+  static int count = 0;
+  count++;
   AggValueSlot Dest = EnsureSlot(E->getType());
   LValue DestLV = CGF.MakeAddrLValue(Dest.getAddress(), E->getType());
   LValue Start = CGF.EmitLValueForFieldInitialization(DestLV, *Field);
@@ -357,6 +359,7 @@ AggExprEmitter::VisitCXXStdInitializerListExpr(CXXStdInitializerListExpr *E) {
   llvm::Value *IdxStart[] = { Zero, Zero };
   llvm::Value *ArrayStart =
       Builder.CreateInBoundsGEP(ArrayPtr.getPointer(), IdxStart, "arraystart");
+  llvm::errs() << count << '\n';
   CGF.EmitStoreThroughLValue(RValue::get(ArrayStart), Start);
   ++Field;
 

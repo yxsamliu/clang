@@ -38,6 +38,7 @@
 #include "llvm/Transforms/Utils/SanitizerStats.h"
 
 #include <string>
+#include <tuple>
 
 using namespace clang;
 using namespace CodeGen;
