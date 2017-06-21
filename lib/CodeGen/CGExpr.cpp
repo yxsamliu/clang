@@ -38,6 +38,7 @@
 #include "llvm/Transforms/Utils/SanitizerStats.h"
 
 #include <string>
+#include <tuple>
 
 using namespace clang;
 using namespace CodeGen;
@@ -363,14 +364,15 @@ static Address createReferenceTemporary(CodeGenFunction &CGF,
               CGF.getContext().getTargetAddressSpace(AS));
           CharUnits alignment = CGF.getContext().getTypeAlignInChars(Ty);
           GV->setAlignment(alignment.getQuantity());
-          llvm::Constant *V = GV;
+          llvm::Constant *C = GV;
           if (AS != LangAS::Default)
-            V = TCG.performAddrSpaceCast(
+            C = TCG.performAddrSpaceCast(
                 GV, AS, LangAS::Default,
-                GV->getType()->getPointerElementType()->getPointerTo(
-                    CGF.getContext().getTargetAddressSpace(LangAS::Default)));
+                CGF.ConvertTypeForMem(Inner->getType())
+                    ->getPointerTo(CGF.getContext().getTargetAddressSpace(
+                        LangAS::Default)));
           // FIXME: Should we put the new global into a COMDAT?
-          return Address(V, alignment);
+          return Address(C, alignment);
         }
       }
     return CGF.CreateMemTemp(Ty, "ref.tmp");
@@ -395,12 +397,8 @@ EmitMaterializeTemporaryExpr(const MaterializeTemporaryExpr *M) {
   if (ownership != Qualifiers::OCL_None &&
       ownership != Qualifiers::OCL_ExplicitNone) {
     Address Object = createReferenceTemporary(*this, getTargetHooks(), M, E);
-    if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer())) {
-      Object = Address(llvm::ConstantExpr::getBitCast(Var,
-                           ConvertTypeForMem(E->getType())
-                             ->getPointerTo(Object.getAddressSpace())),
-                       Object.getAlignment());
-
+    if (auto *Var = dyn_cast<llvm::GlobalVariable>(
+            Object.getPointer()->stripPointerCasts())) {
       // createReferenceTemporary will promote the temporary to a global with a
       // constant initializer if it can.  It can only do this to a value of
       // ARC-manageable type if the value is global and therefore "immune" to
@@ -452,10 +450,8 @@ EmitMaterializeTemporaryExpr(const MaterializeTemporaryExpr *M) {
 
   // Create and initialize the reference temporary.
   Address Object = createReferenceTemporary(*this, getTargetHooks(), M, E);
-  if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer())) {
-    Object = Address(llvm::ConstantExpr::getBitCast(
-                         Var, ConvertTypeForMem(E->getType())->getPointerTo()),
-                     Object.getAlignment());
+  if (auto *Var = dyn_cast<llvm::GlobalVariable>(
+          Object.getPointer()->stripPointerCasts())) {
     // If the temporary is a global and has a constant initializer or is a
     // constant temporary that we promoted to a global, we may have already
     // initialized it.
