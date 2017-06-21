@@ -955,10 +955,12 @@ public:
     return *AddrSpaceMap;
   }
 
-  /// \brief Return the target address space which is read only and can be
-  /// casted to the generic address space.
-  virtual llvm::Optional<unsigned> getTargetConstantAddressSpace() const {
-    return llvm::None;
+  /// \brief Return an AST address space which can be used opportunistically
+  /// for constant global memory. It must be possible to convert pointers into
+  /// this address space to LangAS::Default. If no such address space exists,
+  /// this may return None, and such optimizations will be disabled.
+  virtual llvm::Optional<unsigned> getConstantAddressSpace() const {
+    return LangAS::Default;
   }
 
   /// \brief Retrieve the name of the platform as it is used in the
