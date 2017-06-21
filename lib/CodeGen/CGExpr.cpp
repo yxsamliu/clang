@@ -388,7 +388,7 @@ EmitMaterializeTemporaryExpr(const MaterializeTemporaryExpr *M) {
   if (ownership != Qualifiers::OCL_None &&
       ownership != Qualifiers::OCL_ExplicitNone) {
     Address Object = createReferenceTemporary(*this, getTargetHooks(), M, E);
-    if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer())) {
+    if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer()->stripPointerCasts())) {
       Object = Address(llvm::ConstantExpr::getBitCast(Var,
                            ConvertTypeForMem(E->getType())
                              ->getPointerTo(Object.getAddressSpace())),
@@ -445,7 +445,7 @@ EmitMaterializeTemporaryExpr(const MaterializeTemporaryExpr *M) {
 
   // Create and initialize the reference temporary.
   Address Object = createReferenceTemporary(*this, getTargetHooks(), M, E);
-  if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer())) {
+  if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer()->stripPointerCasts())) {
     Object = Address(llvm::ConstantExpr::getPointerCast(
                          Var, ConvertTypeForMem(E->getType())->getPointerTo()),
                      Object.getAlignment());
