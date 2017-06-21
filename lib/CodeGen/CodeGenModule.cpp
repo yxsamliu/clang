@@ -2529,6 +2529,43 @@ CharUnits CodeGenModule::GetTargetTypeStoreSize(llvm::Type *Ty) const {
       getDataLayout().getTypeStoreSizeInBits(Ty));
 }
 
+unsigned CodeGenModule::GetGlobalVarAddressSpace(const VarDecl *D) {
+  assert(D);
+  unsigned AddrSpace;
+  if (LangOpts.CUDA && LangOpts.CUDAIsDevice) {
+    if (D->hasAttr<CUDAConstantAttr>())
+      AddrSpace = LangAS::cuda_constant;
+    else if (D->hasAttr<CUDASharedAttr>())
+      AddrSpace = LangAS::cuda_shared;
+    else
+      AddrSpace = LangAS::cuda_device;
+    return AddrSpace;
+  }
+
+  AddrSpace = D->getType().getAddressSpace();
+  if (LangOpts.OpenCL) {
+    assert(AddrSpace == LangAS::opencl_global ||
+           AddrSpace == LangAS::opencl_constant ||
+           AddrSpace == LangAS::opencl_local ||
+           AddrSpace >= LangAS::FirstTargetAddressSpace);
+    return AddrSpace;
+  }
+
+  assert(AddrSpace == LangAS::Default ||
+         AddrSpace >= LangAS::FirstTargetAddressSpace);
+  if (getTriple().getArch() == llvm::Triple::amdgcn) {
+    if (AddrSpace == LangAS::Default) {
+      if (isTypeConstant(D->getType(), false)) {
+        AddrSpace = LangAS::opencl_constant;
+      } else {
+        AddrSpace = LangAS::opencl_global;
+      }
+    }
+  }
+
+  return AddrSpace;
+}
+
 unsigned CodeGenModule::GetGlobalVarAddressSpace(const VarDecl *D,
                                                  unsigned AddrSpace) {
   if (D) {

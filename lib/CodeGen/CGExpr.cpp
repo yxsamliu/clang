@@ -355,15 +355,23 @@ static Address createReferenceTemporary(CodeGenFunction &CGF,
         CGF.CGM.isTypeConstant(Ty, true))
       if (llvm::Constant *Init = CGF.CGM.EmitConstantExpr(Inner, Ty, &CGF)) {
         if (auto AddrSpace = CGF.getTarget().getConstantAddressSpace()) {
+          auto AS = AddrSpace.getValue();
           auto *GV = new llvm::GlobalVariable(
               CGF.CGM.getModule(), Init->getType(), /*isConstant=*/true,
               llvm::GlobalValue::PrivateLinkage, Init, ".ref.tmp", nullptr,
               llvm::GlobalValue::NotThreadLocal,
-              CGF.getContext().getTargetAddressSpace(AddrSpace.getValue()));
+              CGF.getContext().getTargetAddressSpace(AS));
           CharUnits alignment = CGF.getContext().getTypeAlignInChars(Ty);
           GV->setAlignment(alignment.getQuantity());
+          llvm::Constant *C = GV;
+          if (AS != LangAS::Default)
+            C = TCG.performAddrSpaceCast(
+                GV, AS, LangAS::Default,
+                CGF.ConvertTypeForMem(Inner->getType())
+                    ->getPointerTo(CGF.getContext().getTargetAddressSpace(
+                        LangAS::Default)));
           // FIXME: Should we put the new global into a COMDAT?
-          return Address(GV, alignment);
+          return Address(C, alignment);
         }
       }
     return CGF.CreateMemTemp(Ty, "ref.tmp");
