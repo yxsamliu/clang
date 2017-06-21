@@ -2333,7 +2333,9 @@ CodeGenModule::GetOrCreateLLVMGlobal(StringRef MangledName,
       return llvm::ConstantExpr::getBitCast(Entry, Ty);
   }
 
-  unsigned AddrSpace = GetGlobalVarAddressSpace(D, Ty->getAddressSpace());
+  unsigned AddrSpace =
+      D ? getContext().getTargetAddressSpace(GetGlobalVarAddressSpace(D))
+        : Ty->getAddressSpace();
   auto *GV = new llvm::GlobalVariable(
       getModule(), Ty->getElementType(), false,
       llvm::GlobalValue::ExternalLinkage, nullptr, MangledName, nullptr,
@@ -2529,34 +2531,36 @@ CharUnits CodeGenModule::GetTargetTypeStoreSize(llvm::Type *Ty) const {
       getDataLayout().getTypeStoreSizeInBits(Ty));
 }
 
-unsigned CodeGenModule::GetGlobalVarAddressSpace(const VarDecl *D,
-                                                 unsigned AddrSpace) {
-  if (D) {
-    if (LangOpts.CUDA && LangOpts.CUDAIsDevice) {
-      if (D->hasAttr<CUDAConstantAttr>())
-        AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_constant);
-      else if (D->hasAttr<CUDASharedAttr>())
-        AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_shared);
-      else
-        AddrSpace = getContext().getTargetAddressSpace(LangAS::cuda_device);
-    } else if (getTriple().getArch() == llvm::Triple::amdgcn) {
-      auto LangAddr = D->getType().getAddressSpace();
-      if (LangOpts.OpenCL) {
-        assert(LangAddr == LangAS::opencl_global ||
-               LangAddr == LangAS::opencl_constant ||
-               LangAddr == LangAS::opencl_local ||
-               LangAddr >= LangAS::FirstTargetAddressSpace);
+unsigned CodeGenModule::GetGlobalVarAddressSpace(const VarDecl *D) {
+  assert(D);
+  unsigned AddrSpace;
+  if (LangOpts.CUDA && LangOpts.CUDAIsDevice) {
+    if (D->hasAttr<CUDAConstantAttr>())
+      AddrSpace = LangAS::cuda_constant;
+    else if (D->hasAttr<CUDASharedAttr>())
+      AddrSpace = LangAS::cuda_shared;
+    else
+      AddrSpace = LangAS::cuda_device;
+    return AddrSpace;
+  }
+
+  AddrSpace = D->getType().getAddressSpace();
+  if (LangOpts.OpenCL) {
+    assert(AddrSpace == LangAS::opencl_global ||
+           AddrSpace == LangAS::opencl_constant ||
+           AddrSpace == LangAS::opencl_local ||
+           AddrSpace >= LangAS::FirstTargetAddressSpace);
+    return AddrSpace;
+  }
+
+  assert(AddrSpace == LangAS::Default ||
+         AddrSpace >= LangAS::FirstTargetAddressSpace);
+  if (getTriple().getArch() == llvm::Triple::amdgcn) {
+    if (AddrSpace == LangAS::Default) {
+      if (isTypeConstant(D->getType(), false)) {
+        AddrSpace = LangAS::opencl_constant;
       } else {
-        assert(LangAddr == LangAS::Default ||
-               LangAddr >= LangAS::FirstTargetAddressSpace);
-      }
-      if (!LangOpts.OpenCL && LangAddr == LangAS::Default) {
-        if (isTypeConstant(D->getType(), false)) {
-          LangAddr = LangAS::opencl_constant;
-        } else {
-          LangAddr = LangAS::opencl_global;
-        }
-        AddrSpace = getContext().getTargetAddressSpace(LangAddr);
+        AddrSpace = LangAS::opencl_global;
       }
     }
   }
@@ -2714,10 +2718,9 @@ void CodeGenModule::EmitGlobalVarDefinition(const VarDecl *D,
   // "extern int x[];") and then a definition of a different type (e.g.
   // "int x[10];"). This also happens when an initializer has a different type
   // from the type of the global (this happens with unions).
-  if (!GV ||
-      GV->getType()->getElementType() != InitType ||
+  if (!GV || GV->getType()->getElementType() != InitType ||
       GV->getType()->getAddressSpace() !=
-       GetGlobalVarAddressSpace(D, getContext().getTargetAddressSpace(ASTTy))) {
+          getContext().getTargetAddressSpace(GetGlobalVarAddressSpace(D))) {
 
     // Move the old entry aside so that we'll create a new one.
     Entry->setName(StringRef());
@@ -3726,20 +3729,24 @@ ConstantAddress CodeGenModule::GetAddrOfGlobalTemporary(
       Linkage = llvm::GlobalVariable::InternalLinkage;
     }
   }
-  unsigned AddrSpace = GetGlobalVarAddressSpace(
-      VD, getContext().getTargetAddressSpace(MaterializedType));
+  unsigned AddrSpace =
+      VD ? GetGlobalVarAddressSpace(VD) : MaterializedType.getAddressSpace();
+  auto TargetAS = getContext().getTargetAddressSpace(AddrSpace);
   auto *GV = new llvm::GlobalVariable(
       getModule(), Type, Constant, Linkage, InitialValue, Name.c_str(),
-      /*InsertBefore=*/nullptr, llvm::GlobalVariable::NotThreadLocal,
-      AddrSpace);
+      /*InsertBefore=*/nullptr, llvm::GlobalVariable::NotThreadLocal, TargetAS);
   setGlobalVisibility(GV, VD);
   GV->setAlignment(Align.getQuantity());
   if (supportsCOMDAT() && GV->isWeakForLinker())
     GV->setComdat(TheModule.getOrInsertComdat(GV->getName()));
   if (VD->getTLSKind())
     setTLSMode(GV, *VD);
+  llvm::Constant *CV = GV;
+  if (AddrSpace != LangAS::Default)
+    CV = getTargetCodeGenInfo().performAddrSpaceCast(GV, AddrSpace, LangAS::Default,
+        Type->getPointerTo(getContext().getTargetAddressSpace(LangAS::Default)));
   MaterializedGlobalTemporaryMap[E] = GV;
-  return ConstantAddress(GV, Align);
+  return ConstantAddress(CV, Align);
 }
 
 /// EmitObjCPropertyImplementations - Emit information for synthesized
