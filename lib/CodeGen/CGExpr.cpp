@@ -455,8 +455,9 @@ EmitMaterializeTemporaryExpr(const MaterializeTemporaryExpr *M) {
   // Create and initialize the reference temporary.
   Address Object = createReferenceTemporary(*this, getTargetHooks(), M, E);
   if (auto *Var = dyn_cast<llvm::GlobalVariable>(Object.getPointer()->stripPointerCasts())) {
-    Object = Address(llvm::ConstantExpr::getPointerCast(
-                         Var, ConvertTypeForMem(E->getType())->getPointerTo()),
+    Object = Address(llvm::ConstantExpr::getBitCast(
+                         cast<llvm::Constant>(Object.getPointer()),
+                         ConvertTypeForMem(E->getType())->getPointerTo()),
                      Object.getAlignment());
     // If the temporary is a global and has a constant initializer or is a
     // constant temporary that we promoted to a global, we may have already
