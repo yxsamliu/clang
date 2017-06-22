@@ -243,6 +243,16 @@ public:
                                             unsigned DestAddr,
                                             llvm::Type *DestTy,
                                             bool IsNonNull = false) const;
+
+  /// Perform address space cast of a constant expression of pointer type.
+  /// \param V is the LLVM constant to be casted to another address space.
+  /// \param SrcAddr is the language address space of \p V.
+  /// \param DestAddr is the targeted language address space.
+  /// \param DestTy is the destination LLVM pointer type.
+  virtual llvm::Constant *performAddrSpaceCast(llvm::Constant *V,
+                                               unsigned SrcAddr,
+                                               unsigned DestAddr,
+                                               llvm::Type *DestTy) const;
 };
 
 } // namespace CodeGen

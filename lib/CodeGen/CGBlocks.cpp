@@ -736,9 +736,7 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
   llvm::Constant *isa =
       (!CGM.getContext().getLangOpts().OpenCL)
           ? CGM.getNSConcreteStackBlock()
-          : CGM.getNullPointer(cast<llvm::PointerType>(
-                                   CGM.getNSConcreteStackBlock()->getType()),
-                               QualType(getContext().VoidPtrTy));
+          : CGM.getNullPointer(VoidPtrTy, QualType(getContext().VoidPtrTy));
   isa = llvm::ConstantExpr::getBitCast(isa, VoidPtrTy);
 
   // Build the block descriptor.
@@ -1141,12 +1139,10 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
   auto fields = builder.beginStruct();
 
   // isa
-  fields.add(
-      (!CGM.getContext().getLangOpts().OpenCL)
-          ? CGM.getNSConcreteGlobalBlock()
-          : CGM.getNullPointer(cast<llvm::PointerType>(
-                                   CGM.getNSConcreteGlobalBlock()->getType()),
-                               QualType(CGM.getContext().VoidPtrTy)));
+  fields.add((!CGM.getContext().getLangOpts().OpenCL)
+                 ? CGM.getNSConcreteGlobalBlock()
+                 : CGM.getNullPointer(CGM.VoidPtrPtrTy,
+                                      QualType(CGM.getContext().VoidPtrTy)));
 
   // __flags
   BlockFlags flags = BLOCK_IS_GLOBAL | BLOCK_HAS_SIGNATURE;
