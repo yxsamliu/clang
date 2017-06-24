@@ -2142,34 +2142,33 @@ void CXXNameMangler::mangleQualifiers(Qualifiers Quals) {
   // be emitted in reversed alphabetical order, see Itanium ABI 5.1.5.
 
   // Address space qualifiers start with an ordinary letter.
-  if (Quals.hasAddressSpace()) {
-    // Address space extension:
-    //
-    //   <type> ::= U <target-addrspace>
-    //   <type> ::= U <OpenCL-addrspace>
-    //   <type> ::= U <CUDA-addrspace>
-
-    SmallString<64> ASString;
-    unsigned AS = Quals.getAddressSpace();
-
-    if (Context.getASTContext().addressSpaceMapManglingFor(AS)) {
-      //  <target-addrspace> ::= "AS" <address-space-number>
-      unsigned TargetAS = Context.getASTContext().getTargetAddressSpace(AS);
+  // Address space extension:
+  //
+  //   <type> ::= U <target-addrspace>
+  //   <type> ::= U <OpenCL-addrspace>
+  //   <type> ::= U <CUDA-addrspace>
+  SmallString<64> ASString;
+  unsigned AS = Quals.getAddressSpace();
+  if (Context.getASTContext().addressSpaceMapManglingFor(AS)) {
+    //  <target-addrspace> ::= "AS" <address-space-number>
+    unsigned TargetAS = Context.getASTContext().getTargetAddressSpace(AS);
+    if (TargetAS) {
       ASString = "AS" + llvm::utostr(TargetAS);
-    } else {
-      switch (AS) {
-      default: llvm_unreachable("Not a language specific address space");
-      //  <OpenCL-addrspace> ::= "CL" [ "global" | "local" | "constant |
-      //                                "generic" ]
-      case LangAS::opencl_global:   ASString = "CLglobal";   break;
-      case LangAS::opencl_local:    ASString = "CLlocal";    break;
-      case LangAS::opencl_constant: ASString = "CLconstant"; break;
-      case LangAS::opencl_generic:  ASString = "CLgeneric";  break;
-      //  <CUDA-addrspace> ::= "CU" [ "device" | "constant" | "shared" ]
-      case LangAS::cuda_device:     ASString = "CUdevice";   break;
-      case LangAS::cuda_constant:   ASString = "CUconstant"; break;
-      case LangAS::cuda_shared:     ASString = "CUshared";   break;
-      }
+      mangleVendorQualifier(ASString);
+    }
+  } else if (AS != LangAS::Default) {
+    switch (AS) {
+    default: llvm_unreachable("Not a language specific address space");
+    //  <OpenCL-addrspace> ::= "CL" [ "global" | "local" | "constant |
+    //                                "generic" ]
+    case LangAS::opencl_global:   ASString = "CLglobal";   break;
+    case LangAS::opencl_local:    ASString = "CLlocal";    break;
+    case LangAS::opencl_constant: ASString = "CLconstant"; break;
+    case LangAS::opencl_generic:  ASString = "CLgeneric";  break;
+    //  <CUDA-addrspace> ::= "CU" [ "device" | "constant" | "shared" ]
+    case LangAS::cuda_device:     ASString = "CUdevice";   break;
+    case LangAS::cuda_constant:   ASString = "CUconstant"; break;
+    case LangAS::cuda_shared:     ASString = "CUshared";   break;
     }
     mangleVendorQualifier(ASString);
   }
