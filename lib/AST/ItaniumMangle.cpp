@@ -2335,24 +2335,21 @@ void CXXNameMangler::mangleType(QualType T) {
     // substitution at the original type.
   }
 
-  if (quals) {
-    mangleQualifiers(quals);
-    // Recurse:  even if the qualified type isn't yet substitutable,
-    // the unqualified type might be.
-    mangleType(QualType(ty, 0));
-  } else {
-    switch (ty->getTypeClass()) {
+  mangleQualifiers(quals);
+  // Recurse:  even if the qualified type isn't yet substitutable,
+  // the unqualified type might be.
+  mangleType(QualType(ty, 0));
+  switch (ty->getTypeClass()) {
 #define ABSTRACT_TYPE(CLASS, PARENT)
 #define NON_CANONICAL_TYPE(CLASS, PARENT) \
-    case Type::CLASS: \
-      llvm_unreachable("can't mangle non-canonical type " #CLASS "Type"); \
-      return;
+  case Type::CLASS: \
+    llvm_unreachable("can't mangle non-canonical type " #CLASS "Type"); \
+    return;
 #define TYPE(CLASS, PARENT) \
-    case Type::CLASS: \
-      mangleType(static_cast<const CLASS##Type*>(ty)); \
-      break;
+  case Type::CLASS: \
+    mangleType(static_cast<const CLASS##Type*>(ty)); \
+    break;
 #include "clang/AST/TypeNodes.def"
-    }
   }
 
   // Add the substitution.
