@@ -438,7 +438,7 @@ public:
   void mangleFunctionEncoding(const FunctionDecl *FD);
   void mangleSeqID(unsigned SeqID);
   void mangleName(const NamedDecl *ND);
-  void mangleType(QualType T);
+  void mangleType(QualType T, bool MangleQualifiers = true);
   void mangleNameOrStandardSubstitution(const NamedDecl *ND);
   
 private:
@@ -2264,7 +2264,7 @@ static bool isTypeSubstitutable(Qualifiers Quals, const Type *Ty) {
   return true;
 }
 
-void CXXNameMangler::mangleType(QualType T) {
+void CXXNameMangler::mangleType(QualType T, bool MangleQualifiers) {
   // If our type is instantiation-dependent but not dependent, we mangle
   // it as it was written in the source, removing any top-level sugar. 
   // Otherwise, use the canonical type.
@@ -2335,14 +2335,19 @@ void CXXNameMangler::mangleType(QualType T) {
     // substitution at the original type.
   }
 
-  auto Pos = Out.tell();
-  mangleQualifiers(quals);
-  if (Pos != Out.tell()) {
+  bool HasMangledQualifiers = false;
+  if (MangleQualifiers) {
     // Recurse:  even if the qualified type isn't yet substitutable,
     // the unqualified type might be.
-    mangleType(QualType(ty, 0));
+    auto Pos = Out.tell();
+    mangleQualifiers(quals);
+    if (Pos != Out.tell())
+      HasMangledQualifiers = true;
+  }
+  if (HasMangledQualifiers) {
+    mangleType(QualType(ty, 0), false);
   } else {
-    switch (ty->getTypeClass()) {
+     switch (ty->getTypeClass()) {
 #define ABSTRACT_TYPE(CLASS, PARENT)
 #define NON_CANONICAL_TYPE(CLASS, PARENT) \
     case Type::CLASS: \
