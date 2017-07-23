@@ -533,15 +533,17 @@ unsigned GCCAsmStmt::AnalyzeAsmString(SmallVectorImpl<AsmStringPiece>&Pieces,
       DiagOffs = CurPtr-StrStart-1;
       return diag::err_asm_invalid_escape;
     }
-
+    // Handle escaped char and continue looping over the asm string.
     char EscapedChar = *CurPtr++;
-    if (EscapedChar == '%') {  // %% -> %
-      // Escaped percentage sign.
-      CurStringPiece += '%';
+    switch (EscapedChar) {
+    default:
+      break;
+    case '%': // %% -> %
+    case '{': // %{ -> {
+    case '}': // %} -> }
+      CurStringPiece += EscapedChar;
       continue;
-    }
-
-    if (EscapedChar == '=') {  // %= -> Generate an unique ID.
+    case '=': // %= -> Generate a unique ID.
       CurStringPiece += "${:uid}";
       continue;
     }
@@ -1081,7 +1083,7 @@ CapturedStmt *CapturedStmt::CreateDeserialized(const ASTContext &Context,
 }
 
 Stmt::child_range CapturedStmt::children() {
-  // Children are captured field initilizers.
+  // Children are captured field initializers.
   return child_range(getStoredStmts(), getStoredStmts() + NumCaptures);
 }
 
@@ -1110,7 +1112,7 @@ void CapturedStmt::setCapturedRegionKind(CapturedRegionKind Kind) {
 
 bool CapturedStmt::capturesVariable(const VarDecl *Var) const {
   for (const auto &I : captures()) {
-    if (!I.capturesVariable())
+    if (!I.capturesVariable() && !I.capturesVariableByCopy())
       continue;
 
     // This does not handle variable redeclarations. This should be

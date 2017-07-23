@@ -4,6 +4,8 @@ set(LLVM_LINK_COMPONENTS
   )
 
 add_subdirectory(Core)
+add_subdirectory(Refactoring)
+add_subdirectory(ASTDiff)
 
 add_clang_library(clangTooling
   ArgumentsAdjusters.cpp

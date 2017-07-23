@@ -125,6 +125,9 @@ class AnalyzerOptions : public RefCountedBase<AnalyzerOptions> {
 public:
   typedef llvm::StringMap<std::string> ConfigTable;
 
+  static std::vector<StringRef>
+  getRegisteredCheckers(bool IncludeExperimental = false);
+
   /// \brief Pair of checker name and enable/disable.
   std::vector<std::pair<std::string, bool> > CheckersControlList;
   
@@ -202,9 +205,15 @@ private:
   /// Controls which C++ member functions will be considered for inlining.
   CXXInlineableMemberKind CXXMemberInliningMode;
   
+  /// \sa includeImplicitDtorsInCFG
+  Optional<bool> IncludeImplicitDtorsInCFG;
+
   /// \sa includeTemporaryDtorsInCFG
   Optional<bool> IncludeTemporaryDtorsInCFG;
-  
+
+  /// \sa IncludeLifetimeInCFG
+  Optional<bool> IncludeLifetimeInCFG;
+
   /// \sa mayInlineCXXStandardLibrary
   Optional<bool> InlineCXXStandardLibrary;
   
@@ -391,6 +400,20 @@ public:
   /// This is controlled by the 'cfg-temporary-dtors' config option, which
   /// accepts the values "true" and "false".
   bool includeTemporaryDtorsInCFG();
+
+  /// Returns whether or not implicit destructors for C++ objects should
+  /// be included in the CFG.
+  ///
+  /// This is controlled by the 'cfg-implicit-dtors' config option, which
+  /// accepts the values "true" and "false".
+  bool includeImplicitDtorsInCFG();
+
+  /// Returns whether or not end-of-lifetime information should be included in
+  /// the CFG.
+  ///
+  /// This is controlled by the 'cfg-lifetime' config option, which accepts
+  /// the values "true" and "false".
+  bool includeLifetimeInCFG();
 
   /// Returns whether or not C++ standard library functions may be considered
   /// for inlining.
