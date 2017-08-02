@@ -3102,13 +3102,14 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
         Diag(Scope->getLocStart(),
              diag::err_atomic_op_has_non_constant_synch_scope)
             << Scope->getSourceRange();
-      else if (!SyncScope::isValid(Result.getZExtValue()))
+      else if (!isValidSyncScopeValue(Result.getZExtValue()))
         Diag(Scope->getLocStart(), diag::err_atomic_op_has_invalid_synch_scope)
             << Scope->getSourceRange();
     } else {
       Scope = IntegerLiteral::Create(
           Context,
-          llvm::APInt(Context.getTypeSize(Context.IntTy), SyncScope::System),
+          llvm::APInt(Context.getTypeSize(Context.IntTy),
+                      static_cast<unsigned>(SyncScope::OpenCLAllSVMDevices)),
           Context.IntTy, SourceLocation());
     }
   }
@@ -3178,8 +3179,7 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
     Diag(AE->getLocStart(), diag::err_atomic_load_store_uses_lib)
         << ((Op == AtomicExpr::AO__c11_atomic_load ||
             Op == AtomicExpr::AO__opencl_atomic_load)
-                ? 0
-                : 1);
+                ? 0 : 1);
 
   return AE;
 }

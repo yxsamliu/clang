@@ -444,10 +444,9 @@ TargetCodeGenInfo::performAddrSpaceCast(CodeGenModule &CGM, llvm::Constant *Src,
   return llvm::ConstantExpr::getPointerCast(Src, DestTy);
 }
 
-llvm::StringRef TargetCodeGenInfo::getSyncScopeName(SyncScope::ID S) const {
-  if (S == SyncScope::SingleThread)
-    return "singlethread";
-  return ""; /* system */
+llvm::SyncScope::ID
+TargetCodeGenInfo::getLLVMSyncScopeID(SyncScope S, llvm::LLVMContext &C) const {
+  return C.getOrInsertSyncScopeID(""); /* default sync scope */
 }
 
 static bool isEmptyRecord(ASTContext &Context, QualType T, bool AllowArrays);
@@ -7436,7 +7435,8 @@ public:
   }
   unsigned getGlobalVarAddressSpace(CodeGenModule &CGM,
                                     const VarDecl *D) const override;
-  llvm::StringRef getSyncScopeName(SyncScope::ID S) const override;
+  llvm::SyncScope::ID getLLVMSyncScopeID(SyncScope S,
+                                         llvm::LLVMContext &C) const override;
 };
 }
 
@@ -7546,20 +7546,27 @@ AMDGPUTargetCodeGenInfo::getGlobalVarAddressSpace(CodeGenModule &CGM,
   return DefaultGlobalAS;
 }
 
-llvm::StringRef
-AMDGPUTargetCodeGenInfo::getSyncScopeName(SyncScope::ID S) const {
+llvm::SyncScope::ID
+AMDGPUTargetCodeGenInfo::getLLVMSyncScopeID(SyncScope S,
+                                            llvm::LLVMContext &C) const {
+  StringRef Name;
   switch (S) {
-  case SyncScope::SingleThread:
-    return "singlethread";
-  case SyncScope::WorkGroup:
-    return "workgroup";
-  case SyncScope::Device:
-    return "agent";
-  case SyncScope::System:
-    return "";
-  case SyncScope::SubGroup:
-    return "subgroup";
+  case SyncScope::OpenCLWorkItem:
+    Name = "singlethread";
+    break;
+  case SyncScope::OpenCLWorkGroup:
+    Name = "workgroup";
+    break;
+  case SyncScope::OpenCLDevice:
+    Name = "agent";
+    break;
+  case SyncScope::OpenCLAllSVMDevices:
+    Name = "";
+    break;
+  case SyncScope::OpenCLSubGroup:
+    Name = "subgroup";
   }
+  return C.getOrInsertSyncScopeID(Name);
 }
 
 //===----------------------------------------------------------------------===//

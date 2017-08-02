@@ -3995,6 +3995,15 @@ unsigned AtomicExpr::getNumSubExprs(AtomicOp Op) {
   llvm_unreachable("unknown atomic op");
 }
 
+QualType AtomicExpr::getValueType() const {
+  auto T = getPtr()->getType()->castAs<PointerType>()->getPointeeType();
+  if (auto AT = T->getAs<AtomicType>()) {
+    return AT->getValueType();
+  } else {
+    return T;
+  }
+}
+
 QualType OMPArraySectionExpr::getBaseOriginalType(const Expr *Base) {
   unsigned ArraySectionCount = 0;
   while (auto *OASE = dyn_cast<OMPArraySectionExpr>(Base->IgnoreParens())) {

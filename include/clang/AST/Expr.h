@@ -5128,6 +5128,7 @@ public:
     assert(NumSubExprs > WEAK);
     return cast<Expr>(SubExprs[WEAK]);
   }
+  QualType getValueType() const;
 
   AtomicOp getOp() const { return Op; }
   unsigned getNumSubExprs() const { return NumSubExprs; }

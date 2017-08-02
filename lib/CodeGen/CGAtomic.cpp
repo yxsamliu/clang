@@ -489,20 +489,6 @@ static void emitAtomicCmpXchgFailureSet(CodeGenFunction &CGF, AtomicExpr *E,
   CGF.Builder.SetInsertPoint(ContBB);
 }
 
-static bool isSignedInteger(AtomicExpr *E) {
-  return E->getPtr()
-      ->getType()
-      .getTypePtr()
-      ->getAs<PointerType>()
-      ->getPointeeType()
-      .getTypePtr()
-      ->getAs<AtomicType>()
-      ->getValueType()
-      .getTypePtr()
-      ->getAs<BuiltinType>()
-      ->isSignedIntegerType();
-}
-
 static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
                          Address Ptr, Address Val1, Address Val2,
                          llvm::Value *IsWeak, llvm::Value *FailureOrder,
@@ -604,13 +590,13 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     break;
 
   case AtomicExpr::AO__opencl_atomic_fetch_min:
-    Op = isSignedInteger(E) ? llvm::AtomicRMWInst::Min
-                            : llvm::AtomicRMWInst::UMin;
+    Op = E->getValueType()->isSignedIntegerType() ? llvm::AtomicRMWInst::Min
+                                                  : llvm::AtomicRMWInst::UMin;
     break;
 
   case AtomicExpr::AO__opencl_atomic_fetch_max:
-    Op = isSignedInteger(E) ? llvm::AtomicRMWInst::Max
-                            : llvm::AtomicRMWInst::UMax;
+    Op = E->getValueType()->isSignedIntegerType() ? llvm::AtomicRMWInst::Max
+                                                  : llvm::AtomicRMWInst::UMax;
     break;
 
   case AtomicExpr::AO__atomic_and_fetch:
@@ -904,28 +890,22 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     // Atomic address is the first or second parameter
     // The OpenCL atomic library functions only accept pointer arguments to
     // generic address space.
-    auto CastToGenericAddrSpace = [&](llvm::Value *V, Expr *E, bool DoIt) {
-      if (!DoIt)
+    auto CastToGenericAddrSpace = [&](llvm::Value *V, QualType PT) {
+      if (!E->isOpenCL())
         return V;
       auto DestAS = getContext().getTargetAddressSpace(LangAS::opencl_generic);
       auto T = V->getType();
-      auto OrigAS = T->getPointerAddressSpace();
-      if (OrigAS == DestAS)
+      auto AS = PT->getAs<PointerType>()->getPointeeType().getAddressSpace();
+      if (AS == LangAS::opencl_generic)
         return V;
-      auto OrigLangAS = E->getType()
-                            .getTypePtr()
-                            ->getAs<PointerType>()
-                            ->getPointeeType()
-                            .getAddressSpace();
       auto *DestType = T->getPointerElementType()->getPointerTo(DestAS);
 
       return getTargetHooks().performAddrSpaceCast(
-          *this, V, OrigLangAS, LangAS::opencl_generic, DestType, false);
+          *this, V, AS, LangAS::opencl_generic, DestType, false);
     };
 
-    Args.add(RValue::get(
-                 CastToGenericAddrSpace(EmitCastToVoidPtr(Ptr.getPointer()),
-                                        E->getPtr(), /*DoIt*/ E->isOpenCL())),
+    Args.add(RValue::get(CastToGenericAddrSpace(
+                 EmitCastToVoidPtr(Ptr.getPointer()), E->getPtr()->getType())),
              getContext().VoidPtrTy);
 
     std::string LibCallName;
@@ -955,10 +935,10 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       LibCallName = "__atomic_compare_exchange";
       RetTy = getContext().BoolTy;
       HaveRetTy = true;
-      Args.add(RValue::get(CastToGenericAddrSpace(
-                   EmitCastToVoidPtr(Val1.getPointer()), E->getVal1(),
-                   /*DoIt*/ E->isOpenCL())),
-               getContext().VoidPtrTy);
+      Args.add(
+          RValue::get(CastToGenericAddrSpace(
+              EmitCastToVoidPtr(Val1.getPointer()), E->getVal1()->getType())),
+          getContext().VoidPtrTy);
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val2.getPointer(),
                         MemTy, E->getExprLoc(), sizeChars);
       Args.add(RValue::get(Order), getContext().IntTy);
@@ -1056,14 +1036,16 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
                         MemTy, E->getExprLoc(), sizeChars);
       break;
     case AtomicExpr::AO__opencl_atomic_fetch_min:
-      LibCallName =
-          isSignedInteger(E) ? "__atomic_fetch_min" : "__atomic_fetch_umin";
+      LibCallName = E->getValueType()->isSignedIntegerType()
+                        ? "__atomic_fetch_min"
+                        : "__atomic_fetch_umin";
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
                         LoweredMemTy, E->getExprLoc(), sizeChars);
       break;
     case AtomicExpr::AO__opencl_atomic_fetch_max:
-      LibCallName =
-          isSignedInteger(E) ? "__atomic_fetch_max" : "__atomic_fetch_umax";
+      LibCallName = E->getValueType()->isSignedIntegerType()
+                        ? "__atomic_fetch_max"
+                        : "__atomic_fetch_umax";
       AddDirectArgument(*this, Args, UseOptimizedLibcall, Val1.getPointer(),
                         LoweredMemTy, E->getExprLoc(), sizeChars);
       break;
@@ -1152,9 +1134,9 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
 
   assert(isa<llvm::ConstantInt>(Scope) &&
       "Non-constant synchronization scope not supported");
-  auto SCID = getLLVMContext().getOrInsertSyncScopeID(
-      getTargetHooks().getSyncScopeName(static_cast<SyncScope::ID>(
-          cast<llvm::ConstantInt>(Scope)->getZExtValue())));
+  auto SCID = getTargetHooks().getLLVMSyncScopeID(
+      static_cast<SyncScope>(cast<llvm::ConstantInt>(Scope)->getZExtValue()),
+      getLLVMContext());
 
   if (isa<llvm::ConstantInt>(Order)) {
     auto ord = cast<llvm::ConstantInt>(Order)->getZExtValue();

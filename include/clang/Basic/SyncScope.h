@@ -1,4 +1,4 @@
-//===--- SyncScope.h - atomic synchronization scopes ------------*- C++ -*-===//
+//===--- SyncScope.h - Atomic synchronization scopes ------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -17,25 +17,22 @@
 
 namespace clang {
 
-namespace SyncScope {
-
-/// \brief Defines the synch scope values used by the atomic instructions.
-///
-enum ID {
-  SingleThread      = 0,
-  WorkGroup         = 1,
-  Device            = 2,
-  System            = 3,
-  SubGroup          = 4,
+/// \brief Defines the synch scope values used by the atomic builtins and
+/// expressions
+enum class SyncScope {
+  OpenCLWorkItem = 0,
+  OpenCLWorkGroup = 1,
+  OpenCLDevice = 2,
+  OpenCLAllSVMDevices = 3,
+  OpenCLSubGroup = 4,
 };
 
-inline unsigned getMaxValue(void) {
-  return SubGroup;
+inline unsigned getMaxSyncScopeValue() {
+  return static_cast<unsigned>(SyncScope::OpenCLSubGroup);
 }
 
-inline bool isValid(unsigned Scope) {
-  return Scope <= getMaxValue();
-}
+inline bool isValidSyncScopeValue(unsigned Scope) {
+  return Scope <= getMaxSyncScopeValue();
 }
 }
 

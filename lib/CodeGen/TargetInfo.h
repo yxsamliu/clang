@@ -262,8 +262,9 @@ public:
   performAddrSpaceCast(CodeGenModule &CGM, llvm::Constant *V, unsigned SrcAddr,
                        unsigned DestAddr, llvm::Type *DestTy) const;
 
-  /// Get the syncscope name used in LLVM IR.
-  virtual llvm::StringRef getSyncScopeName(SyncScope::ID S) const;
+  /// Get the syncscope used in LLVM IR.
+  virtual llvm::SyncScope::ID getLLVMSyncScopeID(SyncScope S,
+                                                 llvm::LLVMContext &C) const;
 };
 
 } // namespace CodeGen
