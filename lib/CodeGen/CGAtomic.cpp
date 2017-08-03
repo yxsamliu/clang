@@ -893,11 +893,11 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
     auto CastToGenericAddrSpace = [&](llvm::Value *V, QualType PT) {
       if (!E->isOpenCL())
         return V;
-      auto DestAS = getContext().getTargetAddressSpace(LangAS::opencl_generic);
-      auto T = V->getType();
       auto AS = PT->getAs<PointerType>()->getPointeeType().getAddressSpace();
       if (AS == LangAS::opencl_generic)
         return V;
+      auto DestAS = getContext().getTargetAddressSpace(LangAS::opencl_generic);
+      auto T = V->getType();
       auto *DestType = T->getPointerElementType()->getPointerTo(DestAS);
 
       return getTargetHooks().performAddrSpaceCast(

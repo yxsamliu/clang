@@ -11,10 +11,8 @@ atomic_int j;
 
 void fi1(atomic_int *i) {
   // CHECK-LABEL: @fi1
-  // CHECK: load atomic i32, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} syncscope("singlethread") seq_cst
-  int x = __opencl_atomic_load(i, memory_order_seq_cst, memory_scope_work_item);
   // CHECK: load atomic i32, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
-  x = __opencl_atomic_load(i, memory_order_seq_cst, memory_scope_work_group);
+  int x = __opencl_atomic_load(i, memory_order_seq_cst, memory_scope_work_group);
   // CHECK: load atomic i32, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} syncscope("agent") seq_cst
   x = __opencl_atomic_load(i, memory_order_seq_cst, memory_scope_device);
   // CHECK: load atomic i32, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} seq_cst
@@ -25,51 +23,51 @@ void fi1(atomic_int *i) {
 
 void fi2(atomic_int *i) {
   // CHECK-LABEL: @fi2
-  // CHECK: store atomic i32 %{{[.0-9A-Z_a-z]+}}, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} syncscope("singlethread") seq_cst
-  __opencl_atomic_store(i, 1, memory_order_seq_cst, memory_scope_work_item);
+  // CHECK: store atomic i32 %{{[.0-9A-Z_a-z]+}}, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
+  __opencl_atomic_store(i, 1, memory_order_seq_cst, memory_scope_work_group);
 }
 
 void fi3(atomic_int *i, atomic_uint *ui) {
   // CHECK-LABEL: @fi3
-  // CHECK: atomicrmw and i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("singlethread") seq_cst
-  int x = __opencl_atomic_fetch_and(i, 1, memory_order_seq_cst, memory_scope_work_item);
-  // CHECK: atomicrmw min i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("singlethread") seq_cst
-  x = __opencl_atomic_fetch_min(i, 1, memory_order_seq_cst, memory_scope_work_item);
-  // CHECK: atomicrmw max i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("singlethread") seq_cst
-  x = __opencl_atomic_fetch_max(i, 1, memory_order_seq_cst, memory_scope_work_item);
-  // CHECK: atomicrmw umin i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("singlethread") seq_cst
-  x = __opencl_atomic_fetch_min(ui, 1, memory_order_seq_cst, memory_scope_work_item);
-  // CHECK: atomicrmw umax i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("singlethread") seq_cst
-  x = __opencl_atomic_fetch_max(ui, 1, memory_order_seq_cst, memory_scope_work_item);
+  // CHECK: atomicrmw and i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
+  int x = __opencl_atomic_fetch_and(i, 1, memory_order_seq_cst, memory_scope_work_group);
+  // CHECK: atomicrmw min i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
+  x = __opencl_atomic_fetch_min(i, 1, memory_order_seq_cst, memory_scope_work_group);
+  // CHECK: atomicrmw max i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
+  x = __opencl_atomic_fetch_max(i, 1, memory_order_seq_cst, memory_scope_work_group);
+  // CHECK: atomicrmw umin i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
+  x = __opencl_atomic_fetch_min(ui, 1, memory_order_seq_cst, memory_scope_work_group);
+  // CHECK: atomicrmw umax i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}}, i32 %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
+  x = __opencl_atomic_fetch_max(ui, 1, memory_order_seq_cst, memory_scope_work_group);
 }
 
 bool fi4(atomic_int *i) {
   // CHECK-LABEL: @fi4(
-  // CHECK: [[PAIR:%[.0-9A-Z_a-z]+]] = cmpxchg i32 addrspace(4)* [[PTR:%[.0-9A-Z_a-z]+]], i32 [[EXPECTED:%[.0-9A-Z_a-z]+]], i32 [[DESIRED:%[.0-9A-Z_a-z]+]] syncscope("singlethread") acquire acquire
+  // CHECK: [[PAIR:%[.0-9A-Z_a-z]+]] = cmpxchg i32 addrspace(4)* [[PTR:%[.0-9A-Z_a-z]+]], i32 [[EXPECTED:%[.0-9A-Z_a-z]+]], i32 [[DESIRED:%[.0-9A-Z_a-z]+]] syncscope("workgroup") acquire acquire
   // CHECK: [[OLD:%[.0-9A-Z_a-z]+]] = extractvalue { i32, i1 } [[PAIR]], 0
   // CHECK: [[CMP:%[.0-9A-Z_a-z]+]] = extractvalue { i32, i1 } [[PAIR]], 1
   // CHECK: br i1 [[CMP]], label %[[STORE_EXPECTED:[.0-9A-Z_a-z]+]], label %[[CONTINUE:[.0-9A-Z_a-z]+]]
   // CHECK: store i32 [[OLD]]
   int cmp = 0;
-  return __opencl_atomic_compare_exchange_strong(i, &cmp, 1, memory_order_acquire, memory_order_acquire, memory_scope_work_item);
+  return __opencl_atomic_compare_exchange_strong(i, &cmp, 1, memory_order_acquire, memory_order_acquire, memory_scope_work_group);
 }
 
 float ff1(global atomic_float *d) {
   // CHECK-LABEL: @ff1
-  // CHECK: load atomic i32, i32 addrspace(1)* {{.*}} syncscope("singlethread") monotonic
-  return __opencl_atomic_load(d, memory_order_relaxed, memory_scope_work_item);
+  // CHECK: load atomic i32, i32 addrspace(1)* {{.*}} syncscope("workgroup") monotonic
+  return __opencl_atomic_load(d, memory_order_relaxed, memory_scope_work_group);
 }
 
 void ff2(atomic_float *d) {
   // CHECK-LABEL: @ff2
-  // CHECK: store atomic i32 {{.*}} syncscope("singlethread") release
-  __opencl_atomic_store(d, 1, memory_order_release, memory_scope_work_item);
+  // CHECK: store atomic i32 {{.*}} syncscope("workgroup") release
+  __opencl_atomic_store(d, 1, memory_order_release, memory_scope_work_group);
 }
 
 float ff3(atomic_float *d) {
   // CHECK-LABEL: @ff3
-  // CHECK: atomicrmw xchg i32 addrspace(4)* {{.*}} syncscope("singlethread") seq_cst
-  return __opencl_atomic_exchange(d, 2, memory_order_seq_cst, memory_scope_work_item);
+  // CHECK: atomicrmw xchg i32 addrspace(4)* {{.*}} syncscope("workgroup") seq_cst
+  return __opencl_atomic_exchange(d, 2, memory_order_seq_cst, memory_scope_work_group);
 }
 
 // CHECK-LABEL: @atomic_init_foo
@@ -85,16 +83,16 @@ void atomic_init_foo()
 
 // CHECK-LABEL: @failureOrder
 void failureOrder(atomic_int *ptr, int *ptr2) {
-  // CHECK: cmpxchg i32 addrspace(4)* {{%[0-9A-Za-z._]+}}, i32 {{%[0-9A-Za-z._]+}}, i32 {{%[0-9A-Za-z_.]+}} syncscope("singlethread") acquire monotonic
-  __opencl_atomic_compare_exchange_strong(ptr, ptr2, 43, memory_order_acquire, memory_order_relaxed, memory_scope_work_item);
+  // CHECK: cmpxchg i32 addrspace(4)* {{%[0-9A-Za-z._]+}}, i32 {{%[0-9A-Za-z._]+}}, i32 {{%[0-9A-Za-z_.]+}} syncscope("workgroup") acquire monotonic
+  __opencl_atomic_compare_exchange_strong(ptr, ptr2, 43, memory_order_acquire, memory_order_relaxed, memory_scope_work_group);
 
-  // CHECK: cmpxchg weak i32 addrspace(4)* {{%[0-9A-Za-z._]+}}, i32 {{%[0-9A-Za-z._]+}}, i32 {{%[0-9A-Za-z_.]+}} syncscope("singlethread") seq_cst acquire
-  __opencl_atomic_compare_exchange_weak(ptr, ptr2, 43, memory_order_seq_cst, memory_order_acquire, memory_scope_work_item);
+  // CHECK: cmpxchg weak i32 addrspace(4)* {{%[0-9A-Za-z._]+}}, i32 {{%[0-9A-Za-z._]+}}, i32 {{%[0-9A-Za-z_.]+}} syncscope("workgroup") seq_cst acquire
+  __opencl_atomic_compare_exchange_weak(ptr, ptr2, 43, memory_order_seq_cst, memory_order_acquire, memory_scope_work_group);
 }
 
 // CHECK-LABEL: @generalFailureOrder
 void generalFailureOrder(atomic_int *ptr, int *ptr2, int success, int fail) {
-  __opencl_atomic_compare_exchange_strong(ptr, ptr2, 42, success, fail, memory_scope_work_item);
+  __opencl_atomic_compare_exchange_strong(ptr, ptr2, 42, success, fail, memory_scope_work_group);
   // CHECK: switch i32 {{.*}}, label %[[MONOTONIC:[0-9a-zA-Z._]+]] [
   // CHECK-NEXT: i32 1, label %[[ACQUIRE:[0-9a-zA-Z._]+]]
   // CHECK-NEXT: i32 2, label %[[ACQUIRE]]
@@ -168,11 +166,11 @@ int test_volatile(volatile atomic_int *i) {
   // CHECK-NEXT: %[[atomicdst:.*]] = alloca i32
   // CHECK-NEXT: store i32 addrspace(4)* %i, i32 addrspace(4)** %[[i_addr]]
   // CHECK-NEXT: %[[addr:.*]] = load i32 addrspace(4)*, i32 addrspace(4)** %[[i_addr]]
-  // CHECK-NEXT: %[[res:.*]] = load atomic volatile i32, i32 addrspace(4)* %[[addr]] syncscope("singlethread") seq_cst
+  // CHECK-NEXT: %[[res:.*]] = load atomic volatile i32, i32 addrspace(4)* %[[addr]] syncscope("workgroup") seq_cst
   // CHECK-NEXT: store i32 %[[res]], i32* %[[atomicdst]]
   // CHECK-NEXT: %[[retval:.*]] = load i32, i32* %[[atomicdst]]
   // CHECK-NEXT: ret i32 %[[retval]]
-  return __opencl_atomic_load(i, memory_order_seq_cst, memory_scope_work_item);
+  return __opencl_atomic_load(i, memory_order_seq_cst, memory_scope_work_group);
 }
 
 #endif

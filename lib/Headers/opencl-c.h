@@ -13142,12 +13142,12 @@ void __ovld __conv barrier(cl_mem_fence_flags flags);
 #if __OPENCL_C_VERSION__ >= CL_VERSION_2_0
 
 typedef enum memory_scope {
-  memory_scope_work_item,
-  memory_scope_work_group,
-  memory_scope_device,
-  memory_scope_all_svm_devices,
+  memory_scope_work_item = __OPENCL_MEMORY_SCOPE_WORK_ITEM,
+  memory_scope_work_group = __OPENCL_MEMORY_SCOPE_WORK_GROUP,
+  memory_scope_device = __OPENCL_MEMORY_SCOPE_DEVICE,
+  memory_scope_all_svm_devices = __OPENCL_MEMORY_SCOPE_ALL_SVM_DEVICES,
 #if defined(cl_intel_subgroups) || defined(cl_khr_subgroups)
-  memory_scope_sub_group
+  memory_scope_sub_group = __OPENCL_MEMORY_SCOPE_SUB_GROUP
 #endif
 } memory_scope;
 

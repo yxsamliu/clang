@@ -7551,9 +7551,6 @@ AMDGPUTargetCodeGenInfo::getLLVMSyncScopeID(SyncScope S,
                                             llvm::LLVMContext &C) const {
   StringRef Name;
   switch (S) {
-  case SyncScope::OpenCLWorkItem:
-    Name = "singlethread";
-    break;
   case SyncScope::OpenCLWorkGroup:
     Name = "workgroup";
     break;
