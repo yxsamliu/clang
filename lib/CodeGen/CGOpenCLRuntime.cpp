@@ -84,22 +84,20 @@ llvm::PointerType *CGOpenCLRuntime::getSamplerType() {
   return SamplerTy;
 }
 
-llvm::Value *CGOpenCLRuntime::getPipeElemSize(const Expr *PipeArg) {
+unsigned CGOpenCLRuntime::getPipeElemSize(const Expr *PipeArg) {
   const PipeType *PipeTy = PipeArg->getType()->getAs<PipeType>();
   // The type of the last (implicit) argument to be passed.
   llvm::Type *Int32Ty = llvm::IntegerType::getInt32Ty(CGM.getLLVMContext());
-  unsigned TypeSize = CGM.getContext()
+  return CGM.getContext()
                           .getTypeSizeInChars(PipeTy->getElementType())
                           .getQuantity();
-  return llvm::ConstantInt::get(Int32Ty, TypeSize, false);
 }
 
-llvm::Value *CGOpenCLRuntime::getPipeElemAlign(const Expr *PipeArg) {
+unsigned CGOpenCLRuntime::getPipeElemAlign(const Expr *PipeArg) {
   const PipeType *PipeTy = PipeArg->getType()->getAs<PipeType>();
   // The type of the last (implicit) argument to be passed.
   llvm::Type *Int32Ty = llvm::IntegerType::getInt32Ty(CGM.getLLVMContext());
-  unsigned TypeSize = CGM.getContext()
+  return CGM.getContext()
                           .getTypeAlignInChars(PipeTy->getElementType())
                           .getQuantity();
-  return llvm::ConstantInt::get(Int32Ty, TypeSize, false);
 }
