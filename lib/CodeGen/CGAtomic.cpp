@@ -493,49 +493,6 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
                          Address Ptr, Address Val1, Address Val2,
                          llvm::Value *IsWeak, llvm::Value *FailureOrder,
                          uint64_t Size, llvm::AtomicOrdering Order,
-                         llvm::Value *Scope) {
-  if (auto SC = dyn_cast<llvm::ConstantInt>(Scope)->getZExtValue()) {
-    auto SCID = CGF.getTargetHooks().getLLVMSyncScopeID(
-      static_cast<SyncScope>(SC),
-      CGF.CGM.getLLVMContext());
-    EmitAtomicOp(CGF, E, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
-      Order, SCID);
-  }
-
-  // Handle non-constant scope.
-  auto &Builder = CGF.Builder;
-  auto Scopes = getAllSyncScopeValues();
-  llvm::SmallVector<llvm::BasicBlock *, 4> BB;
-  for (auto S : Scopes) {
-    BB.push_back(CGF.createBasicBlock(getAsString(S), CGF.CurFn));
-  }
-  //llvm::BasicBlock *ContBB = CGF.createBasicBlock("atomic.scope.continue", CGF.CurFn);
-
-
-  auto *SC = Builder.CreateIntCast(Order, Builder.getInt32Ty(), false);
-  llvm::SwitchInst *SI;
-  for (unsigned I = 0, E = Scopes.size(); I != E; ++I) {
-    auto SCID = CGF.getTargetHooks().getLLVMSyncScopeID(
-      static_cast<SyncScope>(Scopes[I]),
-      CGF.getLLVMContext());
-    auto *B = BB[I];
-    if (I == 0)
-      SI = Builder.CreateSwitch(SC, B);
-    else
-      SI->addCase(Builder.getUInt32(static_cast<unsigned>(Scopes[I])), B);
-
-    // Emit all the different atomics
-    Builder.SetInsertPoint(B);
-    EmitAtomicOp(CGF, E, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
-               Order, Scope);
-    //Builder.CreateBr(ContBB);
-  }
-}
-
-static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
-                         Address Ptr, Address Val1, Address Val2,
-                         llvm::Value *IsWeak, llvm::Value *FailureOrder,
-                         uint64_t Size, llvm::AtomicOrdering Order,
                          llvm::SyncScope::ID Scope) {
   llvm::AtomicRMWInst::BinOp Op = llvm::AtomicRMWInst::Add;
   llvm::Instruction::BinaryOps PostOp = (llvm::Instruction::BinaryOps)0;
@@ -700,6 +657,48 @@ EmitValToTemp(CodeGenFunction &CGF, Expr *E) {
   CGF.EmitAnyExprToMem(E, DeclPtr, E->getType().getQualifiers(),
                        /*Init*/ true);
   return DeclPtr;
+}
+
+static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
+                         Address Ptr, Address Val1, Address Val2,
+                         llvm::Value *IsWeak, llvm::Value *FailureOrder,
+                         uint64_t Size, llvm::AtomicOrdering Order,
+                         llvm::Value *Scope) {
+  if (auto SC = dyn_cast<llvm::ConstantInt>(Scope)->getZExtValue()) {
+    auto SCID = CGF.getTargetHooks().getLLVMSyncScopeID(
+      static_cast<SyncScope>(SC),
+      CGF.CGM.getLLVMContext());
+    EmitAtomicOp(CGF, E, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
+      Order, SCID);
+  }
+
+  // Handle non-constant scope.
+  auto &Builder = CGF.Builder;
+  auto Scopes = getAllSyncScopeValues();
+  llvm::SmallVector<llvm::BasicBlock *, 4> BB;
+  for (auto S : Scopes) {
+    BB.push_back(CGF.createBasicBlock(getAsString(S), CGF.CurFn));
+  }
+  //llvm::BasicBlock *ContBB = CGF.createBasicBlock("atomic.scope.continue", CGF.CurFn);
+
+  auto *SC = Builder.CreateIntCast(Order, Builder.getInt32Ty(), false);
+  llvm::SwitchInst *SI;
+  for (unsigned I = 0, E = Scopes.size(); I != E; ++I) {
+    auto SCID = CGF.getTargetHooks().getLLVMSyncScopeID(
+      static_cast<SyncScope>(Scopes[I]),
+      CGF.getLLVMContext());
+    auto *B = BB[I];
+    if (I == 0)
+      SI = Builder.CreateSwitch(SC, B);
+    else
+      SI->addCase(Builder.getUInt32(static_cast<unsigned>(Scopes[I])), B);
+
+    // Emit all the different atomics
+    Builder.SetInsertPoint(B);
+    EmitAtomicOp(CGF, E, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
+               Order, Scope);
+    //Builder.CreateBr(ContBB);
+  }
 }
 
 static void
