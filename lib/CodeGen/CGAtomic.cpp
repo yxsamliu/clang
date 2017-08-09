@@ -659,7 +659,7 @@ EmitValToTemp(CodeGenFunction &CGF, Expr *E) {
   return DeclPtr;
 }
 
-static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
+static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *Expr, Address Dest,
                          Address Ptr, Address Val1, Address Val2,
                          llvm::Value *IsWeak, llvm::Value *FailureOrder,
                          uint64_t Size, llvm::AtomicOrdering Order,
@@ -668,7 +668,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     auto SCID = CGF.getTargetHooks().getLLVMSyncScopeID(
       static_cast<SyncScope>(SC),
       CGF.CGM.getLLVMContext());
-    EmitAtomicOp(CGF, E, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
+    EmitAtomicOp(CGF, Expr, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
       Order, SCID);
   }
 
@@ -681,7 +681,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
   }
   //llvm::BasicBlock *ContBB = CGF.createBasicBlock("atomic.scope.continue", CGF.CurFn);
 
-  auto *SC = Builder.CreateIntCast(Order, Builder.getInt32Ty(), false);
+  auto *SC = Builder.CreateIntCast(Scope, Builder.getInt32Ty(), false);
   llvm::SwitchInst *SI;
   for (unsigned I = 0, E = Scopes.size(); I != E; ++I) {
     auto SCID = CGF.getTargetHooks().getLLVMSyncScopeID(
@@ -691,11 +691,11 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
     if (I == 0)
       SI = Builder.CreateSwitch(SC, B);
     else
-      SI->addCase(Builder.getUInt32(static_cast<unsigned>(Scopes[I])), B);
+      SI->addCase(Builder.getInt32(static_cast<unsigned>(Scopes[I])), B);
 
     // Emit all the different atomics
     Builder.SetInsertPoint(B);
-    EmitAtomicOp(CGF, E, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
+    EmitAtomicOp(CGF, Expr, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
                Order, Scope);
     //Builder.CreateBr(ContBB);
   }
