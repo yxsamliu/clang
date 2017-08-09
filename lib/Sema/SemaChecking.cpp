@@ -3130,11 +3130,8 @@ ExprResult Sema::SemaAtomicOpsOverloaded(ExprResult TheCallResult,
     if (IsOpenCL) {
       Scope = TheCall->getArg(TheCall->getNumArgs() - 1);
       llvm::APSInt Result(32);
-      if (!Scope->isIntegerConstantExpr(Result, Context))
-        Diag(Scope->getLocStart(),
-             diag::err_atomic_op_has_non_constant_synch_scope)
-            << Scope->getSourceRange();
-      else if (!isValidSyncScopeValue(Result.getZExtValue()))
+      if (Scope->isIntegerConstantExpr(Result, Context) &&
+          !isValidSyncScopeValue(Result.getZExtValue()))
         Diag(Scope->getLocStart(), diag::err_atomic_op_has_invalid_synch_scope)
             << Scope->getSourceRange();
     } else {
