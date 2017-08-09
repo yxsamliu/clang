@@ -493,6 +493,49 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
                          Address Ptr, Address Val1, Address Val2,
                          llvm::Value *IsWeak, llvm::Value *FailureOrder,
                          uint64_t Size, llvm::AtomicOrdering Order,
+                         llvm::Value *Scope) {
+  if (auto SC = dyn_cast<llvm::ConstantInt>(Scope)->getZExtValue()) {
+    auto SCID = CGF.getTargetHooks().getLLVMSyncScopeID(
+      static_cast<SyncScope>(SC),
+      CGF.CGM.getLLVMContext());
+    EmitAtomicOp(CGF, E, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
+      Order, SCID);
+  }
+
+  // Handle non-constant scope.
+  auto &Builder = CGF.Builder;
+  auto Scopes = getAllSyncScopeValues();
+  llvm::SmallVector<llvm::BasicBlock *, 4> BB;
+  for (auto S : Scopes) {
+    BB.push_back(CGF.createBasicBlock(getAsString(S), CGF.CurFn));
+  }
+  //llvm::BasicBlock *ContBB = CGF.createBasicBlock("atomic.scope.continue", CGF.CurFn);
+
+
+  auto *SC = Builder.CreateIntCast(Order, Builder.getInt32Ty(), false);
+  llvm::SwitchInst *SI;
+  for (unsigned I = 0, E = Scopes.size(); I != E; ++I) {
+    auto SCID = CGF.getTargetHooks().getLLVMSyncScopeID(
+      static_cast<SyncScope>(Scopes[I]),
+      CGF.getLLVMContext());
+    auto *B = BB[I];
+    if (I == 0)
+      SI = Builder.CreateSwitch(SC, B);
+    else
+      SI->addCase(Builder.getUInt32(static_cast<unsigned>(Scopes[I])), B);
+
+    // Emit all the different atomics
+    Builder.SetInsertPoint(B);
+    EmitAtomicOp(CGF, E, Dest, Ptr, Val1, Val2, IsWeak, FailureOrder, Size,
+               Order, Scope);
+    //Builder.CreateBr(ContBB);
+  }
+}
+
+static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
+                         Address Ptr, Address Val1, Address Val2,
+                         llvm::Value *IsWeak, llvm::Value *FailureOrder,
+                         uint64_t Size, llvm::AtomicOrdering Order,
                          llvm::SyncScope::ID Scope) {
   llvm::AtomicRMWInst::BinOp Op = llvm::AtomicRMWInst::Add;
   llvm::Instruction::BinaryOps PostOp = (llvm::Instruction::BinaryOps)0;
@@ -1132,12 +1175,6 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
                 E->getOp() == AtomicExpr::AO__atomic_load ||
                 E->getOp() == AtomicExpr::AO__atomic_load_n;
 
-  assert(isa<llvm::ConstantInt>(Scope) &&
-      "Non-constant synchronization scope not supported");
-  auto SCID = getTargetHooks().getLLVMSyncScopeID(
-      static_cast<SyncScope>(cast<llvm::ConstantInt>(Scope)->getZExtValue()),
-      getLLVMContext());
-
   if (isa<llvm::ConstantInt>(Order)) {
     auto ord = cast<llvm::ConstantInt>(Order)->getZExtValue();
     // We should not ever get to a case where the ordering isn't a valid C ABI
@@ -1146,30 +1183,30 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
       switch ((llvm::AtomicOrderingCABI)ord) {
       case llvm::AtomicOrderingCABI::relaxed:
         EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-                     llvm::AtomicOrdering::Monotonic, SCID);
+                     llvm::AtomicOrdering::Monotonic, Scope);
         break;
       case llvm::AtomicOrderingCABI::consume:
       case llvm::AtomicOrderingCABI::acquire:
         if (IsStore)
           break; // Avoid crashing on code with undefined behavior
         EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-                     llvm::AtomicOrdering::Acquire, SCID);
+                     llvm::AtomicOrdering::Acquire, Scope);
         break;
       case llvm::AtomicOrderingCABI::release:
         if (IsLoad)
           break; // Avoid crashing on code with undefined behavior
         EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-                     llvm::AtomicOrdering::Release, SCID);
+                     llvm::AtomicOrdering::Release, Scope);
         break;
       case llvm::AtomicOrderingCABI::acq_rel:
         if (IsLoad || IsStore)
           break; // Avoid crashing on code with undefined behavior
         EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-                     llvm::AtomicOrdering::AcquireRelease, SCID);
+                     llvm::AtomicOrdering::AcquireRelease, Scope);
         break;
       case llvm::AtomicOrderingCABI::seq_cst:
         EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-                     llvm::AtomicOrdering::SequentiallyConsistent, SCID);
+                     llvm::AtomicOrdering::SequentiallyConsistent, Scope);
         break;
       }
     if (RValTy->isVoidType())
@@ -1206,12 +1243,12 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   // Emit all the different atomics
   Builder.SetInsertPoint(MonotonicBB);
   EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-               llvm::AtomicOrdering::Monotonic, SCID);
+               llvm::AtomicOrdering::Monotonic, Scope);
   Builder.CreateBr(ContBB);
   if (!IsStore) {
     Builder.SetInsertPoint(AcquireBB);
     EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-                 llvm::AtomicOrdering::Acquire, SCID);
+                 llvm::AtomicOrdering::Acquire, Scope);
     Builder.CreateBr(ContBB);
     SI->addCase(Builder.getInt32((int)llvm::AtomicOrderingCABI::consume),
                 AcquireBB);
@@ -1221,7 +1258,7 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   if (!IsLoad) {
     Builder.SetInsertPoint(ReleaseBB);
     EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-                 llvm::AtomicOrdering::Release, SCID);
+                 llvm::AtomicOrdering::Release, Scope);
     Builder.CreateBr(ContBB);
     SI->addCase(Builder.getInt32((int)llvm::AtomicOrderingCABI::release),
                 ReleaseBB);
@@ -1229,14 +1266,14 @@ RValue CodeGenFunction::EmitAtomicExpr(AtomicExpr *E) {
   if (!IsLoad && !IsStore) {
     Builder.SetInsertPoint(AcqRelBB);
     EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-                 llvm::AtomicOrdering::AcquireRelease, SCID);
+                 llvm::AtomicOrdering::AcquireRelease, Scope);
     Builder.CreateBr(ContBB);
     SI->addCase(Builder.getInt32((int)llvm::AtomicOrderingCABI::acq_rel),
                 AcqRelBB);
   }
   Builder.SetInsertPoint(SeqCstBB);
   EmitAtomicOp(*this, E, Dest, Ptr, Val1, Val2, IsWeak, OrderFail, Size,
-               llvm::AtomicOrdering::SequentiallyConsistent, SCID);
+               llvm::AtomicOrdering::SequentiallyConsistent, Scope);
   Builder.CreateBr(ContBB);
   SI->addCase(Builder.getInt32((int)llvm::AtomicOrderingCABI::seq_cst),
               SeqCstBB);

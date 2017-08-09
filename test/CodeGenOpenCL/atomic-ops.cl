@@ -52,6 +52,12 @@ bool fi4(atomic_int *i) {
   return __opencl_atomic_compare_exchange_strong(i, &cmp, 1, memory_order_acquire, memory_order_acquire, memory_scope_work_group);
 }
 
+void fi5(atomic_int *i, int scope) {
+  // CHECK-LABEL: @fi5
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
+  int x = __opencl_atomic_load(i, memory_order_seq_cst, scope);
+}
+
 float ff1(global atomic_float *d) {
   // CHECK-LABEL: @ff1
   // CHECK: load atomic i32, i32 addrspace(1)* {{.*}} syncscope("workgroup") monotonic
