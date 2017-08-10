@@ -54,8 +54,48 @@ bool fi4(atomic_int *i) {
 
 void fi5(atomic_int *i, int scope) {
   // CHECK-LABEL: @fi5
-  // CHECK: load atomic i32, i32 addrspace(4)* %{{[.0-9A-Z_a-z]+}} syncscope("workgroup") seq_cst
+  // CHECK: switch i32 %{{.*}}, label %opencl_allsvmdevices [
+  // CHECK-NEXT: i32 1, label %opencl_workgroup
+  // CHECK-NEXT: i32 2, label %opencl_device
+  // CHECK-NEXT: i32 4, label %opencl_subgroup
+  // CHECK-NEXT: ]
+  // CHECK: opencl_workgroup:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("workgroup") seq_cst
+  // CHECK: br label %atomic.scope.continue
+  // CHECK: opencl_device:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("agent") seq_cst
+  // CHECK: br label %atomic.scope.continue
+  // CHECK: opencl_allsvmdevices:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} seq_cst, align 4
+  // CHECK: br label %atomic.scope.continue
+  // CHECK: opencl_subgroup:
+  // CHECK: %5 = load atomic i32, i32 addrspace(4)* %0 syncscope("subgroup") seq_cst, align 4
+  // CHECK: br label %atomic.scope.continue
+  // CHECK: atomic.scope.continue:
   int x = __opencl_atomic_load(i, memory_order_seq_cst, scope);
+}
+
+void fi6(atomic_int *i, int order, int scope) {
+  // CHECK-LABEL: @fi5
+  // CHECK: switch i32 %{{.*}}, label %opencl_allsvmdevices [
+  // CHECK-NEXT: i32 1, label %opencl_workgroup
+  // CHECK-NEXT: i32 2, label %opencl_device
+  // CHECK-NEXT: i32 4, label %opencl_subgroup
+  // CHECK-NEXT: ]
+  // CHECK: opencl_workgroup:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("workgroup") seq_cst
+  // CHECK: br label %atomic.scope.continue
+  // CHECK: opencl_device:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("agent") seq_cst
+  // CHECK: br label %atomic.scope.continue
+  // CHECK: opencl_allsvmdevices:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} seq_cst, align 4
+  // CHECK: br label %atomic.scope.continue
+  // CHECK: opencl_subgroup:
+  // CHECK: %5 = load atomic i32, i32 addrspace(4)* %0 syncscope("subgroup") seq_cst, align 4
+  // CHECK: br label %atomic.scope.continue
+  // CHECK: atomic.scope.continue:
+  int x = __opencl_atomic_load(i, order, scope);
 }
 
 float ff1(global atomic_float *d) {

@@ -687,7 +687,7 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *Expr, Address Dest,
   auto *SC = Builder.CreateIntCast(Scope, Builder.getInt32Ty(), false);
   // If unsupported sync scope is encountered at run time, assume default sync
   // scope.
-  auto Default = SyncScope::OpenCLDevice;
+  auto Default = SyncScope::OpenCLAllSVMDevices;
   llvm::SwitchInst *SI =
       Builder.CreateSwitch(SC, BB[static_cast<unsigned>(Default)]);
   for (auto S : Scopes) {
