@@ -151,7 +151,7 @@ void synchscope_checks(atomic_int *Ap, int scope) {
   (void)__opencl_atomic_load(Ap, memory_order_relaxed, memory_scope_device);
   (void)__opencl_atomic_load(Ap, memory_order_relaxed, memory_scope_all_svm_devices);
   (void)__opencl_atomic_load(Ap, memory_order_relaxed, memory_scope_sub_group);
-  (void)__opencl_atomic_load(Ap, memory_order_relaxed, scope); // expected-error{{non-constant synchronization scope argument to atomic operation is not supported}}
+  (void)__opencl_atomic_load(Ap, memory_order_relaxed, scope);
   (void)__opencl_atomic_load(Ap, memory_order_relaxed, 10);    //expected-error{{synchronization scope argument to atomic operation is invalid}}
 }
 
