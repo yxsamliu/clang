@@ -76,25 +76,54 @@ void fi5(atomic_int *i, int scope) {
 }
 
 void fi6(atomic_int *i, int order, int scope) {
-  // CHECK-LABEL: @fi5
-  // CHECK: switch i32 %{{.*}}, label %opencl_allsvmdevices [
-  // CHECK-NEXT: i32 1, label %opencl_workgroup
-  // CHECK-NEXT: i32 2, label %opencl_device
-  // CHECK-NEXT: i32 4, label %opencl_subgroup
+  // CHECK-LABEL: @fi6
+  // CHECK: switch i32 %{{.*}}, label %monotonic [
+  // CHECK-NEXT: i32 1, label %acquire
+  // CHECK-NEXT: i32 2, label %acquire
+  // CHECK-NEXT: i32 5, label %seqcst
   // CHECK-NEXT: ]
-  // CHECK: opencl_workgroup:
+  // CHECK: monotonic:
+  // CHECK: switch i32 %{{.*}}, label %[[MON_ALL:.*]] [
+  // CHECK-NEXT: i32 1, label %[[MON_WG:.*]]
+  // CHECK-NEXT: i32 2, label %[[MON_DEV:.*]]
+  // CHECK-NEXT: i32 4, label %[[MON_SUB:.*]]
+  // CHECK-NEXT: ]
+  // CHECK: acquire:
+  // CHECK: switch i32 %{{.*}}, label %[[ACQ_ALL:.*]] [
+  // CHECK-NEXT: i32 1, label %[[ACQ_WG:.*]]
+  // CHECK-NEXT: i32 2, label %[[ACQ_DEV:.*]]
+  // CHECK-NEXT: i32 4, label %[[ACQ_SUB:.*]]
+  // CHECK-NEXT: ]
+  // CHECK: seqcst:
+  // CHECK: switch i32 %2, label %[[SEQ_ALL:.*]] [
+  // CHECK-NEXT: i32 1, label %[[SEQ_WG:.*]]
+  // CHECK-NEXT: i32 2, label %[[SEQ_DEV:.*]]
+  // CHECK-NEXT: i32 4, label %[[SEQ_SUB:.*]]
+  // CHECK-NEXT: ]
+  // CHECK: [[MON_WG]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("workgroup") monotonic
+  // CHECK: [[MON_DEV]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("agent") monotonic
+  // CHECK: [[MON_ALL]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} monotonic
+  // CHECK: [[MON_SUB]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("subgroupt") monotonic
+  // CHECK: [[ACQ_WG]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("workgroup") acquire
+  // CHECK: [[ACQ_DEV]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("agent") acquire
+  // CHECK: [[ACQ_ALL]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} acquire
+  // CHECK: [[ACQ_SUB]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("subgroupt") acquire
+  // CHECK: [[SEQ_WG]]:
   // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("workgroup") seq_cst
-  // CHECK: br label %atomic.scope.continue
-  // CHECK: opencl_device:
+  // CHECK: [[SEQ_DEV]]:
   // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("agent") seq_cst
-  // CHECK: br label %atomic.scope.continue
-  // CHECK: opencl_allsvmdevices:
-  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} seq_cst, align 4
-  // CHECK: br label %atomic.scope.continue
-  // CHECK: opencl_subgroup:
-  // CHECK: %5 = load atomic i32, i32 addrspace(4)* %0 syncscope("subgroup") seq_cst, align 4
-  // CHECK: br label %atomic.scope.continue
-  // CHECK: atomic.scope.continue:
+  // CHECK: [[SEQ_ALL]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} seq_cst
+  // CHECK: [[SEQ_SUB]]:
+  // CHECK: load atomic i32, i32 addrspace(4)* %{{.*}} syncscope("subgroupt") seq_cst
   int x = __opencl_atomic_load(i, order, scope);
 }
 
