@@ -2586,18 +2586,31 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
       Name = "__enqueue_kernel_vaargs";
       llvm::Value *Block = Builder.CreatePointerCast(
           EmitScalarExpr(E->getArg(3)), GenericVoidPtrTy);
+      // Create a temporary array to hold the sizes of local pointer arguments
+      // for the block.
+      auto *AT = llvm::ArrayType::get(IntTy, NumArgs - 4);
+      auto *Arr = CreateMemTemp(AT, "sizes", false);
+      Value *Ptr;
+      // Each of the following arguments specifies the size of the corresponding
+      // argument passed to the enqueued block.
+      for (unsigned I = 4/*Position of the first size arg*/; I < NumArgs; ++I) {
+        auto *Index = ConstantInt::get(IntTy, I - 4);
+        auto *GEP = Builder.CreateGEP(Arr, Index);
+        if (I == 4)
+          Ptr = GEP;
+        Builder.CreateStore(GEP, Builder.CreateZExtOrTrunc(
+            EmitScalarExpr(E->getArg(I)), SizeTy));
+      }
+
       // Create a vector of the arguments, as well as a constant value to
       // express to the runtime the number of variadic arguments.
       std::vector<llvm::Value *> Args = {Queue, Flags, Range, Block,
-                                         ConstantInt::get(IntTy, NumArgs - 4)};
+                                         ConstantInt::get(IntTy, NumArgs - 4),
+                                         Ptr};
       std::vector<llvm::Type *> ArgTys = {QueueTy, IntTy, RangeTy,
-                                          GenericVoidPtrTy, IntTy};
+                                          GenericVoidPtrTy, IntTy,
+                                         Ptr->getType()};
 
-      // Each of the following arguments specifies the size of the corresponding
-      // argument passed to the enqueued block.
-      for (unsigned I = 4/*Position of the first size arg*/; I < NumArgs; ++I)
-        Args.push_back(
-            Builder.CreateZExtOrTrunc(EmitScalarExpr(E->getArg(I)), SizeTy));
 
       llvm::FunctionType *FTy = llvm::FunctionType::get(
           Int32Ty, llvm::ArrayRef<llvm::Type *>(ArgTys), true);
