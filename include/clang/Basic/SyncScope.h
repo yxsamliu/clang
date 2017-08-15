@@ -131,7 +131,7 @@ public:
     static const unsigned Scopes[] = {
         static_cast<unsigned>(WorkGroup), static_cast<unsigned>(Device),
         static_cast<unsigned>(AllSVMDevices), static_cast<unsigned>(SubGroup)};
-    return Scopes;
+    return llvm::makeArrayRef(Scopes);
   }
 
   unsigned getFallBackValue() const override {
