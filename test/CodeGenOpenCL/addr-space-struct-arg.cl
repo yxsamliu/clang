@@ -80,6 +80,8 @@ void FuncOneMember(struct StructOneMember u) {
 }
 
 // AMD-LABEL: define void @FuncOneLargeMember(%struct.LargeStructOneMember addrspace(5)* byval align 8 %u)
+// AMD-NOT: addrspacecast
+// AMD:   store <2 x i32> %{{.*}}, <2 x i32> addrspace(5)*
 void FuncOneLargeMember(struct LargeStructOneMember u) {
   u.x[0] = (int2)(0, 0);
 }
