@@ -3851,17 +3851,14 @@ RValue CodeGenFunction::EmitCall(const CGFunctionInfo &CallInfo,
         Address Addr = RV.getAggregateAddress();
         CharUnits Align = ArgInfo.getIndirectAlign();
         const llvm::DataLayout *TD = &CGM.getDataLayout();
-        const unsigned RVAddrSpace = Addr.getPointer()
-                                         ->stripPointerCasts()
-                                         ->getType()
-                                         ->getPointerAddressSpace();
-        const unsigned ArgAddrSpace = TD->getAllocaAddrSpace();
+        const unsigned RVAddrSpace = I->Ty.getAddressSpace();
         if (getenv("DBG_IND")) {
           llvm::errs() << "RV:\n";
           Addr.getPointer()->dump();
           llvm::errs() << "CallList arg type:\n";
           I->Ty.dump();
         }
+        const unsigned ArgAddrSpace = getLangOpts().OpenCL ? LangAS::Default : CGM.getASTAllocaAddressSpace();
         assert((FirstIRArg >= IRFuncTy->getNumParams() ||
              IRFuncTy->getParamType(FirstIRArg)->getPointerAddressSpace() ==
              TD->getAllocaAddrSpace()) && "indirect argument must be in alloca address space");
