@@ -3453,6 +3453,11 @@ struct DisableDebugLocationUpdates {
 
 void CodeGenFunction::EmitCallArg(CallArgList &args, const Expr *E,
                                   QualType type) {
+  if (getenv("DBG_IND")) {
+    llvm::errs() << "EmitCallArg: ";
+    E->dump();
+    type.dump();
+  }
   DisableDebugLocationUpdates Dis(*this, E);
   if (const ObjCIndirectCopyRestoreExpr *CRE
         = dyn_cast<ObjCIndirectCopyRestoreExpr>(E)) {
@@ -3851,6 +3856,12 @@ RValue CodeGenFunction::EmitCall(const CGFunctionInfo &CallInfo,
                                          ->getType()
                                          ->getPointerAddressSpace();
         const unsigned ArgAddrSpace = TD->getAllocaAddrSpace();
+        if (getenv("DBG_IND")) {
+          llvm::errs() << "RV:\n";
+          Addr.getPointer()->dump();
+          llvm::errs() << "CallList arg type:\n";
+          I->Ty.dump();
+        }
         assert((FirstIRArg >= IRFuncTy->getNumParams() ||
              IRFuncTy->getParamType(FirstIRArg)->getPointerAddressSpace() ==
              TD->getAllocaAddrSpace()) && "indirect argument must be in alloca address space");
