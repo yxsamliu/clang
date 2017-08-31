@@ -3453,11 +3453,6 @@ struct DisableDebugLocationUpdates {
 
 void CodeGenFunction::EmitCallArg(CallArgList &args, const Expr *E,
                                   QualType type) {
-  if (getenv("DBG_IND")) {
-    llvm::errs() << "EmitCallArg: ";
-    E->dump();
-    type.dump();
-  }
   DisableDebugLocationUpdates Dis(*this, E);
   unsigned AS = 0;
   if (isa<ImplicitCastExpr>(E) &&
@@ -3858,12 +3853,6 @@ RValue CodeGenFunction::EmitCall(const CGFunctionInfo &CallInfo,
         CharUnits Align = ArgInfo.getIndirectAlign();
         const llvm::DataLayout *TD = &CGM.getDataLayout();
         const unsigned RVAddrSpace = I->AS;
-        if (getenv("DBG_IND")) {
-          llvm::errs() << "RV:\n";
-          Addr.getPointer()->dump();
-          llvm::errs() << "CallList arg type:\n";
-          I->Ty.dump();
-        }
         assert((FirstIRArg >= IRFuncTy->getNumParams() ||
              IRFuncTy->getParamType(FirstIRArg)->getPointerAddressSpace() ==
              TD->getAllocaAddrSpace()) && "indirect argument must be in alloca address space");
