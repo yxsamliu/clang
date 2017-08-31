@@ -111,11 +111,11 @@ kernel void test_indirect_arg_local(void) {
   FuncOneLargeMember(l_s);
 }
 
-// AMD-LABEL: define void @test_indirect_arg_private_aligned()
+// AMD-LABEL: define void @test_indirect_arg_private()
 // AMD: %[[p_s:.*]] = alloca %struct.LargeStructOneMember, align 8, addrspace(5)
 // AMD-NOT: @llvm.memcpy
 // AMD-NEXT: call void @FuncOneLargeMember(%struct.LargeStructOneMember addrspace(5)* byval align 8 %[[p_s]])
-void test_indirect_arg_private_aligned(void) {
+void test_indirect_arg_private(void) {
   struct LargeStructOneMember p_s;
   FuncOneLargeMember(p_s);
 }
