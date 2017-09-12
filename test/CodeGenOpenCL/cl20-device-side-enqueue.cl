@@ -7,7 +7,7 @@ typedef void (^bl_t)(local void *);
 typedef struct {int a;} ndrange_t;
 
 // N.B. The check here only exists to set BL_GLOBAL
-// COMMON: @block_G =  addrspace(1) constant void (i8 addrspace(3)*) addrspace(4)* addrspacecast (void (i8 addrspace(3)*) addrspace(1)* bitcast ({ i8**, i32, i32, i8*, %struct.__block_descriptor addrspace(2)* } addrspace(1)* [[BL_GLOBAL:@__block_literal_global(\.[0-9]+)?]] to void (i8 addrspace(3)*) addrspace(1)*) to void (i8 addrspace(3)*) addrspace(4)*)
+// COMMON: @block_G =  addrspace(1) constant void (i8 addrspace(3)*) addrspace(4)* addrspacecast (void (i8 addrspace(3)*) addrspace(1)* bitcast ({ i8* } addrspace(1)* [[BL_GLOBAL:@__block_literal_global(\.[0-9]+)?]] to void (i8 addrspace(3)*) addrspace(1)*) to void (i8 addrspace(3)*) addrspace(4)*)
 const bl_t block_G = (bl_t) ^ (local void *a) {};
 
 kernel void device_side_enqueue(global int *a, global int *b, int i) {
