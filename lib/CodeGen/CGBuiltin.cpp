@@ -31,6 +31,7 @@
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/MDBuilder.h"
 #include "llvm/Support/ConvertUTF.h"
+#include "llvm/Support/raw_ostream.h"
 #include <sstream>
 
 using namespace clang;
@@ -2610,6 +2611,14 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
 
       llvm::Value *Block = Builder.CreatePointerCast(
           EmitScalarExpr(E->getArg(3)), GenericVoidPtrTy);
+      if (getenv("DBG_BLK")) {
+        llvm::errs() << "call enqueue_kernel:\n";
+        E->dump();
+        llvm::errs() << "Block: " << *(Block->stripPointerCasts());
+        llvm::errs() << "CurFuncDecl:\n";
+        CurFuncDecl->dump();
+        llvm::errs() << "CurFn:\n" << *CurFn;
+      }
 
       AttrBuilder B;
       B.addAttribute(Attribute::ByVal);
