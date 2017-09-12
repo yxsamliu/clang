@@ -740,26 +740,25 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
 
   // Otherwise, we have to emit this as a local block.
 
-  llvm::Constant *isa =
-      (!IsOpenCL)
-          ? CGM.getNSConcreteStackBlock()
-          : CGM.getNullPointer(VoidPtrPtrTy,
-                               CGM.getContext().getPointerType(
-                                   QualType(CGM.getContext().VoidPtrTy)));
-  isa = llvm::ConstantExpr::getBitCast(isa, VoidPtrTy);
+  llvm::Constant *isa;
+  llvm::Constant *descriptor;
+  BlockFlags flags;
+  if (!IsOpenCL) {
+    isa = llvm::ConstantExpr::getBitCast(isa, VoidPtrTy);
 
   // Build the block descriptor.
-  llvm::Constant *descriptor = buildBlockDescriptor(CGM, blockInfo);
+  descriptor = buildBlockDescriptor(CGM, blockInfo);
 
   Address blockAddr = blockInfo.LocalAddress;
   assert(blockAddr.isValid() && "block has no address!");
 
   // Compute the initial on-stack block flags.
-  BlockFlags flags = BLOCK_HAS_SIGNATURE;
+  flags = BLOCK_HAS_SIGNATURE;
   if (blockInfo.HasCapturedVariableLayout) flags |= BLOCK_HAS_EXTENDED_LAYOUT;
   if (blockInfo.NeedsCopyDispose) flags |= BLOCK_HAS_COPY_DISPOSE;
   if (blockInfo.HasCXXObject) flags |= BLOCK_HAS_CXX_OBJ;
   if (blockInfo.UsesStret) flags |= BLOCK_USE_STRET;
+  }
 
   auto projectField =
     [&](unsigned index, CharUnits offset, const Twine &name) -> Address {
