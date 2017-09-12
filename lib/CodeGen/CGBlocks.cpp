@@ -740,17 +740,17 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
 
   // Otherwise, we have to emit this as a local block.
 
+  Address blockAddr = blockInfo.LocalAddress;
+  assert(blockAddr.isValid() && "block has no address!");
+  
   llvm::Constant *isa;
   llvm::Constant *descriptor;
   BlockFlags flags;
   if (!IsOpenCL) {
-    isa = llvm::ConstantExpr::getBitCast(isa, VoidPtrTy);
+    isa = llvm::ConstantExpr::getBitCast(CGM.getNSConcreteStackBlock(), VoidPtrTy);
 
   // Build the block descriptor.
   descriptor = buildBlockDescriptor(CGM, blockInfo);
-
-  Address blockAddr = blockInfo.LocalAddress;
-  assert(blockAddr.isValid() && "block has no address!");
 
   // Compute the initial on-stack block flags.
   flags = BLOCK_HAS_SIGNATURE;
