@@ -1026,7 +1026,8 @@ RValue CodeGenFunction::EmitBlockCallExpr(const CallExpr *E,
 
   // Get the function pointer from the literal.
   llvm::Value *FuncPtr =
-    Builder.CreateStructGEP(CGM.getGenericBlockLiteralType(), BlockPtr, 3);
+    Builder.CreateStructGEP(CGM.getGenericBlockLiteralType(), BlockPtr,
+        CGM.getLangOpts().OpenCL ? 0 : 3);
 
 
   // Add the block literal.

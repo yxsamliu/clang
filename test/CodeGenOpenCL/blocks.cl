@@ -23,7 +23,7 @@ void foo(){
   // COMMON: store i32 () addrspace(4)* %[[r2]], i32 () addrspace(4)** %[[block_B:.*]],
   // COMMON: %[[r3:.*]] = load i32 () addrspace(4)*, i32 () addrspace(4)** %[[block_B]]
   // COMMON: %[[block_literal:.*]] = bitcast i32 () addrspace(4)* %3 to %struct.__block_literal_generic addrspace(4)*
-  // COMMON: %[[r4:.*]] = getelementptr inbounds %struct.__block_literal_generic, %struct.__block_literal_generic addrspace(4)* %[[block_literal]], i32 0, i32 3
+  // COMMON: %[[r4:.*]] = getelementptr inbounds %struct.__block_literal_generic, %struct.__block_literal_generic addrspace(4)* %[[block_literal]], i32 0, i32 0
   // COMMON: %[[r5:.*]] = bitcast %struct.__block_literal_generic addrspace(4)* %[[block_literal]] to i8 addrspace(4)*
   // COMMON: %[[r6:.*]] = load i8*, i8* addrspace(4)* %[[r4]]
   // COMMON: %[[r7:.*]] = bitcast i8* %[[r6]] to i32 (i8 addrspace(4)*)*
