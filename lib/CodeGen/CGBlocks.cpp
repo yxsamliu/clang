@@ -307,15 +307,20 @@ static void initializeForBlockHeader(CodeGenModule &CGM, CGBlockInfo &info,
   assert(CGM.getIntAlign() <= CGM.getPointerAlign());
   assert((2 * CGM.getIntSize()).isMultipleOf(CGM.getPointerAlign()));
 
+  bool IsOpenCL = CGM.getLangOpts().OpenCL;
   info.BlockAlign = CGM.getPointerAlign();
-  info.BlockSize = 3 * CGM.getPointerSize() + 2 * CGM.getIntSize();
+  info.BlockSize = IsOpenCL ? CGM.getPointerSize() ?
+      3 * CGM.getPointerSize() + 2 * CGM.getIntSize();
 
   assert(elementTypes.empty());
+  if (!IsOpenCL) {
+    elementTypes.push_back(CGM.VoidPtrTy);
+    elementTypes.push_back(CGM.IntTy);
+    elementTypes.push_back(CGM.IntTy);
+  }
   elementTypes.push_back(CGM.VoidPtrTy);
-  elementTypes.push_back(CGM.IntTy);
-  elementTypes.push_back(CGM.IntTy);
-  elementTypes.push_back(CGM.VoidPtrTy);
-  elementTypes.push_back(CGM.getBlockDescriptorType());
+  if (!IsOpenCL)
+    elementTypes.push_back(CGM.getBlockDescriptorType());
 }
 
 static QualType getCaptureFieldType(const CodeGenFunction &CGF,
@@ -719,6 +724,7 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const BlockExpr *blockExpr) {
 }
 
 llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
+  bool IsOpenCL = CGM.getContext().getLangOpts().OpenCL;
   // Using the computed layout, generate the actual block function.
   bool isLambdaConv = blockInfo.getBlockDecl()->isConversionFromLambda();
   llvm::Constant *blockFn
@@ -734,7 +740,7 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
   // Otherwise, we have to emit this as a local block.
 
   llvm::Constant *isa =
-      (!CGM.getContext().getLangOpts().OpenCL)
+      (!IsOpenCL)
           ? CGM.getNSConcreteStackBlock()
           : CGM.getNullPointer(VoidPtrPtrTy,
                                CGM.getContext().getPointerType(
@@ -776,13 +782,16 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
         index++;
       };
 
-    addHeaderField(isa, getPointerSize(), "block.isa");
-    addHeaderField(llvm::ConstantInt::get(IntTy, flags.getBitMask()),
-                   getIntSize(), "block.flags");
-    addHeaderField(llvm::ConstantInt::get(IntTy, 0),
-                   getIntSize(), "block.reserved");
+    if (!IsOpenCL) {
+      addHeaderField(isa, getPointerSize(), "block.isa");
+      addHeaderField(llvm::ConstantInt::get(IntTy, flags.getBitMask()),
+                     getIntSize(), "block.flags");
+      addHeaderField(llvm::ConstantInt::get(IntTy, 0),
+                     getIntSize(), "block.reserved");
+    }
     addHeaderField(blockFn, getPointerSize(), "block.invoke");
-    addHeaderField(descriptor, getPointerSize(), "block.descriptor");
+    if (!IsOpenCL)
+      addHeaderField(descriptor, getPointerSize(), "block.descriptor");
   }
 
   // Finally, capture all the values into the block.
@@ -1140,6 +1149,8 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
   ConstantInitBuilder builder(CGM);
   auto fields = builder.beginStruct();
 
+  bool IsOpenCL = CGM.getLangOpts().OpenCL;
+  if (!IsOpenCL) {
   // isa
   fields.add((!CGM.getContext().getLangOpts().OpenCL)
                  ? CGM.getNSConcreteGlobalBlock()
@@ -1155,12 +1166,15 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
 
   // Reserved
   fields.addInt(CGM.IntTy, 0);
+  }
 
   // Function
   fields.add(blockFn);
 
+  if (!IsOpenCL) {
   // Descriptor
   fields.add(buildBlockDescriptor(CGM, blockInfo));
+  }
 
   unsigned AddrSpace = 0;
   if (CGM.getContext().getLangOpts().OpenCL)
