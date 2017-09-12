@@ -310,7 +310,7 @@ static void initializeForBlockHeader(CodeGenModule &CGM, CGBlockInfo &info,
 
   bool IsOpenCL = CGM.getLangOpts().OpenCL;
   info.BlockAlign = CGM.getPointerAlign();
-  info.BlockSize = IsOpenCL ? CGM.getPointerSize() ?
+  info.BlockSize = IsOpenCL ? CGM.getPointerSize() :
       3 * CGM.getPointerSize() + 2 * CGM.getIntSize();
 
   assert(elementTypes.empty());
