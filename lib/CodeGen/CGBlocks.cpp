@@ -303,20 +303,29 @@ static CharUnits getLowBit(CharUnits v) {
 
 static void initializeForBlockHeader(CodeGenModule &CGM, CGBlockInfo &info,
                              SmallVectorImpl<llvm::Type*> &elementTypes) {
-  // The header is basically 'struct { void *; int; int; void *; void *; }'.
-  // Assert that that struct is packed.
-  assert(CGM.getIntSize() <= CGM.getPointerSize());
-  assert(CGM.getIntAlign() <= CGM.getPointerAlign());
-  assert((2 * CGM.getIntSize()).isMultipleOf(CGM.getPointerAlign()));
 
   assert(elementTypes.empty());
   if (CGM.getLangOpts().OpenCL) {
-    info.BlockAlign = CharUnits::fromQuantity(
+    // The header is basically 'struct { int; int; generic void *; }'.
+    // Assert that that struct is packed.
+    auto GenPtrAlign = CharUnits::fromQuantity(
         CGM.getTarget().getPointerAlign(LangAS::opencl_generic) / 8);
-    info.BlockSize = CharUnits::fromQuantity(
+    auto GenPtrSize = CharUnits::fromQuantity(
         CGM.getTarget().getPointerWidth(LangAS::opencl_generic) / 8);
+    assert(CGM.getIntSize() <= GenPtrSize);
+    assert(CGM.getIntAlign() <= GenPtrAlign);
+    assert((2 * CGM.getIntSize()).isMultipleOf(GenPtrAlign));
+    info.BlockAlign = GenPtrAlign;
+    info.BlockSize = GenPtrSize + 2 * CGM.getIntSize();
+    elementTypes.push_back(CGM.IntTy);
+    elementTypes.push_back(CGM.IntTy);
     elementTypes.push_back(CGM.getOpenCLRuntime().getGenericVoidPointerType());
   } else {
+    // The header is basically 'struct { void *; int; int; void *; void *; }'.
+    // Assert that that struct is packed.
+    assert(CGM.getIntSize() <= CGM.getPointerSize());
+    assert(CGM.getIntAlign() <= CGM.getPointerAlign());
+    assert((2 * CGM.getIntSize()).isMultipleOf(CGM.getPointerAlign()));
     info.BlockAlign = CGM.getPointerAlign();
     info.BlockSize = 3 * CGM.getPointerSize() + 2 * CGM.getIntSize();
     elementTypes.push_back(CGM.VoidPtrTy);
@@ -801,6 +810,13 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
                      getIntSize(), "block.flags");
       addHeaderField(llvm::ConstantInt::get(IntTy, 0), getIntSize(),
                      "block.reserved");
+    } else {
+      addHeaderField(
+          llvm::ConstantInt::get(IntTy, blockInfo.BlockSize.getQuantity()),
+          getIntSize(), "block.size");
+      addHeaderField(
+          llvm::ConstantInt::get(IntTy, blockInfo.BlockAlign.getQuantity()),
+          getIntSize(), "block.align");
     }
     addHeaderField(blockFn, GenVoidPtrSize, "block.invoke");
     if (!IsOpenCL)
@@ -1000,16 +1016,27 @@ llvm::Type *CodeGenModule::getGenericBlockLiteralType() {
 
   llvm::Type *BlockDescPtrTy = getBlockDescriptorType();
 
-  // struct __block_literal_generic {
-  //   void *__isa;
-  //   int __flags;
-  //   int __reserved;
-  //   void (*__invoke)(void *);
-  //   struct __block_descriptor *__descriptor;
-  // };
-  GenericBlockLiteralType =
-      llvm::StructType::create("struct.__block_literal_generic", VoidPtrTy,
-                               IntTy, IntTy, VoidPtrTy, BlockDescPtrTy);
+  if (getLangOpts().OpenCL) {
+    // struct __opencl_block_literal_generic {
+    //   int __size;
+    //   int __align;
+    //   __generic void *__invoke;
+    // };
+    GenericBlockLiteralType = llvm::StructType::create(
+        "struct.__opencl_block_literal_generic", IntTy, IntTy,
+        getOpenCLRuntime().getGenericVoidPointerType());
+  } else {
+    // struct __block_literal_generic {
+    //   void *__isa;
+    //   int __flags;
+    //   int __reserved;
+    //   void (*__invoke)(void *);
+    //   struct __block_descriptor *__descriptor;
+    // };
+    GenericBlockLiteralType =
+        llvm::StructType::create("struct.__block_literal_generic", VoidPtrTy,
+                                 IntTy, IntTy, VoidPtrTy, BlockDescPtrTy);
+  }
 
   return GenericBlockLiteralType;
 }
@@ -1040,7 +1067,7 @@ RValue CodeGenFunction::EmitBlockCallExpr(const CallExpr *E,
   // Get the function pointer from the literal.
   llvm::Value *FuncPtr =
       Builder.CreateStructGEP(CGM.getGenericBlockLiteralType(), BlockPtr,
-                              CGM.getLangOpts().OpenCL ? 0 : 3);
+                              CGM.getLangOpts().OpenCL ? 2 : 3);
 
   // Add the block literal.
   CallArgList Args;
@@ -1179,6 +1206,9 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
 
     // Reserved
     fields.addInt(CGM.IntTy, 0);
+  } else {
+    fields.addInt(CGM.IntTy, blockInfo.BlockSize.getQuantity());
+    fields.addInt(CGM.IntTy, blockInfo.BlockAlign.getQuantity());
   }
 
   // Function
