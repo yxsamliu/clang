@@ -308,15 +308,20 @@ static void initializeForBlockHeader(CodeGenModule &CGM, CGBlockInfo &info,
   assert(CGM.getIntAlign() <= CGM.getPointerAlign());
   assert((2 * CGM.getIntSize()).isMultipleOf(CGM.getPointerAlign()));
 
+  bool IsOpenCL = CGM.getLangOpts().OpenCL;
   info.BlockAlign = CGM.getPointerAlign();
-  info.BlockSize = 3 * CGM.getPointerSize() + 2 * CGM.getIntSize();
+  info.BlockSize = IsOpenCL ? CGM.getPointerSize()
+                            : 3 * CGM.getPointerSize() + 2 * CGM.getIntSize();
 
   assert(elementTypes.empty());
+  if (!IsOpenCL) {
+    elementTypes.push_back(CGM.VoidPtrTy);
+    elementTypes.push_back(CGM.IntTy);
+    elementTypes.push_back(CGM.IntTy);
+  }
   elementTypes.push_back(CGM.VoidPtrTy);
-  elementTypes.push_back(CGM.IntTy);
-  elementTypes.push_back(CGM.IntTy);
-  elementTypes.push_back(CGM.VoidPtrTy);
-  elementTypes.push_back(CGM.getBlockDescriptorType());
+  if (!IsOpenCL)
+    elementTypes.push_back(CGM.getBlockDescriptorType());
 }
 
 static QualType getCaptureFieldType(const CodeGenFunction &CGF,
@@ -720,6 +725,7 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const BlockExpr *blockExpr) {
 }
 
 llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
+  bool IsOpenCL = CGM.getContext().getLangOpts().OpenCL;
   // Using the computed layout, generate the actual block function.
   bool isLambdaConv = blockInfo.getBlockDecl()->isConversionFromLambda();
   llvm::Constant *blockFn
@@ -734,26 +740,30 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
 
   // Otherwise, we have to emit this as a local block.
 
-  llvm::Constant *isa =
-      (!CGM.getContext().getLangOpts().OpenCL)
-          ? CGM.getNSConcreteStackBlock()
-          : CGM.getNullPointer(VoidPtrPtrTy,
-                               CGM.getContext().getPointerType(
-                                   QualType(CGM.getContext().VoidPtrTy)));
-  isa = llvm::ConstantExpr::getBitCast(isa, VoidPtrTy);
-
-  // Build the block descriptor.
-  llvm::Constant *descriptor = buildBlockDescriptor(CGM, blockInfo);
-
   Address blockAddr = blockInfo.LocalAddress;
   assert(blockAddr.isValid() && "block has no address!");
 
-  // Compute the initial on-stack block flags.
-  BlockFlags flags = BLOCK_HAS_SIGNATURE;
-  if (blockInfo.HasCapturedVariableLayout) flags |= BLOCK_HAS_EXTENDED_LAYOUT;
-  if (blockInfo.NeedsCopyDispose) flags |= BLOCK_HAS_COPY_DISPOSE;
-  if (blockInfo.HasCXXObject) flags |= BLOCK_HAS_CXX_OBJ;
-  if (blockInfo.UsesStret) flags |= BLOCK_USE_STRET;
+  llvm::Constant *isa;
+  llvm::Constant *descriptor;
+  BlockFlags flags;
+  if (!IsOpenCL) {
+    isa = llvm::ConstantExpr::getBitCast(CGM.getNSConcreteStackBlock(),
+                                         VoidPtrTy);
+
+    // Build the block descriptor.
+    descriptor = buildBlockDescriptor(CGM, blockInfo);
+
+    // Compute the initial on-stack block flags.
+    flags = BLOCK_HAS_SIGNATURE;
+    if (blockInfo.HasCapturedVariableLayout)
+      flags |= BLOCK_HAS_EXTENDED_LAYOUT;
+    if (blockInfo.NeedsCopyDispose)
+      flags |= BLOCK_HAS_COPY_DISPOSE;
+    if (blockInfo.HasCXXObject)
+      flags |= BLOCK_HAS_CXX_OBJ;
+    if (blockInfo.UsesStret)
+      flags |= BLOCK_USE_STRET;
+  }
 
   auto projectField =
     [&](unsigned index, CharUnits offset, const Twine &name) -> Address {
@@ -777,13 +787,16 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
         index++;
       };
 
-    addHeaderField(isa, getPointerSize(), "block.isa");
-    addHeaderField(llvm::ConstantInt::get(IntTy, flags.getBitMask()),
-                   getIntSize(), "block.flags");
-    addHeaderField(llvm::ConstantInt::get(IntTy, 0),
-                   getIntSize(), "block.reserved");
+    if (!IsOpenCL) {
+      addHeaderField(isa, getPointerSize(), "block.isa");
+      addHeaderField(llvm::ConstantInt::get(IntTy, flags.getBitMask()),
+                     getIntSize(), "block.flags");
+      addHeaderField(llvm::ConstantInt::get(IntTy, 0), getIntSize(),
+                     "block.reserved");
+    }
     addHeaderField(blockFn, getPointerSize(), "block.invoke");
-    addHeaderField(descriptor, getPointerSize(), "block.descriptor");
+    if (!IsOpenCL)
+      addHeaderField(descriptor, getPointerSize(), "block.descriptor");
   }
 
   // Finally, capture all the values into the block.
@@ -1018,8 +1031,8 @@ RValue CodeGenFunction::EmitBlockCallExpr(const CallExpr *E,
 
   // Get the function pointer from the literal.
   llvm::Value *FuncPtr =
-    Builder.CreateStructGEP(CGM.getGenericBlockLiteralType(), BlockPtr, 3);
-
+      Builder.CreateStructGEP(CGM.getGenericBlockLiteralType(), BlockPtr,
+                              CGM.getLangOpts().OpenCL ? 0 : 3);
 
   // Add the block literal.
   CallArgList Args;
@@ -1141,27 +1154,29 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
   ConstantInitBuilder builder(CGM);
   auto fields = builder.beginStruct();
 
-  // isa
-  fields.add((!CGM.getContext().getLangOpts().OpenCL)
-                 ? CGM.getNSConcreteGlobalBlock()
-                 : CGM.getNullPointer(CGM.VoidPtrPtrTy,
-                                      CGM.getContext().getPointerType(QualType(
-                                          CGM.getContext().VoidPtrTy))));
+  bool IsOpenCL = CGM.getLangOpts().OpenCL;
+  if (!IsOpenCL) {
+    // isa
+    fields.add(CGM.getNSConcreteGlobalBlock());
 
-  // __flags
-  BlockFlags flags = BLOCK_IS_GLOBAL | BLOCK_HAS_SIGNATURE;
-  if (blockInfo.UsesStret) flags |= BLOCK_USE_STRET;
-                                      
-  fields.addInt(CGM.IntTy, flags.getBitMask());
+    // __flags
+    BlockFlags flags = BLOCK_IS_GLOBAL | BLOCK_HAS_SIGNATURE;
+    if (blockInfo.UsesStret)
+      flags |= BLOCK_USE_STRET;
 
-  // Reserved
-  fields.addInt(CGM.IntTy, 0);
+    fields.addInt(CGM.IntTy, flags.getBitMask());
+
+    // Reserved
+    fields.addInt(CGM.IntTy, 0);
+  }
 
   // Function
   fields.add(blockFn);
 
-  // Descriptor
-  fields.add(buildBlockDescriptor(CGM, blockInfo));
+  if (!IsOpenCL) {
+    // Descriptor
+    fields.add(buildBlockDescriptor(CGM, blockInfo));
+  }
 
   unsigned AddrSpace = 0;
   if (CGM.getContext().getLangOpts().OpenCL)
