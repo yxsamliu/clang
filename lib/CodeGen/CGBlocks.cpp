@@ -14,6 +14,7 @@
 #include "CGBlocks.h"
 #include "CGDebugInfo.h"
 #include "CGObjCRuntime.h"
+#include "CGOpenCLRuntime.h"
 #include "CodeGenFunction.h"
 #include "CodeGenModule.h"
 #include "ConstantEmitter.h"
@@ -308,20 +309,22 @@ static void initializeForBlockHeader(CodeGenModule &CGM, CGBlockInfo &info,
   assert(CGM.getIntAlign() <= CGM.getPointerAlign());
   assert((2 * CGM.getIntSize()).isMultipleOf(CGM.getPointerAlign()));
 
-  bool IsOpenCL = CGM.getLangOpts().OpenCL;
-  info.BlockAlign = CGM.getPointerAlign();
-  info.BlockSize = IsOpenCL ? CGM.getPointerSize()
-                            : 3 * CGM.getPointerSize() + 2 * CGM.getIntSize();
-
   assert(elementTypes.empty());
-  if (!IsOpenCL) {
+  if (CGM.getLangOpts().OpenCL) {
+    info.BlockAlign = CharUnits::fromQuantity(
+        CGM.getTarget().getPointerAlign(LangAS::opencl_generic) / 8);
+    info.BlockSize = CharUnits::fromQuantity(
+        CGM.getTarget().getPointerWidth(LangAS::opencl_generic) / 8);
+    elementTypes.push_back(CGM.getOpenCLRuntime().getGenericVoidPointerType());
+  } else {
+    info.BlockAlign = CGM.getPointerAlign();
+    info.BlockSize = 3 * CGM.getPointerSize() + 2 * CGM.getIntSize();
     elementTypes.push_back(CGM.VoidPtrTy);
     elementTypes.push_back(CGM.IntTy);
     elementTypes.push_back(CGM.IntTy);
-  }
-  elementTypes.push_back(CGM.VoidPtrTy);
-  if (!IsOpenCL)
+    elementTypes.push_back(CGM.VoidPtrTy);
     elementTypes.push_back(CGM.getBlockDescriptorType());
+  }
 }
 
 static QualType getCaptureFieldType(const CodeGenFunction &CGF,
@@ -726,13 +729,18 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const BlockExpr *blockExpr) {
 
 llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
   bool IsOpenCL = CGM.getContext().getLangOpts().OpenCL;
+  auto GenVoidPtrTy =
+      IsOpenCL ? CGM.getOpenCLRuntime().getGenericVoidPointerType() : VoidPtrTy;
+  unsigned GenVoidPtrAddr = IsOpenCL ? LangAS::opencl_generic : LangAS::Default;
+  auto GenVoidPtrSize = CharUnits::fromQuantity(
+      CGM.getTarget().getPointerWidth(GenVoidPtrAddr) / 8);
   // Using the computed layout, generate the actual block function.
   bool isLambdaConv = blockInfo.getBlockDecl()->isConversionFromLambda();
   llvm::Constant *blockFn
     = CodeGenFunction(CGM, true).GenerateBlockFunction(CurGD, blockInfo,
                                                        LocalDeclMap,
                                                        isLambdaConv);
-  blockFn = llvm::ConstantExpr::getBitCast(blockFn, VoidPtrTy);
+  blockFn = llvm::ConstantExpr::getPointerCast(blockFn, GenVoidPtrTy);
 
   // If there is nothing to capture, we can emit this as a global block.
   if (blockInfo.CanBeGlobal)
@@ -794,7 +802,7 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
       addHeaderField(llvm::ConstantInt::get(IntTy, 0), getIntSize(),
                      "block.reserved");
     }
-    addHeaderField(blockFn, getPointerSize(), "block.invoke");
+    addHeaderField(blockFn, GenVoidPtrSize, "block.invoke");
     if (!IsOpenCL)
       addHeaderField(descriptor, getPointerSize(), "block.descriptor");
   }
@@ -1006,7 +1014,7 @@ llvm::Type *CodeGenModule::getGenericBlockLiteralType() {
   return GenericBlockLiteralType;
 }
 
-RValue CodeGenFunction::EmitBlockCallExpr(const CallExpr *E, 
+RValue CodeGenFunction::EmitBlockCallExpr(const CallExpr *E,
                                           ReturnValueSlot ReturnValue) {
   const BlockPointerType *BPT =
     E->getCallee()->getType()->getAs<BlockPointerType>();
@@ -1040,8 +1048,7 @@ RValue CodeGenFunction::EmitBlockCallExpr(const CallExpr *E,
   QualType VoidPtrQualTy = getContext().VoidPtrTy;
   llvm::Type *GenericVoidPtrTy = VoidPtrTy;
   if (getLangOpts().OpenCL) {
-    GenericVoidPtrTy = Builder.getInt8PtrTy(
-        getContext().getTargetAddressSpace(LangAS::opencl_generic));
+    GenericVoidPtrTy = CGM.getOpenCLRuntime().getGenericVoidPointerType();
     VoidPtrQualTy =
         getContext().getPointerType(getContext().getAddrSpaceQualType(
             getContext().VoidTy, LangAS::opencl_generic));
@@ -1066,7 +1073,7 @@ RValue CodeGenFunction::EmitBlockCallExpr(const CallExpr *E,
   llvm::Type *BlockFTy = CGM.getTypes().GetFunctionType(FnInfo);
 
   llvm::Type *BlockFTyPtr = llvm::PointerType::getUnqual(BlockFTy);
-  Func = Builder.CreateBitCast(Func, BlockFTyPtr);
+  Func = Builder.CreatePointerCast(Func, BlockFTyPtr);
 
   // Prepare the callee.
   CGCallee Callee(CGCalleeInfo(), Func);
@@ -1135,7 +1142,11 @@ CodeGenModule::GetAddrOfGlobalBlock(const BlockExpr *BE,
                                                            LocalDeclMap,
                                                            false);
   }
-  blockFn = llvm::ConstantExpr::getBitCast(blockFn, VoidPtrTy);
+  auto GenVoidPtrTy = getContext().getLangOpts().OpenCL
+                          ? getOpenCLRuntime().getGenericVoidPointerType()
+                          : VoidPtrTy;
+
+  blockFn = llvm::ConstantExpr::getPointerCast(blockFn, GenVoidPtrTy);
 
   return buildGlobalBlock(*this, blockInfo, blockFn);
 }
