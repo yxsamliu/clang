@@ -293,10 +293,10 @@ public:
   /// Block invocation functions are C functions with an implicit parameter.
   const CGFunctionInfo &arrangeBlockFunctionDeclaration(
                                                  const FunctionProtoType *type,
-                                                 const FunctionArgList &args);
-  const CGFunctionInfo &arrangeBlockFunctionCall(const CallArgList &args,
-                                                 const FunctionType *type,
+                                                 const FunctionArgList &args,
                                                  bool AsOpenCLKernel = false);
+  const CGFunctionInfo &arrangeBlockFunctionCall(const CallArgList &args,
+                                                 const FunctionType *type);
 
   /// C++ methods have some special rules and also have implicit parameters.
   const CGFunctionInfo &arrangeCXXMethodDeclaration(const CXXMethodDecl *MD);
