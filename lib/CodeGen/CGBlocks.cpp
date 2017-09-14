@@ -1171,7 +1171,7 @@ CodeGenModule::GetAddrOfGlobalBlock(const BlockExpr *BE,
     blockFn = CodeGenFunction(*this).GenerateBlockFunction(GlobalDecl(),
                                                            blockInfo,
                                                            LocalDeclMap,
-                                                           false);
+                                                           false, false);
   }
   auto GenVoidPtrTy = getContext().getLangOpts().OpenCL
                           ? getOpenCLRuntime().getGenericVoidPointerType()
