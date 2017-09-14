@@ -1335,7 +1335,7 @@ CodeGenFunction::GenerateBlockFunction(GlobalDecl GD,
   // Create the function declaration.
   const FunctionProtoType *fnType = blockInfo.getBlockExpr()->getFunctionType();
   const CGFunctionInfo &fnInfo =
-    CGM.getTypes().arrangeBlockFunctionDeclaration(fnType, args);
+    CGM.getTypes().arrangeBlockFunctionDeclaration(fnType, args, blockInfo.asOpenCLKernel());
   if (CGM.ReturnSlotInterferesWithArgs(fnInfo))
     blockInfo.UsesStret = true;
 
