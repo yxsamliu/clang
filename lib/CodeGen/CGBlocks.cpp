@@ -31,10 +31,10 @@ using namespace clang;
 using namespace CodeGen;
 
 CGBlockInfo::CGBlockInfo(const BlockDecl *block, StringRef name)
-  : Name(name), CXXThisIndex(0), CanBeGlobal(false), NeedsCopyDispose(false),
-    HasCXXObject(false), UsesStret(false), HasCapturedVariableLayout(false),
-    LocalAddress(Address::invalid()), StructureType(nullptr), Block(block),
-    DominatingIP(nullptr) {
+    : Name(name), CXXThisIndex(0), CanBeGlobal(false), NeedsCopyDispose(false),
+      HasCXXObject(false), UsesStret(false), HasCapturedVariableLayout(false),
+      LocalAddress(Address::invalid()), StructureType(nullptr), Block(block),
+      DominatingIP(nullptr), AsOpenCLKernel(false) {
 
   // Skip asm prefix, if any.  'name' is usually taken directly from
   // the mangled name of the enclosing function.
@@ -715,15 +715,18 @@ void CodeGenFunction::destroyBlockInfos(CGBlockInfo *head) {
 }
 
 /// Emit a block literal expression in the current function.
-llvm::Value *CodeGenFunction::EmitBlockLiteral(const BlockExpr *blockExpr) {
+llvm::Value *CodeGenFunction::EmitBlockLiteral(const BlockExpr *blockExpr,
+                                               bool AsOpenCLKernel) {
   // If the block has no captures, we won't have a pre-computed
   // layout for it.
   if (!blockExpr->getBlockDecl()->hasCaptures()) {
-    if (llvm::Constant *Block = CGM.getAddrOfGlobalBlockIfEmitted(blockExpr))
-      return Block;
+    if (!AsOpenCLKernel)
+      if (llvm::Constant *Block = CGM.getAddrOfGlobalBlockIfEmitted(blockExpr))
+        return Block;
     CGBlockInfo blockInfo(blockExpr->getBlockDecl(), CurFn->getName());
     computeBlockInfo(CGM, this, blockInfo);
     blockInfo.BlockExpression = blockExpr;
+    blockInfo.setAsOpenCLKernel(AsOpenCLKernel);
     return EmitBlockLiteral(blockInfo);
   }
 
@@ -733,6 +736,7 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const BlockExpr *blockExpr) {
                                          blockExpr->getBlockDecl()));
 
   blockInfo->BlockExpression = blockExpr;
+  blockInfo->setAsOpenCLKernel(AsOpenCLKernel);
   return EmitBlockLiteral(*blockInfo);
 }
 
@@ -745,10 +749,8 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
       CGM.getTarget().getPointerWidth(GenVoidPtrAddr) / 8);
   // Using the computed layout, generate the actual block function.
   bool isLambdaConv = blockInfo.getBlockDecl()->isConversionFromLambda();
-  llvm::Constant *blockFn
-    = CodeGenFunction(CGM, true).GenerateBlockFunction(CurGD, blockInfo,
-                                                       LocalDeclMap,
-                                                       isLambdaConv);
+  llvm::Constant *blockFn = CodeGenFunction(CGM, true).GenerateBlockFunction(
+      CurGD, blockInfo, LocalDeclMap, isLambdaConv, blockInfo.AsOpenCLKernel);
   blockFn = llvm::ConstantExpr::getPointerCast(blockFn, GenVoidPtrTy);
 
   // If there is nothing to capture, we can emit this as a global block.
@@ -1164,10 +1166,8 @@ CodeGenModule::GetAddrOfGlobalBlock(const BlockExpr *BE,
   llvm::Constant *blockFn;
   {
     CodeGenFunction::DeclMapTy LocalDeclMap;
-    blockFn = CodeGenFunction(*this).GenerateBlockFunction(GlobalDecl(),
-                                                           blockInfo,
-                                                           LocalDeclMap,
-                                                           false);
+    blockFn = CodeGenFunction(*this).GenerateBlockFunction(
+        GlobalDecl(), blockInfo, LocalDeclMap, false, false);
   }
   auto GenVoidPtrTy = getContext().getLangOpts().OpenCL
                           ? getOpenCLRuntime().getGenericVoidPointerType()
@@ -1185,7 +1185,8 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
   // Callers should detect this case on their own: calling this function
   // generally requires computing layout information, which is a waste of time
   // if we've already emitted this block.
-  assert(!CGM.getAddrOfGlobalBlockIfEmitted(blockInfo.BlockExpression) &&
+  assert((blockInfo.asOpenCLKernel() ||
+          !CGM.getAddrOfGlobalBlockIfEmitted(blockInfo.BlockExpression)) &&
          "Refusing to re-emit a global block.");
 
   // Generate the constants for the block literal initializer.
@@ -1232,7 +1233,8 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
     CGM.getTypes().ConvertType(blockInfo.getBlockExpr()->getType());
   llvm::Constant *Result =
       llvm::ConstantExpr::getPointerCast(literal, RequiredType);
-  CGM.setAddrOfGlobalBlock(blockInfo.BlockExpression, Result);
+  if (!blockInfo.asOpenCLKernel())
+    CGM.setAddrOfGlobalBlock(blockInfo.BlockExpression, Result);
   return Result;
 }
 
@@ -1278,11 +1280,9 @@ Address CodeGenFunction::LoadBlockStruct() {
   return Address(BlockPointer, BlockInfo->BlockAlign);
 }
 
-llvm::Function *
-CodeGenFunction::GenerateBlockFunction(GlobalDecl GD,
-                                       const CGBlockInfo &blockInfo,
-                                       const DeclMapTy &ldm,
-                                       bool IsLambdaConversionToBlock) {
+llvm::Function *CodeGenFunction::GenerateBlockFunction(
+    GlobalDecl GD, const CGBlockInfo &blockInfo, const DeclMapTy &ldm,
+    bool IsLambdaConversionToBlock, bool AsOpenCLKernel) {
   const BlockDecl *blockDecl = blockInfo.getBlockDecl();
 
   CurGD = GD;
@@ -1329,8 +1329,8 @@ CodeGenFunction::GenerateBlockFunction(GlobalDecl GD,
 
   // Create the function declaration.
   const FunctionProtoType *fnType = blockInfo.getBlockExpr()->getFunctionType();
-  const CGFunctionInfo &fnInfo =
-    CGM.getTypes().arrangeBlockFunctionDeclaration(fnType, args);
+  const CGFunctionInfo &fnInfo = CGM.getTypes().arrangeBlockFunctionDeclaration(
+      fnType, args, blockInfo.asOpenCLKernel());
   if (CGM.ReturnSlotInterferesWithArgs(fnInfo))
     blockInfo.UsesStret = true;
 

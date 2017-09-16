@@ -109,3 +109,26 @@ llvm::PointerType *CGOpenCLRuntime::getGenericVoidPointerType() {
       CGM.getLLVMContext(),
       CGM.getContext().getTargetAddressSpace(LangAS::opencl_generic));
 }
+
+llvm::Value *CGOpenCLRuntime::emitOpenCLEnqueuedBlock(CodeGenFunction &CGF,
+                                                      const Expr *E) {
+  if (auto DR = dyn_cast<DeclRefExpr>(E)) {
+    E = cast<VarDecl>(DR->getDecl())->getInit();
+  }
+  if (auto Cast = dyn_cast<CastExpr>(E)) {
+    E = Cast->getSubExpr();
+  }
+  auto *Block = cast<BlockExpr>(E);
+  bool Cacheable = !Block->getBlockDecl()->hasCaptures();
+  if (Cacheable) {
+    auto Loc = EnqueuedBlockMap.find(Block);
+    if (Loc != EnqueuedBlockMap.end()) {
+      return Loc->second;
+    }
+  }
+  auto *V = CGF.EmitBlockLiteral(Block, true);
+  if (Cacheable) {
+    EnqueuedBlockMap[Block] = V;
+  }
+  return V;
+}

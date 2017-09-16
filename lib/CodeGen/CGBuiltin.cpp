@@ -2609,7 +2609,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
           Int32Ty, llvm::ArrayRef<llvm::Type *>(ArgTys, 4), false);
 
       llvm::Value *Block = Builder.CreatePointerCast(
-          EmitScalarExpr(E->getArg(3)), GenericVoidPtrTy);
+          CGM.getOpenCLRuntime().emitOpenCLEnqueuedBlock(*this, E->getArg(3)),
+          GenericVoidPtrTy);
 
       AttrBuilder B;
       B.addAttribute(Attribute::ByVal);
@@ -2650,8 +2651,9 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
     if (E->getArg(3)->getType()->isBlockPointerType()) {
       // No events passed, but has variadic arguments.
       Name = "__enqueue_kernel_vaargs";
-      auto *Block = Builder.CreatePointerCast(EmitScalarExpr(E->getArg(3)),
-                                              GenericVoidPtrTy);
+      auto *Block = Builder.CreatePointerCast(
+          CGM.getOpenCLRuntime().emitOpenCLEnqueuedBlock(*this, E->getArg(3)),
+          GenericVoidPtrTy);
       auto *PtrToSizeArray = CreateArrayForSizeVar(4);
 
       // Create a vector of the arguments, as well as a constant value to
@@ -2689,7 +2691,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
       EventList = Builder.CreatePointerCast(EventList, EventPtrTy);
       ClkEvent = Builder.CreatePointerCast(ClkEvent, EventPtrTy);
       llvm::Value *Block = Builder.CreatePointerCast(
-          EmitScalarExpr(E->getArg(6)), GenericVoidPtrTy);
+          CGM.getOpenCLRuntime().emitOpenCLEnqueuedBlock(*this, E->getArg(6)),
+          GenericVoidPtrTy);
 
       std::vector<llvm::Type *> ArgTys = {
           QueueTy,    Int32Ty,    RangeTy,         Int32Ty,
@@ -2730,7 +2733,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
   case Builtin::BIget_kernel_work_group_size: {
     llvm::Type *GenericVoidPtrTy = Builder.getInt8PtrTy(
         getContext().getTargetAddressSpace(LangAS::opencl_generic));
-    Value *Arg = EmitScalarExpr(E->getArg(0));
+    Value *Arg =
+        CGM.getOpenCLRuntime().emitOpenCLEnqueuedBlock(*this, E->getArg(0));
     Arg = Builder.CreatePointerCast(Arg, GenericVoidPtrTy);
     return RValue::get(Builder.CreateCall(
         CGM.CreateRuntimeFunction(
@@ -2741,7 +2745,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
   case Builtin::BIget_kernel_preferred_work_group_size_multiple: {
     llvm::Type *GenericVoidPtrTy = Builder.getInt8PtrTy(
         getContext().getTargetAddressSpace(LangAS::opencl_generic));
-    Value *Arg = EmitScalarExpr(E->getArg(0));
+    Value *Arg =
+        CGM.getOpenCLRuntime().emitOpenCLEnqueuedBlock(*this, E->getArg(0));
     Arg = Builder.CreatePointerCast(Arg, GenericVoidPtrTy);
     return RValue::get(Builder.CreateCall(
         CGM.CreateRuntimeFunction(
@@ -2755,7 +2760,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const FunctionDecl *FD,
         getContext().getTargetAddressSpace(LangAS::opencl_generic));
     LValue NDRangeL = EmitAggExprToLValue(E->getArg(0));
     llvm::Value *NDRange = NDRangeL.getAddress().getPointer();
-    Value *Block = EmitScalarExpr(E->getArg(1));
+    Value *Block =
+        CGM.getOpenCLRuntime().emitOpenCLEnqueuedBlock(*this, E->getArg(1));
     Block = Builder.CreatePointerCast(Block, GenericVoidPtrTy);
     const char *Name =
         BuiltinID == Builtin::BIget_kernel_max_sub_group_size_for_ndrange

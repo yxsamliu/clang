@@ -1580,13 +1580,13 @@ public:
   //                                  Block Bits
   //===--------------------------------------------------------------------===//
 
-  llvm::Value *EmitBlockLiteral(const BlockExpr *);
+  llvm::Value *EmitBlockLiteral(const BlockExpr *, bool AsOpenCLKernel = false);
   static void destroyBlockInfos(CGBlockInfo *info);
 
-  llvm::Function *GenerateBlockFunction(GlobalDecl GD,
-                                        const CGBlockInfo &Info,
+  llvm::Function *GenerateBlockFunction(GlobalDecl GD, const CGBlockInfo &Info,
                                         const DeclMapTy &ldm,
-                                        bool IsLambdaConversionToBlock);
+                                        bool IsLambdaConversionToBlock,
+                                        bool AsOpenCLKernel);
 
   llvm::Constant *GenerateCopyHelperFunction(const CGBlockInfo &blockInfo);
   llvm::Constant *GenerateDestroyHelperFunction(const CGBlockInfo &blockInfo);

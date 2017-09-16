@@ -608,14 +608,17 @@ CodeGenTypes::arrangeBlockFunctionCall(const CallArgList &args,
 
 const CGFunctionInfo &
 CodeGenTypes::arrangeBlockFunctionDeclaration(const FunctionProtoType *proto,
-                                              const FunctionArgList &params) {
+                                              const FunctionArgList &params,
+                                              bool AsOpenCLKernel) {
   auto paramInfos = getExtParameterInfosForCall(proto, 1, params.size());
   auto argTypes = getArgTypesForDeclaration(Context, params);
+  auto Info = proto->getExtInfo();
+  if (AsOpenCLKernel)
+    Info = Info.withCallingConv(CC_OpenCLKernel);
 
   return arrangeLLVMFunctionInfo(
       GetReturnType(proto->getReturnType()),
-      /*instanceMethod*/ false, /*chainCall*/ false, argTypes,
-      proto->getExtInfo(), paramInfos,
+      /*instanceMethod*/ false, /*chainCall*/ false, argTypes, Info, paramInfos,
       RequiredArgs::forPrototypePlus(proto, 1, nullptr));
 }
 

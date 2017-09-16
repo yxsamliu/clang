@@ -17,11 +17,13 @@
 #define LLVM_CLANG_LIB_CODEGEN_CGOPENCLRUNTIME_H
 
 #include "clang/AST/Type.h"
+#include "llvm/ADT/DenseMap.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Value.h"
 
 namespace clang {
 
+class Expr;
 class VarDecl;
 
 namespace CodeGen {
@@ -34,6 +36,8 @@ protected:
   CodeGenModule &CGM;
   llvm::Type *PipeTy;
   llvm::PointerType *SamplerTy;
+  /// Maps block expression to llvm value.
+  llvm::DenseMap<const Expr *, llvm::Value *> EnqueuedBlockMap;
 
 public:
   CGOpenCLRuntime(CodeGenModule &CGM) : CGM(CGM), PipeTy(nullptr),
@@ -62,6 +66,9 @@ public:
 
   /// \return __generic void* type.
   llvm::PointerType *getGenericVoidPointerType();
+
+  /// \return block literal for enqueued block.
+  llvm::Value *emitOpenCLEnqueuedBlock(CodeGenFunction &CGF, const Expr *E);
 };
 
 }

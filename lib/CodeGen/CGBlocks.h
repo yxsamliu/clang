@@ -258,6 +258,9 @@ public:
   /// has been encountered.
   CGBlockInfo *NextBlockInfo;
 
+  /// The block is emitted as an OpenCL devide-side kernel.
+  bool AsOpenCLKernel;
+
   const Capture &getCapture(const VarDecl *var) const {
     return const_cast<CGBlockInfo*>(this)->getCapture(var);
   }
@@ -274,6 +277,9 @@ public:
     assert(BlockExpression->getBlockDecl() == Block);
     return BlockExpression;
   }
+
+  void setAsOpenCLKernel(bool Yes) { AsOpenCLKernel = Yes; }
+  bool asOpenCLKernel() const { return AsOpenCLKernel; }
 
   CGBlockInfo(const BlockDecl *blockDecl, StringRef Name);
 };
