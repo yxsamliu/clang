@@ -1787,7 +1787,8 @@ void CodeGenFunction::EmitParmDecl(const VarDecl &D, ParamValue Arg,
     // The only implicit argument a block has is its literal.
     // We assume this is always passed directly.
     if (BlockInfo) {
-      setBlockContextParameter(IPD, ArgNo, Arg.getDirectValue());
+      assert(BlockInfo->asOpenCLKernel() || !Arg.isIndirect());
+      setBlockContextParameter(IPD, ArgNo, Arg);
       return;
     }
 

@@ -14,6 +14,7 @@
 
 #include "TargetInfo.h"
 #include "ABIInfo.h"
+#include "CGBlocks.h"
 #include "CGCXXABI.h"
 #include "CGValue.h"
 #include "CodeGenFunction.h"
@@ -7624,6 +7625,8 @@ public:
                                     const VarDecl *D) const override;
   llvm::SyncScope::ID getLLVMSyncScopeID(SyncScope S,
                                          llvm::LLVMContext &C) const override;
+  QualType getEnqueuedBlockArgumentType(ASTContext &C,
+                                        const CGBlockInfo &Info) const override;
 };
 }
 
@@ -8923,4 +8926,52 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
   case llvm::Triple::spir64:
     return SetCGInfo(new SPIRTargetCodeGenInfo(Types));
   }
+}
+
+QualType
+TargetCodeGenInfo::getEnqueuedBlockArgumentType(ASTContext &C,
+                                                const CGBlockInfo &Info) const {
+  return C.getPointerType(
+      C.getAddrSpaceQualType(C.VoidTy, LangAS::opencl_global));
+}
+
+QualType AMDGPUTargetCodeGenInfo::getEnqueuedBlockArgumentType(
+    ASTContext &C, const CGBlockInfo &Info) const {
+  unsigned Size = Info.BlockSize.getQuantity();
+  unsigned Align = Info.BlockAlign.getQuantity();
+  assert(Align == 4 || Align == 8);
+  // Create a struct type which has the same size and alignment as the block
+  // argument.
+  RecordDecl *RD = C.buildImplicitRecord("__amdgpu_block_arg_t");
+  RD->startDefinition();
+  auto AddField = [&](unsigned ElemSize, unsigned NumElem) {
+    assert(ElemSize == 4 || ElemSize == 8 || ElemSize == 1);
+    llvm::APInt ArraySize(C.getTargetInfo().getIntWidth(), NumElem);
+    QualType ElemType;
+    switch (ElemSize) {
+    case 8:
+      ElemType = C.LongTy;
+      break;
+    case 4:
+      ElemType = C.IntTy;
+      break;
+    case 1:
+      ElemType = C.CharTy;
+      break;
+    default:
+      llvm_unreachable("invalid element size");
+    }
+    const QualType FieldTy = C.getConstantArrayType(
+        ElemType, ArraySize, ArrayType::Normal, /*TypeQualifiers=*/0);
+    auto *Field = FieldDecl::Create(C, RD, SourceLocation(), SourceLocation(),
+                                    &C.Idents.get("data"), FieldTy,
+                                    /*TInfo=*/nullptr, /*BitWidth=*/nullptr,
+                                    /*Mutable=*/false, ICIS_NoInit);
+    RD->addDecl(Field);
+  };
+  AddField(Align, Size / Align);
+  if (unsigned Rem = Size % Align)
+    AddField(1, Rem);
+  RD->completeDefinition();
+  return C.getTagDeclType(RD);
 }

@@ -1603,8 +1603,9 @@ public:
   void emitByrefStructureInit(const AutoVarEmission &emission);
   void enterByrefCleanup(const AutoVarEmission &emission);
 
+  class ParamValue;
   void setBlockContextParameter(const ImplicitParamDecl *D, unsigned argNum,
-                                llvm::Value *ptr);
+                                const ParamValue &PV);
 
   Address LoadBlockStruct();
   Address GetAddrOfBlockDecl(const VarDecl *var, bool ByRef);

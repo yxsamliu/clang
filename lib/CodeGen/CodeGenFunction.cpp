@@ -844,8 +844,14 @@ void CodeGenFunction::StartFunction(GlobalDecl GD,
 
   if (getLangOpts().OpenCL) {
     // Add metadata for a kernel function.
-    if (const FunctionDecl *FD = dyn_cast_or_null<FunctionDecl>(D))
-      EmitOpenCLKernelMetadata(FD, Fn);
+    if (D && getenv("DBG_BLK")) {
+      D->dump();
+      llvm::errs() << "Calling Conv: " << FnInfo.getASTCallingConvention()
+                   << '\n';
+    }
+    if (FnInfo.getASTCallingConvention() == CC_OpenCLKernel)
+      if (const FunctionDecl *FD = dyn_cast_or_null<FunctionDecl>(D))
+        EmitOpenCLKernelMetadata(FD, Fn);
   }
 
   // If we are checking function types, emit a function type signature as

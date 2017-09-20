@@ -44,6 +44,6 @@ void foo(){
 }
 
 // COMMON-LABEL: define internal {{.*}}i32 @__foo_block_invoke(i8 addrspace(4)* %.block_descriptor)
-// COMMON:  %[[block:.*]] = bitcast i8 addrspace(4)* %.block_descriptor to <{ i32, i32, i8 addrspace(4)*, i32 }> addrspace(4)*
-// COMMON:  %[[block_capture_addr:.*]] = getelementptr inbounds <{ i32, i32, i8 addrspace(4)*, i32 }>, <{ i32, i32, i8 addrspace(4)*, i32 }> addrspace(4)* %[[block]], i32 0, i32 3
-// COMMON:  %[[r1:.*]] = load i32, i32 addrspace(4)* %[[block_capture_addr]]
+// COMMON:  %[[block:.*]] = addrspacecast i8 addrspace(4)* %.block_descriptor to <{ i32, i32, i8 addrspace(4)*, i32 }>*
+// COMMON:  %[[block_capture_addr:.*]] = getelementptr inbounds <{ i32, i32, i8 addrspace(4)*, i32 }>, <{ i32, i32, i8 addrspace(4)*, i32 }>* %[[block]], i32 0, i32 3
+// COMMON:  %[[r1:.*]] = load i32, i32* %[[block_capture_addr]]

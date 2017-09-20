@@ -32,11 +32,13 @@ class Value;
 
 namespace clang {
 class Decl;
+class ASTContext;
 
 namespace CodeGen {
 class ABIInfo;
 class CallArgList;
 class CodeGenFunction;
+class CGBlockInfo;
 class CGFunctionInfo;
 
 /// TargetCodeGenInfo - This class organizes various target-specific
@@ -265,6 +267,10 @@ public:
   /// Get the syncscope used in LLVM IR.
   virtual llvm::SyncScope::ID getLLVMSyncScopeID(SyncScope S,
                                                  llvm::LLVMContext &C) const;
+
+  /// Get the QualType for the block argument of an enqueued block.
+  virtual QualType getEnqueuedBlockArgumentType(ASTContext &C,
+                                                const CGBlockInfo &Info) const;
 };
 
 } // namespace CodeGen

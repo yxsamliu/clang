@@ -13,20 +13,20 @@ typedef struct {int a;} ndrange_t;
 // COMMON: @block_G =  addrspace(1) constant void (i8 addrspace(3)*) addrspace(4)* addrspacecast (void (i8 addrspace(3)*) addrspace(1)* bitcast ({ i32, i32, i8 addrspace(4)* } addrspace(1)* [[BL_GLOBAL]] to void (i8 addrspace(3)*) addrspace(1)*) to void (i8 addrspace(3)*) addrspace(4)*)
 
 // For anonymous blocks without captures, emit block literals as global variable.
-// COMMON: [[BLG1:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INVG1:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG2:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INVG2:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG3:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INVG3:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG4:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INVG4:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG5:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INVG5:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG6:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*, i8 addrspace(3)*, i8 addrspace(3)*)* [[INVG6:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG7:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INVG7:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG1:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*)* [[INVG1:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG2:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*)* [[INVG2:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG3:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*)* [[INVG3:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG4:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*)* [[INVG4:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG5:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*)* [[INVG5:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG6:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*, i8 addrspace(3)*, i8 addrspace(3)*)* [[INVG6:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG7:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*)* [[INVG7:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
 // COMMON: [[BLG8:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*)* [[INVG8:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
 // COMMON: [[BLG9:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INVG9:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG8K:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*)* [[INVG8K:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG9K:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INVG9K:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BL_GLOBAL_K:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*, i8 addrspace(3)*)* [[INV_G_K:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG10:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*)* [[INVG10:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
-// COMMON: [[BLG11:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*)* [[INVG11:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG8K:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*)* [[INVG8K:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG9K:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*)* [[INVG9K:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BL_GLOBAL_K:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*, i8 addrspace(3)*)* [[INV_G_K:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG10:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*)* [[INVG10:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
+// COMMON: [[BLG11:@__block_literal_global[^ ]*]] = internal addrspace(1) constant { i32, i32, i8 addrspace(4)* } { i32 {{[0-9]+}}, i32 {{[0-9]+}}, i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*)* [[INVG11:@[^ ]+]] to i8*) to i8 addrspace(4)*) }
 
 // Emits block literal [[BL_GLOBAL]], invoke function [[INV_G]] and global block variable @block_G
 // COMMON: define internal spir_func void [[INV_G]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %a)
@@ -51,7 +51,7 @@ kernel void device_side_enqueue(global int *a, global int *b, int i) {
   // COMMON: [[NDR:%[a-z0-9]+]] = alloca %struct.ndrange_t, align 4
   // COMMON: [[DEF_Q:%[0-9]+]] = load %opencl.queue_t{{.*}}*, %opencl.queue_t{{.*}}** %default_queue
   // COMMON: [[FLAGS:%[0-9]+]] = load i32, i32* %flags
-  // COMMON: store i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*)* [[INVL1:@__device_side_enqueue_block_invoke[^ ]*]] to i8*) to i8 addrspace(4)*), i8 addrspace(4)** %block.invoke
+  // COMMON: store i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*)* [[INVL1:@__device_side_enqueue_block_invoke[^ ]*]] to i8*) to i8 addrspace(4)*), i8 addrspace(4)** %block.invoke
   // B32: [[BL:%[0-9]+]] = bitcast <{ i32, i32, i8 addrspace(4)*, i32 addrspace(1)*, i32, i32 addrspace(1)* }>* %block to void ()*
   // B64: [[BL:%[0-9]+]] = bitcast <{ i32, i32, i8 addrspace(4)*, i32 addrspace(1)*, i32 addrspace(1)*, i32 }>* %block to void ()*
   // COMMON: [[BL_I8:%[0-9]+]] = addrspacecast void ()* [[BL]] to i8 addrspace(4)*
@@ -67,7 +67,7 @@ kernel void device_side_enqueue(global int *a, global int *b, int i) {
   // COMMON: [[FLAGS:%[0-9]+]] = load i32, i32* %flags
   // COMMON: [[WAIT_EVNT:%[0-9]+]] = addrspacecast %opencl.clk_event_t{{.*}}** %event_wait_list to %opencl.clk_event_t{{.*}}* addrspace(4)*
   // COMMON: [[EVNT:%[0-9]+]] = addrspacecast %opencl.clk_event_t{{.*}}** %clk_event to %opencl.clk_event_t{{.*}}* addrspace(4)*
-  // COMMON: store i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(4)*)* [[INVL2:@__device_side_enqueue_block_invoke[^ ]*]] to i8*) to i8 addrspace(4)*), i8 addrspace(4)** %block.invoke
+  // COMMON: store i8 addrspace(4)* addrspacecast (i8* bitcast (void (i8 addrspace(1)*)* [[INVL2:@__device_side_enqueue_block_invoke[^ ]*]] to i8*) to i8 addrspace(4)*), i8 addrspace(4)** %block.invoke
   // COMMON: [[BL:%[0-9]+]] = bitcast <{ i32, i32, i8 addrspace(4)*, i32{{.*}}, i32{{.*}}, i32{{.*}} }>* %block3 to void ()*
   // COMMON: [[BL_I8:%[0-9]+]] = addrspacecast void ()* [[BL]] to i8 addrspace(4)*
   // COMMON-LABEL: call i32 @__enqueue_kernel_basic_events
@@ -276,19 +276,19 @@ kernel void device_side_enqueue(global int *a, global int *b, int i) {
   size = get_kernel_sub_group_count_for_ndrange(ndrange, ^(){});
 }
 
-// COMMON: define internal spir_kernel void [[INVL1]](i8 addrspace(4)* %.block_descriptor)
-// COMMON: define internal spir_kernel void [[INVL2]](i8 addrspace(4)* %.block_descriptor)
-// COMMON: define internal spir_kernel void [[INVG1]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %p)
-// COMMON: define internal spir_kernel void [[INVG2]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %p)
-// COMMON: define internal spir_kernel void [[INVG3]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %p)
-// COMMON: define internal spir_kernel void [[INVG4]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %p)
-// COMMON: define internal spir_kernel void [[INVG5]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %p)
-// COMMON: define internal spir_kernel void [[INVG6]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %p1, i8 addrspace(3)* %p2, i8 addrspace(3)* %p3)
-// COMMON: define internal spir_kernel void [[INVG7]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %p)
-// COMMON: define internal spir_func void [[INVG8]](i8 addrspace(4)* %.block_descriptor)
-// COMMON: define internal spir_func void [[INVG9]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %a)
-// COMMON: define internal spir_kernel void [[INVG8K]](i8 addrspace(4)* %.block_descriptor)
-// COMMON: define internal spir_kernel void [[INVG9K]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %a)
-// COMMON: define internal spir_kernel void [[INV_G_K]](i8 addrspace(4)* %.block_descriptor, i8 addrspace(3)* %a)
-// COMMON: define internal spir_kernel void [[INVG10]](i8 addrspace(4)* %.block_descriptor)
-// COMMON: define internal spir_kernel void [[INVG11]](i8 addrspace(4)* %.block_descriptor)
+// COMMON: define internal spir_kernel void [[INVL1]](i8 addrspace(1)* %{{.*}})
+// COMMON: define internal spir_kernel void [[INVL2]](i8 addrspace(1)* %{{.*}})
+// COMMON: define internal spir_kernel void [[INVG1]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON: define internal spir_kernel void [[INVG2]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON: define internal spir_kernel void [[INVG3]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON: define internal spir_kernel void [[INVG4]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON: define internal spir_kernel void [[INVG5]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON: define internal spir_kernel void [[INVG6]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p1, i8 addrspace(3)* %p2, i8 addrspace(3)* %p3)
+// COMMON: define internal spir_kernel void [[INVG7]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON: define internal spir_func void [[INVG8]](i8 addrspace(4)* %{{.*}})
+// COMMON: define internal spir_func void [[INVG9]](i8 addrspace(4)* %{{.*}}, i8 addrspace(3)* %a)
+// COMMON: define internal spir_kernel void [[INVG8K]](i8 addrspace(1)* %{{.*}})
+// COMMON: define internal spir_kernel void [[INVG9K]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %a)
+// COMMON: define internal spir_kernel void [[INV_G_K]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %a)
+// COMMON: define internal spir_kernel void [[INVG10]](i8 addrspace(1)* %{{.*}})
+// COMMON: define internal spir_kernel void [[INVG11]](i8 addrspace(1)* %{{.*}})

@@ -18,8 +18,9 @@
 #include "CodeGenFunction.h"
 #include "CodeGenModule.h"
 #include "ConstantEmitter.h"
-#include "clang/CodeGen/ConstantInitBuilder.h"
+#include "TargetInfo.h"
 #include "clang/AST/DeclObjC.h"
+#include "clang/CodeGen/ConstantInitBuilder.h"
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/DataLayout.h"
@@ -1240,13 +1241,22 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
 
 void CodeGenFunction::setBlockContextParameter(const ImplicitParamDecl *D,
                                                unsigned argNum,
-                                               llvm::Value *arg) {
+                                               const ParamValue &PV) {
   assert(BlockInfo && "not emitting prologue of block invocation function?!");
 
+  auto &C = getContext();
+  auto *arg = PV.getAnyValue();
+  // On certain target OpenCL struct type kernel argument is passed directly,
+  // therefore the block literal argument is not a pointer.
+  bool IsPtr = isa<llvm::PointerType>(arg->getType());
   llvm::Value *localAddr = nullptr;
-  if (CGM.getCodeGenOpts().OptimizationLevel == 0) {
+  if (CGM.getCodeGenOpts().OptimizationLevel == 0 || !IsPtr) {
     // Allocate a stack slot to let the debug info survive the RA.
-    Address alloc = CreateMemTemp(D->getType(), D->getName() + ".addr");
+    Address alloc = CreateMemTemp(
+        !PV.isIndirect() ? D->getType()
+                         : C.getPointerType(C.getAddrSpaceQualType(
+                               D->getType(), getASTAllocaAddressSpace())),
+        D->getName() + ".addr");
     Builder.CreateStore(arg, alloc);
     localAddr = Builder.CreateLoad(alloc);
   }
@@ -1263,15 +1273,14 @@ void CodeGenFunction::setBlockContextParameter(const ImplicitParamDecl *D,
   SourceLocation StartLoc = BlockInfo->getBlockExpr()->getBody()->getLocStart();
   ApplyDebugLocation Scope(*this, StartLoc);
 
+  assert(BlockInfo->asOpenCLKernel() || IsPtr);
   // Instead of messing around with LocalDeclMap, just set the value
   // directly as BlockPointer.
-  BlockPointer = Builder.CreatePointerCast(
-      arg,
-      BlockInfo->StructureType->getPointerTo(
-          getContext().getLangOpts().OpenCL
-              ? getContext().getTargetAddressSpace(LangAS::opencl_generic)
-              : 0),
-      "block");
+  BlockPointer =
+      Builder.CreatePointerCast(IsPtr ? arg : localAddr,
+                                BlockInfo->StructureType->getPointerTo(
+                                    CGM.getDataLayout().getAllocaAddrSpace()),
+                                "block");
 }
 
 Address CodeGenFunction::LoadBlockStruct() {
@@ -1309,13 +1318,9 @@ llvm::Function *CodeGenFunction::GenerateBlockFunction(
   // and cast it later.
   QualType selfTy = getContext().VoidPtrTy;
 
-  // For OpenCL passed block pointer can be private AS local variable or
-  // global AS program scope variable (for the case with and without captures).
-  // Generic AS is used therefore to be able to accommodate both private and
-  // generic AS in one implementation.
-  if (getLangOpts().OpenCL)
-    selfTy = getContext().getPointerType(getContext().getAddrSpaceQualType(
-        getContext().VoidTy, LangAS::opencl_generic));
+  if (blockInfo.asOpenCLKernel())
+    selfTy = CGM.getTargetCodeGenInfo().getEnqueuedBlockArgumentType(
+        getContext(), blockInfo);
 
   IdentifierInfo *II = &CGM.getContext().Idents.get(".block_descriptor");
 
