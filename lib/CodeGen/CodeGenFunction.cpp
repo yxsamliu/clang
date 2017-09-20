@@ -494,9 +494,11 @@ static unsigned ArgInfoAddressSpace(unsigned LangAS) {
 // OpenCL v1.2 s5.6.4.6 allows the compiler to store kernel argument
 // information in the program executable. The argument information stored
 // includes the argument name, its type, the address and access qualifiers used.
-static void GenOpenCLArgMetadata(const FunctionDecl *FD, llvm::Function *Fn,
-                                 CodeGenModule &CGM, llvm::LLVMContext &Context,
+static void GenOpenCLArgMetadata(const Decl *D, llvm::Function *Fn,
+                                 CodeGenFunction &CGF,
+                                 llvm::LLVMContext &Context,
                                  CGBuilderTy &Builder, ASTContext &ASTCtx) {
+  assert((isa<FunctionDecl>(D) || isa<BlockDecl>(D)));
   // Create MDNodes that represent the kernel arg metadata.
   // Each MDNode is a list in the form of "key", N number of values which is
   // the same number of values as their are kernel arguments.
@@ -521,10 +523,23 @@ static void GenOpenCLArgMetadata(const FunctionDecl *FD, llvm::Function *Fn,
   // MDNode for the kernel argument names.
   SmallVector<llvm::Metadata *, 8> argNames;
 
-  for (unsigned i = 0, e = FD->getNumParams(); i != e; ++i) {
-    const ParmVarDecl *parm = FD->getParamDecl(i);
-    QualType ty = parm->getType();
+  bool IsBlock = isa<BlockDecl>(D);
+  auto Params = IsBlock ? cast<BlockDecl>(D)->parameters()
+                        : cast<FunctionDecl>(D)->parameters();
+  for (unsigned i = 0, e = IsBlock ? Params.size() + 1 : Params.size(); i != e;
+       ++i) {
     std::string typeQuals;
+    QualType ty;
+    StringRef Name;
+    if (i == 0 && IsBlock) {
+      ty = CGF.CGM.getTargetCodeGenInfo().getEnqueuedBlockArgumentType(
+          ASTCtx, *CGF.BlockInfo);
+      Name = "block_context";
+    } else {
+      auto *Arg = Params[IsBlock ? i - 1 : i];
+      ty = Arg->getType();
+      Name = Arg->getName();
+    }
 
     if (ty->isPointerType()) {
       QualType pointeeTy = ty->getPointeeType();
@@ -621,7 +636,8 @@ static void GenOpenCLArgMetadata(const FunctionDecl *FD, llvm::Function *Fn,
 
     // Get image and pipe access qualifier:
     if (ty->isImageType()|| ty->isPipeType()) {
-      const Decl *PDecl = parm;
+      // Only normal kernel function can have image and pipe type arguments.
+      const Decl *PDecl = cast<FunctionDecl>(D)->getParamDecl(i);
       if (auto *TD = dyn_cast<TypedefType>(ty))
         PDecl = TD->getDecl();
       const OpenCLAccessAttr *A = PDecl->getAttr<OpenCLAccessAttr>();
@@ -635,7 +651,7 @@ static void GenOpenCLArgMetadata(const FunctionDecl *FD, llvm::Function *Fn,
       accessQuals.push_back(llvm::MDString::get(Context, "none"));
 
     // Get argument name.
-    argNames.push_back(llvm::MDString::get(Context, parm->getName()));
+    argNames.push_back(llvm::MDString::get(Context, Name));
   }
 
   Fn->setMetadata("kernel_arg_addr_space",
@@ -648,20 +664,18 @@ static void GenOpenCLArgMetadata(const FunctionDecl *FD, llvm::Function *Fn,
                   llvm::MDNode::get(Context, argBaseTypeNames));
   Fn->setMetadata("kernel_arg_type_qual",
                   llvm::MDNode::get(Context, argTypeQuals));
-  if (CGM.getCodeGenOpts().EmitOpenCLArgMetadata)
+  if (CGF.CGM.getCodeGenOpts().EmitOpenCLArgMetadata)
     Fn->setMetadata("kernel_arg_name",
                     llvm::MDNode::get(Context, argNames));
 }
 
-void CodeGenFunction::EmitOpenCLKernelMetadata(const FunctionDecl *FD,
-                                               llvm::Function *Fn)
-{
-  if (!FD->hasAttr<OpenCLKernelAttr>())
-    return;
+void CodeGenFunction::EmitOpenCLKernelMetadata(const Decl *FD,
+                                               llvm::Function *Fn) {
+  assert(isa<FunctionDecl>(FD) || isa<BlockDecl>(FD));
 
   llvm::LLVMContext &Context = getLLVMContext();
 
-  GenOpenCLArgMetadata(FD, Fn, CGM, Context, Builder, getContext());
+  GenOpenCLArgMetadata(FD, Fn, *this, Context, Builder, getContext());
 
   if (const VecTypeHintAttr *A = FD->getAttr<VecTypeHintAttr>()) {
     QualType HintQTy = A->getTypeHint();
@@ -850,8 +864,7 @@ void CodeGenFunction::StartFunction(GlobalDecl GD,
                    << '\n';
     }
     if (FnInfo.getASTCallingConvention() == CC_OpenCLKernel)
-      if (const FunctionDecl *FD = dyn_cast_or_null<FunctionDecl>(D))
-        EmitOpenCLKernelMetadata(FD, Fn);
+      EmitOpenCLKernelMetadata(D, Fn);
   }
 
   // If we are checking function types, emit a function type signature as

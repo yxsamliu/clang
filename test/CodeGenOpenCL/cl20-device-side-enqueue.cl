@@ -277,18 +277,49 @@ kernel void device_side_enqueue(global int *a, global int *b, int i) {
 }
 
 // COMMON: define internal spir_kernel void [[INVL1]](i8 addrspace(1)* %{{.*}})
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVL2]](i8 addrspace(1)* %{{.*}})
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG1]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG2]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG3]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG4]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG5]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG6]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p1, i8 addrspace(3)* %p2, i8 addrspace(3)* %p3)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG7]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %p)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_func void [[INVG8]](i8 addrspace(4)* %{{.*}})
+// COMMON-NOT: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_func void [[INVG9]](i8 addrspace(4)* %{{.*}}, i8 addrspace(3)* %a)
+// COMMON-NOT: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG8K]](i8 addrspace(1)* %{{.*}})
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG9K]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %a)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INV_G_K]](i8 addrspace(1)* %{{.*}}, i8 addrspace(3)* %a)
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG10]](i8 addrspace(1)* %{{.*}})
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
+
 // COMMON: define internal spir_kernel void [[INVG11]](i8 addrspace(1)* %{{.*}})
+// COMMON-SAME: #{{[0-9]+}} !kernel_arg_addr_space !{{.*}} !kernel_arg_access_qual !{{.*}} !kernel_arg_type !{{.*}} !kernel_arg_base_type !{{.*}} !kernel_arg_type_qual !{{.*}}
