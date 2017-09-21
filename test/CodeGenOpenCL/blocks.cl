@@ -14,7 +14,10 @@ void (^block_A)(local void *) = ^(local void *a) {
 // COMMON-LABEL: define {{.*}}void @foo()
 void foo(){
   int i;
-  // COMMON-NOT: store i8* null, i8** %block.isa
+  // COMMON-NOT: %block.isa
+  // COMMON-NOT: %block.flags
+  // COMMON-NOT: %block.reserved
+  // COMMON-NOT: %block.descriptor
   // COMMON: %[[block_size:.*]] = getelementptr inbounds <{ i32, i32, i8 addrspace(4)*, i32 }>, <{ i32, i32, i8 addrspace(4)*, i32 }>* %block, i32 0, i32 0
   // SPIR: store i32 16, i32* %[[block_size]]
   // AMD: store i32 20, i32* %[[block_size]]

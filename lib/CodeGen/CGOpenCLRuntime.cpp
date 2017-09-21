@@ -105,6 +105,7 @@ llvm::Value *CGOpenCLRuntime::getPipeElemAlign(const Expr *PipeArg) {
 }
 
 llvm::PointerType *CGOpenCLRuntime::getGenericVoidPointerType() {
+  assert(CGM.getLangOpts().OpenCL);
   return llvm::IntegerType::getInt8PtrTy(
       CGM.getLLVMContext(),
       CGM.getContext().getTargetAddressSpace(LangAS::opencl_generic));
