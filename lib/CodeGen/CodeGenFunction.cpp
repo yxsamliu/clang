@@ -856,16 +856,9 @@ void CodeGenFunction::StartFunction(GlobalDecl GD,
   if (CGM.getCodeGenOpts().ProfileSampleAccurate)
     Fn->addFnAttr("profile-sample-accurate");
 
-  if (getLangOpts().OpenCL) {
-    // Add metadata for a kernel function.
-    if (D && getenv("DBG_BLK")) {
-      D->dump();
-      llvm::errs() << "Calling Conv: " << FnInfo.getASTCallingConvention()
-                   << '\n';
-    }
-    if (FnInfo.getASTCallingConvention() == CC_OpenCLKernel)
-      EmitOpenCLKernelMetadata(D, Fn);
-  }
+  // Add metadata for a kernel function.
+  if (FnInfo.getASTCallingConvention() == CC_OpenCLKernel)
+    EmitOpenCLKernelMetadata(D, Fn);
 
   // If we are checking function types, emit a function type signature as
   // prologue data.
