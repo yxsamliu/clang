@@ -307,8 +307,8 @@ static void initializeForBlockHeader(CodeGenModule &CGM, CGBlockInfo &info,
 
   assert(elementTypes.empty());
   if (CGM.getLangOpts().OpenCL) {
-    // The header is basically 'struct { int; int; generic void *; }'.
-    // Assert that that struct is packed.
+    // The header is basically 'struct { int; int; generic void *;
+    // custom_fields; }'. Assert that that struct is packed.
     auto GenPtrAlign = CharUnits::fromQuantity(
         CGM.getTarget().getPointerAlign(LangAS::opencl_generic) / 8);
     auto GenPtrSize = CharUnits::fromQuantity(
@@ -323,9 +323,19 @@ static void initializeForBlockHeader(CodeGenModule &CGM, CGBlockInfo &info,
     elementTypes.push_back(
         CGM.getOpenCLRuntime()
             .getGenericVoidPointerType()); /* invoke function */
-    if (auto *Helper = CGM.getTargetCodeGenInfo().getTargetOpenCLBlockHelper())
-      for (auto I : Helper->getCustomFieldTypes()) /* custom fields */
+    unsigned Offset =
+        2 * CGM.getIntSize().getQuantity() + GenPtrSize.getQuantity();
+    if (auto *Helper =
+            CGM.getTargetCodeGenInfo().getTargetOpenCLBlockHelper()) {
+      for (auto I : Helper->getCustomFieldTypes()) /* custom fields */ {
+        // TargetOpenCLBlockHelp needs to make sure the struct is packed.
+        // If necessary, add padding fields to the custom fields.
+        assert(Offset % CGM.getDataLayout().getABITypeAlignment(I) == 0);
+        Offset += CGM.getDataLayout().getTypeAllocSize(I);
         elementTypes.push_back(I);
+      }
+      assert(Offset % GenPtrAlign.getQuantity() == 0);
+    }
   } else {
     // The header is basically 'struct { void *; int; int; void *; void *; }'.
     // Assert that that struct is packed.
@@ -1040,10 +1050,16 @@ llvm::Type *CodeGenModule::getGenericBlockLiteralType() {
     //   int __size;
     //   int __align;
     //   __generic void *__invoke;
+    //   /* custom fields */
     // };
+    SmallVector<llvm::Type *, 8> StructFields(
+        {IntTy, IntTy, getOpenCLRuntime().getGenericVoidPointerType()});
+    if (auto *Helper = getTargetCodeGenInfo().getTargetOpenCLBlockHelper()) {
+      for (auto I : Helper->getCustomFieldTypes())
+        StructFields.push_back(I);
+    }
     GenericBlockLiteralType = llvm::StructType::create(
-        "struct.__opencl_block_literal_generic", IntTy, IntTy,
-        getOpenCLRuntime().getGenericVoidPointerType());
+        StructFields, "struct.__opencl_block_literal_generic");
   } else {
     // struct __block_literal_generic {
     //   void *__isa;
