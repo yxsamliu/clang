@@ -18,8 +18,9 @@
 #include "CodeGenFunction.h"
 #include "CodeGenModule.h"
 #include "ConstantEmitter.h"
-#include "clang/CodeGen/ConstantInitBuilder.h"
+#include "TargetInfo.h"
 #include "clang/AST/DeclObjC.h"
+#include "clang/CodeGen/ConstantInitBuilder.h"
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/DataLayout.h"
@@ -317,9 +318,14 @@ static void initializeForBlockHeader(CodeGenModule &CGM, CGBlockInfo &info,
     assert((2 * CGM.getIntSize()).isMultipleOf(GenPtrAlign));
     info.BlockAlign = GenPtrAlign;
     info.BlockSize = GenPtrSize + 2 * CGM.getIntSize();
-    elementTypes.push_back(CGM.IntTy);
-    elementTypes.push_back(CGM.IntTy);
-    elementTypes.push_back(CGM.getOpenCLRuntime().getGenericVoidPointerType());
+    elementTypes.push_back(CGM.IntTy); /* total size */
+    elementTypes.push_back(CGM.IntTy); /* align */
+    elementTypes.push_back(
+        CGM.getOpenCLRuntime()
+            .getGenericVoidPointerType()); /* invoke function */
+    if (auto *Helper = CGM.getTargetCodeGenInfo().getTargetOpenCLBlockHelper())
+      for (auto I : Helper->getCustomFieldTypes()) /* custom fields */
+        elementTypes.push_back(I);
   } else {
     // The header is basically 'struct { void *; int; int; void *; void *; }'.
     // Assert that that struct is packed.
@@ -358,8 +364,12 @@ static void computeBlockInfo(CodeGenModule &CGM, CodeGenFunction *CGF,
 
   SmallVector<llvm::Type*, 8> elementTypes;
   initializeForBlockHeader(CGM, info, elementTypes);
-
-  if (!block->hasCaptures()) {
+  bool hasNonConstantCustomFields = false;
+  if (auto *OpenCLHelper =
+          CGM.getTargetCodeGenInfo().getTargetOpenCLBlockHelper())
+    hasNonConstantCustomFields =
+        !OpenCLHelper->areAllCustomFieldValuesConstant(info);
+  if (!block->hasCaptures() && !hasNonConstantCustomFields) {
     info.StructureType =
       llvm::StructType::get(CGM.getLLVMContext(), elementTypes, true);
     info.CanBeGlobal = true;
@@ -821,6 +831,15 @@ llvm::Value *CodeGenFunction::EmitBlockLiteral(const CGBlockInfo &blockInfo) {
     addHeaderField(blockFn, GenVoidPtrSize, "block.invoke");
     if (!IsOpenCL)
       addHeaderField(descriptor, getPointerSize(), "block.descriptor");
+    else if (auto *Helper =
+                 CGM.getTargetCodeGenInfo().getTargetOpenCLBlockHelper()) {
+      for (auto I : Helper->getCustomFieldValues(*this, blockInfo)) {
+        addHeaderField(I,
+                       CharUnits::fromQuantity(
+                           CGM.getDataLayout().getTypeAllocSize(I->getType())),
+                       "block.custom");
+      }
+    }
   }
 
   // Finally, capture all the values into the block.
@@ -1217,6 +1236,11 @@ static llvm::Constant *buildGlobalBlock(CodeGenModule &CGM,
   if (!IsOpenCL) {
     // Descriptor
     fields.add(buildBlockDescriptor(CGM, blockInfo));
+  } else if (auto *Helper =
+                 CGM.getTargetCodeGenInfo().getTargetOpenCLBlockHelper()) {
+    for (auto I : Helper->getCustomFieldValues(CGM, blockInfo)) {
+      fields.add(I);
+    }
   }
 
   unsigned AddrSpace = 0;
