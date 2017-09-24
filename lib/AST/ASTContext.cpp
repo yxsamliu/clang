@@ -707,6 +707,7 @@ static const LangAS::Map *getAddressSpaceMap(const TargetInfo &T,
       1, // opencl_global
       3, // opencl_local
       2, // opencl_constant
+      0, // opencl_private
       4, // opencl_generic
       5, // cuda_device
       6, // cuda_constant
@@ -2282,10 +2283,11 @@ ASTContext::getExtQualType(const Type *baseType, Qualifiers quals) const {
   return QualType(eq, fastQuals);
 }
 
-QualType
-ASTContext::getAddrSpaceQualType(QualType T, unsigned AddressSpace) const {
+QualType ASTContext::getAddrSpaceQualType(QualType T, unsigned AddressSpace,
+                                          bool ImplicitFlag) const {
   QualType CanT = getCanonicalType(T);
-  if (CanT.getAddressSpace() == AddressSpace)
+  if (CanT.getAddressSpace() == AddressSpace &&
+      CanT.getQualifiers().getImplicitAddressSpaceFlag() == ImplicitFlag)
     return T;
 
   // If we are composing extended qualifiers together, merge together
@@ -2298,6 +2300,7 @@ ASTContext::getAddrSpaceQualType(QualType T, unsigned AddressSpace) const {
   assert(!Quals.hasAddressSpace() &&
          "Type cannot be in multiple addr spaces!");
   Quals.addAddressSpace(AddressSpace);
+  Quals.setImplicitAddressSpaceFlag(ImplicitFlag);
 
   return getExtQualType(TypeNode, Quals);
 }
@@ -8102,6 +8105,7 @@ QualType ASTContext::mergeTypes(QualType LHS, QualType RHS,
   // If the qualifiers are different, the types aren't compatible... mostly.
   Qualifiers LQuals = LHSCan.getLocalQualifiers();
   Qualifiers RQuals = RHSCan.getLocalQualifiers();
+  RQuals.setImplicitAddressSpaceFlag(LQuals.getImplicitAddressSpaceFlag());
   if (LQuals != RQuals) {
     // If any of these qualifiers are different, we have a type
     // mismatch.

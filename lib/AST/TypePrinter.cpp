@@ -1662,11 +1662,12 @@ void Qualifiers::print(raw_ostream &OS, const PrintingPolicy& Policy,
     OS << "__unaligned";
     addSpace = true;
   }
-  if (unsigned addrspace = getAddressSpace()) {
-    if (addSpace)
-      OS << ' ';
-    addSpace = true;
-    switch (addrspace) {
+  if (!getImplicitAddressSpaceFlag()) {
+    if (unsigned addrspace = getAddressSpace()) {
+      if (addSpace)
+        OS << ' ';
+      addSpace = true;
+      switch (addrspace) {
       case LangAS::opencl_global:
         OS << "__global";
         break;
@@ -1676,6 +1677,9 @@ void Qualifiers::print(raw_ostream &OS, const PrintingPolicy& Policy,
       case LangAS::opencl_constant:
       case LangAS::cuda_constant:
         OS << "__constant";
+        break;
+      case LangAS::opencl_private:
+        OS << "__private";
         break;
       case LangAS::opencl_generic:
         OS << "__generic";
@@ -1691,6 +1695,7 @@ void Qualifiers::print(raw_ostream &OS, const PrintingPolicy& Policy,
         OS << "__attribute__((address_space(";
         OS << addrspace - LangAS::FirstTargetAddressSpace;
         OS << ")))";
+      }
     }
   }
   if (Qualifiers::GC gc = getObjCGCAttr()) {

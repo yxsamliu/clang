@@ -1068,7 +1068,8 @@ public:
   /// The resulting type has a union of the qualifiers from T and the address
   /// space. If T already has an address space specifier, it is silently
   /// replaced.
-  QualType getAddrSpaceQualType(QualType T, unsigned AddressSpace) const;
+  QualType getAddrSpaceQualType(QualType T, unsigned AddressSpace,
+                                bool IsImplicit = false) const;
 
   /// \brief Apply Objective-C protocol qualifiers to the given type.
   /// \param allowOnPointerType specifies if we can apply protocol
