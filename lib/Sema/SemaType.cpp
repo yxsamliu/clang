@@ -6997,7 +6997,7 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
         }
       }
       // OpenCL v1.2 s6.5:
-      // The generic address space name for arguments to a function in a
+      // The default address space name for arguments to a function in a
       // program, or local variables of a function is __private. All function
       // arguments shall be in the __private address space.
     } else if (state.getCurrentChunkIndex() > 0 &&
