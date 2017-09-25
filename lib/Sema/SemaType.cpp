@@ -4834,6 +4834,11 @@ TypeSourceInfo *Sema::GetTypeForDeclarator(Declarator &D, Scope *S) {
 
   TypeSourceInfo *ReturnTypeInfo = nullptr;
   QualType T = GetDeclSpecTypeForDeclarator(state, ReturnTypeInfo);
+  if (getenv("DBG_ADDR")) {
+    llvm::errs() << "GetDeclSpecTypeForDeclarator: ";
+    T.dump();
+    llvm::errs() << "addr space: " << T.getAddressSpace() << '\n';
+  }
 
   if (D.isPrototypeContext() && getLangOpts().ObjCAutoRefCount)
     inferARCWriteback(state, T);
@@ -6977,20 +6982,34 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
     }
   }
 
-  if (state.getSema().getLangOpts().OpenCL && !hasOpenCLAddressSpace &&
-      type.getAddressSpace() == LangAS::Default &&
-      (TAL == TAL_DeclSpec || TAL == TAL_DeclChunk)) {
-    Declarator &D = state.getDeclarator();
+  Declarator &D = state.getDeclarator();
+  auto ChunkIndex = state.getCurrentChunkIndex();
+  if (!state.getSema().getLangOpts().OpenCL || hasOpenCLAddressSpace ||
+      type.getAddressSpace() != LangAS::Default ||
+      // LLVM expects function in default addr space.
+      (ChunkIndex == 0 &&
+       (D.isFunctionDeclarator() || D.isFunctionDefinition() ||
+        // Rule out cases like f(void).
+        type->isVoidType() ||
+        // Rule out typedef.
+        D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef ||
+        // Rule out struct members.
+        D.getContext() == Declarator::MemberContext)))
+    return;
+
+  if (getenv("DBG_ADDR")) {
+    llvm::errs() << "before setting implicit addr: type:\n";
+    type.dump();
+    llvm::errs() << "type addr space: " << type.getAddressSpace() << '\n';
+    llvm::errs() << "current chunk index: " << state.getCurrentChunkIndex()
+                 << '\n';
+    llvm::errs() << "TAL: " << (unsigned)TAL << '\n';
+  }
+
+  if (state.getSema().getLangOpts().OpenCLVersion <= 120) {
     // Put OpenCL automatic variable in private address space.
-    if (state.getCurrentChunkIndex() == 0 && !D.isFunctionDeclarator() &&
-        !D.isFunctionDefinition() &&
-        D.getDeclSpec().getStorageClassSpec() != DeclSpec::SCS_typedef &&
-        !type->isVoidType()) {
-      if (D.getContext() == Declarator::BlockContext ||
-          D.getContext() == Declarator::ForContext ||
-          D.getContext() == Declarator::InitStmtContext ||
-          D.getContext() == Declarator::ConditionContext ||
-          D.getContext() == Declarator::PrototypeContext) {
+    if (state.getCurrentChunkIndex() == 0) {
+      if (D.getContext() != Declarator::FileContext) {
         if (D.getDeclSpec().getStorageClassSpec() != DeclSpec::SCS_static) {
           type = state.getSema().Context.getAddrSpaceQualType(
               type, LangAS::opencl_private, true);
@@ -7008,7 +7027,6 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
           type, LangAS::opencl_private, true);
     }
   }
-
   // If address space is not set, OpenCL 2.0 defines non private default
   // address spaces for some cases:
   // OpenCL 2.0, section 6.5:
@@ -7018,9 +7036,7 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
   // (...)
   // Pointers that are declared without pointing to a named address space point
   // to the generic address space.
-  if (state.getSema().getLangOpts().OpenCLVersion >= 200 &&
-      !hasOpenCLAddressSpace && type.getAddressSpace() == LangAS::Default &&
-      (TAL == TAL_DeclSpec || TAL == TAL_DeclChunk)) {
+  if (state.getSema().getLangOpts().OpenCLVersion >= 200) {
     Declarator &D = state.getDeclarator();
     if (state.getCurrentChunkIndex() > 0 &&
         (D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
@@ -7029,14 +7045,12 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
              DeclaratorChunk::BlockPointer)) {
       type = state.getSema().Context.getAddrSpaceQualType(
           type, LangAS::opencl_generic, true);
-    } else if (state.getCurrentChunkIndex() == 0 &&
-               !D.isFunctionDeclarator() && !D.isFunctionDefinition() &&
-               D.getDeclSpec().getStorageClassSpec() != DeclSpec::SCS_typedef &&
-               !type->isSamplerT()) {
+    } else if (state.getCurrentChunkIndex() == 0 /*&&
+               !type->isSamplerT()*/) {
       if (D.getContext() == Declarator::FileContext) {
         type = state.getSema().Context.getAddrSpaceQualType(
             type, LangAS::opencl_global, true);
-      } else if (D.getContext() == Declarator::BlockContext) {
+      } else {
         if (D.getDeclSpec().getStorageClassSpec() != DeclSpec::SCS_static) {
           type = state.getSema().Context.getAddrSpaceQualType(
               type, LangAS::opencl_private, true);
@@ -7050,6 +7064,11 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
                D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static)
       type = state.getSema().Context.getAddrSpaceQualType(
           type, LangAS::opencl_global, true);
+  }
+  if (getenv("DBG_ADDR")) {
+    llvm::errs() << "after setting implicit addr: type:\n";
+    type.dump();
+    llvm::errs() << "type addr space: " << type.getAddressSpace() << '\n';
   }
 }
 
