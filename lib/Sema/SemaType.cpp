@@ -6984,17 +6984,24 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
 
   Declarator &D = state.getDeclarator();
   auto ChunkIndex = state.getCurrentChunkIndex();
+  bool IsPointer = ChunkIndex > 0 && D.getTypeObject(ChunkIndex - 1).Kind ==
+                                         DeclaratorChunk::Pointer;
+  bool IsStatic = D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static;
   if (!state.getSema().getLangOpts().OpenCL || hasOpenCLAddressSpace ||
       type.getAddressSpace() != LangAS::Default ||
-      // LLVM expects function in default addr space.
+      (D.getContext() == Declarator::MemberContext && !IsPointer) ||
       (ChunkIndex == 0 &&
+       // LLVM expects function in default addr space.
        (D.isFunctionDeclarator() || D.isFunctionDefinition() ||
         // Rule out cases like f(void).
         type->isVoidType() ||
         // Rule out typedef.
-        D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef ||
-        // Rule out struct members.
-        D.getContext() == Declarator::MemberContext)))
+        D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef)) ||
+      // Rule out struct members.
+      (ChunkIndex > 0 &&
+       // Rule out function return type.
+       D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
+           DeclaratorChunk::Function))
     return;
 
   if (getenv("DBG_ADDR")) {
@@ -7003,72 +7010,56 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
     llvm::errs() << "type addr space: " << type.getAddressSpace() << '\n';
     llvm::errs() << "current chunk index: " << state.getCurrentChunkIndex()
                  << '\n';
-    llvm::errs() << "TAL: " << (unsigned)TAL << '\n';
+    llvm::errs() << "TAL: " << (unsigned)TAL << "\n\n";
   }
 
+  unsigned ImpAddr = LangAS::Default;
+  // Put OpenCL automatic variable in private address space.
+  // OpenCL v1.2 s6.5:
+  // The default address space name for arguments to a function in a
+  // program, or local variables of a function is __private. All function
+  // arguments shall be in the __private address space.
   if (state.getSema().getLangOpts().OpenCLVersion <= 120) {
-    // Put OpenCL automatic variable in private address space.
-    if (state.getCurrentChunkIndex() == 0) {
-      if (D.getContext() != Declarator::FileContext) {
-        if (D.getDeclSpec().getStorageClassSpec() != DeclSpec::SCS_static) {
-          type = state.getSema().Context.getAddrSpaceQualType(
-              type, LangAS::opencl_private, true);
-        }
-      }
-      // OpenCL v1.2 s6.5:
-      // The default address space name for arguments to a function in a
-      // program, or local variables of a function is __private. All function
-      // arguments shall be in the __private address space.
-    } else if (state.getCurrentChunkIndex() > 0 &&
-               state.getSema().getLangOpts().OpenCLVersion <= 120 &&
-               (D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
-                DeclaratorChunk::Pointer)) {
-      type = state.getSema().Context.getAddrSpaceQualType(
-          type, LangAS::opencl_private, true);
-    }
-  }
-  // If address space is not set, OpenCL 2.0 defines non private default
-  // address spaces for some cases:
-  // OpenCL 2.0, section 6.5:
-  // The address space for a variable at program scope or a static variable
-  // inside a function can either be __global or __constant, but defaults to
-  // __global if not specified.
-  // (...)
-  // Pointers that are declared without pointing to a named address space point
-  // to the generic address space.
-  if (state.getSema().getLangOpts().OpenCLVersion >= 200) {
-    Declarator &D = state.getDeclarator();
+    if (IsPointer)
+      ImpAddr = LangAS::opencl_private;
+    else if (IsStatic)
+      ImpAddr = LangAS::opencl_global;
+    else
+      ImpAddr = LangAS::opencl_private;
+  } else {
+    // If address space is not set, OpenCL 2.0 defines non private default
+    // address spaces for some cases:
+    // OpenCL 2.0, section 6.5:
+    // The address space for a variable at program scope or a static variable
+    // inside a function can either be __global or __constant, but defaults to
+    // __global if not specified.
+    // (...)
+    // Pointers that are declared without pointing to a named address space
+    // point to the generic address space.
     if (state.getCurrentChunkIndex() > 0 &&
         (D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
              DeclaratorChunk::Pointer ||
          D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
              DeclaratorChunk::BlockPointer)) {
-      type = state.getSema().Context.getAddrSpaceQualType(
-          type, LangAS::opencl_generic, true);
-    } else if (state.getCurrentChunkIndex() == 0 /*&&
-               !type->isSamplerT()*/) {
+      ImpAddr = LangAS::opencl_generic;
+    } else if (state.getCurrentChunkIndex() == 0) {
       if (D.getContext() == Declarator::FileContext) {
-        type = state.getSema().Context.getAddrSpaceQualType(
-            type, LangAS::opencl_global, true);
+        ImpAddr = LangAS::opencl_global;
       } else {
-        if (D.getDeclSpec().getStorageClassSpec() != DeclSpec::SCS_static) {
-          type = state.getSema().Context.getAddrSpaceQualType(
-              type, LangAS::opencl_private, true);
+        if (IsStatic) {
+          ImpAddr = LangAS::opencl_global;
         } else {
-          type = state.getSema().Context.getAddrSpaceQualType(
-              type, LangAS::opencl_global, true);
+          ImpAddr = LangAS::opencl_private;
         }
       }
-    } else if (state.getCurrentChunkIndex() == 0 &&
-               D.getContext() == Declarator::BlockContext &&
-               D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static)
-      type = state.getSema().Context.getAddrSpaceQualType(
-          type, LangAS::opencl_global, true);
+    }
   }
+  if (ImpAddr != LangAS::Default)
+    type = state.getSema().Context.getAddrSpaceQualType(type, ImpAddr, true);
   if (getenv("DBG_ADDR")) {
     llvm::errs() << "after setting implicit addr: type:\n";
     type.dump();
-    llvm::errs() << "type addr space: " << type.getAddressSpace() << '\n';
+    llvm::errs() << "type addr space: " << type.getAddressSpace() << "\n\n";
   }
 }
 
