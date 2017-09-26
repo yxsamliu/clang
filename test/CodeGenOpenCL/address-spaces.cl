@@ -7,6 +7,18 @@
 // RUN: %clang_cc1 %s -O0 -triple amdgcn-mesa-mesa3d -emit-llvm -o - | FileCheck --check-prefixes=CHECK,SPIR %s
 // RUN: %clang_cc1 %s -O0 -triple r600-- -emit-llvm -o - | FileCheck --check-prefixes=CHECK,SPIR %s
 
+// SPIR: %struct.S = type { i32, i32, i32* }
+// CL20SPIR: %struct.S = type { i32, i32, i32 addrspace(4)* }
+struct S {
+  int x;
+  int y;
+  int *z;
+};
+#ifdef CL20
+// CL20-DAG: @g_s = common addrspace(1) global %struct.S zeroinitializer
+struct S g_s;
+#endif
+
 // SPIR: i32* %arg
 // GIZ: i32 addrspace(5)* %arg
 void f__p(__private int *arg) {}
@@ -58,3 +70,31 @@ void f(int *arg) {
 // CL20-DAG: @f.ii = internal addrspace(1) global i32 0
 #endif
 }
+
+typedef int int_td;
+typedef int *intp_td;
+// SPIR: define void @test_typedef(i32 addrspace(1)* %x, i32 addrspace(2)* %y, i32* %z)
+void test_typedef(global int_td *x, constant int_td *y, intp_td z) {
+  *x = *y;
+  *z = 0;
+}
+
+// SPIR: define void @test_struct()
+void test_struct() {
+  // SPIR: %ps = alloca %struct.S*
+  // CL20SPIR: %ps = alloca %struct.S addrspace(4)*
+  struct S *ps;
+  // SPIR: store i32 0, i32* %x
+  // CL20SPIR: store i32 0, i32 addrspace(4)* %x
+  ps->x = 0;
+#ifdef CL20
+  // CL20SPIR: store i32 0, i32 addrspace(1)* getelementptr inbounds (%struct.S, %struct.S addrspace(1)* @g_s, i32 0, i32 0)
+  g_s.x = 0;
+#endif
+}
+
+// SPIR: define void @test_void_par()
+void test_void_par(void) {}
+
+// SPIR: define i32 @test_func_return_type()
+int test_func_return_type(void) {}

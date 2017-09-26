@@ -6236,7 +6236,7 @@ NamedDecl *Sema::ActOnVariableDeclarator(
     // The event type cannot be used with the __local, __constant and __global
     // address space qualifiers.
     if (R->isEventT()) {
-      if (R.getAddressSpace()) {
+      if (R.getAddressSpace() != LangAS::opencl_private) {
         Diag(D.getLocStart(), diag::err_event_t_addr_space_qual);
         D.setInvalidType();
       }
@@ -7339,7 +7339,7 @@ void Sema::CheckVariableDeclarationType(VarDecl *NewVD) {
             return;
           }
         }
-      } else if (T.getAddressSpace() != LangAS::Default) {
+      } else if (T.getAddressSpace() != LangAS::opencl_private) {
         // Do not allow other address spaces on automatic variable.
         Diag(NewVD->getLocation(), diag::err_as_qualified_auto_decl) << 1;
         NewVD->setInvalidDecl();
@@ -7974,7 +7974,8 @@ static OpenCLParamType getOpenCLKernelParameterType(Sema &S, QualType PT) {
     if (PointeeType->isPointerType())
       return PtrPtrKernelParam;
     if (PointeeType.getAddressSpace() == LangAS::opencl_generic ||
-        PointeeType.getAddressSpace() == 0)
+        PointeeType.getAddressSpace() == LangAS::opencl_private ||
+        PointeeType.getAddressSpace() == LangAS::Default)
       return InvalidAddrSpacePtrKernelParam;
     return PtrKernelParam;
   }
@@ -8744,9 +8745,7 @@ Sema::ActOnFunctionDeclarator(Scope *S, Declarator &D, DeclContext *DC,
     // OpenCL v1.1 s6.5: Using an address space qualifier in a function return
     // type declaration will generate a compilation error.
     unsigned AddressSpace = NewFD->getReturnType().getAddressSpace();
-    if (AddressSpace == LangAS::opencl_local ||
-        AddressSpace == LangAS::opencl_global ||
-        AddressSpace == LangAS::opencl_constant) {
+    if (AddressSpace != LangAS::Default) {
       Diag(NewFD->getLocation(),
            diag::err_opencl_return_value_with_address_space);
       NewFD->setInvalidDecl();
@@ -11856,13 +11855,13 @@ ParmVarDecl *Sema::CheckParameter(DeclContext *DC, SourceLocation StartLoc,
   // duration shall not be qualified by an address-space qualifier."
   // Since all parameters have automatic store duration, they can not have
   // an address space.
-  if (T.getAddressSpace() != 0) {
-    // OpenCL allows function arguments declared to be an array of a type
-    // to be qualified with an address space.
-    if (!(getLangOpts().OpenCL && T->isArrayType())) {
-      Diag(NameLoc, diag::err_arg_with_address_space);
-      New->setInvalidDecl();
-    }
+  if (T.getAddressSpace() != LangAS::Default &&
+      // OpenCL allows function arguments declared to be an array of a type
+      // to be qualified with an address space.
+      !(getLangOpts().OpenCL &&
+        (T->isArrayType() || T.getAddressSpace() == LangAS::opencl_private))) {
+    Diag(NameLoc, diag::err_arg_with_address_space);
+    New->setInvalidDecl();
   }
 
   return New;

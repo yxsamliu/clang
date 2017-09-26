@@ -35,6 +35,7 @@ enum ID {
   opencl_global,
   opencl_local,
   opencl_constant,
+  opencl_private,
   opencl_generic,
 
   // CUDA specific address spaces.

@@ -152,8 +152,8 @@ public:
 
   enum {
     /// The maximum supported address space number.
-    /// 23 bits should be enough for anyone.
-    MaxAddressSpace = 0x7fffffu,
+    /// 22 bits should be enough for anyone.
+    MaxAddressSpace = 0x3fffffu,
 
     /// The width of the "fast" qualifier mask.
     FastWidth = 3,
@@ -329,6 +329,17 @@ public:
     return (lifetime == OCL_Strong || lifetime == OCL_Weak);
   }
 
+  /// True if the non-default address space is not explicit in the source
+  /// code but deduced by context. This flag is used when printing
+  /// types or performing semantic checks if the explicity of an address
+  /// space makes difference.
+  bool getImplicitAddressSpaceFlag() const { return Mask & IMask; }
+  void setImplicitAddressSpaceFlag(bool Value) {
+    Mask = (Mask & ~IMask) | (((uint32_t)Value) << IShift);
+  }
+  void removeImplicitAddressSpaceFlag() {
+    setImplicitAddressSpaceFlag(false);
+  }
   bool hasAddressSpace() const { return Mask & AddressSpaceMask; }
   unsigned getAddressSpace() const { return Mask >> AddressSpaceShift; }
   bool hasTargetSpecificAddressSpace() const {
@@ -353,7 +364,10 @@ public:
     Mask = (Mask & ~AddressSpaceMask)
          | (((uint32_t) space) << AddressSpaceShift);
   }
-  void removeAddressSpace() { setAddressSpace(0); }
+  void removeAddressSpace() {
+    setAddressSpace(0);
+    removeImplicitAddressSpaceFlag();
+  }
   void addAddressSpace(unsigned space) {
     assert(space);
     setAddressSpace(space);
@@ -536,9 +550,8 @@ public:
   }
 
 private:
-
-  // bits:     |0 1 2|3|4 .. 5|6  ..  8|9   ...   31|
-  //           |C R V|U|GCAttr|Lifetime|AddressSpace|
+  // bits:     |0 1 2|3|4 .. 5|6  ..  8|9|10   ...   31|
+  //           |C R V|U|GCAttr|Lifetime|I|AddressSpace |
   uint32_t Mask;
 
   static const uint32_t UMask = 0x8;
@@ -547,9 +560,11 @@ private:
   static const uint32_t GCAttrShift = 4;
   static const uint32_t LifetimeMask = 0x1C0;
   static const uint32_t LifetimeShift = 6;
+  static const uint32_t IMask = 0x200;
+  static const uint32_t IShift = 9;
   static const uint32_t AddressSpaceMask =
-      ~(CVRMask | UMask | GCAttrMask | LifetimeMask);
-  static const uint32_t AddressSpaceShift = 9;
+      ~(CVRMask | UMask | GCAttrMask | LifetimeMask | IMask);
+  static const uint32_t AddressSpaceShift = 10;
 };
 
 /// A std::pair-like structure for storing a qualified type split
