@@ -6815,7 +6815,7 @@ static void setOpenCLImplicitAddrSpace(TypeProcessingState &state,
        D.getTypeObject(ChunkIndex - 1).Kind == DeclaratorChunk::BlockPointer);
   bool IsPartOfAnotherType = ChunkIndex > 0;
   bool IsStatic = D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static;
-  if (!state.getSema().getLangOpts().OpenCL || /*hasOpenCLAddressSpace ||*/
+  if (!state.getSema().getLangOpts().OpenCL ||
       type.getAddressSpace() != LangAS::Default ||
       (IsPartOfAnotherType && !IsPointer) ||
       // Rule out struct members.
@@ -6826,17 +6826,13 @@ static void setOpenCLImplicitAddrSpace(TypeProcessingState &state,
         // Rule out cases like f(void).
         type->isVoidType() ||
         // Rule out typedef.
-        D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef))
-      // Rule out function return type.
-      //|| (ChunkIndex > 0 && D.getTypeObject(state.getCurrentChunkIndex() -
-      // 1).Kind == DeclaratorChunk::Function)
-  )
+        D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef)))
     return;
 
   if (getenv("DBG_ADDR")) {
     llvm::errs() << " IsPointer: " << IsPointer;
   }
-  unsigned ImpAddr = LangAS::Default;
+  unsigned ImpAddr;
   // Put OpenCL automatic variable in private address space.
   // OpenCL v1.2 s6.5:
   // The default address space name for arguments to a function in a
@@ -6861,7 +6857,7 @@ static void setOpenCLImplicitAddrSpace(TypeProcessingState &state,
     // point to the generic address space.
     if (IsPointer) {
       ImpAddr = LangAS::opencl_generic;
-    } else if (state.getCurrentChunkIndex() == 0) {
+    } else /*if (state.getCurrentChunkIndex() == 0)*/ {
       if (D.getContext() == Declarator::FileContext) {
         ImpAddr = LangAS::opencl_global;
       } else {
@@ -6873,8 +6869,7 @@ static void setOpenCLImplicitAddrSpace(TypeProcessingState &state,
       }
     }
   }
-  if (ImpAddr != LangAS::Default)
-    type = state.getSema().Context.getAddrSpaceQualType(type, ImpAddr, true);
+  type = state.getSema().Context.getAddrSpaceQualType(type, ImpAddr, true);
   if (getenv("DBG_ADDR")) {
     llvm::errs() << " new addr: " << type.getAddressSpace() << "\n\n";
   }
