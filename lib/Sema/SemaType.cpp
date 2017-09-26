@@ -4834,12 +4834,6 @@ TypeSourceInfo *Sema::GetTypeForDeclarator(Declarator &D, Scope *S) {
 
   TypeSourceInfo *ReturnTypeInfo = nullptr;
   QualType T = GetDeclSpecTypeForDeclarator(state, ReturnTypeInfo);
-  if (getenv("DBG_ADDR")) {
-    llvm::errs() << "GetDeclSpecTypeForDeclarator: ";
-    T.dump();
-    llvm::errs() << "addr space: " << T.getAddressSpace() << '\n';
-  }
-
   if (D.isPrototypeContext() && getLangOpts().ObjCAutoRefCount)
     inferARCWriteback(state, T);
 
@@ -6813,6 +6807,19 @@ static void HandleOpenCLAccessAttr(QualType &CurType, const AttributeList &Attr,
 
 static void processTypeAttrs(TypeProcessingState &state, QualType &type,
                              TypeAttrLocation TAL, AttributeList *attrs) {
+  if (getenv("DBG_ADDR")) {
+    Declarator &D = state.getDeclarator();
+    llvm::errs() << "TAL: " << (unsigned)TAL;
+    llvm::errs() << " Context: " << (unsigned)D.getContext();
+    llvm::errs() << " chunk index: " << state.getCurrentChunkIndex();
+    if (state.getCurrentChunkIndex() < D.getNumTypeObjects())
+      llvm::errs()
+          << " chunk kind: "
+          << (unsigned)D.getTypeObject(state.getCurrentChunkIndex()).Kind;
+    llvm::errs() << " addr: " << type.getAddressSpace() << '\n';
+    type.dump();
+    llvm::errs() << '\n';
+  }
   // Scan through and apply attributes to this type where it makes sense.  Some
   // attributes (such as __address_space__, __vector_size__, etc) apply to the
   // type, but others can be present in the type specifiers even though they
@@ -6984,11 +6991,16 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
 
   Declarator &D = state.getDeclarator();
   auto ChunkIndex = state.getCurrentChunkIndex();
-  bool IsPointer = ChunkIndex > 0 && D.getTypeObject(ChunkIndex - 1).Kind ==
-                                         DeclaratorChunk::Pointer;
+  bool IsPointer =
+      ChunkIndex > 0 &&
+      (D.getTypeObject(ChunkIndex - 1).Kind == DeclaratorChunk::Pointer ||
+       D.getTypeObject(ChunkIndex - 1).Kind == DeclaratorChunk::BlockPointer);
+  bool IsPartOfAnotherType = ChunkIndex > 0;
   bool IsStatic = D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static;
   if (!state.getSema().getLangOpts().OpenCL || hasOpenCLAddressSpace ||
       type.getAddressSpace() != LangAS::Default ||
+      (IsPartOfAnotherType && !IsPointer) ||
+      // Rule out struct members.
       (D.getContext() == Declarator::MemberContext && !IsPointer) ||
       (ChunkIndex == 0 &&
        // LLVM expects function in default addr space.
@@ -6996,23 +7008,16 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
         // Rule out cases like f(void).
         type->isVoidType() ||
         // Rule out typedef.
-        D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef)) ||
-      // Rule out struct members.
-      (ChunkIndex > 0 &&
-       // Rule out function return type.
-       D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
-           DeclaratorChunk::Function))
+        D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef))
+      // Rule out function return type.
+      //|| (ChunkIndex > 0 && D.getTypeObject(state.getCurrentChunkIndex() -
+      //1).Kind == DeclaratorChunk::Function)
+  )
     return;
 
   if (getenv("DBG_ADDR")) {
-    llvm::errs() << "before setting implicit addr: type:\n";
-    type.dump();
-    llvm::errs() << "type addr space: " << type.getAddressSpace() << '\n';
-    llvm::errs() << "current chunk index: " << state.getCurrentChunkIndex()
-                 << '\n';
-    llvm::errs() << "TAL: " << (unsigned)TAL << "\n\n";
+    llvm::errs() << " IsPointer: " << IsPointer;
   }
-
   unsigned ImpAddr = LangAS::Default;
   // Put OpenCL automatic variable in private address space.
   // OpenCL v1.2 s6.5:
@@ -7036,11 +7041,7 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
     // (...)
     // Pointers that are declared without pointing to a named address space
     // point to the generic address space.
-    if (state.getCurrentChunkIndex() > 0 &&
-        (D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
-             DeclaratorChunk::Pointer ||
-         D.getTypeObject(state.getCurrentChunkIndex() - 1).Kind ==
-             DeclaratorChunk::BlockPointer)) {
+    if (IsPointer) {
       ImpAddr = LangAS::opencl_generic;
     } else if (state.getCurrentChunkIndex() == 0) {
       if (D.getContext() == Declarator::FileContext) {
@@ -7057,9 +7058,7 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
   if (ImpAddr != LangAS::Default)
     type = state.getSema().Context.getAddrSpaceQualType(type, ImpAddr, true);
   if (getenv("DBG_ADDR")) {
-    llvm::errs() << "after setting implicit addr: type:\n";
-    type.dump();
-    llvm::errs() << "type addr space: " << type.getAddressSpace() << "\n\n";
+    llvm::errs() << " new addr: " << type.getAddressSpace() << "\n\n";
   }
 }
 
