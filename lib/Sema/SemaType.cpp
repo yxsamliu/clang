@@ -6805,41 +6805,72 @@ static void HandleOpenCLAccessAttr(QualType &CurType, const AttributeList &Attr,
   }
 }
 
-static void setOpenCLImplicitAddrSpace(TypeProcessingState &state,
-                                       QualType &type, TypeAttrLocation TAL) {
-  Declarator &D = state.getDeclarator();
-  auto ChunkIndex = state.getCurrentChunkIndex();
-  bool IsPointer =
+static void deduceOpenCLImplicitAddrSpace(TypeProcessingState &State,
+                                          QualType &T, TypeAttrLocation TAL) {
+  if (!State.getSema().getLangOpts().OpenCL ||
+      T.getAddressSpace() != LangAS::Default)
+    return;
+
+  Declarator &D = State.getDeclarator();
+
+  // Handle the cases where address space should not be deduced.
+  //
+  // The pointee type of a pointer type is alwasy deduced since a pointer always
+  // points to some memory location which should has an address space.
+  //
+  // There are situations that at the point of certain declarations, the address
+  // space may be unknown and better to be left as default. For example, when
+  // definining a typedef or struct type, they are not associated with any
+  // specific address space. Later on, they may be used with any address space
+  // to declare a variable.
+  //
+  // The return value of a function is r-value, therefore should not have
+  // address space.
+  //
+  // The void type does not occupy memory, therefore should not have address
+  // space, except when it is used as a pointee type.
+  //
+  // Since LLVM assumes function type is in default address space, it should not
+  // have address space.
+  auto ChunkIndex = State.getCurrentChunkIndex();
+  bool IsPointee =
       ChunkIndex > 0 &&
       (D.getTypeObject(ChunkIndex - 1).Kind == DeclaratorChunk::Pointer ||
        D.getTypeObject(ChunkIndex - 1).Kind == DeclaratorChunk::BlockPointer);
-  bool IsPartOfAnotherType = ChunkIndex > 0;
-  bool IsStatic = D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static;
-  if (!state.getSema().getLangOpts().OpenCL ||
-      type.getAddressSpace() != LangAS::Default ||
-      (IsPartOfAnotherType && !IsPointer) ||
-      // Rule out struct members.
-      (D.getContext() == Declarator::MemberContext && !IsPointer) ||
-      (ChunkIndex == 0 &&
-       // LLVM expects function in default addr space.
-       (D.isFunctionDeclarator() || D.isFunctionDefinition() ||
-        // Rule out cases like f(void).
-        type->isVoidType() ||
-        // Rule out typedef.
-        D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef)))
+  bool IsFuncReturnType =
+      ChunkIndex > 0 &&
+      D.getTypeObject(ChunkIndex - 1).Kind == DeclaratorChunk::Function;
+  bool IsFuncType =
+      ChunkIndex < D.getNumTypeObjects() &&
+      D.getTypeObject(ChunkIndex).Kind == DeclaratorChunk::Function;
+  if ( // Do not deduce addr space for function return type and function type,
+       // otherwise it will fail some sema check.
+      IsFuncReturnType || IsFuncType ||
+      // Do not deduce addr space for member types of struct, except the pointee
+      // type of a pointer member type.
+      (D.getContext() == Declarator::MemberContext && !IsPointee) ||
+      // Do not deduce addr space for types used to define a typedef and the
+      // typedef itself, except the pointee type of a pointer type which is used
+      // to define the typedef.
+      (D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef &&
+       !IsPointee) ||
+      // Do not deduce addr space of the void type, e.g. in f(void), otherwise
+      // it will fail some sema check.
+      (T->isVoidType() && !IsPointee))
     return;
 
   if (getenv("DBG_ADDR")) {
-    llvm::errs() << " IsPointer: " << IsPointer;
+    llvm::errs() << " IsPointer: " << IsPointee;
   }
   unsigned ImpAddr;
+  bool IsStatic = D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static;
   // Put OpenCL automatic variable in private address space.
   // OpenCL v1.2 s6.5:
   // The default address space name for arguments to a function in a
   // program, or local variables of a function is __private. All function
   // arguments shall be in the __private address space.
-  if (state.getSema().getLangOpts().OpenCLVersion <= 120) {
-    if (IsPointer)
+  if (State.getSema().getLangOpts().OpenCLVersion <= 120) {
+    if (IsPointee)
       ImpAddr = LangAS::opencl_private;
     else if (IsStatic)
       ImpAddr = LangAS::opencl_global;
@@ -6855,9 +6886,9 @@ static void setOpenCLImplicitAddrSpace(TypeProcessingState &state,
     // (...)
     // Pointers that are declared without pointing to a named address space
     // point to the generic address space.
-    if (IsPointer) {
+    if (IsPointee) {
       ImpAddr = LangAS::opencl_generic;
-    } else /*if (state.getCurrentChunkIndex() == 0)*/ {
+    } else {
       if (D.getContext() == Declarator::FileContext) {
         ImpAddr = LangAS::opencl_global;
       } else {
@@ -6869,9 +6900,9 @@ static void setOpenCLImplicitAddrSpace(TypeProcessingState &state,
       }
     }
   }
-  type = state.getSema().Context.getAddrSpaceQualType(type, ImpAddr, true);
+  T = State.getSema().Context.getAddrSpaceQualType(T, ImpAddr, true);
   if (getenv("DBG_ADDR")) {
-    llvm::errs() << " new addr: " << type.getAddressSpace() << "\n\n";
+    llvm::errs() << " new addr: " << T.getAddressSpace() << "\n\n";
   }
 }
 
@@ -6882,6 +6913,7 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
     llvm::errs() << "TAL: " << (unsigned)TAL;
     llvm::errs() << " Context: " << (unsigned)D.getContext();
     llvm::errs() << " chunk index: " << state.getCurrentChunkIndex();
+    llvm::errs() << "/" << D.getNumTypeObjects();
     if (state.getCurrentChunkIndex() < D.getNumTypeObjects())
       llvm::errs()
           << " chunk kind: "
@@ -7058,7 +7090,7 @@ static void processTypeAttrs(TypeProcessingState &state, QualType &type,
       break;
     }
   }
-  setOpenCLImplicitAddrSpace(state, type, TAL);
+  deduceOpenCLImplicitAddrSpace(state, type, TAL);
 }
 
 void Sema::completeExprArrayBound(Expr *E) {

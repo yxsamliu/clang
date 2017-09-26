@@ -95,3 +95,6 @@ void test_struct() {
 
 // SPIR: define void @test_void_par()
 void test_void_par(void) {}
+
+// SPIR: define i32 @test_func_return_type()
+int test_func_return_type(void) {}
