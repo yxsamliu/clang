@@ -6859,9 +6859,6 @@ static void deduceOpenCLImplicitAddrSpace(TypeProcessingState &State,
       (T->isVoidType() && !IsPointee))
     return;
 
-  if (getenv("DBG_ADDR")) {
-    llvm::errs() << " IsPointer: " << IsPointee;
-  }
   unsigned ImpAddr;
   bool IsStatic = D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_static;
   // Put OpenCL automatic variable in private address space.
@@ -6901,27 +6898,10 @@ static void deduceOpenCLImplicitAddrSpace(TypeProcessingState &State,
     }
   }
   T = State.getSema().Context.getAddrSpaceQualType(T, ImpAddr, true);
-  if (getenv("DBG_ADDR")) {
-    llvm::errs() << " new addr: " << T.getAddressSpace() << "\n\n";
-  }
 }
 
 static void processTypeAttrs(TypeProcessingState &state, QualType &type,
                              TypeAttrLocation TAL, AttributeList *attrs) {
-  if (getenv("DBG_ADDR")) {
-    Declarator &D = state.getDeclarator();
-    llvm::errs() << "TAL: " << (unsigned)TAL;
-    llvm::errs() << " Context: " << (unsigned)D.getContext();
-    llvm::errs() << " chunk index: " << state.getCurrentChunkIndex();
-    llvm::errs() << "/" << D.getNumTypeObjects();
-    if (state.getCurrentChunkIndex() < D.getNumTypeObjects())
-      llvm::errs()
-          << " chunk kind: "
-          << (unsigned)D.getTypeObject(state.getCurrentChunkIndex()).Kind;
-    llvm::errs() << " addr: " << type.getAddressSpace() << '\n';
-    type.dump();
-    llvm::errs() << '\n';
-  }
   // Scan through and apply attributes to this type where it makes sense.  Some
   // attributes (such as __address_space__, __vector_size__, etc) apply to the
   // type, but others can be present in the type specifiers even though they
