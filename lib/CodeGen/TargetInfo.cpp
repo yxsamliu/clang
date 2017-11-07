@@ -7724,6 +7724,18 @@ public:
 };
 }
 
+namespace
+{
+  inline
+  llvm::APSInt getConstexprInt(const Expr *E, const ASTContext& Ctx)
+  {
+    llvm::APSInt r{32, 0};
+    if (E) E->EvaluateAsInt(r, Ctx);
+
+    return r;
+  }
+}
+
 void AMDGPUTargetCodeGenInfo::setTargetAttributes(
     const Decl *D, llvm::GlobalValue *GV, CodeGen::CodeGenModule &M) const {
   if (GV->isDeclaration())
@@ -7743,8 +7755,11 @@ void AMDGPUTargetCodeGenInfo::setTargetAttributes(
 
   const auto *FlatWGS = FD->getAttr<AMDGPUFlatWorkGroupSizeAttr>();
   if (ReqdWGS || FlatWGS) {
-    unsigned Min = FlatWGS ? FlatWGS->getMin() : 0;
-    unsigned Max = FlatWGS ? FlatWGS->getMax() : 0;
+    llvm::APSInt min = getConstexprInt(FlatWGS->getMin(), FD->getASTContext());
+    llvm::APSInt max = getConstexprInt(FlatWGS->getMax(), FD->getASTContext());
+
+    unsigned Min = min.getZExtValue();
+    unsigned Max = std::max(min, max).getZExtValue();
     if (ReqdWGS && Min == 0 && Max == 0)
       Min = Max = ReqdWGS->getXDim() * ReqdWGS->getYDim() * ReqdWGS->getZDim();
 
@@ -7758,8 +7773,13 @@ void AMDGPUTargetCodeGenInfo::setTargetAttributes(
   }
 
   if (const auto *Attr = FD->getAttr<AMDGPUWavesPerEUAttr>()) {
-    unsigned Min = Attr->getMin();
-    unsigned Max = Attr->getMax();
+    llvm::APSInt min = getConstexprInt(Attr->getMin(), FD->getASTContext());
+    llvm::APSInt max = getConstexprInt(Attr->getMax(), FD->getASTContext());
+
+    Attr->getMin()->dump();
+    Attr->getMax()->dump();
+    unsigned Min = min.getZExtValue();
+    unsigned Max = std::max(min, max).getZExtValue();
 
     if (Min != 0) {
       assert((Max == 0 || Min <= Max) && "Min must be less than or equal Max");
@@ -7773,18 +7793,29 @@ void AMDGPUTargetCodeGenInfo::setTargetAttributes(
   }
 
   if (const auto *Attr = FD->getAttr<AMDGPUNumSGPRAttr>()) {
-    unsigned NumSGPR = Attr->getNumSGPR();
+    llvm::APSInt sgprs =
+      getConstexprInt(Attr->getNumSGPR(), FD->getASTContext());
+    unsigned NumSGPR = sgprs.getZExtValue();
 
     if (NumSGPR != 0)
       F->addFnAttr("amdgpu-num-sgpr", llvm::utostr(NumSGPR));
   }
 
   if (const auto *Attr = FD->getAttr<AMDGPUNumVGPRAttr>()) {
-    uint32_t NumVGPR = Attr->getNumVGPR();
+    llvm::APSInt vgprs =
+      getConstexprInt(Attr->getNumVGPR(), FD->getASTContext());
+    unsigned NumVGPR = vgprs.getZExtValue();
 
     if (NumVGPR != 0)
       F->addFnAttr("amdgpu-num-vgpr", llvm::utostr(NumVGPR));
   }
+    llvm::APSInt x = getConstexprInt(Attr->getX(), FD->getASTContext());
+    llvm::APSInt y = getConstexprInt(Attr->getY(), FD->getASTContext());
+    llvm::APSInt z = getConstexprInt(Attr->getZ(), FD->getASTContext());
+
+    unsigned X = Attr->getX();
+    unsigned Y = Attr->getY();
+    unsigned Z = Attr->getZ();
 }
 
 unsigned AMDGPUTargetCodeGenInfo::getOpenCLKernelCallingConv() const {

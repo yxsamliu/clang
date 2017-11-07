@@ -1433,30 +1433,41 @@ def RISCVInterrupt : InheritableAttr, TargetSpecificAttr<TargetRISCV> {
 
 def AMDGPUFlatWorkGroupSize : InheritableAttr {
   let Spellings = [Clang<"amdgpu_flat_work_group_size", 0>];
-  let Args = [UnsignedArgument<"Min">, UnsignedArgument<"Max">];
+  let Args = [UnsignedArgument<"Min">,
+              UnsignedArgument<"Max", 1>,
   let Documentation = [AMDGPUFlatWorkGroupSizeDocs];
   let Subjects = SubjectList<[Function], ErrorDiag, "kernel functions">;
+  let TemplateDependent = 1;
 }
 
 def AMDGPUWavesPerEU : InheritableAttr {
   let Spellings = [Clang<"amdgpu_waves_per_eu", 0>];
-  let Args = [UnsignedArgument<"Min">, UnsignedArgument<"Max", 1>];
+  let Args = [UnsignedArgument<"Min">,
+              UnsignedArgument<"Max", 1>,
   let Documentation = [AMDGPUWavesPerEUDocs];
   let Subjects = SubjectList<[Function], ErrorDiag, "kernel functions">;
+  let TemplateDependent = 1;
 }
 
 def AMDGPUNumSGPR : InheritableAttr {
   let Spellings = [Clang<"amdgpu_num_sgpr", 0>];
-  let Args = [UnsignedArgument<"NumSGPR">];
+  let Args = [ExprArgument<"NumSGPR">];
   let Documentation = [AMDGPUNumSGPRNumVGPRDocs];
   let Subjects = SubjectList<[Function], ErrorDiag, "kernel functions">;
+  let TemplateDependent = 1;
 }
 
 def AMDGPUNumVGPR : InheritableAttr {
   let Spellings = [Clang<"amdgpu_num_vgpr", 0>];
-  let Args = [UnsignedArgument<"NumVGPR">];
+  let Args = [ExprArgument<"NumVGPR">];
   let Documentation = [AMDGPUNumSGPRNumVGPRDocs];
   let Subjects = SubjectList<[Function], ErrorDiag, "kernel functions">;
+  let TemplateDependent = 1;
+def AMDGPUMaxWorkGroupDim : InheritableParamAttr {
+  let Args = [IntArgument<"X">,
+              IntArgument<"Y", 1>,
+              IntArgument<"Z", 1>,
+  let TemplateDependent = 1;
 }
 
 def NoSplitStack : InheritableAttr {
