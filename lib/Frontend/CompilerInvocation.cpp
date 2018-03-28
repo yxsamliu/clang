@@ -1564,6 +1564,7 @@ static InputKind ParseFrontendArgs(FrontendOptions &Opts, ArgList &Args,
                 .Case("c", InputKind::C)
                 .Case("cl", InputKind::OpenCL)
                 .Case("cuda", InputKind::CUDA)
+                .Case("hip", InputKind::CUDA)
                 .Case("c++", InputKind::CXX)
                 .Case("objective-c", InputKind::ObjC)
                 .Case("objective-c++", InputKind::ObjCXX)
@@ -2074,6 +2075,11 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
   }
 
   Opts.IncludeDefaultHeader = Args.hasArg(OPT_finclude_default_header);
+
+  if (const Arg *A = Args.getLastArg(OPT_x)) {
+    if (!strcmp(A->getValue(), "hip"))
+      Opts.HIP = true;
+  }
 
   llvm::Triple T(TargetOpts.Triple);
   CompilerInvocation::setLangDefaults(Opts, IK, T, PPOpts, LangStd);

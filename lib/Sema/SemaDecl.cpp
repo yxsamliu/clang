@@ -9048,11 +9048,13 @@ Sema::ActOnFunctionDeclarator(Scope *S, Declarator &D, DeclContext *DC,
 
   if (getLangOpts().CUDA) {
     IdentifierInfo *II = NewFD->getIdentifier();
-    if (II && II->isStr("cudaConfigureCall") && !NewFD->isInvalidDecl() &&
+    if (II &&
+        ((getLangOpts().HIP && II->isStr("hipConfigureCall")) ||
+         (!getLangOpts().HIP && II->isStr("cudaConfigureCall"))) &&
+        !NewFD->isInvalidDecl() &&
         NewFD->getDeclContext()->getRedeclContext()->isTranslationUnit()) {
       if (!R->getAs<FunctionType>()->getReturnType()->isScalarType())
         Diag(NewFD->getLocation(), diag::err_config_scalar_return);
-
       Context.setcudaConfigureCallDecl(NewFD);
     }
 

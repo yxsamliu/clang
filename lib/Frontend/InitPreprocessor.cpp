@@ -465,6 +465,8 @@ static void InitializeStandardPredefinedMacros(const TargetInfo &TI,
     Builder.defineMacro("__ASSEMBLER__");
   if (LangOpts.CUDA)
     Builder.defineMacro("__CUDA__");
+  if (LangOpts.HIP)
+    Builder.defineMacro("__HIP__");
 }
 
 /// Initialize the predefined C++ language feature test macros defined in
