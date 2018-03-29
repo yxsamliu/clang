@@ -1,5 +1,5 @@
 // RUN: %clang_cc1 -emit-llvm %s -o - | FileCheck %s --check-prefixes=CUDA,CHECK
-// RUN: %clang_cc1 -x hip -emit-llvm %s -o - | FileCheck %s --check-prefixes=HIP,CHECk
+// RUN: %clang_cc1 -x hip -emit-llvm %s -o - | FileCheck %s --check-prefixes=HIP,CHECK
 
 
 #include "Inputs/cuda.h"

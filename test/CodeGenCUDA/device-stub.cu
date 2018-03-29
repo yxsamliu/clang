@@ -1,12 +1,20 @@
 // RUN: echo "GPU binary would be here" > %t
-// RUN: %clang_cc1 -triple x86_64-linux-gnu -emit-llvm %s -fcuda-include-gpubinary %t -o - | FileCheck -check-prefixes=CHECK,CUDA %s
-// RUN: %clang_cc1 -triple x86_64-linux-gnu -emit-llvm %s -fcuda-include-gpubinary %t -o -  -DNOGLOBALS \
+// RUN: %clang_cc1 -triple x86_64-linux-gnu -emit-llvm %s \
+// RUN:   -fcuda-include-gpubinary %t -o - \
+// RUN:   | FileCheck -check-prefixes=CHECK,CUDA %s
+// RUN: %clang_cc1 -triple x86_64-linux-gnu -emit-llvm %s \
+// RUN:   -fcuda-include-gpubinary %t -o -  -DNOGLOBALS \
 // RUN:   | FileCheck %s -check-prefix=NOGLOBALS
-// RUN: %clang_cc1 -triple x86_64-linux-gnu -x hip -emit-llvm %s -o - | FileCheck %s -check-prefix=NOGPUBIN
-// RUN: %clang_cc1 -triple x86_64-linux-gnu -x hip -emit-llvm %s -fcuda-include-gpubinary %t -o - | FileCheck -check-prefixes=CHECK,HIP %s
-// RUN: %clang_cc1 -triple x86_64-linux-gnu -x hip -emit-llvm %s -fcuda-include-gpubinary %t -o -  -DNOGLOBALS \
+// RUN: %clang_cc1 -triple x86_64-linux-gnu -x hip -emit-llvm %s -o - \
+// RUN:   | FileCheck %s -check-prefix=NOGPUBIN
+// RUN: %clang_cc1 -triple x86_64-linux-gnu -x hip -emit-llvm %s \
+// RUN:   -fcuda-include-gpubinary %t -o - \
+// RUN:   | FileCheck -check-prefixes=CHECK,HIP %s
+// RUN: %clang_cc1 -triple x86_64-linux-gnu -x hip -emit-llvm %s \
+// RUN:   -fcuda-include-gpubinary %t -o -  -DNOGLOBALS \
 // RUN:   | FileCheck %s -check-prefix=NOGLOBALS
-// RUN: %clang_cc1 -triple x86_64-linux-gnu -x hip -emit-llvm %s -o - | FileCheck %s -check-prefix=NOGPUBIN
+// RUN: %clang_cc1 -triple x86_64-linux-gnu -x hip -emit-llvm %s -o - \
+// RUN:   | FileCheck %s -check-prefix=NOGPUBIN
 
 #include "Inputs/cuda.h"
 
