@@ -33,6 +33,7 @@
 // RUN:    -mlink-cuda-bitcode %t.bc -S -o /dev/null %s \
 // RUN:    -backend-option -debug-pass=Structure 2>&1 \
 // RUN:    | FileCheck %s -check-prefix CHECK-REFLECT
+// XFAIL: *
 
 #include "Inputs/cuda.h"
 
