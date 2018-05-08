@@ -121,3 +121,83 @@ CodeGenFunction::EmitNVPTXDevicePrintfCallExpr(const CallExpr *E,
   return RValue::get(Builder.CreateCall(
       VprintfFunc, {Args[0].getRValue(*this).getScalarVal(), BufferPtr}));
 }
+
+/// hipdrt_printf_alloc will allocate buffer,  write service header,
+/// copy fmtstr, and then return a pointer to Struct for data.
+static llvm::Function *GetHipPrintfAllocDeclaration(CodeGenModule &CGM) {
+  auto &M = CGM.getModule();
+  llvm::Type *ArgTypes[] = {CGM.Int8PtrTy, CGM.Int32Ty, CGM.Int32Ty};
+  llvm::FunctionType *HipPrintfAllocFuncType = llvm::FunctionType::get(
+      llvm::PointerType::getUnqual(CGM.Int8Ty), ArgTypes, false);
+  if (auto *F = M.getFunction("hipdrt_printf_alloc")) {
+    assert(F->getFunctionType() == HipPrintfAllocFuncType);
+    return F;
+  }
+  llvm::Function *FN = llvm::Function::Create(
+      HipPrintfAllocFuncType, llvm::GlobalVariable::ExternalLinkage,
+      "hipdrt_printf_alloc", &M);
+  return FN;
+}
+
+RValue
+CodeGenFunction::EmitAMDGPUDevicePrintfCallExpr(const CallExpr *E,
+                                                ReturnValueSlot ReturnValue) {
+  assert(getTarget().getTriple().getArch() == llvm::Triple::amdgcn);
+  assert(E->getBuiltinCallee() == Builtin::BIprintf);
+  assert(E->getNumArgs() >= 1); // printf always has at least one arg.
+
+  const llvm::DataLayout &DL = CGM.getDataLayout();
+
+  CallArgList Args;
+  EmitCallArgs(Args,
+               E->getDirectCallee()->getType()->getAs<FunctionProtoType>(),
+               E->arguments(), E->getDirectCallee(),
+               /* ParamsToSkip = */ 0);
+
+  // We don't know how to emit non-scalar varargs.
+  if (std::any_of(Args.begin() + 1, Args.end(), [&](const CallArg &A) {
+        return !A.getRValue(*this).isScalar();
+      })) {
+    CGM.ErrorUnsupported(E, "non-scalar arg to printf");
+    return RValue::get(llvm::ConstantInt::get(IntTy, 0));
+  }
+
+  // Calculate Compile Time Length of Format String and DataStruct
+  StringRef FormatString =
+      cast<StringLiteral>(E->getArg(0)->IgnoreParenCasts())->getString();
+  int FmtStrLen_CT = (int)FormatString.size() + 1;
+  int DataLen_CT = 0;
+  llvm::SmallVector<llvm::Type *, 8> ArgTypes;
+  for (unsigned I = 1, NumArgs = Args.size(); I < NumArgs; ++I) {
+    llvm::Type *ArgType = Args[I].getRValue(*this).getScalarVal()->getType();
+    ArgTypes.push_back(ArgType);
+    DataLen_CT += (int)DL.getTypeAllocSize(ArgType);
+  }
+
+  // hipdrt_printf_alloc will allocate thread specific device global memory,
+  // insert service header, copy format string, then return pointer to
+  // datastruct.
+  llvm::Value *FmtStrLen = llvm::ConstantInt::get(Int32Ty, FmtStrLen_CT);
+  llvm::Value *DataLen = llvm::ConstantInt::get(Int32Ty, DataLen_CT);
+  llvm::Function *FN = GetHipPrintfAllocDeclaration(CGM);
+  llvm::Value *DataStructPtr = Builder.CreateCall(
+      FN, {Args[0].getRValue(*this).getScalarVal(), FmtStrLen, DataLen});
+  if (!ArgTypes.empty()) {
+    // Declare struct to be built in device global memory
+    llvm::StructType *DataStructTy =
+        llvm::StructType::create(ArgTypes, "printf_args");
+    unsigned AS = getContext().getTargetAddressSpace(LangAS::cuda_device);
+    llvm::Value *BufferPtr = Builder.CreatePointerCast(
+        DataStructPtr, llvm::PointerType::get(DataStructTy, AS));
+
+    // Write thread specific values into the data structure
+    for (unsigned I = 1, NumArgs = Args.size(); I < NumArgs; ++I) {
+      llvm::Value *P = Builder.CreateStructGEP(DataStructTy, BufferPtr, I - 1);
+      llvm::Value *Arg = Args[I].getRValue(*this).getScalarVal();
+      Builder.CreateAlignedStore(Arg, P,
+                                 DL.getPrefTypeAlignment(Arg->getType()));
+    }
+  }
+
+  return RValue::get(llvm::ConstantInt::get(Int32Ty, 0));
+}
