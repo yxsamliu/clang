@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+
+if [[ $# == 0 ]]; then
+  echo "hipcc - A wrapper for clang to compile hip source code."
+  echo ""
+  echo "Usage:"
+  echo ""
+  echo "hipcc -c a.cpp -o a.o"
+  echo "hipcc a.o -o a"
+  echo "hipcc a.cpp -o a"
+  echo ""
+  echo "Environment variable:"
+  echo ""
+  echo "HIP_INCLUDE_PATH: hip include path"
+  echo "HIP_LIB_PATH: hip library path"
+  echo "DEVICE_LIB_PATH: amdgcn device library path"
+  echo "HIP_ARCH: amdgcn GPU arch, e.g. gfx803 for fiji, gfx900 for vega"
+  exit
+fi
+
+HIP_INCLUDE_PATH=${HIP_INCLUDE_PATH:-/opt/hip/include}
+HIP_LIB_PATH=${HIP_LIB_PATH:-/opt/hip/lib}
+DEVICE_LIB_PATH=${DEVICE_LIB_PATH:-/opt/hsa/lib}
+HIP_ARCH=${HIP_ARCH:-gfx803}
+
+opt=""
+for var in "$@"; do
+  if [[ $var = *.cpp || $var = *.cu ]]; then
+    var="-x hip $var"
+  fi
+  opt="$opt $var"
+done
+
+opt_pre="-std=c++11 --cuda-gpu-arch=$HIP_ARCH -I $HIP_INCLUDE_PATH"
+opt_post="-O3"
+
+if [[ "$opt" != *" -c "* ]]; then
+  opt_pre="--hip-link $opt_pre"
+  opt_post="$opt_post --hip-device-lib-path=$DEVICE_LIB_PATH -L $HIP_LIB_PATH -lhip_hcc -lpthread"
+fi
+
+set -x
+/usr/local/hip/bin/clang++ $opt_pre $opt $opt_post
