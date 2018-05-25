@@ -2210,7 +2210,10 @@ class OffloadingActionBuilder final {
         // Set the flag to true, so that the builder acts on the current input.
         IsActive = true;
 
-        if (CompileHostOnly)
+        // ToDo: Handle situations where device compilation and host
+        // compilation have different dependencies. Currently we assume they
+        // are the same therefore device compilation is not performed for -M.
+        if (CompileHostOnly || Args.getLastArg(options::OPT_M))
           return ABRT_Success;
 
         // Replicate inputs for each GPU architecture.

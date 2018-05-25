@@ -246,3 +246,14 @@
 // DASM2-DAG: [[P7:[0-9]+]]: compiler, {[[P6]]}, ir, (device-[[T]], [[ARCH2]])
 // DASM2_NV-DAG: [[P8:[0-9]+]]: backend, {[[P7]]}, assembler, (device-[[T]], [[ARCH2]])
 // DASM2_NV-DAG: [[P9:[0-9]+]]: offload, "device-[[T]] ([[TRIPLE]]:[[ARCH2]])" {[[P8]]}, assembler
+
+//
+// Test -M does not cause device input.
+//
+// RUN: %clang -target powerpc64le-ibm-linux-gnu -ccc-print-phases --cuda-gpu-arch=sm_30 --cuda-gpu-arch=sm_35 %s -M 2>&1 \
+// RUN: | FileCheck -check-prefixes=DEP %s
+// RUN: %clang -x hip -target powerpc64le-ibm-linux-gnu -ccc-print-phases --cuda-gpu-arch=gfx803 --cuda-gpu-arch=gfx900 %s -M 2>&1 \
+// RUN: | FileCheck -check-prefixes=DEP %s
+// DEP-DAG: [[P0:[0-9]+]]: input, "{{.*}}cuda-phases.cu", [[T:.*]], (host-[[T]])
+// DEP-DAG: [[P1:[0-9]+]]: preprocessor, {[[P0]]}, dependencies, (host-[[T]])
+
