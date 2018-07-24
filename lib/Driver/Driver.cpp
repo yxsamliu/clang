@@ -3282,7 +3282,7 @@ void Driver::BuildJobs(Compilation &C) const {
     }
 
     BuildJobsForAction(C, A, &C.getDefaultToolChain(),
-                       /*BoundArch*/ StringRef(),
+                       /*BoundArch*/ "all",
                        /*AtTopLevel*/ true,
                        /*MultipleArchs*/ ArchNames.size() > 1,
                        /*LinkingOutput*/ LinkingOutput, CachedResults,
@@ -3659,14 +3659,31 @@ InputInfo Driver::BuildJobsForAction(
     Action::OffloadKind TargetDeviceOffloadKind) const {
   std::pair<const Action *, std::string> ActionTC = {
       A, GetTriplePlusArchString(TC, BoundArch, TargetDeviceOffloadKind)};
+  if (getenv("DBG_CACHE")) {
+    llvm::errs() << "Get cached InputInfo:\n ActionTC: {" << A << ", "
+        << GetTriplePlusArchString(TC, BoundArch, TargetDeviceOffloadKind)
+        << "}\n";
+  }
   auto CachedResult = CachedResults.find(ActionTC);
   if (CachedResult != CachedResults.end()) {
+    if (getenv("DBG_CACHE")) {
+      llvm::errs() << "Found: {" << A << ", "
+          << GetTriplePlusArchString(TC, BoundArch, TargetDeviceOffloadKind)
+          << "}\n";
+      llvm::errs() << " => " << CachedResult->second.getAsString() << '\n';
+    }
     return CachedResult->second;
   }
   InputInfo Result = BuildJobsForActionNoCache(
       C, A, TC, BoundArch, AtTopLevel, MultipleArchs, LinkingOutput,
       CachedResults, TargetDeviceOffloadKind);
   CachedResults[ActionTC] = Result;
+  if (getenv("DBG_CACHE")) {
+    llvm::errs() << "Add cached InputInfo:\n ActionTC: {" << A << ", "
+        << GetTriplePlusArchString(TC, BoundArch, TargetDeviceOffloadKind)
+        << "}\n";
+    llvm::errs() << " => " << Result.getAsString() << '\n';
+  }
   return Result;
 }
 
@@ -3877,6 +3894,13 @@ InputInfo Driver::BuildJobsForActionNoCache(
       CachedResults[{A, GetTriplePlusArchString(UI.DependentToolChain, Arch,
                                                 UI.DependentOffloadKind)}] =
           CurI;
+      if (getenv("DBG_CACHE")) {
+        llvm::errs() << "Unbundler add cached InputInfo:\n ActionTC: {" << A << ", "
+            << GetTriplePlusArchString(UI.DependentToolChain, Arch,
+                UI.DependentOffloadKind)
+            << "}\n";
+        llvm::errs() << " => " << CurI.getAsString() << '\n';
+      }
     }
 
     // Now that we have all the results generated, select the one that should be
