@@ -1123,6 +1123,8 @@ static void InitializePredefinedAuxMacros(const TargetInfo &AuxTI,
   if (AuxTriple.getOS() == llvm::Triple::Linux) {
     Builder.defineMacro("__ELF__");
     Builder.defineMacro("__linux__");
+    if (AuxTriple.getEnvironment() == llvm::Triple::GNU)
+      Builder.defineMacro("__gnu_linux__");
     // Used in features.h. If this is omitted, math.h doesn't declare float
     // versions of the functions in bits/mathcalls.h.
     if (LangOpts.CPlusPlus)
