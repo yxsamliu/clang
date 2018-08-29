@@ -135,6 +135,9 @@ const char *AMDGCN::Linker::constructOptCommand(
   }
   OptArgs.push_back("-mtriple=amdgcn-amd-amdhsa");
   OptArgs.push_back(Args.MakeArgString("-mcpu=" + SubArchName));
+  // AMDGPU backend needs this option for whole program compilation to
+  // work around the limitation of no PLT support.
+  OptArgs.push_back("-amdgpu-internalize-symbols");
   OptArgs.push_back("-o");
   std::string TmpFileName = C.getDriver().GetTemporaryPath(
       OutputFilePrefix.str() + "-optimized", "bc");

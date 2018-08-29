@@ -29,7 +29,7 @@
 // CHECK-SAME: "-o" [[LINKED_BC_DEV1:".*-gfx803-linked-.*bc"]]
 
 // CHECK: [[OPT:".*opt"]] [[LINKED_BC_DEV1]] "-mtriple=amdgcn-amd-amdhsa"
-// CHECK-SAME: "-mcpu=gfx803"
+// CHECK-SAME: "-mcpu=gfx803" "-amdgpu-internalize-symbols"
 // CHECK-SAME: "-o" [[OPT_BC_DEV1:".*-gfx803-optimized.*bc"]]
 
 // CHECK: [[LLC: ".*llc"]] [[OPT_BC_DEV1]] "-mtriple=amdgcn-amd-amdhsa"
@@ -55,7 +55,7 @@
 // CHECK-SAME: "-o" [[LINKED_BC_DEV2:".*-gfx900-linked-.*bc"]]
 
 // CHECK: [[OPT]] [[LINKED_BC_DEV2]] "-mtriple=amdgcn-amd-amdhsa"
-// CHECK-SAME: "-mcpu=gfx900"
+// CHECK-SAME: "-mcpu=gfx900" "-amdgpu-internalize-symbols"
 // CHECK-SAME: "-o" [[OPT_BC_DEV2:".*-gfx900-optimized.*bc"]]
 
 // CHECK: [[LLC]] [[OPT_BC_DEV2]] "-mtriple=amdgcn-amd-amdhsa"
