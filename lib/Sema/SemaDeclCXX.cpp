@@ -7205,8 +7205,9 @@ bool Sema::ShouldDeleteSpecialMember(CXXMethodDecl *MD, CXXSpecialMember CSM,
   if (getLangOpts().CUDA) {
     // We should delete the special member in CUDA mode if target inference
     // failed.
-    return inferCUDATargetForImplicitSpecialMember(RD, CSM, MD, SMI.ConstArg,
-                                                   Diagnose);
+    return inferCUDATargetForImplicitSpecialMember(
+        RD, CSM, MD, CSM == CXXDefaultConstructor ? false : SMI.ConstArg,
+        Diagnose);
   }
 
   return false;
