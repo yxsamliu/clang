@@ -2417,6 +2417,110 @@ class OffloadingActionBuilder final {
           if (!isa<AssembleJobAction>(CudaDeviceActions[I]) ||
               CompileDeviceOnly)
             continue;
+        }
+
+        // We generate the fat binary if we have device input actions.
+        if (!DeviceActions.empty()) {
+          CudaFatBinary =
+              C.MakeAction<LinkJobAction>(DeviceActions, types::TY_CUDA_FATBIN);
+
+          if (!CompileDeviceOnly) {
+            DA.add(*CudaFatBinary, *ToolChains.front(), /*BoundArch=*/nullptr,
+                   Action::OFK_Cuda);
+            // Clear the fat binary, it is already a dependence to an host
+            // action.
+            CudaFatBinary = nullptr;
+          }
+
+          // Remove the CUDA actions as they are already connected to an host
+          // action or fat binary.
+          CudaDeviceActions.clear();
+        }
+
+        // We avoid creating host action in device-only mode.
+        return CompileDeviceOnly ? ABRT_Ignore_Host : ABRT_Success;
+      } else if (CurPhase > phases::Backend) {
+        // If we are past the backend phase and still have a device action, we
+        // don't have to do anything as this action is already a device
+        // top-level action.
+        return ABRT_Success;
+      }
+
+      assert(CurPhase < phases::Backend && "Generating single CUDA "
+                                           "instructions should only occur "
+                                           "before the backend phase!");
+
+      // By default, we produce an action for each device arch.
+      for (Action *&A : CudaDeviceActions)
+        A = C.getDriver().ConstructPhaseAction(C, Args, CurPhase, A);
+
+      return ABRT_Success;
+    }
+  };
+  /// \brief HIP action builder. It injects device code in the host backend
+  /// action.
+  class HIPActionBuilder final : public CudaActionBuilderBase {
+    /// The linker inputs obtained for each device arch.
+    SmallVector<ActionList, 8> DeviceLinkerInputs;
+    bool EarlyFinalize;
+
+  public:
+    HIPActionBuilder(Compilation &C, DerivedArgList &Args,
+                     const Driver::InputList &Inputs)
+        : CudaActionBuilderBase(C, Args, Inputs, Action::OFK_HIP) {}
+
+    bool canUseBundlerUnbundler() const override { return true; }
+
+    ActionBuilderReturnCode
+    getDeviceDependences(OffloadAction::DeviceDependences &DA,
+                         phases::ID CurPhase, phases::ID FinalPhase,
+                         PhasesTy &Phases) override {
+
+      // amdgcn does not support linking of object files, therefore we skip
+      // backend and assemble phases to output LLVM IR.
+      if (CudaDeviceActions.empty() || ((CurPhase == phases::Backend ||
+          CurPhase == phases::Assemble) && !EarlyFinalize))
+        return ABRT_Success;
+
+      assert(((CurPhase == phases::Link && !EarlyFinalize) ||
+              CudaDeviceActions.size() == GpuArchList.size()) &&
+             "Expecting one action per GPU architecture.");
+      assert(!CompileHostOnly &&
+             "Not expecting CUDA actions in host-only compilation.");
+
+      if (EarlyFinalize) {
+      // If we are in backend phase, we attempt to generate the fat binary.
+      // We compile each arch to IR and
+      // assemble to code object, then feed the code object into a device
+      // "link" action, which uses fatbinary to combine these code object into
+      // one fatbin.  The fatbin is then an input to the host action if not in
+      // device-only mode.
+      if (CompileDeviceOnly || CurPhase == phases::Backend) {
+        ActionList DeviceActions;
+        for (unsigned I = 0, E = GpuArchList.size(); I != E; ++I) {
+          // Produce the device action from the current phase up to the assemble
+          // phase.
+          for (auto Ph : Phases) {
+            // Skip the phases that were already dealt with.
+            if (Ph < CurPhase)
+              continue;
+            // We have to be consistent with the host final phase.
+            if (Ph > FinalPhase)
+              break;
+
+            CudaDeviceActions[I] = C.getDriver().ConstructPhaseAction(
+                C, Args, Ph, CudaDeviceActions[I], Action::OFK_HIP);
+
+            if (Ph == phases::Assemble)
+              break;
+          }
+
+          // If we didn't reach the assemble phase, we can't generate the fat
+          // binary. We don't need to generate the fat binary if we are not in
+          // device-only mode.
+          if (!isa<AssembleJobAction>(CudaDeviceActions[I]) ||
+              CompileDeviceOnly)
+            continue;
 
           Action *AssembleAction = CudaDeviceActions[I];
           assert(AssembleAction->getType() == types::TY_Object);
@@ -2464,49 +2568,12 @@ class OffloadingActionBuilder final {
       assert(CurPhase < phases::Backend && "Generating single CUDA "
                                            "instructions should only occur "
                                            "before the backend phase!");
-
-      // By default, we produce an action for each device arch.
-      for (Action *&A : CudaDeviceActions)
-        A = C.getDriver().ConstructPhaseAction(C, Args, CurPhase, A);
-
-      return ABRT_Success;
-    }
-  };
-  /// \brief HIP action builder. It injects device code in the host backend
-  /// action.
-  class HIPActionBuilder final : public CudaActionBuilderBase {
-    /// The linker inputs obtained for each device arch.
-    SmallVector<ActionList, 8> DeviceLinkerInputs;
-
-  public:
-    HIPActionBuilder(Compilation &C, DerivedArgList &Args,
-                     const Driver::InputList &Inputs)
-        : CudaActionBuilderBase(C, Args, Inputs, Action::OFK_HIP) {}
-
-    bool canUseBundlerUnbundler() const override { return true; }
-
-    ActionBuilderReturnCode
-    getDeviceDependences(OffloadAction::DeviceDependences &DA,
-                         phases::ID CurPhase, phases::ID FinalPhase,
-                         PhasesTy &Phases) override {
-      // amdgcn does not support linking of object files, therefore we skip
-      // backend and assemble phases to output LLVM IR.
-      if (CudaDeviceActions.empty() || CurPhase == phases::Backend ||
-          CurPhase == phases::Assemble)
-        return ABRT_Success;
-
-      assert((CurPhase == phases::Link ||
-              CudaDeviceActions.size() == GpuArchList.size()) &&
-             "Expecting one action per GPU architecture.");
-      assert(!CompileHostOnly &&
-             "Not expecting CUDA actions in host-only compilation.");
-
-      // Save CudaDeviceActions to DeviceLinkerInputs for each GPU subarch.
-      // This happens to each device action originated from each input file.
-      // Later on, device actions in DeviceLinkerInputs are used to create
-      // device link actions in appendLinkDependences and the created device
-      // link actions are passed to the offload action as device dependence.
-      if (CurPhase == phases::Link) {
+      } else if (CurPhase == phases::Link) {
+        // Save CudaDeviceActions to DeviceLinkerInputs for each GPU subarch.
+        // This happens to each device action originated from each input file.
+        // Later on, device actions in DeviceLinkerInputs are used to create
+        // device link actions in appendLinkDependences and the created device
+        // link actions are passed to the offload action as device dependence.
         DeviceLinkerInputs.resize(CudaDeviceActions.size());
         auto LI = DeviceLinkerInputs.begin();
         for (auto *A : CudaDeviceActions) {
@@ -2538,6 +2605,11 @@ class OffloadingActionBuilder final {
                CudaArchToString(GpuArchList[I]), AssociatedOffloadKind);
         ++I;
       }
+    }
+
+    bool initialize() override {
+      EarlyFinalize = Args.getLastArg(options::OPT_hip_early_finalize);
+      return CudaActionBuilderBase::initialize();
     }
   };
 

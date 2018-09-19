@@ -17,6 +17,9 @@
 // RUN: %clang -x hip -target powerpc64le-ibm-linux-gnu -ccc-print-phases \
 // RUN: --cuda-gpu-arch=gfx803 %s 2>&1 \
 // RUN: | FileCheck -check-prefixes=BIN,BIN_AMD %s
+// RUN: %clang -x hip -target powerpc64le-ibm-linux-gnu -ccc-print-phases \
+// RUN: --cuda-gpu-arch=gfx803 --hip-early-finalize %s 2>&1 \
+// RUN: | FileCheck -check-prefixes=BIN,BIN_AMD %s
 // BIN_NV-DAG: [[P0:[0-9]+]]: input, "{{.*}}cuda-phases.cu", [[T:cuda]], (host-[[T]])
 // BIN_AMD-DAG: [[P0:[0-9]+]]: input, "{{.*}}cuda-phases.cu", [[T:hip]], (host-[[T]])
 // BIN-DAG: [[P1:[0-9]+]]: preprocessor, {[[P0]]}, [[T]]-cpp-output, (host-[[T]])
