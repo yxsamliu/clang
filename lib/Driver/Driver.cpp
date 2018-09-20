@@ -2517,20 +2517,22 @@ class OffloadingActionBuilder final {
           // Create a link action to link device IR with device library
           // and generate ISA.
           ActionList AL;
+          AL.push_back(CudaDeviceActions[I]);
+          CudaDeviceActions[I] =
+              C.MakeAction<LinkJobAction>(AL, types::TY_Image);
+
+          // OffloadingActionBuilder propagates device arch until an offload
+          // action. Since the next action (OffloadBundlingJobAction) does
+          // not have device arch, whereas the link action and its input
+          // have device arch, an offload action is needed to stop the null
+          // device arch of OffloadBundlingJobAction being propagated to link
+          // action.
           OffloadAction::DeviceDependences DDep;
           DDep.add(*CudaDeviceActions[I], *ToolChains.front(),
                    CudaArchToString(GpuArchList[I]), AssociatedOffloadKind);
-          // We need an offload action here to keep the bound arch of device
-          // actions. OffloadingActionBuilder propagates device bound arch
-          // of the host offload action which does not have device bound
-          // arch since the fat binary is for all archs. This offload action
-          // stops that propagation.
-          AL.push_back(C.MakeAction<OffloadAction>(
-              DDep, CudaDeviceActions[I]->getType()));
-          CudaDeviceActions[I] =
-              C.MakeAction<LinkJobAction>(AL, types::TY_Image);
+          CudaDeviceActions[I] = C.MakeAction<OffloadAction>(
+              DDep, CudaDeviceActions[I]->getType());
         }
-
         CudaFatBinary =
             C.MakeAction<OffloadBundlingJobAction>(CudaDeviceActions);
 
