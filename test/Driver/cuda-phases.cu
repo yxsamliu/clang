@@ -11,12 +11,21 @@
 //
 // Test single gpu architecture with complete compilation.
 //
+// Test CUDA NVPTX phases.
 // RUN: %clang -target powerpc64le-ibm-linux-gnu -ccc-print-phases \
 // RUN: --cuda-gpu-arch=sm_30 %s 2>&1 \
 // RUN: | FileCheck -check-prefixes=BIN,BIN_NV %s
+//
+// Test HIP AMDGPU non-early-finalize phases.
 // RUN: %clang -x hip -target powerpc64le-ibm-linux-gnu -ccc-print-phases \
 // RUN: --cuda-gpu-arch=gfx803 %s 2>&1 \
-// RUN: | FileCheck -check-prefixes=BIN,BIN_AMD %s
+// RUN: | FileCheck -check-prefixes=BIN,BIN_AMD,BIN_AMD_NONEF %s
+//
+// Test HIP AMDGPU early-finalize phases.
+// RUN: %clang -x hip -target powerpc64le-ibm-linux-gnu -ccc-print-phases \
+// RUN: --cuda-gpu-arch=gfx803 --hip-early-finalize %s 2>&1 \
+// RUN: | FileCheck -check-prefixes=BIN,BIN_AMD,BIN_AMD_EF %s
+//
 // BIN_NV-DAG: [[P0:[0-9]+]]: input, "{{.*}}cuda-phases.cu", [[T:cuda]], (host-[[T]])
 // BIN_AMD-DAG: [[P0:[0-9]+]]: input, "{{.*}}cuda-phases.cu", [[T:hip]], (host-[[T]])
 // BIN-DAG: [[P1:[0-9]+]]: preprocessor, {[[P0]]}, [[T]]-cpp-output, (host-[[T]])
@@ -32,12 +41,17 @@
 // BIN_NV-DAG: [[P10:[0-9]+]]: linker, {[[P8]], [[P9]]}, cuda-fatbin, (device-[[T]])
 // BIN_NV-DAG: [[P11:[0-9]+]]: offload, "host-[[T]] (powerpc64le-ibm-linux-gnu)" {[[P2]]}, "device-[[T]] ([[TRIPLE]])" {[[P10]]}, ir
 // BIN_NV-DAG: [[P12:[0-9]+]]: backend, {[[P11]]}, assembler, (host-[[T]])
-// BIN_AMD-DAG: [[P12:[0-9]+]]: backend, {[[P2]]}, assembler, (host-[[T]])
+// BIN_AMD_NONEF-DAG: [[P12:[0-9]+]]: backend, {[[P2]]}, assembler, (host-[[T]])
+// BIN_AMD_EF-DAG: [[P6:[0-9]+]]: offload, "device-hip (amdgcn-amd-amdhsa:[[ARCH]])" {[[P5]]}, ir
+// BIN_AMD_EF-DAG: [[P7:[0-9]+]]: linker, {[[P6]]}, image, (device-hip)
+// BIN_AMD_EF-DAG: [[P8:[0-9]+]]: clang-offload-bundler, {[[P7]]}, image, (device-hip)
+// BIN_AMD_EF-DAG: [[P11:[0-9]+]]: offload, "host-hip (powerpc64le-ibm-linux-gnu)" {[[P2]]}, "device-hip (amdgcn-amd-amdhsa)" {[[P8]]}, ir
+// BIN_AMD_EF-DAG: [[P12:[0-9]+]]: backend, {[[P11]]}, assembler, (host-[[T]])
 // BIN-DAG: [[P13:[0-9]+]]: assembler, {[[P12]]}, object, (host-[[T]])
 // BIN-DAG: [[P14:[0-9]+]]: linker, {[[P13]]}, image, (host-[[T]])
-// BIN_AMD-DAG: [[P15:[0-9]+]]: linker, {[[P5]]}, image, (device-[[T]], [[ARCH]])
-// BIN_AMD-DAG: [[P16:[0-9]+]]: offload, "host-[[T]] (powerpc64le-ibm-linux-gnu)" {[[P14]]},
-// BIN_AMD-DAG-SAME:  "device-[[T]] ([[TRIPLE:amdgcn-amd-amdhsa]]:[[ARCH]])" {[[P15]]}, object
+// BIN_AMD_NONEF-DAG: [[P15:[0-9]+]]: linker, {[[P5]]}, image, (device-[[T]], [[ARCH]])
+// BIN_AMD_NONEF-DAG: [[P16:[0-9]+]]: offload, "host-[[T]] (powerpc64le-ibm-linux-gnu)" {[[P14]]},
+// BIN_AMD_NONEF-DAG-SAME:  "device-[[T]] ([[TRIPLE:amdgcn-amd-amdhsa]]:[[ARCH]])" {[[P15]]}, object
 
 //
 // Test single gpu architecture up to the assemble phase.

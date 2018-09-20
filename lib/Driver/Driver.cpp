@@ -2477,11 +2477,13 @@ class OffloadingActionBuilder final {
   class HIPActionBuilder final : public CudaActionBuilderBase {
     /// The linker inputs obtained for each device arch.
     SmallVector<ActionList, 8> DeviceLinkerInputs;
+    bool EarlyFinalize;
 
   public:
     HIPActionBuilder(Compilation &C, DerivedArgList &Args,
                      const Driver::InputList &Inputs)
-        : CudaActionBuilderBase(C, Args, Inputs, Action::OFK_HIP) {}
+        : CudaActionBuilderBase(C, Args, Inputs, Action::OFK_HIP),
+          EarlyFinalize(false) {}
 
     bool canUseBundlerUnbundler() const override { return true; }
 
@@ -2489,24 +2491,66 @@ class OffloadingActionBuilder final {
     getDeviceDependences(OffloadAction::DeviceDependences &DA,
                          phases::ID CurPhase, phases::ID FinalPhase,
                          PhasesTy &Phases) override {
+
       // amdgcn does not support linking of object files, therefore we skip
-      // backend and assemble phases to output LLVM IR.
-      if (CudaDeviceActions.empty() || CurPhase == phases::Backend ||
+      // backend and assemble phases to output LLVM IR. Except for early
+      // finalization, where we generate fat binary for device code and pass
+      // to host in Backend phase.
+      if (CudaDeviceActions.empty() ||
+          (CurPhase == phases::Backend && !EarlyFinalize) ||
           CurPhase == phases::Assemble)
         return ABRT_Success;
 
-      assert((CurPhase == phases::Link ||
+      assert(((CurPhase == phases::Link && !EarlyFinalize) ||
               CudaDeviceActions.size() == GpuArchList.size()) &&
              "Expecting one action per GPU architecture.");
       assert(!CompileHostOnly &&
              "Not expecting CUDA actions in host-only compilation.");
 
-      // Save CudaDeviceActions to DeviceLinkerInputs for each GPU subarch.
-      // This happens to each device action originated from each input file.
-      // Later on, device actions in DeviceLinkerInputs are used to create
-      // device link actions in appendLinkDependences and the created device
-      // link actions are passed to the offload action as device dependence.
-      if (CurPhase == phases::Link) {
+      if (EarlyFinalize && CurPhase == phases::Backend) {
+        // If we are in backend phase, we attempt to generate the fat binary.
+        // We compile each arch to IR and use a link action to generate code
+        // object containing ISA. Then we use a bundling action to create
+        // a fat binary containing all the code objects for different GPU's.
+        // The fat binary is then an input to the host action.
+        for (unsigned I = 0, E = GpuArchList.size(); I != E; ++I) {
+          // Create a link action to link device IR with device library
+          // and generate ISA.
+          ActionList AL;
+          OffloadAction::DeviceDependences DDep;
+          DDep.add(*CudaDeviceActions[I], *ToolChains.front(),
+                   CudaArchToString(GpuArchList[I]), AssociatedOffloadKind);
+          // We need an offload action here to keep the bound arch of device
+          // actions. OffloadingActionBuilder propagates device bound arch
+          // of the host offload action which does not have device bound
+          // arch since the fat binary is for all archs. This offload action
+          // stops that propagation.
+          AL.push_back(C.MakeAction<OffloadAction>(
+              DDep, CudaDeviceActions[I]->getType()));
+          CudaDeviceActions[I] =
+              C.MakeAction<LinkJobAction>(AL, types::TY_Image);
+        }
+
+        CudaFatBinary =
+            C.MakeAction<OffloadBundlingJobAction>(CudaDeviceActions);
+
+        DA.add(*CudaFatBinary, *ToolChains.front(), /*BoundArch=*/nullptr,
+               AssociatedOffloadKind);
+        // Clear the fat binary, it is already a dependence to an host
+        // action.
+        CudaFatBinary = nullptr;
+
+        // Remove the CUDA actions as they are already connected to an host
+        // action or fat binary.
+        CudaDeviceActions.clear();
+
+        return ABRT_Success;
+      } else if (CurPhase == phases::Link) {
+        // Save CudaDeviceActions to DeviceLinkerInputs for each GPU subarch.
+        // This happens to each device action originated from each input file.
+        // Later on, device actions in DeviceLinkerInputs are used to create
+        // device link actions in appendLinkDependences and the created device
+        // link actions are passed to the offload action as device dependence.
         DeviceLinkerInputs.resize(CudaDeviceActions.size());
         auto LI = DeviceLinkerInputs.begin();
         for (auto *A : CudaDeviceActions) {
@@ -2538,6 +2582,11 @@ class OffloadingActionBuilder final {
                CudaArchToString(GpuArchList[I]), AssociatedOffloadKind);
         ++I;
       }
+    }
+
+    bool initialize() override {
+      EarlyFinalize = Args.getLastArg(options::OPT_hip_early_finalize);
+      return CudaActionBuilderBase::initialize();
     }
   };
 
