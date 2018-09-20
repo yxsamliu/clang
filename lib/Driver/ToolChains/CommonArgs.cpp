@@ -1337,6 +1337,18 @@ void tools::AddHIPLinkerScript(const ToolChain &TC, Compilation &C,
   if (!JA.isHostOffloading(Action::OFK_HIP))
     return;
 
+  InputInfoList DeviceInputs;
+  for (const auto &II : Inputs) {
+    const Action *A = II.getAction();
+    // Is this a device linking action?
+    if (A && isa<LinkJobAction>(A) && A->isDeviceOffloading(Action::OFK_HIP)) {
+      DeviceInputs.push_back(II);
+    }
+  }
+
+  if (DeviceInputs.empty())
+    return;
+
   // Create temporary linker script. Keep it if save-temps is enabled.
   const char *LKS;
   SmallString<256> Name = llvm::sys::path::filename(Output.getFilename());
@@ -1374,14 +1386,11 @@ void tools::AddHIPLinkerScript(const ToolChain &TC, Compilation &C,
   std::string BundlerTargetArg = "-targets=host-x86_64-unknown-linux";
   std::string BundlerInputArg = "-inputs=/dev/null";
 
-  for (const auto &II : Inputs) {
-    const Action *A = II.getAction();
-    // Is this a device linking action?
-    if (A && isa<LinkJobAction>(A) && A->isDeviceOffloading(Action::OFK_HIP)) {
-      BundlerTargetArg = BundlerTargetArg + ",hip-amdgcn-amd-amdhsa-" +
-                         StringRef(A->getOffloadingArch()).str();
-      BundlerInputArg = BundlerInputArg + "," + II.getFilename();
-    }
+  for (const auto &II : DeviceInputs) {
+    const auto* A = II.getAction();
+    BundlerTargetArg = BundlerTargetArg + ",hip-amdgcn-amd-amdhsa-" +
+                       StringRef(A->getOffloadingArch()).str();
+    BundlerInputArg = BundlerInputArg + "," + II.getFilename();
   }
   BundlerArgs.push_back(Args.MakeArgString(BundlerTargetArg));
   BundlerArgs.push_back(Args.MakeArgString(BundlerInputArg));
