@@ -4809,14 +4809,14 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back(Args.MakeArgString(Flags));
   }
 
-  if (IsCuda) {
-    // Host-side cuda compilation receives all device-side outputs in a single
-    // fatbin as Inputs[1]. Include the binary with -fcuda-include-gpubinary.
-    if (CudaDeviceInput) {
+  // Host-side cuda compilation receives all device-side outputs in a single
+  // fatbin as Inputs[1]. Include the binary with -fcuda-include-gpubinary.
+  if ((IsCuda || IsHIP) && CudaDeviceInput) {
       CmdArgs.push_back("-fcuda-include-gpubinary");
       CmdArgs.push_back(CudaDeviceInput->getFilename());
-    }
+  }
 
+  if (IsCuda) {
     if (Args.hasFlag(options::OPT_fcuda_rdc, options::OPT_fno_cuda_rdc, false))
       CmdArgs.push_back("-fcuda-rdc");
     if (Args.hasFlag(options::OPT_fcuda_short_ptr,
