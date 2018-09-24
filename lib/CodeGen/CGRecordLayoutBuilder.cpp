@@ -602,6 +602,19 @@ void CGRecordLowering::clipTailPadding() {
   }
 }
 
+static bool isPassedToHIPGlobalFn(const CXXRecordDecl *MaybeKernarg)
+{
+  if (!MaybeKernarg) return false;
+  if (!MaybeKernarg->hasAttr<AnnotateAttr>()) return false;
+
+  // N.B.: this is set in Sema::GatherArgumentsForCall, via
+  //       MarkByValueRecordsPassedToHIPGlobalFN.
+  static constexpr const char HIPKernargRecord[]{"__HIP_KERNARG_RECORD__"};
+
+  return MaybeKernarg->getAttr<AnnotateAttr>()->getAnnotation()
+    .find(HIPKernargRecord) != StringRef::npos;
+}
+
 void CGRecordLowering::determinePacked(bool NVBaseType) {
   if (Packed)
     return;
@@ -631,6 +644,13 @@ void CGRecordLowering::determinePacked(bool NVBaseType) {
   // non-virtual sub-object and an unpacked complete object or vise versa.
   if (NVSize % NVAlignment)
     Packed = true;
+
+  // TODO: this is a heinous workaround the sad reality that passing things by
+  //       value through Kernarg is essentially broken, since the packing choice
+  //       made here is opaque for HLLs, and thus the latter will layout the
+  //       memory erroneously.
+  Packed = Packed && !isPassedToHIPGlobalFn(RD);
+
   // Update the alignment of the sentinel.
   if (!Packed)
     Members.back().Data = getIntNType(Context.toBits(Alignment));
@@ -657,8 +677,11 @@ void CGRecordLowering::insertPadding() {
   // Add the padding to the Members list and sort it.
   for (std::vector<std::pair<CharUnits, CharUnits> >::const_iterator
         Pad = Padding.begin(), PadEnd = Padding.end();
-        Pad != PadEnd; ++Pad)
+        Pad != PadEnd; ++Pad) {
+    //if (Pad->second.isZero())
+    //  continue;
     Members.push_back(StorageInfo(Pad->first, getByteArrayType(Pad->second)));
+  }
   std::stable_sort(Members.begin(), Members.end());
 }
 
@@ -783,6 +806,20 @@ CGRecordLayout *CodeGenTypes::ComputeRecordLayout(const RecordDecl *D,
 
     uint64_t AlignedNonVirtualTypeSizeInBits =
       getContext().toBits(NonVirtualSize);
+
+    if(AlignedNonVirtualTypeSizeInBits !=
+           getDataLayout().getTypeAllocSizeInBits(BaseTy)){
+      llvm::errs() << "Type size mismatch:\n";
+      llvm::errs() << "AlignedNonVirtualTypeSizeInBits = " <<
+          AlignedNonVirtualTypeSizeInBits << '\n';
+      llvm::errs() << "getDataLayout().getTypeAllocSizeInBits(BaseTy)) = "
+          << getDataLayout().getTypeAllocSizeInBits(BaseTy) << '\n';
+      llvm::errs() << "\n*** Dumping IRgen Record Layout\n";
+      llvm::errs() << "Record: ";
+      D->dump(llvm::errs());
+      llvm::errs() << "\nLayout: ";
+      RL->print(llvm::errs());
+    }
 
     assert(AlignedNonVirtualTypeSizeInBits ==
            getDataLayout().getTypeAllocSizeInBits(BaseTy) &&
