@@ -284,12 +284,6 @@ void HIPToolChain::addClangTargetOptions(
   if (DriverArgs.hasFlag(options::OPT_fgpu_rdc, options::OPT_fno_gpu_rdc,
                          false))
     CC1Args.push_back("-fgpu-rdc");
-
-  // Default to "hidden" visibility, as object level linking will not be
-  // supported for the foreseeable future.
-  if (!DriverArgs.hasArg(options::OPT_fvisibility_EQ,
-                         options::OPT_fvisibility_ms_compat))
-    CC1Args.append({"-fvisibility", "hidden"});
 }
 
 llvm::opt::DerivedArgList *
