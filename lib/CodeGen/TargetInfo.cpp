@@ -7784,6 +7784,11 @@ void AMDGPUTargetCodeGenInfo::setTargetAttributes(
 
   llvm::Function *F = cast<llvm::Function>(GV);
 
+  if (F->getCallingConv() != llvm::CallingConv::AMDGPU_KERNEL)
+    F->setVisibility(llvm::GlobalValue::VisibilityTypes::HiddenVisibility);
+  else
+    F->setLinkage(llvm::GlobalValue::ExternalLinkage);
+
   const auto *ReqdWGS = M.getLangOpts().OpenCL ?
     FD->getAttr<ReqdWorkGroupSizeAttr>() : nullptr;
 
