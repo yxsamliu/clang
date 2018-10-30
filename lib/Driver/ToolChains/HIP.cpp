@@ -93,7 +93,9 @@ const char *AMDGCN::Linker::constructLLVMLinkCommand(
 
   // Add an intermediate output file.
   CmdArgs.push_back("-o");
-  std::string TmpName =
+  std::string TmpName;
+  TmpName = C.getDriver().isSaveTempsEnabled() ?
+      OutputFilePrefix.str() + "-linked.bc" :
       C.getDriver().GetTemporaryPath(OutputFilePrefix.str() + "-linked", "bc");
   const char *OutputFileName =
       C.addTempFile(C.getArgs().MakeArgString(TmpName));
@@ -136,8 +138,10 @@ const char *AMDGCN::Linker::constructOptCommand(
   OptArgs.push_back("-mtriple=amdgcn-amd-amdhsa");
   OptArgs.push_back(Args.MakeArgString("-mcpu=" + SubArchName));
   OptArgs.push_back("-o");
-  std::string TmpFileName = C.getDriver().GetTemporaryPath(
-      OutputFilePrefix.str() + "-optimized", "bc");
+  std::string TmpFileName;
+  TmpFileName = C.getDriver().isSaveTempsEnabled() ?
+      OutputFilePrefix.str() + "-optimized.bc" :
+      C.getDriver().GetTemporaryPath(OutputFilePrefix.str() + "-optimized", "bc");
   const char *OutputFileName =
       C.addTempFile(C.getArgs().MakeArgString(TmpFileName));
   OptArgs.push_back(OutputFileName);
@@ -156,7 +160,9 @@ const char *AMDGCN::Linker::constructLlcCommand(
   ArgStringList LlcArgs{InputFileName, "-mtriple=amdgcn-amd-amdhsa",
                         "-filetype=obj", "-mattr=-code-object-v3",
                         Args.MakeArgString("-mcpu=" + SubArchName), "-o"};
-  std::string LlcOutputFileName =
+  std::string LlcOutputFileName;
+  LlcOutputFileName = C.getDriver().isSaveTempsEnabled() ?
+      OutputFilePrefix.str() + ".o" :
       C.getDriver().GetTemporaryPath(OutputFilePrefix, "o");
   const char *LlcOutputFile =
       C.addTempFile(C.getArgs().MakeArgString(LlcOutputFileName));
