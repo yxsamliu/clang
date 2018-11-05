@@ -603,12 +603,7 @@ void CGRecordLowering::clipTailPadding() {
 }
 
 void CGRecordLowering::determinePacked(bool NVBaseType) {
-  if (getenv("DBG_LAMBDA")) {
-    RD->dump();
-    llvm::errs() << "isLambda: " << RD->isLambda() << '\n';
-  }
   if (Packed) {
-    assert(!Context.getLangOpts().HIP || !RD->isLambda());
     return;
   }
   CharUnits Alignment = CharUnits::One();
