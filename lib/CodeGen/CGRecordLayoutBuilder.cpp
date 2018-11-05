@@ -603,8 +603,14 @@ void CGRecordLowering::clipTailPadding() {
 }
 
 void CGRecordLowering::determinePacked(bool NVBaseType) {
-  if (Packed)
+  if (getenv("DBG_LAMBDA")) {
+    RD->dump();
+    llvm::errs() << "isLambda: " << RD->isLambda() << '\n';
+  }
+  if (Packed) {
+    assert(!Context.getLangOpts().HIP || !RD->isLambda());
     return;
+  }
   CharUnits Alignment = CharUnits::One();
   CharUnits NVAlignment = CharUnits::One();
   CharUnits NVSize =
@@ -631,6 +637,10 @@ void CGRecordLowering::determinePacked(bool NVBaseType) {
   // non-virtual sub-object and an unpacked complete object or vise versa.
   if (NVSize % NVAlignment)
     Packed = true;
+
+  if (Context.getLangOpts().HIP) {
+    Packed = false;
+  }
   // Update the alignment of the sentinel.
   if (!Packed)
     Members.back().Data = getIntNType(Context.toBits(Alignment));
