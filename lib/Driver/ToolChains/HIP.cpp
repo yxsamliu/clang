@@ -159,6 +159,7 @@ const char *AMDGCN::Linker::constructLlcCommand(
   // Construct llc command.
   ArgStringList LlcArgs{InputFileName, "-mtriple=amdgcn-amd-amdhsa",
                         "-filetype=obj", "-mattr=-code-object-v3",
+                        "-disable-promote-alloca-to-vector",
                         Args.MakeArgString("-mcpu=" + SubArchName), "-o"};
   std::string LlcOutputFileName;
   LlcOutputFileName = C.getDriver().isSaveTempsEnabled() ?
