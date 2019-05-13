@@ -467,6 +467,10 @@ def Xcuda_fatbinary : Separate<["-"], "Xcuda-fatbinary">,
   HelpText<"Pass <arg> to fatbinary invocation">, MetaVarName<"<arg>">;
 def Xcuda_ptxas : Separate<["-"], "Xcuda-ptxas">,
   HelpText<"Pass <arg> to the ptxas assembler">, MetaVarName<"<arg>">;
+def Xcuda_device : Separate<["-"], "Xcuda-device">,
+  HelpText<"Pass <arg> to clang for device compilation only">, MetaVarName<"<arg>">;
+def Xcuda_host : Separate<["-"], "Xcuda-host">,
+  HelpText<"Pass <arg> to clang for host compilation only">, MetaVarName<"<arg>">;
 def Xopenmp_target : Separate<["-"], "Xopenmp-target">,
   HelpText<"Pass <arg> to the target offloading toolchain.">, MetaVarName<"<arg>">;
 def Xopenmp_target_EQ : JoinedAndSeparate<["-"], "Xopenmp-target=">,

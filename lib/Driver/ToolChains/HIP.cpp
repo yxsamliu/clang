@@ -349,12 +349,17 @@ HIPToolChain::TranslateArgs(const llvm::opt::DerivedArgList &Args,
   const OptTable &Opts = getDriver().getOpts();
 
   for (Arg *A : Args) {
+    unsigned Index = ~0U;
     if (A->getOption().matches(options::OPT_Xarch__)) {
       // Skip this argument unless the architecture matches BoundArch.
       if (BoundArch.empty() || A->getValue(0) != BoundArch)
         continue;
 
-      unsigned Index = Args.getBaseArgs().MakeIndex(A->getValue(1));
+      Index = Args.getBaseArgs().MakeIndex(A->getValue(1));
+    } else if (A->getOption().matches(options::OPT_Xcuda_device)) {
+      Index = Args.getBaseArgs().MakeIndex(A->getValue(0));
+    }
+    if (Index != ~0U){
       unsigned Prev = Index;
       std::unique_ptr<Arg> XarchArg(Opts.ParseOneArg(Args, Index));
 
@@ -378,7 +383,7 @@ HIPToolChain::TranslateArgs(const llvm::opt::DerivedArgList &Args,
       XarchArg->setBaseArg(A);
       A = XarchArg.release();
       DAL->AddSynthesizedArg(A);
-    }
+    } else
     DAL->append(A);
   }
 
