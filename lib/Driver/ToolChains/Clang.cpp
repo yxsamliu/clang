@@ -4204,7 +4204,11 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   // Manually translate -O4 to -O3; let clang reject others.
   if (Arg *A = Args.getLastArg(options::OPT_O_Group)) {
-    if (A->getOption().matches(options::OPT_O4)) {
+    // Disable -O0 for amdgcn.
+    if (TC.getArch() == llvm::Triple::amdgcn &&
+        A->getOption().matches(options::OPT_O0)) {
+      CmdArgs.push_back("-O3");
+    } else if (A->getOption().matches(options::OPT_O4)) {
       CmdArgs.push_back("-O3");
       D.Diag(diag::warn_O4_is_O3);
     } else {
