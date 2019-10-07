@@ -166,6 +166,7 @@ CGNVCUDARuntime::CGNVCUDARuntime(CodeGenModule &CGM)
   CharPtrTy = llvm::PointerType::getUnqual(Types.ConvertType(Ctx.CharTy));
   VoidPtrTy = cast<llvm::PointerType>(Types.ConvertType(Ctx.VoidPtrTy));
   VoidPtrPtrTy = VoidPtrTy->getPointerTo();
+  DeviceMC->setPrefixDeviceStub(false);
 }
 
 llvm::FunctionCallee CGNVCUDARuntime::getSetupArgumentFn() const {
@@ -231,6 +232,7 @@ void CGNVCUDARuntime::emitDeviceStub(CodeGenFunction &CGF,
   assert((CGF.CGM.getContext().getAuxTargetInfo() &&
           (CGF.CGM.getContext().getAuxTargetInfo()->getCXXABI() !=
            CGF.CGM.getContext().getTargetInfo().getCXXABI())) ||
+         CGF.getLangOpts().HIP ||
          getDeviceStubName(getDeviceSideName(CGF.CurFuncDecl)) ==
              CGF.CurFn->getName());
 
@@ -798,9 +800,9 @@ llvm::Function *CGNVCUDARuntime::makeModuleDtorFunction() {
 }
 
 std::string CGNVCUDARuntime::getDeviceStubName(llvm::StringRef Name) const {
-  if (!CGM.getLangOpts().HIP)
+  if (!CGM.getLangOpts().HIP || Name.startswith("_Z"))
     return Name;
-  return (Name + ".stub").str();
+  return ("__device_stub__" + Name).str();
 }
 
 CGCUDARuntime *CodeGen::CreateNVCUDARuntime(CodeGenModule &CGM) {

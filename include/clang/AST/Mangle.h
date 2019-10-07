@@ -147,6 +147,12 @@ public:
   /// across translation units so it can be used with LTO.
   virtual void mangleTypeName(QualType T, raw_ostream &) = 0;
 
+  /// Whether should add prefix to HIP device stub function.
+  virtual bool shouldPrefixDeviceStub() const { return false; }
+
+  /// Set whether should add prefix to HIP device stub function.
+  virtual void setPrefixDeviceStub(bool Prefix) {}
+
   /// @}
 };
 
